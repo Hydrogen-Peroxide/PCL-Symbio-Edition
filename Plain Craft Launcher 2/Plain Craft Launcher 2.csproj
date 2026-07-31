@@ -8,7 +8,7 @@
         <IsWebBootstrapper>false</IsWebBootstrapper>
         <StartupObject>PCL.Program</StartupObject>
         <PublishUrl>publish\</PublishUrl>
-        <PublishSingleFile>true</PublishSingleFile>
+        <PublishSingleFile>false</PublishSingleFile>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
         <RuntimeIdentifier Condition="'$(Platform)' == 'x64'">win-x64</RuntimeIdentifier>
         <RuntimeIdentifier Condition="'$(Platform)' == 'ARM64'">win-arm64</RuntimeIdentifier>

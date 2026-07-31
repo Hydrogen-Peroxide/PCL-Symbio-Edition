@@ -1,0 +1,36 @@
+<local:MyPageRight
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PCL"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" x:Class="PCL.PageBedrockRight"
+    PanScroll="{Binding ElementName=PanBack}">
+    <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
+        <StackPanel x:Name="PanMain" Margin="25,25,25,10">
+            <!-- 标题区域 -->
+            <Grid Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="基岩版（Minecraft Bedrock Edition）"
+                           FontSize="24" FontWeight="Bold"
+                           Foreground="{DynamicResource ColorBrush3}"
+                           VerticalAlignment="Center" />
+                <local:MyButton x:Name="BtnRefresh" Text="刷新版本列表" ColorType="Normal"
+                                Grid.Column="2" Width="110" Height="30"
+                                Click="BtnRefresh_Click" />
+            </Grid>
+
+            <!-- 状态提示 -->
+            <TextBlock x:Name="TextStatus" TextWrapping="Wrap" FontSize="14"
+                       Foreground="{DynamicResource ColorBrushGray2}"
+                       Margin="0,0,0,15" Visibility="Collapsed" />
+
+            <!-- 版本列表 -->
+            <StackPanel x:Name="PanVersionList" />
+        </StackPanel>
+    </local:MyScrollViewer>
+</local:MyPageRight>
