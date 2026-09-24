@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using PCL.Core.App;
@@ -72,7 +72,7 @@ public static class UpdateManager
 
     public static void UpdateStart(UpdateEnums.UpdateType type, string receivedKey = null, bool forceValidated = false)
     {
-        var dlTargetPath = ModBase.exePath + @"PCL\Plain Craft Launcher Community Edition.exe";
+        var dlTargetPath = ModBase.exePath + @"PCL\Plain Craft Launcher Symbio Edition.exe";
         ModBase.RunInNewThread(() =>
         {
             try
@@ -96,7 +96,7 @@ public static class UpdateManager
                                 Lang.Text("Update.Action"),
                                 Lang.Text("Common.Action.Cancel")
                             ) == 1)
-                            ModMain.frmMain.PageChange(FormMain.PageType.Setup, FormMain.PageSubType.SetupUpdate);
+                            ModMain.frmMain.PageChange(FormMain.PageType.Setup, FormMain.PageSubType.SetupAbout);
                     });
                     return;
                     // 构造步骤加载器
@@ -134,12 +134,7 @@ public static class UpdateManager
                     });
                 loaders.Add(new ModLoader.LoaderTask<int, int>(Lang.Text("Update.Task.RefreshSettings"), _ =>
                 {
-                    if (ModMain.frmSetupUpdate is not null)
-                        ModBase.RunInUi(() =>
-                        {
-                            ModMain.frmSetupUpdate.BtnUpdate.Text = Lang.Text("Update.Task.RestartInstall");
-                            ModMain.frmSetupUpdate.BtnUpdate.IsEnabled = true;
-                        });
+                    // 更新页面已移除，跳过刷新设置页面
                 })
                 {
                     show = false
@@ -167,7 +162,7 @@ public static class UpdateManager
     {
         try
         {
-            var fileName = ModBase.exePath + @"PCL\Plain Craft Launcher Community Edition.exe";
+            var fileName = ModBase.exePath + @"PCL\Plain Craft Launcher Symbio Edition.exe";
             if (!File.Exists(fileName))
             {
                 ModBase.Log("[System] 更新失败：未找到更新文件");

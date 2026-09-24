@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using PCL.Core.App;
 using PCL.Core.App.Localization;
@@ -24,7 +24,6 @@ public partial class PageSetupLeft
         if (ItemLauncherLanguage.Checked && hide.SetupLauncherLanguage) isHiddenPage = true;
         if (ItemLauncherMisc.Checked && hide.SetupLauncherMisc) isHiddenPage = true;
         if (ItemAbout.Checked && hide.SetupAbout) isHiddenPage = true;
-        if (ItemUpdate.Checked && hide.SetupUpdate) isHiddenPage = true;
         if (ItemFeedback.Checked && hide.SetupFeedback) isHiddenPage = true;
         if (ItemLog.Checked && hide.SetupLog) isHiddenPage = true;
         if (PageSetupUI.HiddenForceShow)
@@ -55,8 +54,6 @@ public partial class PageSetupLeft
             ItemLauncherMisc.SetChecked(true, false, false);
         else if (!hideCfg.SetupAbout) 
             ItemAbout.SetChecked(true, false, false);   
-        else if (!hideCfg.SetupUpdate) 
-            ItemUpdate.SetChecked(true, false, false);
         else if (!hideCfg.SetupFeedback) 
             ItemFeedback.SetChecked(true, false, false);
         else if (!hideCfg.SetupLog) 
@@ -222,8 +219,6 @@ public partial class PageSetupLeft
             pageID = FormMain.PageSubType.SetupLauncherMisc;
         else if (!hideCfg.SetupAbout)
             pageID = FormMain.PageSubType.SetupAbout;        
-        else if (!hideCfg.SetupUpdate)
-            pageID = FormMain.PageSubType.SetupUpdate;
         else if (!hideCfg.SetupFeedback)
             pageID = FormMain.PageSubType.SetupFeedback;
         else if (!hideCfg.SetupLog)
@@ -272,12 +267,6 @@ public partial class PageSetupLeft
                 if (ModMain.frmSetupGameManage is null)
                     ModMain.frmSetupGameManage = new PageSetupGameManage();
                 return ModMain.frmSetupGameManage;
-            }
-            case FormMain.PageSubType.SetupUpdate:
-            {
-                if (ModMain.frmSetupUpdate is null)
-                    ModMain.frmSetupUpdate = new PageSetupUpdate();
-                return ModMain.frmSetupUpdate;
             }
             case FormMain.PageSubType.SetupAbout:
             {

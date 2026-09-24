@@ -30,7 +30,7 @@ public class GetPlayerProfileListHandler : IRequestHandler
         {
             Name = context.PlayerName,
             MachineId = Utils.Secret.Identify.LauncherId,
-            Vendor = $"PCL CE {Basics.VersionName}, EasyTier {EasyTierMetadata.CurrentEasyTierVer}",
+            Vendor = $"PCL SE {Basics.VersionName}, EasyTier {EasyTierMetadata.CurrentEasyTierVer}",
             Kind = PlayerKind.HOST
         };
 

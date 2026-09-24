@@ -57,8 +57,8 @@
                     </local:MyComboBox>
                     <TextBlock Grid.Row="8" VerticalAlignment="Center" HorizontalAlignment="Left" Text="节点行为"/>
                     <local:MyComboBox x:Name="ComboServerType" Tag="LinkServerType" Grid.Row="8" Grid.Column="2">
-                        <local:MyComboBoxItem Content="仅自有节点协助中继" ToolTip="仅通过 PCL CE 自有节点通信。&#xa;自有节点由 PCL CE 官方部署，一般情况下此选项已经足够使用。"/>
-                        <local:MyComboBoxItem Content="自有节点 + 社区节点 协助中继" ToolTip="除自有节点外，添加由 PCL CE 挑选的部分 EasyTier 社区提供的节点。&#xa;这些节点由社区志愿者部署，可能可以提供更快的连接速度。"/>
+                        <local:MyComboBoxItem Content="仅自有节点协助中继" ToolTip="仅通过 PCL SE 自有节点通信。&#xa;自有节点由 PCL SE 官方部署，一般情况下此选项已经足够使用。"/>
+                        <local:MyComboBoxItem Content="自有节点 + 社区节点 协助中继" ToolTip="除自有节点外，添加由 PCL SE 挑选的部分 EasyTier 社区提供的节点。&#xa;这些节点由社区志愿者部署，可能可以提供更快的连接速度。"/>
                         <local:MyComboBoxItem Content="不使用预设节点中继 (谨慎选择)" ToolTip="不使用任何预设节点中继数据。&#xa;联机双方将需要添加至少一个相同的自定义节点才可以连接。&#xa;这要求你具备一定技术能力且有特殊需要，在绝大多数情况下不要选择此选项！"/>
                     </local:MyComboBox>-->
                         <TextBlock Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Left" Text="{DynamicResource Setup.GameLink.Protocol.Preference}" />

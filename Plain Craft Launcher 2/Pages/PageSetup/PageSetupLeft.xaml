@@ -127,10 +127,6 @@
                                Check="PageCheck"
                                Height="36" VerticalAlignment="Top" Title="{DynamicResource Setup.Left.Item.About}" Type="RadioBox"
                               SvgIcon="lucide/info" />
-            <local:MyListItem x:Name="ItemUpdate" IsScaleAnimationEnabled="False" Tag="8" MinPaddingRight="35"
-                               Check="PageCheck"
-                               Height="36" VerticalAlignment="Top" Title="{DynamicResource Setup.Left.Item.Update}" Type="RadioBox"
-                              SvgIcon="lucide/refresh-cw" />
             <local:MyListItem x:Name="ItemFeedback" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="6"
                                Check="PageCheck"
                                MinPaddingRight="35" Height="36" VerticalAlignment="Top" Title="{DynamicResource Setup.Left.Item.Feedback}"

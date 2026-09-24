@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Effects;
@@ -478,7 +478,7 @@ public class ModSetup
                 ModMain.frmMain.ShapeHMCLTitleLogo.Visibility = Visibility.Collapsed;
                 ModMain.frmMain.LabTitleLogo.Visibility = Visibility.Collapsed;
                 ModMain.frmMain.ImageTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.CELogo.Visibility = Visibility.Collapsed;
+                ModMain.frmMain.SELogo.Visibility = Visibility.Collapsed;
                 if (ModMain.frmSetupUI is not null)
                 {
                     ModMain.frmSetupUI.CheckLogoLeft.Visibility = Visibility.Visible;
@@ -495,7 +495,7 @@ public class ModSetup
                 ModMain.frmMain.ShapeHMCLTitleLogo.Visibility = Visibility.Collapsed;
                 ModMain.frmMain.LabTitleLogo.Visibility = Visibility.Collapsed;
                 ModMain.frmMain.ImageTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.CELogo.Visibility = Visibility.Visible;
+                ModMain.frmMain.SELogo.Visibility = Visibility.Visible;
                 if (ModMain.frmSetupUI is not null)
                 {
                     ModMain.frmSetupUI.CheckLogoLeft.Visibility = Visibility.Collapsed;
@@ -512,7 +512,7 @@ public class ModSetup
                 ModMain.frmMain.ShapeHMCLTitleLogo.Visibility = Visibility.Collapsed;
                 ModMain.frmMain.LabTitleLogo.Visibility = Visibility.Visible;
                 ModMain.frmMain.ImageTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.CELogo.Visibility = Visibility.Visible;
+                ModMain.frmMain.SELogo.Visibility = Visibility.Visible;
                 if (ModMain.frmSetupUI is not null)
                 {
                     ModMain.frmSetupUI.CheckLogoLeft.Visibility = Visibility.Collapsed;
@@ -530,7 +530,7 @@ public class ModSetup
                 ModMain.frmMain.ShapeHMCLTitleLogo.Visibility = Visibility.Collapsed;
                 ModMain.frmMain.LabTitleLogo.Visibility = Visibility.Collapsed;
                 ModMain.frmMain.ImageTitleLogo.Visibility = Visibility.Visible;
-                ModMain.frmMain.CELogo.Visibility = Visibility.Visible;
+                ModMain.frmMain.SELogo.Visibility = Visibility.Visible;
                 if (ModMain.frmSetupUI is not null)
                 {
                     ModMain.frmSetupUI.CheckLogoLeft.Visibility = Visibility.Collapsed;

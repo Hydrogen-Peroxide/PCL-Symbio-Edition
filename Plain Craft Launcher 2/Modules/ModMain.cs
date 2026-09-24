@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -58,7 +58,6 @@ public static class ModMain
     public static PageSetupLaunch? frmSetupLaunch;
     public static PageSetupUI? frmSetupUI;
     public static PageSetupGameManage? frmSetupGameManage;
-    public static PageSetupUpdate? frmSetupUpdate;
     public static PageSetupJava? frmSetupJava;
     public static PageSetupAbout? frmSetupAbout;
     public static PageSetupLog? frmSetupLog;
@@ -89,6 +88,8 @@ public static class ModMain
     public static PageInstanceSavesDatapack? frmInstanceSavesDatapack;
     public static PageDownloadCompDetail? frmDownloadCompDetail;
     public static PageHomepageNewsView? frmHomepageNews;
+    public static PageBedrockLeft? frmBedrockLeft;
+    public static PageBedrockRight? frmBedrockRight;
 
     public static MySlider? dragControl = null;
     private static int timer4Count;

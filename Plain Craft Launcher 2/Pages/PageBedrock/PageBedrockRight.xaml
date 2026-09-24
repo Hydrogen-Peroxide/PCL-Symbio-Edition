@@ -1,0 +1,64 @@
+<local:MyPageRight x:Class="PCL.PageBedrockRight"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:local="clr-namespace:PCL">
+    <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
+        <StackPanel Name="PanMain" Margin="25,25,25,10">
+            <!-- 启动区域 -->
+            <Grid Margin="0,0,0,15">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- 状态信息 -->
+                <local:MyCard Grid.Row="0" Title="基岩版状态">
+                    <StackPanel Margin="25,38,23,15">
+                        <TextBlock x:Name="LabStatus" Text="正在检测基岩版..."
+                                   FontSize="14" Margin="0,0,0,8" />
+                        <TextBlock x:Name="LabDetail" Text="请稍候..."
+                                   TextWrapping="Wrap" FontSize="13" Margin="0,0,0,5"
+                                   Foreground="{DynamicResource ColorBrushGray3}" />
+                        <TextBlock x:Name="LabVersion" Text=""
+                                   FontSize="12"
+                                   Foreground="{DynamicResource ColorBrushGray4}" />
+                    </StackPanel>
+                </local:MyCard>
+
+                <!-- 启动按钮 -->
+                <Grid Grid.Row="1" Margin="0,10,0,0">
+                    <local:MyButton x:Name="BtnLaunch" Height="54" Margin="20,0"
+                                    Text="启动基岩版" ColorType="Highlight"
+                                    Click="BtnLaunch_Click"
+                                    Padding="30,0,30,15" IsEnabled="False" />
+                    <TextBlock x:Name="LabSelectedVersion" Text="未检测到基岩版" Margin="35,0,35,10"
+                               IsHitTestVisible="False"
+                               VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                               TextTrimming="CharacterEllipsis"
+                               FontSize="11" Foreground="{DynamicResource ColorBrushGray3}" />
+                </Grid>
+            </Grid>
+
+            <!-- 已下载版本 -->
+            <TextBlock x:Name="LabLocalTitle" Text="已下载版本" FontSize="14" FontWeight="Bold" Margin="5,0,0,8" />
+            <StackPanel Name="PanLocalVersions" Margin="5,0,5,5"
+                        Grid.IsSharedSizeScope="True" />
+
+            <!-- 在线版本下载 -->
+            <local:MyCard Margin="0,10,0,15" Title="基岩版下载">
+                <StackPanel Margin="25,38,23,15">
+                    <TextBlock Text="选择版本下载基岩版安装包，下载完成后可在上方「已下载版本」中安装。"
+                               TextWrapping="Wrap" FontSize="13" Margin="0,0,0,10"
+                               Foreground="{DynamicResource ColorBrushGray3}" />
+                </StackPanel>
+            </local:MyCard>
+
+            <!-- 可用版本标题 -->
+            <TextBlock Text="可用版本" FontSize="14" FontWeight="Bold" Margin="5,0,0,8" />
+
+            <!-- 版本列表区域 -->
+            <StackPanel Name="PanVersionList" Margin="5,0,5,20"
+                        Grid.IsSharedSizeScope="True" />
+        </StackPanel>
+    </local:MyScrollViewer>
+</local:MyPageRight>

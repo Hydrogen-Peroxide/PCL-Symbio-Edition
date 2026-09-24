@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -110,10 +110,10 @@ public static class ModBase
     public static string pathAppdata = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PCL") + @"\";
 
     /// <summary>
-    ///     AppData 中的 PCLCE 配置文件夹路径，以 \ 结尾。
+    ///     AppData 中的 PCL SE 配置文件夹路径，以 \ 结尾。
     /// </summary>
     public static string pathAppdataConfig = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
-                                             (versionBranchName == "Debug" ? @"\.pclcedebug\" : @"\.pclce\");
+                                             (versionBranchName == "Debug" ? @"\.pclsedebug\" : @"\.pclse\");
 
 
     #endregion
@@ -3579,7 +3579,7 @@ public static class ModBase
                     ? Lang.Text("Setup.Feedback.Unavailable.NotLatest.Action")
                     : Lang.Text("Setup.Feedback.Unavailable.CheckFailed.Action"),
                 Lang.Text("Common.Action.Cancel")) == 1)
-            ModMain.frmMain.PageChange(FormMain.PageType.Setup, FormMain.PageSubType.SetupUpdate);
+            ModMain.frmMain.PageChange(FormMain.PageType.Setup, FormMain.PageSubType.SetupAbout);
 
         return false;
     }

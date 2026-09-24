@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
@@ -902,8 +902,13 @@ public static class ModLaunch
                    .GetAwaiter()
                    .GetResult())
         {
-            response.EnsureSuccessStatusCode();
-            prepareJson = (JsonObject)ModBase.GetJson(response.AsString());
+            var responseBody = response.AsString();
+            if (!response.IsSuccess)
+            {
+                ModBase.Log($"正版验证 Step 1 汇报 {response.StatusCode}，client_id={Secrets.MSOAuthClientId?[..8]}...，响应：{responseBody}");
+                response.EnsureSuccessStatusCode();
+            }
+            prepareJson = (JsonObject)ModBase.GetJson(responseBody);
         }
 
         McLaunchLog("网页登录地址：" + prepareJson["verification_uri"]);
@@ -1193,53 +1198,64 @@ public static class ModLaunch
         if (tokens.Length < 2 || string.IsNullOrEmpty(tokens.ElementAt(0)) || string.IsNullOrEmpty(tokens.ElementAt(1)))
             throw new ArgumentException("传入的 XSTSToken 或者 UHS 错误", nameof(tokens));
         var requestData = new Dictionary<string, string> { { "identityToken", $"XBL3.0 x={tokens[1]};{tokens[0]}" } };
-        string result;
-        try
+        // Mojang 对 login_with_xbox 的 403 多为 IP 信誉拦截，且带有概率性，重试常能成功；
+        // 此处先读取响应体再判断状态码，避免 EnsureSuccessStatusCode 丢弃 Mojang 返回的真实原因。
+        const int maxAttempts = 3;
+        string result = null;
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
-            using (var response = HttpRequest
-                       .CreatePost("https://api.minecraftservices.com/authentication/login_with_xbox")
-                       .WithJsonContent(requestData)
-                       .SendAsync()
-                       .GetAwaiter()
-                       .GetResult())
+            try
             {
-                response.EnsureSuccessStatusCode();
-                result = response.AsString();
-            }
-        }
-        catch (HttpRequestException ex)
-        {
-            var message = ex.Message;
-            if (ex.StatusCode.Equals(HttpStatusCode.TooManyRequests))
-            {
-                ModBase.Log(ex, "正版验证 Step 4 汇报 429");
-                throw new Exception(Lang.Text("Minecraft.Launch.Login.Microsoft.TooManyRequests"));
-            }
+                using (var response = HttpRequest
+                           .CreatePost("https://api.minecraftservices.com/authentication/login_with_xbox")
+                           .WithJsonContent(requestData)
+                           .SendAsync()
+                           .GetAwaiter()
+                           .GetResult())
+                {
+                    result = response.AsString();
+                    if (response.IsSuccess)
+                        break; // 成功，跳出重试循环
 
-            if (ex.StatusCode is { } arg1 && arg1 == HttpStatusCode.Forbidden)
-            {
-                ModBase.Log(ex, "正版验证 Step 4 汇报 403");
-                throw new Exception(Lang.Text("Minecraft.Launch.Login.Microsoft.AbnormalIp"));
-            }
+                    if (response.StatusCode == HttpStatusCode.Forbidden)
+                    {
+                        ModBase.Log($"正版验证 Step 4 汇报 403（第 {attempt}/{maxAttempts} 次尝试），响应：{result}");
+                        if (attempt < maxAttempts)
+                        {
+                            Thread.Sleep(2000 * attempt);
+                            continue;
+                        }
+                        throw new Exception(Lang.Text("Minecraft.Launch.Login.Microsoft.AbnormalIp"));
+                    }
+                    if (response.StatusCode == HttpStatusCode.TooManyRequests)
+                    {
+                        ModBase.Log($"正版验证 Step 4 汇报 429，响应：{result}");
+                        throw new Exception(Lang.Text("Minecraft.Launch.Login.Microsoft.TooManyRequests"));
+                    }
 
-            ModProfile.ProfileLog("正版验证 Step 4/6 获取 MC AccessToken 失败：" + ex);
-            var isIgnore = false;
-            ModBase.RunInUiWait(() =>
-            {
-                if (!isLaunching)
-                    return;
-                if (ModMain.MyMsgBox(
-                        Lang.Text("Minecraft.Launch.Login.RefreshAccountFailed.Message"),
-                        Lang.Text("Minecraft.Launch.Login.RefreshAccountFailed.Title"), Lang.Text("Minecraft.Launch.Login.Continue"), Lang.Text("Common.Action.Cancel")) == 1)
-                    isIgnore = true;
-            });
-            if (isIgnore)
-            {
-                return "Ignore";
-                return default;
+                    // 其他非成功状态码：记录响应体后复用原有"刷新失败"提示逻辑
+                    ModProfile.ProfileLog($"正版验证 Step 4/6 获取 MC AccessToken 失败：{response.StatusCode}，响应：{result}");
+                    response.EnsureSuccessStatusCode(); // 抛出 HttpRequestException，交由下方 catch 处理
+                }
             }
-
-            throw;
+            catch (HttpRequestException ex)
+            {
+                // 403/429 已在上面转为 Exception 抛出，此处仅处理网络错误与其他非成功状态码
+                ModProfile.ProfileLog("正版验证 Step 4/6 获取 MC AccessToken 失败：" + ex);
+                var isIgnore = false;
+                ModBase.RunInUiWait(() =>
+                {
+                    if (!isLaunching)
+                        return;
+                    if (ModMain.MyMsgBox(
+                            Lang.Text("Minecraft.Launch.Login.RefreshAccountFailed.Message"),
+                            Lang.Text("Minecraft.Launch.Login.RefreshAccountFailed.Title"), Lang.Text("Minecraft.Launch.Login.Continue"), Lang.Text("Common.Action.Cancel")) == 1)
+                        isIgnore = true;
+                });
+                if (isIgnore)
+                    return "Ignore";
+                throw;
+            }
         }
 
         var resultJson = (JsonObject)ModBase.GetJson(result);
@@ -2873,7 +2889,7 @@ public static class ModLaunch
         gameArguments.Add("${natives_directory}", ModBase.ShortenPath(GetNativesFolder()));
         gameArguments.Add("${library_directory}", ModBase.ShortenPath(ModFolder.mcFolderSelected + "libraries"));
         gameArguments.Add("${libraries_directory}", ModBase.ShortenPath(ModFolder.mcFolderSelected + "libraries"));
-        gameArguments.Add("${launcher_name}", "PCLCE");
+        gameArguments.Add("${launcher_name}", "PCLSE");
         gameArguments.Add("${launcher_version}", ModBase.versionCode.ToString());
         gameArguments.Add("${version_name}", instance.Name);
         var argumentInfo = Config.Instance.TypeInfo[ModInstanceList.McMcInstanceSelected?.PathInstance];

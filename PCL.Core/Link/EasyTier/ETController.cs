@@ -75,7 +75,7 @@ public static class ETController
 
             switch (TargetLobby.Type)
             {
-                case LobbyType.PCLCE:
+                case LobbyType.PCLSE:
                     name = ETNetworkNamePrefix + name;
                     secret = ETNetworkSecretPrefix + secret;
                     break;

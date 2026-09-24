@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -2449,6 +2449,305 @@ public static class ModDownload
     /// </summary>
     public static ModLoader.LoaderTask<int, List<ModComp.CompFile>> dlLegacyFabricApiLoader =
         new("Legacy Fabric API List Loader", task => task.output = ModComp.CompFilesGet("legacy-fabric-api", false));
+
+    #endregion
+
+    #region BedrockDownload
+
+    /// <summary>
+    ///     基岩版版本列表，主加载器。
+    ///     使用 MCAPPX API 获取数据。
+    /// </summary>
+    public static ModLoader.LoaderTask<string, JsonObject> dlBedrockListLoader =
+        new("DlBedrockList Main", DlBedrockListMain);
+
+    /// <summary>
+    ///     缓存的原始 MCAPPX 数据，用于下载时获取 URL。
+    /// </summary>
+    public static JsonObject? cachedBedrockRawData;
+
+    /// <summary>
+    ///     Xbox Live CDN 下载源列表。
+    /// </summary>
+    public static readonly List<(string Host, string UrlTemplate)> BedrockCDNSources = new()
+    {
+        ("assets1.xboxlive.cn", "http://assets1.xboxlive.cn{router}"),
+        ("assets2.xboxlive.cn", "http://assets2.xboxlive.cn{router}"),
+        ("assets1.xboxlive.com", "http://assets1.xboxlive.com{router}"),
+        ("assets2.xboxlive.com", "http://assets2.xboxlive.com/{router}"),
+        ("xvcf1.xboxlive.com",  "http://xvcf1.xboxlive.com{router}"),
+        ("xvcf2.xboxlive.com",  "http://xvcf2.xboxlive.com/{router}"),
+        ("d1.xboxlive.cn",      "http://d1.xboxlive.cn/{router}"),
+        ("d2.xboxlive.cn",      "http://d2.xboxlive.cn/{router}"),
+        ("d1.xboxlive.com",     "http://d1.xboxlive.com/{router}"),
+        ("d2.xboxlive.com",     "http://d2.xboxlive.com/{router}"),
+    };
+
+    public static void DlBedrockListMain(ModLoader.LoaderTask<string, JsonObject> loader)
+    {
+        // 从 MCAPPX API 获取版本列表
+        try
+        {
+            var json = (JsonObject)Requester.FetchJson(
+                "https://data.mcappx.com/v2/bedrock.json");
+            if (json is not null && json["From_mcappx.com"] is not null)
+            {
+                cachedBedrockRawData = (JsonObject)json["From_mcappx.com"];
+                loader.output = ConvertMcAppxToVersionList(cachedBedrockRawData);
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log("[Bedrock] MCAPPX API 获取失败: " + ex.Message);
+        }
+
+        // 尝试备用源 BMCBL
+        try
+        {
+            var json = (JsonObject)Requester.FetchJson(
+                "https://mcappx.chlna6666.com");
+            if (json is not null && json["From_mcappx.com"] is not null)
+            {
+                cachedBedrockRawData = (JsonObject)json["From_mcappx.com"];
+                loader.output = ConvertMcAppxToVersionList(cachedBedrockRawData);
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log("[Bedrock] BMCBL 备用源获取失败: " + ex.Message);
+        }
+
+        // 回退：使用内置版本列表
+        loader.output = GetBuiltInBedrockVersionList();
+    }
+
+    /// <summary>
+    ///     获取基岩版下载 URL 列表。
+    ///     返回多个 CDN 源的 URL 和 MD5。
+    /// </summary>
+    public static (List<string> Urls, string? Md5)? GetBedrockDownloadUrls(string versionKey)
+    {
+        if (cachedBedrockRawData is null) return null;
+
+        var verData = cachedBedrockRawData[versionKey] as JsonObject;
+        if (verData is null) return null;
+
+        var variations = verData["Variations"] as JsonArray;
+        if (variations is null || variations.Count == 0) return null;
+
+        // 优先 x64
+        JsonObject? selectedVar = null;
+        foreach (var v in variations)
+        {
+            if (v is JsonObject vo && (string)vo["Arch"] == "x64")
+            {
+                selectedVar = vo;
+                break;
+            }
+        }
+        selectedVar ??= variations[0] as JsonObject;
+        if (selectedVar is null) return null;
+
+        var md5 = (string)selectedVar["MD5"];
+        var metadata = selectedVar["MetaData"] as JsonArray;
+        if (metadata is null || metadata.Count == 0) return null;
+
+        var firstMeta = (string?)metadata[0];
+        if (string.IsNullOrEmpty(firstMeta)) return null;
+
+        var buildType = (string)verData["BuildType"] ?? "UWP";
+        List<string> urls;
+
+        if (buildType == "GDK" && firstMeta.StartsWith("http"))
+        {
+            // GDK 版本：从 MetaData URL 提取路径，分发到多个 CDN
+            try
+            {
+                var uri = new Uri(firstMeta);
+                var router = uri.AbsolutePath;
+                urls = BedrockCDNSources
+                    .Select(s => s.UrlTemplate.Replace("{router}", router))
+                    .ToList();
+            }
+            catch
+            {
+                urls = new List<string> { firstMeta };
+            }
+        }
+        else
+        {
+            // UWP 或无法解析：直接使用 MetaData URL 或回退到 MCAPPX 网页
+            if (firstMeta.StartsWith("http"))
+                urls = new List<string> { firstMeta };
+            else
+                return null; // GUID 类型，需要 BedrockLauncher.Core 解析
+        }
+
+        return (urls, string.IsNullOrEmpty(md5) ? null : md5);
+    }
+
+    /// <summary>
+    ///     将 MCAPPX 格式的版本数据转换为统一的版本列表格式。
+    ///     按大版本分组，每组取最新 Release 版本。
+    /// </summary>
+    private static JsonObject ConvertMcAppxToVersionList(JsonObject source)
+    {
+        // 收集所有版本，按版本号数字排序
+        var allVersions = new List<(string Key, JsonObject Data, long VersionNumber)>();
+
+        foreach (var kv in source)
+        {
+            if (kv.Value is not JsonObject verData) continue;
+            var versionKey = kv.Key;
+            var versionNum = BedrockVersionToLong(versionKey);
+            allVersions.Add((versionKey, verData, versionNum));
+        }
+
+        // 按版本号降序排列
+        allVersions.Sort((a, b) => b.VersionNumber.CompareTo(a.VersionNumber));
+
+        // 按大版本分组（取前两位，如 1.21）
+        var majorGroups = new Dictionary<string, (string Key, JsonObject Data, long VersionNumber)>();
+        foreach (var ver in allVersions)
+        {
+            var type = (string)ver.Data["Type"] ?? "";
+            // 只取 Release 版本
+            if (type != "Release") continue;
+
+            var parts = ver.Key.Split('.');
+            if (parts.Length < 2) continue;
+            var major = parts[0] + "." + parts[1]; // e.g., "1.21"
+
+            if (!majorGroups.ContainsKey(major))
+                majorGroups[major] = ver;
+        }
+
+        // 生成版本列表
+        var versions = new JsonArray();
+        foreach (var group in majorGroups.OrderByDescending(g =>
+        {
+            var p = g.Key.Split('.');
+            return int.Parse(p[0]) * 1000 + int.Parse(p[1]);
+        }))
+        {
+            var ver = group.Value;
+            var versionKey = ver.Key;
+            var verData = ver.Data;
+            var buildType = (string)verData["BuildType"] ?? "UWP";
+            var date = (string)verData["Date"] ?? "";
+
+            versions.Add(new JsonObject
+            {
+                ["id"] = versionKey,
+                ["name"] = $"Bedrock {versionKey}",
+                ["type"] = "release",
+                ["releaseDate"] = date,
+                ["buildType"] = buildType
+            });
+        }
+
+        return new JsonObject { ["versions"] = versions };
+    }
+
+    /// <summary>
+    ///     将基岩版版本号转为可比较的长整数。
+    /// </summary>
+    private static long BedrockVersionToLong(string version)
+    {
+        try
+        {
+            var parts = version.Split('.');
+            long result = 0;
+            for (int i = 0; i < Math.Min(parts.Length, 4); i++)
+            {
+                if (int.TryParse(parts[i], out var num))
+                    result = result * 1000 + num;
+            }
+            return result;
+        }
+        catch { return 0; }
+    }
+
+    /// <summary>
+    ///     获取基岩版某个版本的具体构建列表。
+    /// </summary>
+    public static void DlBedrockBuildMain(ModLoader.LoaderTask<string, JsonObject> loader)
+    {
+        var versionId = (string)loader.input;
+        try
+        {
+            var json = (JsonObject)Requester.FetchJson(
+                $"https://pcl.mcimirror.top/bedrock/version/{versionId}.json");
+            if (json is not null && json["builds"] is not null)
+            {
+                loader.output = json;
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 在线获取版本 {versionId} 构建列表失败: " + ex.Message);
+        }
+
+        // 回退：返回基本信息
+        loader.output = GetBuiltInBedrockBuildInfo(versionId);
+    }
+
+    /// <summary>
+    ///     内置基岩版版本列表（回退用）。
+    /// </summary>
+    private static JsonObject GetBuiltInBedrockVersionList()
+    {
+        return new JsonObject
+        {
+            ["versions"] = new JsonArray
+            {
+                new JsonObject { ["id"] = "1.21.70", ["name"] = "1.21.70", ["type"] = "release", ["releaseDate"] = "2026-03-25" },
+                new JsonObject { ["id"] = "1.21.60", ["name"] = "1.21.60", ["type"] = "release", ["releaseDate"] = "2026-02-11" },
+                new JsonObject { ["id"] = "1.21.50", ["name"] = "1.21.50", ["type"] = "release", ["releaseDate"] = "2025-12-03" },
+                new JsonObject { ["id"] = "1.21.40", ["name"] = "1.21.40", ["type"] = "release", ["releaseDate"] = "2025-10-22" },
+                new JsonObject { ["id"] = "1.21.30", ["name"] = "1.21.30", ["type"] = "release", ["releaseDate"] = "2025-09-17" },
+                new JsonObject { ["id"] = "1.21.20", ["name"] = "1.21.20", ["type"] = "release", ["releaseDate"] = "2025-08-13" },
+                new JsonObject { ["id"] = "1.21.0",  ["name"] = "1.21.0 Tricky Trials", ["type"] = "release", ["releaseDate"] = "2024-06-13" },
+                new JsonObject { ["id"] = "1.20.80", ["name"] = "1.20.80", ["type"] = "release", ["releaseDate"] = "2024-04-23" },
+                new JsonObject { ["id"] = "1.20.70", ["name"] = "1.20.70", ["type"] = "release", ["releaseDate"] = "2024-03-12" },
+                new JsonObject { ["id"] = "1.20.60", ["name"] = "1.20.60", ["type"] = "release", ["releaseDate"] = "2024-02-06" },
+                new JsonObject { ["id"] = "1.20.50", ["name"] = "1.20.50", ["type"] = "release", ["releaseDate"] = "2023-12-05" },
+                new JsonObject { ["id"] = "1.20.40", ["name"] = "1.20.40", ["type"] = "release", ["releaseDate"] = "2023-10-24" },
+                new JsonObject { ["id"] = "1.20.30", ["name"] = "1.20.30", ["type"] = "release", ["releaseDate"] = "2023-09-19" },
+                new JsonObject { ["id"] = "1.20.10", ["name"] = "1.20.10", ["type"] = "release", ["releaseDate"] = "2023-07-11" },
+                new JsonObject { ["id"] = "1.20.0",  ["name"] = "1.20.0 Trails & Tales", ["type"] = "release", ["releaseDate"] = "2023-06-07" }
+            }
+        };
+    }
+
+    /// <summary>
+    ///     内置基岩版构建信息（回退用）。
+    /// </summary>
+    private static JsonObject GetBuiltInBedrockBuildInfo(string versionId)
+    {
+        return new JsonObject
+        {
+            ["version"] = versionId,
+            ["builds"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["platform"] = "windows_uwp",
+                    ["version"] = versionId + ".0",
+                    ["url"] = ""  // 需要从 Microsoft CDN 获取，暂时为空
+                },
+                new JsonObject
+                {
+                    ["platform"] = "windows_gdk",
+                    ["version"] = versionId + ".0",
+                    ["url"] = ""  // 需要从 Microsoft CDN 获取，暂时为空
+                }
+            }
+        };
+    }
 
     #endregion
 

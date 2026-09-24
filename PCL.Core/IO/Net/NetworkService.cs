@@ -67,8 +67,6 @@ public partial class NetworkService
         var services = new ServiceCollection();
         services.ConfigureHttpClientDefaults(b => b
             .ConfigurePrimaryHttpMessageHandler(_GetSocketsHttpHandler)
-            .ConfigureHttpClient(c => c.DefaultRequestHeaders
-                .UserAgent.Add(new ProductInfoHeaderValue("PCL-CE", Basics.VersionName)))
             .SetHandlerLifetime(TimeSpan.FromMinutes(LifeTime)));
         
         // 默认的 HTTP Client

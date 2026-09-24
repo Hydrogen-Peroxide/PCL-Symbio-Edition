@@ -23,7 +23,7 @@ public static class HttpSenderExtension
             using var request = requestMessage;
             httpClient ??= NetworkService.GetClient();
 
-            if(addMetedata)
+            if (addMetedata)
             {
                 request
                     .WithHeader("User-Agent", $"PCL-Community/PCL2-CE/{Basics.VersionName} (pclc.cc)")

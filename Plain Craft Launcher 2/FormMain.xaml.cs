@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -278,7 +278,8 @@ public partial class FormMain
                 {
                     ModDownload.dlClientListMojangLoader.Start(1); // PCL 会同时根据这里的加载结果决定是否使用官方源进行下载
                     RunCountSub();
-                    UpdateManager.serverLoader.Start(1);
+                    // SE 版：禁用 CE 更新检查
+                    // UpdateManager.serverLoader.Start(1);
                     ModBase.RunInNewThread(ModMain.TryClearTaskTemp, "TryClearTaskTemp", ThreadPriority.BelowNormal);
                 }
                 catch (Exception ex)
@@ -337,8 +338,8 @@ public partial class FormMain
         if ((int)Config.Launch.GameWindowMode == 5)
             Config.Launch.GameWindowMode = GameWindowSizeMode.Default;
 
-        // 更新后展示社区版提示
-        UpdateManager.ShowCEAnnounce();
+        // SE 版：禁用 CE 公告
+        // UpdateManager.ShowCEAnnounce();
         // 输出更新日志
         if (lastVersionCode <= 0)
             return;
@@ -1373,6 +1374,11 @@ public partial class FormMain
         Download = 1,
 
         /// <summary>
+        ///     基岩版。
+        /// </summary>
+        Bedrock = 13,
+
+        /// <summary>
         ///     联机。
         /// </summary>
         Tools = 3,
@@ -1445,7 +1451,6 @@ public partial class FormMain
         SetupLog = 5,
         SetupFeedback = 6,
         SetupGameLink = 7,
-        SetupUpdate = 8,
         SetupJava = 9,
         SetupLauncherMisc = 10,
         SetupLauncherLanguage = 11,
@@ -1465,8 +1470,9 @@ public partial class FormMain
         VersionSchematic = 9,
         VersionInstall = 10,
         VersionServer = 11,
+        VersionSaves = 12,
         VersionSavesInfo = 0,
-        VersionSavesDatapack = 1
+        VersionSavesDatapack = 1,
     }
 
     /// <summary>
@@ -1658,8 +1664,9 @@ public partial class FormMain
             // 切换到主页面
             PageChangeExit();
             isChangingPage = true; // 防止下面的勾选直接触发了 PageChangeActual
-            ((MyRadioButton)PanTitleSelect.Children[(int)stack.page]).SetChecked(true, true,
-                string.IsNullOrEmpty(PageNameGet(pageCurrent)));
+            if ((int)stack.page < PanTitleSelect.Children.Count)
+                ((MyRadioButton)PanTitleSelect.Children[(int)stack.page]).SetChecked(true, true,
+                    string.IsNullOrEmpty(PageNameGet(pageCurrent)));
             isChangingPage = false;
             switch (stack.page)
             {
@@ -1831,6 +1838,13 @@ public partial class FormMain
                 case PageType.Launch: // 启动
                     {
                         PageChangeAnim(ModMain.frmLaunchLeft, ModMain.frmLaunchRight);
+                        break;
+                    }
+                case PageType.Bedrock: // 基岩版
+                    {
+                        ModMain.frmBedrockLeft ??= new PageBedrockLeft();
+                        ModMain.frmBedrockRight ??= new PageBedrockRight();
+                        PageChangeAnim(ModMain.frmBedrockLeft, ModMain.frmBedrockRight);
                         break;
                     }
                 case PageType.Download: // 下载

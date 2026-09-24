@@ -14,7 +14,7 @@ namespace PCL.Core.Link.Scaffolding;
 public static class ScaffoldingFactory
 {
     // Please update ScaffoldingServerContext.cs at the same time.
-    private static readonly string _LobbyVendor = $"PCL CE {Basics.VersionName}, EasyTier {EasyTierMetadata.CurrentEasyTierVer}";
+    private static readonly string _LobbyVendor = $"PCL SE {Basics.VersionName}, EasyTier {EasyTierMetadata.CurrentEasyTierVer}";
     private const string HostIp = "10.114.51.41";
 
     /// <exception cref="ArgumentException">Invalid lobby code.</exception>

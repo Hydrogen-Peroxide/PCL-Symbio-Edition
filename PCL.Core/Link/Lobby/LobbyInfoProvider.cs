@@ -41,7 +41,7 @@ public static class LobbyInfoProvider
     public enum LobbyType
     {
         // ReSharper disable once InconsistentNaming
-        PCLCE,
+        PCLSE,
         Terracotta
     }
 
@@ -63,7 +63,7 @@ public static class LobbyInfoProvider
             return null;
         }
 
-        if (code.Split("-".ToCharArray()).Length != 5) // PCL CE 大厅
+        if (code.Split("-".ToCharArray()).Length != 5) // PCL SE 大厅
         {
             try
             {
@@ -74,13 +74,13 @@ public static class LobbyInfoProvider
                     NetworkName = info[..8],
                     NetworkSecret = info[8..10],
                     Port = int.Parse(info[10..]),
-                    Type = LobbyType.PCLCE,
+                    Type = LobbyType.PCLSE,
                     Ip = "10.114.51.41"
                 };
             }
             catch (Exception ex)
             {
-                LogWrapper.Error(ex, "Link", "大厅编号解析失败，可能是无效的 PCL CE 大厅编号: " + code);
+                LogWrapper.Error(ex, "Link", "大厅编号解析失败，可能是无效的 PCL SE 大厅编号: " + code);
             }
         }
         else // 陶瓦
