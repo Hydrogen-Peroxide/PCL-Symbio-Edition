@@ -625,11 +625,11 @@ public partial class PageBedrockRight
         // 启动同样需要调用 PowerShell 与注册包，放到后台线程执行
         _ = Task.Run(() =>
         {
+            Process? process = null;
+            BedrockIsolationSession? isolationSession = null;
+            var watchingExit = false;
             try
             {
-                Process? process = null;
-                var isolated = false;
-
                 // GDK 便携版不经过系统包注册，直接运行解包目录里的主程序，可与其他版本同时运行
                 if (_isGdkPortable)
                 {
@@ -641,9 +641,9 @@ public partial class PageBedrockRight
                         SetLaunchStage(0.08, Lang.Text("Bedrock.Launch.Stage.Isolation"));
                         try
                         {
-                            ModBedrockIsolation.Apply(installPath,
+                            // 使用带启动租约的会话：游戏尚未出现时不会被其他还原逻辑误删隔离目录
+                            isolationSession = ModBedrockIsolation.BeginSession(installPath,
                                 BedrockVersion ?? Path.GetFileName(installPath));
-                            isolated = true;
                         }
                         catch (Exception ex)
                         {
@@ -672,30 +672,13 @@ public partial class PageBedrockRight
                         SetLaunchStage(0.55, Lang.Text("Bedrock.Launch.Stage.WaitingWindow"));
                     }
 
-                    // 版本隔离的还原放到后台：等游戏进程退出后再恢复共享目录
-                    if (isolated)
-                        _ = Task.Run(() =>
-                        {
-                            try
-                            {
-                                if (process is not null)
-                                {
-                                    process.WaitForExit();
-                                }
-                                else
-                                {
-                                    // 注册式启动拿不到进程句柄，等进程出现后再等它退出
-                                    Thread.Sleep(3000);
-                                    while (ModBedrockIsolation.IsAnyGameRunning()) Thread.Sleep(1000);
-                                }
-                            }
-                            catch { }
-                            finally
-                            {
-                                process?.Dispose();
-                                ModBedrockIsolation.Restore();
-                            }
-                        });
+                    // 版本隔离的还原交给后端：登记本次启动，等游戏进程退出后再恢复共享目录；
+                    // 注册式启动拿不到进程句柄时，后端会先等待进程出现，避免游戏还没启动就还原
+                    if (isolationSession is not null)
+                    {
+                        ModBedrockIsolation.RestoreAfterGameExit(isolationSession, process);
+                        watchingExit = true;
+                    }
 
                     if (!WaitForGameWindow(process, TimeSpan.FromSeconds(60)))
                     {
@@ -706,8 +689,7 @@ public partial class PageBedrockRight
                             ModBase.LogLevel.Hint);
                     }
 
-                    // 未启用隔离时在这里回收进程句柄，启用隔离时交给上面的还原任务
-                    if (!isolated) process?.Dispose();
+                    // 进程句柄统一在 finally 中回收，隔离还原由后端负责
 
                     ModBase.Log($"[Bedrock] 正在启动 GDK 版本: {installPath}", ModBase.LogLevel.Normal);
                     SetLaunchStage(0.9);
@@ -746,6 +728,13 @@ public partial class PageBedrockRight
                 ModBase.Log($"[Bedrock] 启动失败: {ex.Message}", ModBase.LogLevel.Hint,
                     Lang.Text("Bedrock.Launch.Error"));
                 EndLaunchProgress(false, Lang.Text("Bedrock.Status.LaunchFailed"), ex.Message);
+            }
+            finally
+            {
+                process?.Dispose();
+                // 启动失败（尚未登记退出监视）时立即还原本次隔离，避免留下目录联接
+                if (isolationSession is not null && !watchingExit)
+                    ModBedrockIsolation.Restore(isolationSession);
             }
         });
     }
