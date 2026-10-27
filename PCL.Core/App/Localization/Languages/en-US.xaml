@@ -160,6 +160,7 @@
     <sys:String x:Key="Bedrock.Local.LaunchGdk">Launch directly (portable build, can run alongside other versions)</sys:String>
     <sys:String x:Key="Bedrock.Local.PackageMissing">The package file has been deleted, so this version cannot be switched to</sys:String>
     <sys:String x:Key="Bedrock.Local.Reinstall">Reinstall this version</sys:String>
+    <sys:String x:Key="Bedrock.Local.RunningHint">Close the running Bedrock game before deleting a local version.</sys:String>
     <sys:String x:Key="Bedrock.Local.SwitchLaunch">Switch to this version and launch</sys:String>
     <sys:String x:Key="Bedrock.Local.Tag.Downloaded">Downloaded</sys:String>
     <sys:String x:Key="Bedrock.Local.Tag.Gdk">GDK portable</sys:String>

@@ -160,6 +160,7 @@
     <sys:String x:Key="Bedrock.Local.LaunchGdk">直接启动（便携版，可与其它版本同时运行）</sys:String>
     <sys:String x:Key="Bedrock.Local.PackageMissing">安装包已被删除，无法切换到该版本</sys:String>
     <sys:String x:Key="Bedrock.Local.Reinstall">重新安装此版本</sys:String>
+    <sys:String x:Key="Bedrock.Local.RunningHint">请先关闭正在运行的基岩版，再删除本地版本。</sys:String>
     <sys:String x:Key="Bedrock.Local.SwitchLaunch">切换到此版本并启动</sys:String>
     <sys:String x:Key="Bedrock.Local.Tag.Downloaded">已下载</sys:String>
     <sys:String x:Key="Bedrock.Local.Tag.Gdk">GDK 便携版</sys:String>

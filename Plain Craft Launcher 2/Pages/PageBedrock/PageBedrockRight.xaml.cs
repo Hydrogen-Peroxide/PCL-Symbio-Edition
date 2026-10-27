@@ -789,9 +789,10 @@ public partial class PageBedrockRight
                 var result = ModBase.ShellAndGetOutput("powershell.exe",
                     ModBedrockUwp.GetAppxInstallArguments(manifestPath, register: true),
                     timeout: 300000);
-                if (IsPowerShellFailure(result))
+                // 不仅要命令成功，还要确认注册确实落在当前目录，而不是被商店版或其它目录抢占
+                if (IsPowerShellFailure(result) || !IsRegisteredFromDirectory(identityName, extractDir))
                 {
-                    ModBase.Log($"[Bedrock] 注册 GDK 版本失败，改用直接启动: {result.Trim()}",
+                    ModBase.Log($"[Bedrock] 注册 GDK 版本失败或未能确认注册位置，改用直接启动: {result.Trim()}",
                         ModBase.LogLevel.Hint, userSummary: Lang.Text("Bedrock.Register.Failed"));
                     return false;
                 }
@@ -821,16 +822,8 @@ public partial class PageBedrockRight
     {
         try
         {
-            var output = ModBase.ShellAndGetOutput("powershell.exe",
-                $"-NoProfile -Command \"$p = Get-AppxPackage -Name '{packageName}' | Select-Object -First 1; if ($p) {{ $p.InstallLocation }}\"",
-                timeout: 20000);
-            var location = output.Trim();
-            if (string.IsNullOrEmpty(location) || location.Contains("Exception")) return false;
-
-            return string.Equals(
-                Path.GetFullPath(location).TrimEnd(Path.DirectorySeparatorChar),
-                Path.GetFullPath(directory).TrimEnd(Path.DirectorySeparatorChar),
-                StringComparison.OrdinalIgnoreCase);
+            // 后端会同时校验包标识与 InstallLocation，避免把商店版或其它目录的注册误判成本版本
+            return ModBedrockRegistration.IsRegisteredFromDirectory(packageName, directory);
         }
         catch
         {
@@ -1481,30 +1474,19 @@ public partial class PageBedrockRight
             {
                 ModBase.Log($"[Bedrock] 开始解包 GDK 版本: {filePath}", ModBase.LogLevel.Normal);
 
-                // 解包前结束运行中的实例，避免目标文件被占用
-                ModBedrockGdk.StopProcesses();
-
-                var extractDir = ModBedrockUwp.GetVersionDirectory(
-                    Path.Combine(BedrockVersionsDir, "extracted"), versionId);
-                if (Directory.Exists(extractDir))
-                    Directory.Delete(extractDir, true);
-                Directory.CreateDirectory(extractDir);
-
-                ModBase.Log($"[Bedrock] 解密解包到: {extractDir}", ModBase.LogLevel.Normal);
-
+                // 事务式安装：先解包到临时目录并校验主程序，再整体替换目标目录；
+                // 旧版本会备份保留，mods/preload 等用户数据会迁移过去，失败时回滚，不会留下半成品
                 var lastPercent = -1;
-                ModBedrockGdk.Extract(filePath, extractDir, (_, index, total) =>
-                {
-                    if (total <= 0) return;
-                    var percent = index * 100 / total;
-                    if (percent == lastPercent) return;
-                    lastPercent = percent;
-                    ModBase.RunInUi(() => LabDetail.Text =
-                        Lang.Text("Bedrock.Gdk.ExtractingFile", versionId, percent));
-                });
-
-                if (!ModBedrockGdk.IsInstalled(extractDir))
-                    throw new FileNotFoundException(Lang.Text("Bedrock.Gdk.ExecutableMissing"));
+                var extractDir = ModBedrockInstall.InstallGdk(filePath, BedrockVersionsDir, versionId,
+                    (_, index, total) =>
+                    {
+                        if (total <= 0) return;
+                        var percent = index * 100 / total;
+                        if (percent == lastPercent) return;
+                        lastPercent = percent;
+                        ModBase.RunInUi(() => LabDetail.Text =
+                            Lang.Text("Bedrock.Gdk.ExtractingFile", versionId, percent));
+                    });
 
                 ModBase.Log($"[Bedrock] GDK 版本已解包: {versionId}",
                     ModBase.LogLevel.Normal,
@@ -1543,8 +1525,11 @@ public partial class PageBedrockRight
             }
             finally
             {
-                _installingVersions.Remove(versionId);
-                ModBase.RunInUi(RefreshLocalVersions);
+                ModBase.RunInUi(() =>
+                {
+                    _installingVersions.Remove(versionId);
+                    RefreshLocalVersions();
+                });
             }
         });
     }
@@ -1564,9 +1549,12 @@ public partial class PageBedrockRight
         {
             try
             {
-                // GDK 便携版没有系统包注册，结束进程后直接删除目录即可
+                if (ModBedrockIsolation.IsAnyGameRunning())
+                    throw new InvalidOperationException(Lang.Text("Bedrock.Local.RunningHint"));
+
+                // GDK 便携版可能以开发模式注册过；只注销身份与目录都匹配的注册，避免误删商店版或其它版本
                 if (isGdk)
-                    ModBedrockGdk.StopProcesses();
+                    ModBedrockRegistration.UnregisterPortable(extractDir);
                 // 正在使用的 UWP 版本要先卸载，否则删除目录后会留下失效的包注册
                 else if (isRegistered)
                     ModBedrockUwp.UninstallPreservingData();
@@ -1585,6 +1573,7 @@ public partial class PageBedrockRight
                 ModBase.Log(ex, "删除本地版本失败",
                     ModBase.LogLevel.Feedback,
                     userSummary: Lang.Text("Bedrock.Local.DeleteFailed", ex.Message));
+                return;
             }
 
             ModBase.RunInUi(() =>
