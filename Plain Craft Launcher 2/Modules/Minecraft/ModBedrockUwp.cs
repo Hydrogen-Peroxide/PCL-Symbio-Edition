@@ -451,8 +451,8 @@ public static class ModBedrockUwp
     {
         try
         {
-            var output = ModBase.ShellAndGetOutput("powershell.exe",
-                $"-NoProfile -Command \"Get-AppxPackage -Name '{packageName}' | Select-Object -First 1 -Property PackageFullName,Version,PackageFamilyName | ConvertTo-Csv -NoTypeInformation\"",
+            var output = ModBase.ShellAndGetOutputChecked("powershell.exe",
+                $"-NoProfile -Command \"Get-AppxPackage -Name '{packageName}' -ErrorAction Stop | Select-Object -First 1 -Property PackageFullName,Version,PackageFamilyName | ConvertTo-Csv -NoTypeInformation\"",
                 timeout: 20000);
             var lines = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
             if (lines.Length < 2) return null;
@@ -478,13 +478,13 @@ public static class ModBedrockUwp
 
         // 只处理旧版 UWP 包（Microsoft.MinecraftUWP），避免误卸新版 GDK 包（Microsoft.Minecraft）
         // PreserveApplicationData 需要 Windows 10 1809 及以上
-        var result = ModBase.ShellAndGetOutput("powershell.exe",
-            $"-NoProfile -Command \"$p = Get-AppxPackage -Name '{ReleasePackageName}' -ErrorAction SilentlyContinue; if ($p) {{ foreach ($x in $p) {{ try {{ Remove-AppxPackage -Package $x.PackageFullName -PreserveApplicationData -ErrorAction Stop }} catch {{ Write-Output ('Error:' + $_.Exception.Message) }} }} }} else {{ Write-Output 'None' }}\"",
+        var result = ModBase.ShellAndGetOutputChecked("powershell.exe",
+            $"-NoProfile -Command \"$p = Get-AppxPackage -Name '{ReleasePackageName}' -ErrorAction Stop; if ($p) {{ foreach ($x in $p) {{ Remove-AppxPackage -Package $x.PackageFullName -PreserveApplicationData -ErrorAction Stop }} }} else {{ Write-Output 'None' }}\"",
             timeout: 120000);
 
         ModBase.Log($"[Bedrock] 卸载结果: {result.Trim()}", ModBase.LogLevel.Normal);
 
-        var verify = ModBase.ShellAndGetOutput("powershell.exe",
+        var verify = ModBase.ShellAndGetOutputChecked("powershell.exe",
             $"-NoProfile -Command \"if (Get-AppxPackage -Name '{ReleasePackageName}' -ErrorAction Stop) {{ 'StillInstalled' }} else {{ 'Cleared' }}\"",
             timeout: 20000);
 
@@ -566,12 +566,12 @@ public static class ModBedrockUwp
     {
         try
         {
-            var output = ModBase.ShellAndGetOutput("powershell.exe",
-                "-NoProfile -Command \"$p = Get-AppxPackage -Name '" + packageName + "' | Select-Object -First 1; " +
-                "if ($p) { $ids = @((Get-AppxPackageManifest $p).Package.Applications.Application.Id); Write-Output $ids[0] }\"",
+            var output = ModBase.ShellAndGetOutputChecked("powershell.exe",
+                "-NoProfile -Command \"$p = Get-AppxPackage -Name '" + packageName + "' -ErrorAction Stop | Select-Object -First 1; " +
+                "if ($p) { $ids = @((Get-AppxPackageManifest $p -ErrorAction Stop).Package.Applications.Application.Id); Write-Output $ids[0] }\"",
                 timeout: 20000);
             var id = output.Trim();
-            if (!string.IsNullOrEmpty(id) && !id.Contains("Exception") && !id.Contains(' '))
+            if (!string.IsNullOrEmpty(id) && !id.Contains(' '))
                 return id;
         }
         catch (Exception ex)
@@ -605,8 +605,8 @@ public static class ModBedrockUwp
         var installed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         try
         {
-            var output = ModBase.ShellAndGetOutput("powershell.exe",
-                "-NoProfile -ExecutionPolicy Bypass -Command \"Get-AppxPackage | Select-Object Name,Version | ConvertTo-Csv -NoTypeInformation\"",
+            var output = ModBase.ShellAndGetOutputChecked("powershell.exe",
+                "-NoProfile -ExecutionPolicy Bypass -Command \"Get-AppxPackage -ErrorAction Stop | Select-Object Name,Version | ConvertTo-Csv -NoTypeInformation\"",
                 timeout: 60000);
 
             var lines = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
@@ -632,7 +632,7 @@ public static class ModBedrockUwp
         catch (Exception ex)
         {
             ModBase.Log($"[Bedrock] 检测 UWP 依赖失败: {ex.Message}", ModBase.LogLevel.Normal);
-            return [];
+            throw;
         }
 
         var missing = new List<(string Name, string? MinVersion)>();
@@ -680,6 +680,7 @@ public static class ModBedrockUwp
 
         foreach (var (name, minVersion) in missing)
         {
+            string? tempPath = null;
             try
             {
                 var url = await GetUwpPackageDownloadUrlAsync(name, minVersion).ConfigureAwait(false);
@@ -689,27 +690,27 @@ public static class ModBedrockUwp
                     continue;
                 }
 
-                var tempPath = Path.Combine(Path.GetTempPath(), $"{name}_{Guid.NewGuid():N}.appx");
+                tempPath = Path.Combine(Path.GetTempPath(), $"{name}_{Guid.NewGuid():N}.appx");
                 using (var client = new HttpClient { Timeout = TimeSpan.FromMinutes(10) })
                 {
                     var bytes = await client.GetByteArrayAsync(url).ConfigureAwait(false);
                     await File.WriteAllBytesAsync(tempPath, bytes).ConfigureAwait(false);
                 }
 
-                var result = ModBase.ShellAndGetOutput("powershell.exe",
+                _ = ModBase.ShellAndGetOutputChecked("powershell.exe",
                     GetAppxInstallArguments(tempPath),
                     timeout: 300000);
 
-                if (result.Contains("Exception") || result.Contains("错误"))
-                    ModBase.Log($"[Bedrock] 安装依赖 {name} 失败: {result.Trim()}", ModBase.LogLevel.Normal);
-                else
-                    ModBase.Log($"[Bedrock] 依赖 {name} 安装完成", ModBase.LogLevel.Normal);
+                ModBase.Log($"[Bedrock] 依赖 {name} 安装完成", ModBase.LogLevel.Normal);
 
-                try { File.Delete(tempPath); } catch { }
             }
             catch (Exception ex)
             {
                 ModBase.Log($"[Bedrock] 安装依赖 {name} 失败: {ex.Message}", ModBase.LogLevel.Normal);
+            }
+            finally
+            {
+                if (tempPath is not null) try { File.Delete(tempPath); } catch { }
             }
         }
     }

@@ -22,4 +22,11 @@ public interface IUpdateSource
     bool IsLatest(UpdateChannel channel, UpdateArch arch, SemVer currentVersion, int currentVersionCode);
     VersionAnnouncementDataModel GetAnnouncementList();
     List<ModLoader.LoaderBase> GetDownloadLoader(UpdateChannel channel, UpdateArch arch, string output);
+
+    /// <summary>使用本次版本查询携带的下载快照；未提供快照的历史更新源继续使用原接口。</summary>
+    List<ModLoader.LoaderBase> GetDownloadLoader(UpdateChannel channel, UpdateArch arch, string output, VersionDataModel version)
+    {
+        return version.DownloadSnapshot?.CreateLoaders(channel, arch, output, version)
+               ?? GetDownloadLoader(channel, arch, output);
+    }
 }

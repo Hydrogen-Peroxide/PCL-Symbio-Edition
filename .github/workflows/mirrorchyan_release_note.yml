@@ -10,13 +10,24 @@ on:
 
 jobs:
   mirrorchyan:
+    if: ${{ vars.MIRRORCHYAN_ENABLED == 'true' }}
     runs-on: macos-latest
+    timeout-minutes: 10
 
     steps:
+      - name: Check optional mirror configuration
+        env:
+          MIRRORCHYAN_RID: ${{ vars.MIRRORCHYAN_RID }}
+          MIRRORCHYAN_UPLOAD_TOKEN: ${{ secrets.MirrorChyanUploadToken }}
+        run: |
+          if [ -z "$MIRRORCHYAN_RID" ] || [ -z "$MIRRORCHYAN_UPLOAD_TOKEN" ]; then
+            echo "::error::MirrorChyan is enabled. Configure your MIRRORCHYAN_RID repository variable and MirrorChyanUploadToken repository secret."
+            exit 1
+          fi
       - id: uploading
         uses: MirrorChyan/release-note-action@v1
         with:
-          mirrorchyan_rid: PCL2-CE
+          mirrorchyan_rid: ${{ vars.MIRRORCHYAN_RID }}
 
           upload_token: ${{ secrets.MirrorChyanUploadToken }}
           github_token: ${{ secrets.GITHUB_TOKEN }}

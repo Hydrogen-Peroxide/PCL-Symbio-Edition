@@ -21,7 +21,7 @@
 
 PCL SE（Plain Craft Launcher Symbio Edition）是由 Hydrogen-Peroxide 維護的第三方 Minecraft 啟動器，基於 PCL 開源程式碼開發，在保留原有互動習慣的基礎上補齊了基岩版支援、實例管理與資源下載等能力。
 
-- 目前版本：`2.17.9`
+- 目前版本：`2.17.11`
 - 上游基線：PCL `2.12.1`
 - 技術棧：C# / WPF / .NET 10
 
@@ -56,12 +56,12 @@ PCL SE 與 PCL 官方版沒有隸屬關係，請不要向官方儲存庫回報 P
 
 ### 使用體驗
 
-- 7 種介面語言：簡體中文、繁體中文、English (US)、English (UK)、日本語、Français、Español
+- 簡體中文與 English (US) 提供完整介面資源；繁體中文、English (UK)、日本語、Français、Español 目前僅有語言名稱等預留資源，介面文字回退為簡體中文
 - 主題配色與背景可自訂，頁面切換與清單捲動帶有過場動畫
 - 自動掃描本機 Java，減少手動設定
 - 啟動失敗時分析日誌，給出可讀的原因與建議
 
-> 本分支不包含多人遊戲大廳功能，相關模組已從程式碼庫中移除。
+> 本分支不包含多人遊戲大廳功能，相關模組已從程式碼庫中移除，目前沒有已確認的恢復時程。
 
 ## 支援平台
 
@@ -92,7 +92,7 @@ PCL SE 與 PCL 官方版沒有隸屬關係，請不要向官方儲存庫回報 P
 
 ## 從原始碼建置
 
-需要 [.NET 10 SDK](https://get.dot.net/10)，在儲存庫根目錄執行：
+需要 [.NET 10 SDK](https://get.dot.net/10)。SDK 基線由 [global.json](global.json) 固定為 `10.0.403`，允許同一功能帶的修補更新；CI 安裝該基線版本。請在儲存庫根目錄執行：
 
 ```powershell
 # 與 CI 一致的框架依賴發行
@@ -109,6 +109,8 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 
 可用設定（`-c`）：`Release`、`Beta`、`Debug`、`CI`；可用平台（`-p:Platform`）：`x64`、`ARM64`、`AnyCPU`。
 
+測試命令、離線測試範圍與發行設定見 [貢獻指南](CONTRIBUTING.md#本地构建与测试)。解決方案預設不建置核心測試專案，需要單獨執行該專案。
+
 ## 專案結構
 
 | 目錄 | 說明 |
@@ -123,7 +125,7 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 
 - 新增基岩版管理：版本偵測、安裝包匯入、Xbox 帳號登入與本機篩選
 - 移除多人遊戲大廳及配套模組，不再提供大廳與多人遊戲相關入口
-- 使用獨立版本號（`2.17.9`），上游基線為 PCL `2.12.1`
+- 使用獨立版本號（`2.17.11`），上游基線為 PCL `2.12.1`
 
 ## 聲明
 
@@ -136,7 +138,7 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 - **名稱使用**：文件與示範中出現的「Minecraft」字樣僅用於描述本專案所支援的遊戲，屬於《中華人民共和國著作權法》規定的合理使用；相關截圖與影片的著作權歸其各自開發者所有。
 - **關係說明**：PCL Symbio Edition 與 PCL2、PCL CE、Mojang Studios 及其中國代理商之間不存在任何隸屬、合作、維護或授權關係。
 - **正版倡議**：我們鼓勵透過官方管道購買並遊玩正版 Minecraft。
-- **多人遊戲大廳**：由於特殊原因，PCL Symbio Edition 暫不支援 PCL CE 的多人遊戲大廳，後續版本將逐步補齊。
+- **多人遊戲大廳**：PCL Symbio Edition 目前不提供 PCL CE 的多人遊戲大廳，相關模組已移除，目前沒有已確認的恢復時程。
 
 ## 授權條款
 

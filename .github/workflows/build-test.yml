@@ -13,7 +13,6 @@ on:
       - '**/*.md'
       - '**/LICENSE'
       - '**/LICENCE'
-      - 'PCL.Core.Test/**'
       - '.github/ISSUE_TEMPLATE/**'
       - '.github/FUNDING.yml'
   pull_request:
@@ -23,13 +22,68 @@ on:
 jobs:
   bedrock-regression:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 10.0.x
+          global-json-file: global.json
       - name: Test Bedrock installation safeguards
         run: dotnet run --project tests/BedrockInstallRegression -c Release
+
+  core-tests:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Run offline core tests
+        run: >-
+          dotnet test PCL.Core.Test/PCL.Core.Test.csproj
+          -c Release -p:Platform=x64 --settings PCL.Core.Test/ci.runsettings
+          --logger "trx;LogFileName=core-tests.trx" --results-directory TestResults
+      - name: Upload test results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: core-test-results
+          path: TestResults/*.trx
+          if-no-files-found: ignore
+
+  bedrock-data-regression:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Test Bedrock data isolation and transactional installation
+        run: dotnet run --project tests/BedrockDataRegression -c Release -- --suite data
+
+  bedrock-registration-regression:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Test Bedrock package ownership and preserving unregister scripts
+        run: dotnet run --project tests/BedrockDataRegression -c Release -- --suite registration
+
+  launcher-services-regression:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+      - name: Test command lifecycle, configuration persistence and update snapshots
+        run: dotnet run --project tests/LauncherServicesRegression -c Release
 
   build:
     strategy:

@@ -15,6 +15,14 @@ internal static class Program
     [STAThread]
     public static void Main()
     {
+#if DEBUG
+        // Keep legacy migration and cache paths isolated when an explicit debug profile is requested.
+        var debugProfile = Environment.GetEnvironmentVariable("PCL_PATH_SHARED");
+        if (!string.IsNullOrWhiteSpace(debugProfile))
+        {
+            Paths.OldSharedData = System.IO.Path.Combine(debugProfile, "legacy-shared");
+        }
+#endif
         if (Basics.CommandLineArguments.Contains("--console")) KernelInterop.AllocateConsole();
 #if DEBUG
         if (Basics.CommandLineArguments.Contains("--debug"))

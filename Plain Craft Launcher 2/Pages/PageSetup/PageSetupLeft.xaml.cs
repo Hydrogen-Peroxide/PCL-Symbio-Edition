@@ -308,7 +308,7 @@ public partial class PageSetupLeft
     {
         if (pageID == id)
             return;
-        ModAnimation.AniControlEnabled += 1;
+        ModAnimation.AniBeginControl();
         isPageSwitched = true;
         try
         {
@@ -325,7 +325,7 @@ public partial class PageSetupLeft
         }
         finally
         {
-            ModAnimation.AniControlEnabled -= 1;
+            ModAnimation.AniEndControl();
         }
     }
 

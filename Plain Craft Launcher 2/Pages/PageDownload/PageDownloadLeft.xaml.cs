@@ -1,4 +1,4 @@
-﻿using System.Windows.Controls;
+using System.Windows.Controls;
 using System.Windows.Input;
 using PCL.Core.App.Localization;
 
@@ -462,7 +462,7 @@ public partial class PageDownloadLeft : IRefreshable
     {
         if (pageID == id)
             return;
-        ModAnimation.AniControlEnabled += 1;
+        ModAnimation.AniBeginControl();
         try
         {
             PageChangeRun((MyPageRight)PageGet(id));
@@ -478,7 +478,7 @@ public partial class PageDownloadLeft : IRefreshable
         }
         finally
         {
-            ModAnimation.AniControlEnabled -= 1;
+            ModAnimation.AniEndControl();
         }
     }
 

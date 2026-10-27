@@ -78,6 +78,11 @@ public static class ModBedrockMods
         {
             return StartWithInjection(exePath, workingDirectory, arguments, mods);
         }
+        catch (InjectionProcessTerminationException)
+        {
+            // 不能确认旧进程结束时禁止再启动一份，更不能继续使用仍在执行注入的进程。
+            throw;
+        }
         catch (Exception ex)
         {
             ModBase.Log(ex, $"注入基岩版 DLL 模组失败（{mods.Count} 个），本次直接启动", ModBase.LogLevel.Hint,
@@ -134,9 +139,14 @@ public static class ModBedrockMods
                     InjectModule(processInfo.hProcess, remoteLoadLibrary, mod);
             }
         }
-        catch (Exception ex)
+        catch
         {
-            ModBase.Log(ex, "注入基岩版 DLL 模组时出现异常", ModBase.LogLevel.Hint);
+            // 注入线程可能仍使用远程参数。结束且确认本次创建的进程退出后，系统会回收其地址空间。
+            // 终止失败时禁止普通启动回退，避免遗留游戏进程与下一次启动并存。
+            suspended = false;
+            AbortCreatedProcess(processInfo.hProcess, WaitForSingleObject,
+                handle => TerminateProcess(handle, 1));
+            throw;
         }
         finally
         {
@@ -167,6 +177,7 @@ public static class ModBedrockMods
             return;
         }
 
+        var argumentOwnedByThread = false;
         try
         {
             if (!WriteProcessMemory(processHandle, remotePath, bytes, (uint)bytes.Length, out _))
@@ -182,25 +193,52 @@ public static class ModBedrockMods
                 return;
             }
 
-            try
-            {
-                if (WaitForSingleObject(thread, 15000) != WaitObject0)
-                    ModBase.Log($"[Bedrock] 注入模组超时: {fileName}", ModBase.LogLevel.Hint);
-                else if (GetExitCodeThread(thread, out var exitCode) && exitCode == 0)
-                    ModBase.Log($"[Bedrock] 模组加载失败（DllMain 返回 FALSE 或缺少依赖）: {fileName}",
-                        ModBase.LogLevel.Hint);
-                else
-                    ModBase.Log($"[Bedrock] 已注入模组: {fileName}", ModBase.LogLevel.Normal);
-            }
-            finally
-            {
-                CloseHandle(thread);
-            }
+            argumentOwnedByThread = true;
+            var exitCode = CompleteInjectionThread(thread,
+                handle => WaitForSingleObject(handle, 15000),
+                handle => GetExitCodeThread(handle, out var code)
+                    ? code : throw new InvalidOperationException("无法读取 DLL 注入线程的退出状态。"),
+                handle => CloseHandle(handle),
+                () => VirtualFreeEx(processHandle, remotePath, 0, MemRelease));
+            if (exitCode == 0)
+                throw new InvalidOperationException($"模组加载失败（DllMain 返回 FALSE 或缺少依赖）: {fileName}");
+            ModBase.Log($"[Bedrock] 已注入模组: {fileName}", ModBase.LogLevel.Normal);
         }
         finally
         {
-            VirtualFreeEx(processHandle, remotePath, 0, MemRelease);
+            if (!argumentOwnedByThread) VirtualFreeEx(processHandle, remotePath, 0, MemRelease);
         }
+    }
+
+    /// <summary>只在线程确认结束后释放远程参数；超时或等待失败由启动方结束本次创建的进程。</summary>
+    internal static uint CompleteInjectionThread(IntPtr thread, Func<IntPtr, uint> wait,
+        Func<IntPtr, uint> getExitCode, Action<IntPtr> close, Action releaseArgument)
+    {
+        var completed = false;
+        try
+        {
+            var waitResult = wait(thread);
+            if (waitResult == 0x102) throw new TimeoutException("DLL 模组注入超时，正在中止本次游戏启动。");
+            if (waitResult != WaitObject0) throw new InvalidOperationException("无法确认 DLL 注入线程已经结束。");
+            completed = true;
+            return getExitCode(thread);
+        }
+        finally
+        {
+            try { if (completed) releaseArgument(); }
+            finally { close(thread); }
+        }
+    }
+
+    private sealed class InjectionProcessTerminationException()
+        : InvalidOperationException("DLL 模组注入失败，且无法确认本次创建的游戏进程已终止；已中止启动。");
+
+    internal static void AbortCreatedProcess(IntPtr process, Func<IntPtr, uint, uint> wait, Action<IntPtr> terminate)
+    {
+        if (wait(process, 0) == WaitObject0) return;
+        terminate(process);
+        // TerminateProcess 可能与自然退出竞争，以最终等待结果为准。
+        if (wait(process, 5000) != WaitObject0) throw new InjectionProcessTerminationException();
     }
 
     /// <summary>等待目标进程完成加载器初始化，再按模块基址换算出远程 LoadLibraryW 地址。</summary>
@@ -335,6 +373,9 @@ public static class ModBedrockMods
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool GetExitCodeThread(IntPtr hThread, out uint lpExitCode);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool TerminateProcess(IntPtr hProcess, uint uExitCode);
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern uint ResumeThread(IntPtr hThread);

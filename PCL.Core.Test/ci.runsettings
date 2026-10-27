@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <!-- Explicitly opt in offline tests. Do not run network, desktop or user-environment tests in CI. -->
+    <!-- The parent-folder validator test assumes files in C:\Windows, so exclude that method. -->
+    <TestCaseFilter>(FullyQualifiedName~PCL.Core.Test.Validate&amp;FullyQualifiedName!~TestFileNameValidateWithParentFolder)|FullyQualifiedName=PCL.Core.Test.SemVerTest.TestParse|FullyQualifiedName~PCL.Core.Test.BaseXTest|FullyQualifiedName=PCL.Core.Test.DiffTest.TestBsDiff|FullyQualifiedName~PCL.Core.Test.JsonCompatDateTimeTest|FullyQualifiedName~PCL.Core.Test.App.CommandLineTest|FullyQualifiedName~PCL.Core.Test.Hash.MurmurHash2Test|FullyQualifiedName~PCL.Core.Test.Encryption.AesGcmTest|FullyQualifiedName~PCL.Core.Test.Minecraft.ResourceProject.ModDependencyResolverTest|FullyQualifiedName~PCL.Core.Test.Minecraft.SaveImportHelperTest|FullyQualifiedName~PCL.Core.Test.App.Configuration.Storage.FileConfigStorageTest</TestCaseFilter>
+    <TestSessionTimeout>180000</TestSessionTimeout>
+    <TreatNoTestsAsError>true</TreatNoTestsAsError>
+  </RunConfiguration>
+</RunSettings>

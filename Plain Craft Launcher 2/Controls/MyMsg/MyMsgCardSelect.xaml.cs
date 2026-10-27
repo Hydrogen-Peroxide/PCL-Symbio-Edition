@@ -2,12 +2,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
-using System.Windows.Media;
 using PCL.Core.App.Localization;
 using PCL.Core.UI.Controls;
-
-using SvgIconControl = PCL.Core.UI.Controls.SvgIcon.SvgIcon;
-
 namespace PCL;
 
 /// <summary>
@@ -40,7 +36,7 @@ public partial class MyMsgCardSelect
 {
     private readonly ModMain.MyMsgBoxConverter myConverter;
     private readonly int uuid = ModBase.GetUuid();
-    private readonly List<CardVisual> cards = [];
+    private readonly List<MyListItem> cards = [];
 
     private int selectedIndex = -1;
 
@@ -107,7 +103,7 @@ public partial class MyMsgCardSelect
             {
                 var visual = CreateCard(options[i], i);
                 cards.Add(visual);
-                PanCards.Children.Add(visual.Card);
+                PanCards.Children.Add(visual);
             }
 
         selectedIndex = initialIndex >= 0 && initialIndex < cards.Count ? initialIndex : -1;
@@ -115,110 +111,20 @@ public partial class MyMsgCardSelect
         UpdateCards();
     }
 
-    private CardVisual CreateCard(MyMsgCardOption option, int index)
+    private MyListItem CreateCard(MyMsgCardOption option, int index)
     {
-        var icon = new SvgIconControl
+        var item = new MyListItem
         {
-            Icon = option.SvgIcon,
-            Width = 18,
-            Height = 18,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center
+            Title = option.Title,
+            Info = option.Description,
+            ToolTip = option.Description,
+            Tags = string.IsNullOrEmpty(option.Tag) ? Array.Empty<string>() : new[] { option.Tag },
+            SvgIcon = option.SvgIcon,
+            Type = MyListItem.CheckType.RadioBox,
+            Height = 42
         };
-        var iconTile = new Border
-        {
-            Width = 34,
-            Height = 34,
-            CornerRadius = new CornerRadius(8),
-            Margin = new Thickness(0, 0, 10, 0),
-            VerticalAlignment = VerticalAlignment.Center,
-            Child = icon
-        };
-
-        var title = new TextBlock
-        {
-            Text = option.Title,
-            FontSize = 15,
-            FontWeight = FontWeights.Bold,
-            VerticalAlignment = VerticalAlignment.Center,
-            TextTrimming = TextTrimming.CharacterEllipsis
-        };
-        title.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush1");
-
-        // 右侧要给选中圆点留位置，避免长标题压到圆点上
-        var titleRow = new StackPanel
-        {
-            Orientation = Orientation.Horizontal,
-            Margin = new Thickness(0, 0, 22, 0),
-            Children = { iconTile, title }
-        };
-        if (!string.IsNullOrEmpty(option.Tag))
-        {
-            var tagText = new TextBlock { Text = option.Tag, FontSize = 10.5, FontWeight = FontWeights.Bold };
-            tagText.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush2");
-            var tag = new Border
-            {
-                CornerRadius = new CornerRadius(4),
-                Padding = new Thickness(6, 1, 6, 2),
-                Margin = new Thickness(8, 0, 0, 0),
-                VerticalAlignment = VerticalAlignment.Center,
-                Child = tagText
-            };
-            tag.SetResourceReference(Border.BackgroundProperty, "ColorBrush6");
-            titleRow.Children.Add(tag);
-        }
-
-        var description = new TextBlock
-        {
-            Text = option.Description,
-            FontSize = 12,
-            TextWrapping = TextWrapping.Wrap,
-            Margin = new Thickness(0, 10, 0, 0)
-        };
-        description.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray3");
-
-        var marker = new Border
-        {
-            Width = 18,
-            Height = 18,
-            CornerRadius = new CornerRadius(9),
-            BorderThickness = new Thickness(1.5),
-            HorizontalAlignment = HorizontalAlignment.Right,
-            VerticalAlignment = VerticalAlignment.Top,
-            Margin = new Thickness(0, 2, 0, 0)
-        };
-
-        var content = new Grid();
-        content.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        content.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-        Grid.SetRow(titleRow, 0);
-        Grid.SetRow(description, 1);
-        Grid.SetRow(marker, 0);
-        content.Children.Add(titleRow);
-        content.Children.Add(description);
-        content.Children.Add(marker);
-
-        var card = new Border
-        {
-            CornerRadius = new CornerRadius(9),
-            BorderThickness = new Thickness(1.5),
-            Padding = new Thickness(14, 13, 14, 13),
-            MinHeight = 112,
-            Margin = new Thickness(4),
-            Child = content,
-            Cursor = Cursors.Hand
-        };
-        card.MouseLeftButtonUp += (_, _) => SelectCard(index);
-        card.MouseEnter += (_, _) =>
-        {
-            if (selectedIndex != index) card.SetResourceReference(Border.BackgroundProperty, "ColorBrush7");
-        };
-        card.MouseLeave += (_, _) =>
-        {
-            if (selectedIndex != index) card.SetResourceReference(Border.BackgroundProperty, "ColorBrush8");
-        };
-
-        return new CardVisual(card, marker, iconTile, icon);
+        item.Check += (_, _) => SelectCard(index);
+        return item;
     }
 
     private void SelectCard(int index)
@@ -231,35 +137,9 @@ public partial class MyMsgCardSelect
 
     private void UpdateCards()
     {
-        for (var i = 0; i < cards.Count; i++)
-        {
-            var visual = cards[i];
-            var isSelected = i == selectedIndex;
-
-            visual.Card.SetResourceReference(Border.BackgroundProperty,
-                isSelected ? "ColorBrush7" : "ColorBrush8");
-            visual.Card.SetResourceReference(Border.BorderBrushProperty,
-                isSelected ? "ColorBrush3" : "ColorBrushGray6");
-            visual.IconTile.SetResourceReference(Border.BackgroundProperty,
-                isSelected ? "ColorBrush3" : "ColorBrush6");
-            visual.Icon.SetResourceReference(SvgIconControl.IconBrushProperty,
-                isSelected ? "ColorBrushWhite" : "ColorBrush3");
-            visual.Marker.SetResourceReference(Border.BorderBrushProperty,
-                isSelected ? "ColorBrush3" : "ColorBrushGray5");
-            visual.Marker.SetResourceReference(Border.BackgroundProperty,
-                isSelected ? "ColorBrush3" : "ColorBrushTransparent");
-            visual.Marker.Child = isSelected
-                ? new Border
-                {
-                    Width = 7,
-                    Height = 7,
-                    CornerRadius = new CornerRadius(4),
-                    Background = Brushes.White,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
-                }
-                : null;
-        }
+        // CE 单选列表会自行取消同组的其他项；先逐项清空会触发它的“至少选中一项”回退。
+        if (selectedIndex >= 0 && selectedIndex < cards.Count)
+            cards[selectedIndex].SetChecked(true, false, false);
     }
 
     private void Load(object sender, EventArgs e)
@@ -356,11 +236,4 @@ public partial class MyMsgCardSelect
         }
     }
 
-    private sealed class CardVisual(Border card, Border marker, Border iconTile, SvgIconControl icon)
-    {
-        public readonly Border Card = card;
-        public readonly Border Marker = marker;
-        public readonly Border IconTile = iconTile;
-        public readonly SvgIconControl Icon = icon;
-    }
 }

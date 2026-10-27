@@ -21,7 +21,7 @@
 
 PCL SE (Plain Craft Launcher Symbio Edition) is a third-party Minecraft launcher maintained by Hydrogen-Peroxide. Built on PCL's open-source code, it keeps the familiar interaction while adding Bedrock edition support, instance management and resource downloads.
 
-- Current version: `2.17.9`
+- Current version: `2.17.11`
 - Upstream baseline: PCL `2.12.1`
 - Tech stack: C# / WPF / .NET 10
 
@@ -56,12 +56,12 @@ PCL SE has no affiliation with the official PCL, so please do not report PCL SE 
 
 ### User experience
 
-- 7 interface languages: Simplified Chinese, Traditional Chinese, English (US), English (UK), Japanese, French, Spanish
+- Complete interface resources for Simplified Chinese and English (US); Traditional Chinese, English (UK), Japanese, French and Spanish currently contain only language metadata, with interface text falling back to Simplified Chinese
 - Customizable color theme and background, with transition animations for page switching and list scrolling
 - Automatic Java scanning to reduce manual configuration
 - Log analysis on failed launches, with readable causes and suggestions
 
-> This fork does not include the multiplayer lobby; the related modules have been removed from the codebase.
+> This fork does not include the multiplayer lobby; the related modules have been removed from the codebase, and there is no confirmed schedule for restoring them.
 
 ## Supported platforms
 
@@ -92,7 +92,7 @@ Official release builds are framework-dependent and require the [.NET 10 Desktop
 
 ## Building from source
 
-Requires the [.NET 10 SDK](https://get.dot.net/10). Run the following in the repository root:
+Requires the [.NET 10 SDK](https://get.dot.net/10). [global.json](global.json) selects SDK `10.0.403` and allows patch updates within the same feature band; CI installs that baseline version. Run the following in the repository root:
 
 ```powershell
 # Framework-dependent publish, matching CI
@@ -109,6 +109,8 @@ Replace `-p:Platform=x64` with `-p:Platform=ARM64` to build for ARM64.
 
 Available configurations (`-c`): `Release`, `Beta`, `Debug`, `CI`. Available platforms (`-p:Platform`): `x64`, `ARM64`, `AnyCPU`.
 
+See the [contribution guide](CONTRIBUTING.md#本地构建与测试) for test commands, the offline test scope and release configuration. The solution does not build the core test project by default; run that project explicitly.
+
 ## Project structure
 
 | Directory | Description |
@@ -123,7 +125,7 @@ Available configurations (`-c`): `Release`, `Beta`, `Debug`, `CI`. Available pla
 
 - Added Bedrock edition management: version detection, package import, Xbox sign-in and local filtering
 - Removed the multiplayer lobby and its modules; no lobby or multiplayer entry points are provided
-- Uses an independent version number (`2.17.9`) based on PCL `2.12.1`
+- Uses an independent version number (`2.17.11`) based on PCL `2.12.1`
 
 ## Legal notice
 
@@ -136,7 +138,7 @@ Available configurations (`-c`): `Release`, `Beta`, `Debug`, `CI`. Available pla
 - **Name usage**: The word "Minecraft" appears in documentation and demonstrations solely to describe the game this project supports, which constitutes fair use under the Copyright Law of the People's Republic of China. Copyright in related screenshots and videos belongs to their respective developers.
 - **Relationships**: PCL Symbio Edition has no affiliation, partnership, maintenance or licensing relationship with PCL2, PCL CE, Mojang Studios or its agents in China.
 - **Genuine copies**: We encourage buying and playing genuine copies of Minecraft through official channels.
-- **Multiplayer lobby**: For special reasons, PCL Symbio Edition does not yet support the PCL CE multiplayer lobby; support will be added in a later release.
+- **Multiplayer lobby**: PCL Symbio Edition currently does not provide the PCL CE multiplayer lobby. The related modules have been removed, and there is no confirmed schedule for restoring them.
 
 ## License
 

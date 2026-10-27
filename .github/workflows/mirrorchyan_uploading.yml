@@ -23,18 +23,29 @@ on:
 
 jobs:
   mirrorchyan_uploading:
+    if: ${{ vars.MIRRORCHYAN_ENABLED == 'true' }}
     runs-on: macos-latest
+    timeout-minutes: 10
 
     steps:
+      - name: Check optional mirror configuration
+        env:
+          MIRRORCHYAN_RID: ${{ vars.MIRRORCHYAN_RID }}
+          MIRRORCHYAN_UPLOAD_TOKEN: ${{ secrets.MirrorChyanUploadToken }}
+        run: |
+          if [ -z "$MIRRORCHYAN_RID" ] || [ -z "$MIRRORCHYAN_UPLOAD_TOKEN" ]; then
+            echo "::error::MirrorChyan is enabled. Configure your MIRRORCHYAN_RID repository variable and MirrorChyanUploadToken repository secret."
+            exit 1
+          fi
       - uses: MirrorChyan/uploading-action@v1
         with:
           filetype: latest-release
           filename: "PCL2_CE_${{ inputs.channel == 'stable' && 'Release' || 'Beta' }}_${{ inputs.arch == 'x64' && 'x64' || 'ARM64' }}.exe"
-          mirrorchyan_rid: PCL2-CE
+          mirrorchyan_rid: ${{ vars.MIRRORCHYAN_RID }}
 
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          owner: Hydrogen-Peroxide
-          repo: PCL-Symbio-Edition
+          owner: ${{ github.repository_owner }}
+          repo: ${{ github.event.repository.name }}
           upload_token: ${{ secrets.MirrorChyanUploadToken }}
           os: win
           arch: ${{ inputs.arch }}

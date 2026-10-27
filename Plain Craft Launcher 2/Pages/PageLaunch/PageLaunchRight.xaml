@@ -12,8 +12,7 @@
                                     x:Name="BtnHintClose"
                                     Click="BtnHintClose_Click" />
                 <StackPanel Margin="25,38,23,15">
-                    <TextBlock x:Name="LabHint1" TextWrapping="Wrap" Margin="0,0,0,2" FontSize="13.5" />
-                    <TextBlock x:Name="LabHint2" TextWrapping="Wrap" Margin="0,0,0,2" FontSize="13.5" />
+                    <TextBlock x:Name="LabHint1" TextWrapping="Wrap" />
                 </StackPanel>
             </local:MyCard>
             <local:MyCard Margin="0,0,0,15" Title="{DynamicResource Launch.Right.Log.Title}" x:Name="PanLog">

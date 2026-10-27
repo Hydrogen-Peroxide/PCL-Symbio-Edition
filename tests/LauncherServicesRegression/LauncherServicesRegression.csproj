@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Plain Craft Launcher 2/Modules/Base/WindowsProcessExecution.cs" Link="WindowsProcessExecution.cs" />
+    <Compile Include="../../Plain Craft Launcher 2/Modules/Minecraft/ModBedrockMods.cs" Link="ModBedrockMods.cs" />
+    <Compile Include="../../Plain Craft Launcher 2/Modules/Updates/UpdatesGitHubModel.cs" Link="UpdatesGitHubModel.cs" />
+    <Compile Include="../../Plain Craft Launcher 2/Modules/Updates/UpdatesWrapperModel.cs" Link="UpdatesWrapperModel.cs" />
+    <Compile Include="../../Plain Craft Launcher 2/Modules/Updates/UpdateDownloadSnapshot.cs" Link="UpdateDownloadSnapshot.cs" />
+    <Compile Include="../../Plain Craft Launcher 2/Modules/Updates/IUpdateSource.cs" Link="IUpdateSource.cs" />
+    <Compile Include="../../Plain Craft Launcher 2/Modules/Updates/EnumUpdateChannel.cs" Link="EnumUpdateChannel.cs" />
+    <Compile Include="../../Plain Craft Launcher 2/Modules/Updates/VersionDataModel.cs" Link="VersionDataModel.cs" />
+    <Compile Include="../../Plain Craft Launcher 2/Modules/Updates/VersionAnnouncementDataModel.cs" Link="VersionAnnouncementDataModel.cs" />
+    <Compile Include="../../PCL.Core/Utils/SemVer.cs" Link="SemVer.cs" />
+    <Compile Include="../../PCL.Core/Utils/RegexPatterns.cs" Link="RegexPatterns.cs" />
+    <Compile Include="../../PCL.Core/App/Configuration/Storage/FileConfigStorage.cs" Link="FileConfigStorage.cs" />
+    <Compile Include="../../PCL.Core/App/Configuration/Storage/IKeyValueFileProvider.cs" Link="IKeyValueFileProvider.cs" />
+    <Compile Include="$(BaseIntermediateOutputPath)CheckedProcess.cs" Link="CheckedProcess.cs" />
+  </ItemGroup>
+  <Target Name="ExtractActualProcessMethods" BeforeTargets="CoreCompile">
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)/ExtractProcessMethods.ps1&quot; -OutputPath &quot;$(MSBuildProjectDirectory)/$(BaseIntermediateOutputPath)CheckedProcess.cs&quot;" />
+  </Target>
+</Project>

@@ -8,8 +8,23 @@ on:
     types: [published]
 
 jobs:
+  preflight:
+    if: ${{ !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check required signing configuration
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          if [ -z "$GPG_PRIVATE_KEY" ]; then
+            echo "::error::Configure the GPG_PRIVATE_KEY repository secret before publishing a signed release. If the key is protected, also configure GPG_PASSPHRASE."
+            exit 1
+          fi
+
   build:
     if: ${{ !github.event.release.prerelease }}
+    needs: preflight
     strategy:
       matrix:
         include:
@@ -26,9 +41,11 @@ jobs:
     secrets: inherit
 
   changelog:
+    needs: preflight
     permissions:
       contents: write
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     continue-on-error: true
     if: ${{ !github.event.release.prerelease }}
     steps:
@@ -57,6 +74,7 @@ jobs:
       actions: write
     needs: [build, changelog]
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     strategy:
       matrix:
         include:
@@ -84,10 +102,12 @@ jobs:
       - name: Sign the binary
         run: |
           gpg --detach-sign --armor "PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}.exe"
+          gpg --verify "PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}.exe.asc" "PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}.exe"
 
       - name: Upload binary and signature to Release
         uses: softprops/action-gh-release@v2.5.0
         with:
+          fail_on_unmatched_files: true
           files: |
             PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}.exe
             PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}.exe.asc
@@ -95,8 +115,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trigger MirrorChyanUploading
+        if: ${{ vars.MIRRORCHYAN_ENABLED == 'true' }}
         run: |
           gh workflow run --repo $GITHUB_REPOSITORY mirrorchyan_uploading.yml -f channel=stable -f arch=${{ matrix.architecture == 'x64' && 'x64' || 'arm64' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trigger MirrorChyan release notes
+        if: ${{ vars.MIRRORCHYAN_ENABLED == 'true' && matrix.architecture == 'x64' }}
+        run: |
           gh workflow run --repo $GITHUB_REPOSITORY mirrorchyan_release_note.yml
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

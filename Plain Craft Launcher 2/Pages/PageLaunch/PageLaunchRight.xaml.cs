@@ -34,31 +34,29 @@ public partial class PageLaunchRight : IRefreshable
         PanBack.ScrollToHome();
         PanScroll = PanBack; // 不知道为啥不能在 XAML 设置
         PanLog.Visibility = ModBase.modeDebug ? Visibility.Visible : Visibility.Collapsed;
-        // 社区版提示
+        RefreshCommunityHint();
+        _EnsureHomepageLiveWatcher();
+    }
+
+    // 普通来源说明沿用原状态键；恢复设置或快速返回页面时还原关闭动画留下的尺寸与交互状态。
+    private void RefreshCommunityHint()
+    {
+        ModAnimation.AniStop("MyCard Dispose " + PanHint.uuid);
+        PanHint.TriggerForceResize();
+        PanHint.Opacity = 1d;
+        PanHint.RenderTransform = null;
+        PanHint.IsHitTestVisible = true;
         PanHint.Visibility = States.Hint.CEMessage
             ? Visibility.Visible
             : Visibility.Collapsed;
         LabHint1.Text = Lang.Text("Launch.Right.CommunityHint.Message");
-        LabHint2.Text = Lang.Text("Launch.Right.CommunityHint.HidePrompt");
-        _EnsureHomepageLiveWatcher();
     }
 
-    // 暂时关闭快照版提示
+    // 关闭普通信息提示，不触发确认或身份问答。
     private void BtnHintClose_Click(object sender, EventArgs e)
     {
-        var input = ModMain.MyMsgBoxInput(Lang.Text("Launch.Right.CommunityHint.InputTitle"));
-        if (string.IsNullOrWhiteSpace(input))
-            return;
-        input = new string(input.Where(char.IsAsciiLetter).ToArray()).ToLower();
-        if (input.Contains("hydrogenperoxide"))
-        {
-            ModAnimation.AniDispose(PanHint, true);
-            States.Hint.CEMessage = false;
-        }
-        else
-        {
-            HintService.Hint(Lang.Text("Launch.Right.CommunityHint.WrongInput"));
-        }
+        States.Hint.CEMessage = false;
+        ModAnimation.AniDispose(PanHint, false);
     }
 
     #region 主页

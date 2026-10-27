@@ -18,6 +18,9 @@ internal static class ModBase
             throw new InvalidOperationException("Unexpected shell command: " + arguments);
         return Responses.Dequeue();
     }
+
+    public static string ShellAndGetOutputChecked(string fileName, string arguments = "", int timeout = 1000000,
+        string? workingDirectory = null) => ShellAndGetOutput(fileName, arguments, timeout);
 }
 
 internal sealed class Process

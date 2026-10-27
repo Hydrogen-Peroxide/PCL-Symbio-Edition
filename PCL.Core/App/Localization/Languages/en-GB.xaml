@@ -10,4 +10,7 @@
     <sys:String x:Key="Meta.Code">en-GB</sys:String>
     <sys:String x:Key="Meta.Name">English (United Kingdom)</sys:String>
 
+    <sys:String x:Key="Setup.Language.Banner.DescriptionLine1">Simplified Chinese and US English cover the main interface; other languages are still incomplete. Untranslated text falls back to Simplified Chinese.</sys:String>
+    <sys:String x:Key="Setup.Language.Banner.DescriptionLine2">Contribute language resource changes to the PCL SE maintenance repository.</sys:String>
+    <sys:String x:Key="Setup.Language.Banner.SubmitPullRequest">Contribute translations</sys:String>
 </ResourceDictionary>

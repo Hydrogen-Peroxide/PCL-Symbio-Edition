@@ -56,13 +56,11 @@ public static class ModBedrockGdk
     /// <summary>当前构建是否内置了可用于该安装包的内容密钥（CIK）。</summary>
     public static bool HasContentKey(string packagePath) => GetContentKey(packagePath) is { Length: >= 48 };
 
-    private static byte[]? GetContentKey(string packagePath)
-    {
-        return packagePath.Contains("preview", StringComparison.OrdinalIgnoreCase) ||
-               packagePath.Contains("beta", StringComparison.OrdinalIgnoreCase)
+    private static byte[]? GetContentKey(string packagePath) =>
+        packagePath.Contains("preview", StringComparison.OrdinalIgnoreCase) ||
+        packagePath.Contains("beta", StringComparison.OrdinalIgnoreCase)
             ? Secrets.BedrockPreviewCik
             : Secrets.BedrockReleaseCik;
-    }
 
     /// <summary>
     ///     解包 .msixvc 到目标目录。
@@ -293,11 +291,15 @@ internal sealed class XvcContainer : IDisposable
     public void Extract(string outputDirectory, XvcContentKey key,
         Action<string, int, int>? onProgress, CancellationToken token)
     {
+        token.ThrowIfCancellationRequested();
         if (!_hasSegmentMetadata || _segments.Length == 0)
             throw new InvalidOperationException("安装包内没有文件段信息，可能不是有效的 GDK 包");
         if (_xvcUpdateSegments.Length == 0)
             throw new InvalidOperationException("安装包内没有可解包的区域信息");
 
+        // Validate the complete manifest before writing any package contents.
+        foreach (var path in _segmentPaths)
+            _ = BedrockFileSystem.GetChildPath(outputDirectory, path);
         Directory.CreateDirectory(outputDirectory);
 
         using var decoder = new XvcDecoder(key);
@@ -305,7 +307,7 @@ internal sealed class XvcContainer : IDisposable
 
         foreach (var region in _xvcRegions)
         {
-            if (token.IsCancellationRequested) break;
+            token.ThrowIfCancellationRequested();
 
             // 文件段可能被拆分到多个区域（例如主程序、DLL、资源各占一个区域），必须逐个解包；
             // 元数据区域（XVC-HD / EXVD / MDU / MD / FS-MD）的 FirstSegmentIndex 同样是 0，
@@ -346,11 +348,12 @@ internal sealed class XvcContainer : IDisposable
         var pageCounter = 0;
         var totalPages = (long)GetPageOffset(regionLength);
 
-        while (_segments.Length > segmentIndex && totalPages > pageCounter && !token.IsCancellationRequested)
+        while (_segments.Length > segmentIndex && totalPages > pageCounter)
         {
+            token.ThrowIfCancellationRequested();
             var fileSize = _segments[segmentIndex].FileSize;
             var relativePath = _segmentPaths[segmentIndex];
-            var path = Path.Join(outputDirectory, relativePath);
+            var path = BedrockFileSystem.GetChildPath(outputDirectory, relativePath);
             var directory = Path.GetDirectoryName(path);
             if (directory is not null) Directory.CreateDirectory(directory);
 
@@ -359,6 +362,7 @@ internal sealed class XvcContainer : IDisposable
                 var remaining = fileSize;
                 do
                 {
+                    token.ThrowIfCancellationRequested();
                     var writeLength = (int)Math.Min(remaining, PageSize);
 
                     if (needHashRead)

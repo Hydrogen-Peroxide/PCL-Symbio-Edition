@@ -71,10 +71,9 @@ public static class UpdateManager
         {
             try
             {
-                var version = remoteServer.GetLatestVersion(
-                    IsCurrentVersionBeta ? UpdateChannel.beta : UpdateChannel.stable,
-                    SystemInfo.IsArm64System ? UpdateArch.arm64 : UpdateArch.x64
-                );
+                var channel = IsCurrentVersionBeta ? UpdateChannel.beta : UpdateChannel.stable;
+                var arch = SystemInfo.IsArm64System ? UpdateArch.arm64 : UpdateArch.x64;
+                var version = remoteServer.GetLatestVersion(channel, arch);
 
                 ModBase.WriteFile($"{ModBase.pathTemp}SEUpdateLog.md", version.Changelog);
                 ModBase.Log($"[Update] 远程最新版本: {version.VersionName}, 当前版本: {ModBase.versionBaseName}");
@@ -104,9 +103,7 @@ public static class UpdateManager
                 if (!isDownloaded)
                 {
                     // 下载
-                    loaders.AddRange(remoteServer.GetDownloadLoader(
-                        IsCurrentVersionBeta ? UpdateChannel.beta : UpdateChannel.stable,
-                        SystemInfo.IsArm64System ? UpdateArch.arm64 : UpdateArch.x64, dlTargetPath));
+                    loaders.AddRange(remoteServer.GetDownloadLoader(channel, arch, dlTargetPath, version));
                     loaders.Add(new ModLoader.LoaderTask<int, int>(Lang.Text("Update.Task.Check"), _ =>
                     {
                         var curHash = ModBase.GetFileSHA256(dlTargetPath);
@@ -224,7 +221,7 @@ public static class UpdateManager
         }
 
         var loaders = remoteServer.GetDownloadLoader(UpdateChannel.stable,
-            SystemInfo.IsArm64System ? UpdateArch.arm64 : UpdateArch.x64, latestPCLPath);
+            SystemInfo.IsArm64System ? UpdateArch.arm64 : UpdateArch.x64, latestPCLPath, target);
         var loader = new ModLoader.LoaderCombo<int>(Lang.Text("Update.Task.DownloadLatestStable"), loaders);
         loader.Start();
         loader.WaitForExit();

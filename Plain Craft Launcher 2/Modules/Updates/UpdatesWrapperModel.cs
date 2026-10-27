@@ -159,6 +159,13 @@ public class UpdatesWrapperModel : IUpdateSource
         throw new Exception(Lang.Text("Update.Task.GetVersionInfoFailed"));
     }
 
+    public List<ModLoader.LoaderBase> GetDownloadLoader(UpdateChannel channel, UpdateArch arch, string output, VersionDataModel version)
+    {
+        // 快照已含确定的附件，即使其他查询更换 _versionSource 也不会串用另一个版本。
+        return version.DownloadSnapshot?.CreateLoaders(channel, arch, output, version)
+               ?? GetDownloadLoader(channel, arch, output);
+    }
+
     public async Task<bool> IsLatestAsync(UpdateChannel channel, UpdateArch arch, SemVer currentVersion,
         int currentVersionCode)
     {

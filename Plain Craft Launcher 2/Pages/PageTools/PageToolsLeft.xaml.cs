@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 using System.Windows.Controls;
 using PCL.Core.App;
 
@@ -87,7 +87,7 @@ public partial class PageToolsLeft
     {
         if (pageID == id)
             return;
-        ModAnimation.AniControlEnabled += 1;
+        ModAnimation.AniBeginControl();
         isPageSwitched = true;
         try
         {
@@ -104,7 +104,7 @@ public partial class PageToolsLeft
         }
         finally
         {
-            ModAnimation.AniControlEnabled -= 1;
+            ModAnimation.AniEndControl();
         }
     }
 

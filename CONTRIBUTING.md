@@ -4,6 +4,37 @@ Wiki 页面:
 [开发指南](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/wiki/开发指南)
 [技术规范](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/wiki/技术规范)
 
+## 本地构建与测试
+
+在仓库根目录使用 [global.json](global.json) 指定的 .NET SDK `10.0.403`（或同一功能带的更新补丁）。源生成器依赖 Roslyn 5.6，请勿使用较旧的 SDK；仅安装 .NET 9 无法构建本仓库。
+
+```powershell
+# 编译主程序（x64；ARM64 可替换 Platform 参数）
+dotnet build "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" -c Release -p:Platform=x64
+
+# 基岩版安装安全回归（Windows、Linux 均可，无需游戏安装或账户）
+dotnet run --project tests/BedrockInstallRegression -c Release
+
+# 核心离线测试子集（必须在 Windows 上显式运行此项目）
+dotnet test PCL.Core.Test/PCL.Core.Test.csproj -c Release -p:Platform=x64 --settings PCL.Core.Test/ci.runsettings
+
+# 数据目录、待启动会话、事务安装及包归属回归（Windows；只操作临时数据与 mock 包）
+dotnet run --project tests/BedrockDataRegression -c Release
+
+# 外部进程、配置落盘、注入生命周期及更新快照回归（Windows；不运行真实游戏）
+dotnet run --project tests/LauncherServicesRegression -c Release
+```
+
+解决方案默认不构建 `PCL.Core.Test`，因此仅构建解决方案不能代替运行测试。CI 分别运行基岩版安装回归、Windows 核心离线测试、数据安全回归、包注册归属回归、启动器服务回归，以及 x64 / ARM64 主程序构建。新增回归的受控替身、临时目录与验收边界详见各测试目录的 README。
+
+[ci.runsettings](PCL.Core.Test/ci.runsettings) 明确选择验证器、语义版本与进制转换、JSON 日期、命令行、哈希、加密、模组依赖、存档导入和内存配置存储测试，并将测试会话限制为 3 分钟。依赖 `C:\Windows` 现有文件的验证器方法不在此子集中。网络、桌面通知、性能测试、真实 Java/账户等环境相关测试需按改动范围在合适的 Windows 环境中单独验证；离线测试通过不代表这些流程已验收。
+
+## 发布工作流配置
+
+Release / Beta 发布必须提供仓库机密 `GPG_PRIVATE_KEY`；私钥若有口令，还需提供 `GPG_PASSPHRASE`。工作流会在构建前检查私钥是否配置，签名并验证成功后才上传二进制文件和对应的 `.asc` 签名。缺少私钥或签名失败会使发布失败。
+
+MirrorChyan 同步默认关闭。仅在仓库维护者已确认自己的镜像目标后，配置仓库变量 `MIRRORCHYAN_ENABLED=true`、`MIRRORCHYAN_RID` 和机密 `MirrorChyanUploadToken`。同步从当前仓库读取发布产物，资源 ID 不预设为上游项目。启用但缺少资源 ID 或令牌时，同步工作流会给出明确错误。该可选同步开关不会取消 Release / Beta 发布的签名要求。
+
 <details>
 
 <summary>原 CONTRIBUTING.md 内容</summary>

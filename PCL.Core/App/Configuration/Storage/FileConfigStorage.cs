@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -24,73 +24,119 @@ public class FileConfigStorage : ConfigStorage
     public IKeyValueFileProvider File { get; }
 
     private readonly Channel<(string, Action)> _writeActionChannel;
-    private readonly CancellationTokenSource _writeActionCts;
-    private readonly ManualResetEventSlim _writeStopEvent = new(false);
+    private readonly Task _writeTask;
+    private int _saveFailureReportPending;
 
-    public FileConfigStorage(IKeyValueFileProvider file)
+    public FileConfigStorage(IKeyValueFileProvider file) : this(file, TimeSpan.FromSeconds(10)) { }
+
+    // 测试可缩短间隔；生产构造函数始终使用十秒节流。
+    internal FileConfigStorage(IKeyValueFileProvider file, TimeSpan syncInterval)
     {
+        ArgumentNullException.ThrowIfNull(file);
+        if (syncInterval <= TimeSpan.Zero || syncInterval.TotalMilliseconds > int.MaxValue)
+            throw new ArgumentOutOfRangeException(nameof(syncInterval));
         File = file;
-        _writeActionChannel = Channel.CreateUnbounded<(string, Action)>();
-        _writeActionCts = new CancellationTokenSource();
-        Task.Run(async () =>
+        _writeActionChannel = Channel.CreateUnbounded<(string, Action)>(new UnboundedChannelOptions
         {
-            const long syncInterval = 10000; // ms
-            var lastSyncTick = 0L;
-            var cancelToken = _writeActionCts.Token;
-            var writeActionMap = new Dictionary<string, Action>();
-            var reader = _writeActionChannel.Reader;
-            try
+            SingleReader = true,
+            AllowSynchronousContinuations = false
+        });
+        _writeTask = Task.Run(() => ProcessWriteActionsAsync(syncInterval));
+    }
+
+    private async Task ProcessWriteActionsAsync(TimeSpan syncInterval)
+    {
+        var intervalMs = Math.Max(1L, (long)syncInterval.TotalMilliseconds);
+        var lastSyncTick = Environment.TickCount64 - intervalMs;
+        var writeActionMap = new Dictionary<string, Action>();
+        var reader = _writeActionChannel.Reader;
+        try
+        {
+            while (true)
             {
-                while (!cancelToken.IsCancellationRequested)
+                // 每次取一项后重新检查期限，连续写入也不能无限推迟落盘。
+                if (writeActionMap.Count > 0 && Environment.TickCount64 - lastSyncTick >= intervalMs)
                 {
-                    // 读入并合并暂存操作
-                    var (key, action) = await reader.ReadAsync(cancelToken);
-                    writeActionMap[key] = action;
-                    if (Environment.TickCount64 - lastSyncTick < syncInterval || cancelToken.IsCancellationRequested) continue;
-                    // 同步文件
-                    Sync();
+                    if (Sync()) writeActionMap.Clear();
                     lastSyncTick = Environment.TickCount64;
-                    writeActionMap.Clear();
                 }
-            }
-            catch (OperationCanceledException) { /* ignoring*/ }
-            finally
-            {
-                // 停止前先排空通道中尚未被 ReadAsync 读取的写入：
-                // 取消令牌会让 ReadAsync 直接抛出，通道里剩余的操作若不取出，会在缓存被驱逐时随实例一起丢弃
-                while (reader.TryRead(out var pendingItem))
-                    writeActionMap[pendingItem.Item1] = pendingItem.Item2;
-                // 结束时执行一次同步
-                Sync();
-                _writeStopEvent.Set();
-            }
-            void Sync()
-            {
+                if (reader.TryRead(out var item))
+                {
+                    writeActionMap[item.Item1] = item.Item2;
+                    continue;
+                }
+                if (reader.Completion.IsCompleted) break;
+                if (writeActionMap.Count == 0)
+                {
+                    if (!await reader.WaitToReadAsync().ConfigureAwait(false)) break;
+                    continue;
+                }
+
+                // 无新消息时仍在最后一次同步后的期限唤醒；无需等下一次写入或 Stop。
+                var remainingMs = Math.Max(1, intervalMs - (Environment.TickCount64 - lastSyncTick));
+                using var deadline = new CancellationTokenSource(TimeSpan.FromMilliseconds(remainingMs));
                 try
                 {
-                    LogWrapper.Trace("Config", $"正在保存 {File.FilePath}");
-                    foreach (var action in writeActionMap.Values) action();
-                    File.Sync();
+                    if (!await reader.WaitToReadAsync(deadline.Token).ConfigureAwait(false)) break;
                 }
-                catch (Exception ex)
+                catch (OperationCanceledException) when (deadline.IsCancellationRequested) { }
+            }
+        }
+        finally
+        {
+            while (reader.TryRead(out var item)) writeActionMap[item.Item1] = item.Item2;
+            // Stop 完成前排空此前成功入队的写入，并执行最终同步。
+            Sync();
+        }
+
+        bool Sync()
+        {
+            try
+            {
+                LogWrapper.Trace("Config", $"正在保存 {File.FilePath}");
+                foreach (var action in writeActionMap.Values) action();
+                File.Sync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ReportSaveFailure(ex);
+                return false;
+            }
+        }
+    }
+
+    private void ReportSaveFailure(Exception error)
+    {
+        // 报告回调可能调度 UI 或等待隐藏窗口；保存线程和 Stop 均不能等待它。
+        // 同一实例只允许一个未完成的报告，避免持续保存失败时堆积 UI 通知。
+        if (Interlocked.CompareExchange(ref _saveFailureReportPending, 1, 0) != 0) return;
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                try { LogWrapper.Error(error, "Config", "配置文件保存失败"); }
+                catch (Exception) { /* 报告失败不得影响保存工作。 */ }
+                try
                 {
-                    LogWrapper.Error(ex, "Config", "配置文件保存失败");
                     var summary = Lang.Text("Config.Error.SaveFailed.Message", File.FilePath);
-                    var message = ExceptionDetails.Compose(summary, ex);
-                    MsgBoxWrapper.Show(
-                        message,
-                        Lang.Text("Config.Error.SaveFailed.Title"),
-                        MsgBoxTheme.Error);
+                    var message = ExceptionDetails.Compose(summary, error);
+                    MsgBoxWrapper.Show(message, Lang.Text("Config.Error.SaveFailed.Title"), MsgBoxTheme.Error, block: false);
+                }
+                catch (Exception reportError)
+                {
+                    try { LogWrapper.Error(reportError, "Config", "配置保存失败提示无法显示"); }
+                    catch (Exception) { /* UI 和日志处理器均可能在退出期间失效。 */ }
                 }
             }
+            finally { Volatile.Write(ref _saveFailureReportPending, 0); }
         });
     }
 
     protected override void OnStop()
     {
-        _writeActionCts.Cancel();
-        _writeStopEvent.Wait();
-        _writeStopEvent.Dispose();
+        _writeActionChannel.Writer.TryComplete();
+        _writeTask.GetAwaiter().GetResult();
     }
 
     protected override bool OnAccess<TKey, TValue>(

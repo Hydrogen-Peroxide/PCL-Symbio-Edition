@@ -10,4 +10,7 @@
     <sys:String x:Key="Meta.Code">zh-TW</sys:String>
     <sys:String x:Key="Meta.Name">繁體中文（台灣）</sys:String>
 
+    <sys:String x:Key="Setup.Language.Banner.DescriptionLine1">簡體中文與美式英文已涵蓋主要介面，其他語言仍待補齊。未翻譯內容將使用簡體中文。</sys:String>
+    <sys:String x:Key="Setup.Language.Banner.DescriptionLine2">如需補充翻譯，請向 PCL SE 維護倉庫提交語言資源修改。</sys:String>
+    <sys:String x:Key="Setup.Language.Banner.SubmitPullRequest">貢獻翻譯</sys:String>
 </ResourceDictionary>

@@ -107,13 +107,25 @@ public static class ModBase
     /// <summary>
     ///     AppData 中的 PCL 文件夹路径，以 \ 结尾。
     /// </summary>
-    public static string pathAppdata = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PCL") + @"\";
+    public static string pathAppdata = GetLegacyAppDataPath("legacy-pcl",
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PCL")) + @"\";
 
     /// <summary>
     ///     AppData 中的 PCL SE 配置文件夹路径，以 \ 结尾。
     /// </summary>
-    public static string pathAppdataConfig = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) +
-                                             (versionBranchName == "Debug" ? @"\.pclsedebug\" : @"\.pclse\");
+    public static string pathAppdataConfig = GetLegacyAppDataPath("legacy-shared",
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            versionBranchName == "Debug" ? ".pclsedebug" : ".pclse")) + @"\";
+
+    private static string GetLegacyAppDataPath(string isolatedName, string fallback)
+    {
+#if DEBUG
+        var debugProfile = Environment.GetEnvironmentVariable("PCL_PATH_SHARED");
+        if (!string.IsNullOrWhiteSpace(debugProfile))
+            return Path.Combine(Path.GetFullPath(debugProfile), isolatedName);
+#endif
+        return fallback;
+    }
 
 
     #endregion
@@ -2557,55 +2569,50 @@ public static class ModBase
         }
     }
 
+    #region CheckedProcessExecution
+
+    /// <summary>外部进程的退出状态和分别捕获的输出。输出内容不会自动写入日志。</summary>
+    public sealed record ProcessExecutionResult(int ExitCode, bool TimedOut, string StandardOutput, string StandardError)
+    {
+        public bool Succeeded => !TimedOut && ExitCode == 0;
+        public string Output => StandardOutput + StandardError;
+    }
+
+    /// <summary>命令未成功完成；诊断输出保留在 Result 中，由调用方决定是否展示。</summary>
+    public sealed class ProcessExecutionException(ProcessExecutionResult result)
+        : InvalidOperationException(result.TimedOut ? "外部命令执行超时。" : $"外部命令执行失败（退出码 {result.ExitCode}）。")
+    {
+        public ProcessExecutionResult Result { get; } = result;
+    }
+
+    /// <summary>静默执行命令，保留退出码与超时状态。不会记录可能包含敏感信息的参数或输出。</summary>
+    public static ProcessExecutionResult ShellAndGetResult(string fileName, string arguments = "", int timeout = 1000000,
+        string? workingDirectory = null)
+    {
+        return WindowsProcessExecution.Execute(fileName, arguments, timeout, workingDirectory);
+    }
+
+    /// <summary>仅在正常退出且退出码为零时返回输出，否则抛出包含结构化结果的异常。</summary>
+    public static string ShellAndGetOutputChecked(string fileName, string arguments = "", int timeout = 1000000,
+        string? workingDirectory = null)
+    {
+        var result = ShellAndGetResult(fileName, arguments, timeout, workingDirectory);
+        if (!result.Succeeded) throw new ProcessExecutionException(result);
+        return result.Output;
+    }
+
+    #endregion
+
     /// <summary>
-    ///     静默运行文件并返回输出流字符串。执行失败会抛出异常。
+    ///     静默运行文件并返回合并的输出流字符串。保留历史上忽略退出码与超时的行为。
     /// </summary>
     /// <param name="fileName">文件名。可以为“notepad”等缩写。</param>
     /// <param name="arguments">运行参数。</param>
-    /// <param name="timeout">等待该程序结束的最长时间（毫秒）。超时会抛出错误。</param>
+    /// <param name="timeout">等待该程序结束的最长时间（毫秒）。需要验证成功时使用 ShellAndGetOutputChecked。</param>
     public static string ShellAndGetOutput(string fileName, string arguments = "", int timeout = 1000000,
         string workingDirectory = null)
     {
-        var info = new ProcessStartInfo
-        {
-            FileName = fileName,
-            Arguments = arguments,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true
-        };
-
-        // 设置工作目录（如果提供）
-        if (!string.IsNullOrEmpty(workingDirectory)) info.WorkingDirectory = workingDirectory.TrimEnd('\\');
-
-        Log("[System] 执行外部命令并等待返回结果：" + fileName + " " + arguments);
-
-        using (var program = new Process { StartInfo = info })
-        {
-            program.Start();
-
-            // 异步读取输出和错误流
-            var outputTask = program.StandardOutput.ReadToEndAsync();
-            var errorTask = program.StandardError.ReadToEndAsync();
-
-            // 等待进程退出或超时
-            if (program.WaitForExit(timeout))
-            {
-                // 确保异步读取完成
-                Task.WaitAll(outputTask, errorTask);
-            }
-            else
-            {
-                // 超时后终止进程
-                program.Kill();
-                // 仍然尝试获取已输出的内容
-                Task.WaitAll(outputTask, errorTask);
-            }
-
-            // 合并结果并返回
-            return outputTask.Result + errorTask.Result;
-        }
+        return ShellAndGetResult(fileName, arguments, timeout, workingDirectory).Output;
     }
 
     /// <summary>
