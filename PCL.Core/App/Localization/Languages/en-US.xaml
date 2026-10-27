@@ -1,4 +1,4 @@
-﻿<!-- Formatted by xaml-lang-formatter at 2026-06-28T17:16:52. -->
+<!-- Formatted by xaml-lang-formatter at 2026-06-28T17:16:52. -->
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -33,16 +33,26 @@
 
     <!-- Bedrock -->
 
+    <sys:String x:Key="Bedrock.Account.AutoRefreshed">Xbox account updated</sys:String>
     <sys:String x:Key="Bedrock.Account.Hint">Bedrock uses the Xbox account signed in to Windows</sys:String>
+    <sys:String x:Key="Bedrock.Account.InstallXbox">Install now</sys:String>
     <sys:String x:Key="Bedrock.Account.Loading">Loading account…</sys:String>
     <sys:String x:Key="Bedrock.Account.MicrosoftAccount">Microsoft account</sys:String>
+    <sys:String x:Key="Bedrock.Account.MsaOnly">Signed in to Microsoft, not to Xbox</sys:String>
+    <sys:String x:Key="Bedrock.Account.MsaOnlyHint">Windows is signed in as {0}, but no Xbox account was found. Sign in with the Xbox app — this page will refresh automatically.</sys:String>
     <sys:String x:Key="Bedrock.Account.NotLoggedIn">Not signed in to Xbox</sys:String>
-    <sys:String x:Key="Bedrock.Account.OpenXboxFailed">Could not open the Xbox app. Opened the Microsoft account page instead.</sys:String>
+    <sys:String x:Key="Bedrock.Account.OpenXboxFailed">Could not open the Xbox app sign-in screen. Bedrock signs in through the Xbox app, so make sure it is installed, repair it if needed, then try again.</sys:String>
+    <sys:String x:Key="Bedrock.Account.OpenXboxFailedTitle">Could not open the Xbox app</sys:String>
     <sys:String x:Key="Bedrock.Account.Refresh">Refresh account info</sys:String>
     <sys:String x:Key="Bedrock.Account.SignIn">Sign in to Xbox</sys:String>
     <sys:String x:Key="Bedrock.Account.SignInHint">Please sign in to a Microsoft account first</sys:String>
     <sys:String x:Key="Bedrock.Account.Switch">Switch Xbox account</sys:String>
-    <sys:String x:Key="Bedrock.Account.SwitchHint">Sign out and sign in with another account in the Xbox app, then re-enter the game to switch</sys:String>
+    <sys:String x:Key="Bedrock.Account.SwitchHint">Sign out and sign in with another account in the Xbox app — this page will refresh automatically; re-enter the game to switch</sys:String>
+    <sys:String x:Key="Bedrock.Account.Waiting">Waiting for sign-in…</sys:String>
+    <sys:String x:Key="Bedrock.Account.WaitingSignIn">The Xbox app is open. Complete the sign-in there and this page will refresh automatically.</sys:String>
+    <sys:String x:Key="Bedrock.Account.XboxNotInstalledHint">Xbox app not found. Install it and sign in to read the account.</sys:String>
+    <sys:String x:Key="Bedrock.Account.XboxOnly">Signed in to Xbox</sys:String>
+    <sys:String x:Key="Bedrock.Account.XboxOnlyHint">Windows records an Xbox account but has no cached gamertag. Sign in again with the Xbox app; the nickname will appear automatically.</sys:String>
     <sys:String x:Key="Bedrock.Action.Download">Download Bedrock</sys:String>
     <sys:String x:Key="Bedrock.Action.Import">Import package</sys:String>
     <sys:String x:Key="Bedrock.Action.Launch">Launch Bedrock</sys:String>
@@ -72,6 +82,7 @@
     <sys:String x:Key="Bedrock.Folder.Saves">saves folder</sys:String>
     <sys:String x:Key="Bedrock.Folder.Screenshots">screenshots folder</sys:String>
     <sys:String x:Key="Bedrock.Folder.XboxNotInstalled">Could not open the Xbox app. Make sure it is installed on this system.</sys:String>
+    <sys:String x:Key="Bedrock.Gdk.CikMissing">This launcher build does not include the Bedrock GDK Content Integrity Key (CIK), so the package cannot be extracted. Use an official full build, or inject the CIK and rebuild.</sys:String>
     <sys:String x:Key="Bedrock.Gdk.ExecutableMissing">Extraction finished, but Minecraft.Windows.exe was not found. The package may be incomplete</sys:String>
     <sys:String x:Key="Bedrock.Gdk.ExtractFailed">Failed to extract GDK version {0}: {1}</sys:String>
     <sys:String x:Key="Bedrock.Gdk.ExtractSuccessSummary">GDK version {0} extracted and ready to launch</sys:String>

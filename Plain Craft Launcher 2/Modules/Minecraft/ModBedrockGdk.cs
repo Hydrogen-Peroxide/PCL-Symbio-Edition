@@ -53,6 +53,17 @@ public static class ModBedrockGdk
         return null;
     }
 
+    /// <summary>当前构建是否内置了可用于该安装包的内容密钥（CIK）。</summary>
+    public static bool HasContentKey(string packagePath) => GetContentKey(packagePath) is { Length: >= 48 };
+
+    private static byte[]? GetContentKey(string packagePath)
+    {
+        return packagePath.Contains("preview", StringComparison.OrdinalIgnoreCase) ||
+               packagePath.Contains("beta", StringComparison.OrdinalIgnoreCase)
+            ? Secrets.BedrockPreviewCik
+            : Secrets.BedrockReleaseCik;
+    }
+
     /// <summary>
     ///     解包 .msixvc 到目标目录。
     /// </summary>
@@ -63,10 +74,7 @@ public static class ModBedrockGdk
     public static void Extract(string packagePath, string targetDirectory,
         Action<string, int, int>? onProgress = null, CancellationToken token = default)
     {
-        var keyBytes = packagePath.Contains("preview", StringComparison.OrdinalIgnoreCase) ||
-                       packagePath.Contains("beta", StringComparison.OrdinalIgnoreCase)
-            ? Secrets.BedrockPreviewCik
-            : Secrets.BedrockReleaseCik;
+        var keyBytes = GetContentKey(packagePath);
         if (keyBytes is not { Length: >= 48 })
             throw new InvalidOperationException("当前构建未包含基岩版 GDK 内容密钥（CIK），无法解包安装包。");
 

@@ -1,4 +1,4 @@
-﻿<!-- Formatted by xaml-lang-formatter at 2026-06-28T17:16:52. -->
+<!-- Formatted by xaml-lang-formatter at 2026-06-28T17:16:52. -->
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -33,16 +33,26 @@
 
     <!-- Bedrock -->
 
+    <sys:String x:Key="Bedrock.Account.AutoRefreshed">Xbox 账号信息已更新</sys:String>
     <sys:String x:Key="Bedrock.Account.Hint">基岩版使用 Windows 登录的 Xbox 账号</sys:String>
+    <sys:String x:Key="Bedrock.Account.InstallXbox">前往安装</sys:String>
     <sys:String x:Key="Bedrock.Account.Loading">正在读取账号…</sys:String>
     <sys:String x:Key="Bedrock.Account.MicrosoftAccount">Microsoft 账号</sys:String>
+    <sys:String x:Key="Bedrock.Account.MsaOnly">已登录 Microsoft 账号，Xbox 应用未登录</sys:String>
+    <sys:String x:Key="Bedrock.Account.MsaOnlyHint">Windows 已登录 {0}，但未检测到 Xbox 账号。请在 Xbox 应用中完成登录，完成后会自动刷新。</sys:String>
     <sys:String x:Key="Bedrock.Account.NotLoggedIn">未登录 Xbox 账号</sys:String>
-    <sys:String x:Key="Bedrock.Account.OpenXboxFailed">未能打开 Xbox 应用，已改为打开 Microsoft 账号页面</sys:String>
+    <sys:String x:Key="Bedrock.Account.OpenXboxFailed">未能打开 Xbox 应用登录界面。基岩版需要通过 Xbox 应用登录，请确认本机已安装 Xbox 应用，安装或修复后再试。</sys:String>
+    <sys:String x:Key="Bedrock.Account.OpenXboxFailedTitle">未能打开 Xbox 应用</sys:String>
     <sys:String x:Key="Bedrock.Account.Refresh">刷新账号信息</sys:String>
     <sys:String x:Key="Bedrock.Account.SignIn">登录 Xbox 账号</sys:String>
     <sys:String x:Key="Bedrock.Account.SignInHint">请先登录 Microsoft 账号</sys:String>
     <sys:String x:Key="Bedrock.Account.Switch">切换 Xbox 账号</sys:String>
-    <sys:String x:Key="Bedrock.Account.SwitchHint">在 Xbox 应用中退出并登录其他账号，重新进入游戏即可切换</sys:String>
+    <sys:String x:Key="Bedrock.Account.SwitchHint">在 Xbox 应用中退出并登录其他账号，完成后会自动刷新；重新进入游戏即可切换</sys:String>
+    <sys:String x:Key="Bedrock.Account.Waiting">等待登录…</sys:String>
+    <sys:String x:Key="Bedrock.Account.WaitingSignIn">已打开 Xbox 应用，请在应用中完成登录，完成后会自动刷新</sys:String>
+    <sys:String x:Key="Bedrock.Account.XboxNotInstalledHint">未检测到 Xbox 应用，安装并登录后即可读取账号</sys:String>
+    <sys:String x:Key="Bedrock.Account.XboxOnly">已登录 Xbox 账号</sys:String>
+    <sys:String x:Key="Bedrock.Account.XboxOnlyHint">系统已记录 Xbox 账号，但没有缓存玩家代号。在 Xbox 应用中重新登录后稍候即可显示昵称。</sys:String>
     <sys:String x:Key="Bedrock.Action.Download">下载基岩版</sys:String>
     <sys:String x:Key="Bedrock.Action.Import">导入安装包</sys:String>
     <sys:String x:Key="Bedrock.Action.Launch">启动基岩版</sys:String>
@@ -72,6 +82,7 @@
     <sys:String x:Key="Bedrock.Folder.Saves">存档目录</sys:String>
     <sys:String x:Key="Bedrock.Folder.Screenshots">截图目录</sys:String>
     <sys:String x:Key="Bedrock.Folder.XboxNotInstalled">未能打开 Xbox 应用，请确认系统中已安装 Xbox 应用。</sys:String>
+    <sys:String x:Key="Bedrock.Gdk.CikMissing">当前启动器构建未包含基岩版 GDK 内容密钥（CIK），无法解包该安装包。请使用官方发布的完整构建，或自行注入 CIK 后重新构建。</sys:String>
     <sys:String x:Key="Bedrock.Gdk.ExecutableMissing">解包完成，但未找到 Minecraft.Windows.exe，安装包可能不完整</sys:String>
     <sys:String x:Key="Bedrock.Gdk.ExtractFailed">解包 GDK 版本 {0} 失败：{1}</sys:String>
     <sys:String x:Key="Bedrock.Gdk.ExtractSuccessSummary">GDK 版本 {0} 解包完成，可直接启动</sys:String>

@@ -1463,6 +1463,17 @@ public partial class PageBedrockRight
         if (_installingVersions.Contains(versionId))
             return;
 
+        // 构建未内置 CIK 时直接提示，避免先结束进程、清空目录再抛出异常
+        if (!ModBedrockGdk.HasContentKey(filePath))
+        {
+            ModBase.Log($"[Bedrock] 当前构建未内置 GDK 内容密钥（CIK），无法解包: {filePath}",
+                ModBase.LogLevel.Hint,
+                userSummary: Lang.Text("Bedrock.Gdk.CikMissing"));
+            LabStatus.Text = Lang.Text("Bedrock.Install.Failed");
+            LabDetail.Text = Lang.Text("Bedrock.Gdk.CikMissing");
+            return;
+        }
+
         _installingVersions.Add(versionId);
         RefreshLocalVersions();
 

@@ -351,5 +351,7 @@ MaskFiles/
 
 /.minecraft/
 /PCL/
+/artifact/
 /*.exe
 /PCL SE 宣传*.pptx
+/local-secrets.ps1
