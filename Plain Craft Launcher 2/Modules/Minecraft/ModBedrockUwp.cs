@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -306,6 +307,7 @@ public static class ModBedrockUwp
         UpdateIgnorableNamespaces(package, rescap, uap4, uap10);
         UpdateApplicationTrustLevel(package, ns, uap10);
         UpdateCapabilities(package, ns, rescap, uap4);
+        RemoveOptionalDependencies(package);
 
         var applications = package.Element(ns + "Applications");
         var application = applications?.Element(ns + "Application");
@@ -347,6 +349,22 @@ public static class ModBedrockUwp
         var selfClosing = Regex.Match(text, @"<\s*Extensions\s*/\s*>");
         if (selfClosing.Success)
             File.WriteAllText(manifestPath, text.Replace(selfClosing.Value, ExtensionsXml));
+    }
+
+    private static void RemoveOptionalDependencies(XElement package)
+    {
+        // 旧版本依赖的 Store 评分/遥测框架在大多数系统上不存在，侧载时会导致 0x80073CF3。
+        // 这个框架只用于商店评分提示，移除后不影响游戏启动。
+        string[] optional = ["Microsoft.Services.Store.Engagement"];
+        foreach (var dependency in package.Descendants()
+                     .Where(e => e.Name.LocalName == "PackageDependency")
+                     .ToList())
+        {
+            var name = dependency.Attribute("Name")?.Value;
+            if (name is null || !optional.Contains(name, StringComparer.OrdinalIgnoreCase)) continue;
+            dependency.Remove();
+            ModBase.Log($"[Bedrock] 已移除可选依赖 {name}", ModBase.LogLevel.Normal);
+        }
     }
 
     private static void UpdateIgnorableNamespaces(XElement package, XNamespace rescap, XNamespace uap4,
@@ -723,7 +741,6 @@ public static class ModBedrockUwp
         ("Microsoft.NET.Native.Runtime.1.4", null),
         ("Microsoft.NET.Native.Runtime.2.2", "2.2.28604.0"),
         ("Microsoft.VCLibs.140.00.UWPDesktop", null),
-        ("Microsoft.Services.Store.Engagement", null),
         ("Microsoft.NET.Native.Framework.1.3", null),
         ("Microsoft.NET.Native.Framework.2.2", "2.2.29512.0"),
         ("Microsoft.GamingServices", "33.108.12001.0")
@@ -731,8 +748,10 @@ public static class ModBedrockUwp
 
     /// <summary>
     ///     对应 BedrockBoot 的 UwpDependencyChecker.GetMissingDependencies。
+    ///     传入 required 时只检查这些依赖（用于按安装包 Manifest 精确检查）。
     /// </summary>
-    public static List<(string Name, string? MinVersion)> GetMissingDependencies()
+    public static List<(string Name, string? MinVersion)> GetMissingDependencies(
+        IReadOnlyList<(string Name, string? MinVersion)>? required = null)
     {
         var installed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         try
@@ -768,7 +787,7 @@ public static class ModBedrockUwp
         }
 
         var missing = new List<(string Name, string? MinVersion)>();
-        foreach (var dependency in UwpDependencies)
+        foreach (var dependency in required ?? UwpDependencies)
         {
             if (!installed.TryGetValue(dependency.Name, out var installedVersion))
             {
@@ -788,12 +807,16 @@ public static class ModBedrockUwp
     ///     下载并安装缺失的 UWP 依赖（对应 BedrockBoot 的依赖安装流程）。
     ///     失败不会中断安装，仅记录日志。
     /// </summary>
-    public static async Task EnsureDependenciesAsync()
+    public static async Task EnsureDependenciesAsync(string? packagePath = null)
     {
         List<(string Name, string? MinVersion)> missing;
         try
         {
-            missing = GetMissingDependencies();
+            var declared = packagePath is null ? null : GetDeclaredDependencies(packagePath);
+            if (declared is { Count: > 0 })
+                ModBase.Log($"[Bedrock] 安装包声明了 {declared.Count} 个依赖: {string.Join(", ", declared.Select(d => d.Name))}",
+                    ModBase.LogLevel.Normal);
+            missing = GetMissingDependencies(declared);
         }
         catch (Exception ex)
         {
@@ -815,19 +838,8 @@ public static class ModBedrockUwp
             string? tempPath = null;
             try
             {
-                var url = await GetUwpPackageDownloadUrlAsync(name, minVersion).ConfigureAwait(false);
-                if (string.IsNullOrEmpty(url))
-                {
-                    ModBase.Log($"[Bedrock] 无法获取依赖 {name} 的下载地址，跳过", ModBase.LogLevel.Normal);
-                    continue;
-                }
-
                 tempPath = Path.Combine(Path.GetTempPath(), $"{name}_{Guid.NewGuid():N}.appx");
-                using (var client = new HttpClient { Timeout = TimeSpan.FromMinutes(10) })
-                {
-                    var bytes = await client.GetByteArrayAsync(url).ConfigureAwait(false);
-                    await File.WriteAllBytesAsync(tempPath, bytes).ConfigureAwait(false);
-                }
+                await DownloadDependencyAsync(name, minVersion, tempPath).ConfigureAwait(false);
 
                 _ = ModBase.ShellAndGetOutputChecked("powershell.exe",
                     GetAppxInstallArguments(tempPath),
@@ -847,6 +859,88 @@ public static class ModBedrockUwp
         }
     }
 
+    /// <summary>可选依赖：侧载时通常不存在，也不影响游戏启动。</summary>
+    private static readonly string[] OptionalDependencies = ["Microsoft.Services.Store.Engagement"];
+
+    /// <summary>读取安装包（含包束）中 Manifest 声明的依赖；读取失败时返回 null，回退到内置依赖列表。</summary>
+    private static List<(string Name, string? MinVersion)>? GetDeclaredDependencies(string packagePath)
+    {
+        try
+        {
+            using var archive = ZipFile.OpenRead(packagePath);
+            var entry = archive.GetEntry("AppxManifest.xml");
+            if (entry is null)
+            {
+                var inner = archive.Entries
+                    .Where(e => e.Name.EndsWith(".appx", StringComparison.OrdinalIgnoreCase) ||
+                                e.Name.EndsWith(".msix", StringComparison.OrdinalIgnoreCase))
+                    .OrderByDescending(e => e.Name.Contains("x64", StringComparison.OrdinalIgnoreCase))
+                    .FirstOrDefault();
+                if (inner is null) return null;
+
+                using var buffer = new MemoryStream();
+                using (var innerStream = inner.Open()) innerStream.CopyTo(buffer);
+                buffer.Position = 0;
+                using var innerArchive = new ZipArchive(buffer, ZipArchiveMode.Read);
+                var innerEntry = innerArchive.GetEntry("AppxManifest.xml");
+                if (innerEntry is null) return null;
+                using var innerManifest = innerEntry.Open();
+                return ParseDependencies(innerManifest);
+            }
+
+            using var manifest = entry.Open();
+            return ParseDependencies(manifest);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 读取安装包依赖失败，使用内置依赖列表: {ex.Message}", ModBase.LogLevel.Normal);
+            return null;
+        }
+    }
+
+    private static List<(string Name, string? MinVersion)>? ParseDependencies(Stream manifestStream)
+    {
+        var doc = XDocument.Load(manifestStream);
+        var list = doc.Descendants()
+            .Where(e => e.Name.LocalName == "PackageDependency")
+            .Select(e => (Name: e.Attribute("Name")?.Value, MinVersion: e.Attribute("MinVersion")?.Value))
+            .Where(x => !string.IsNullOrEmpty(x.Name))
+            .Where(x => !OptionalDependencies.Contains(x.Name!, StringComparer.OrdinalIgnoreCase))
+            .Select(x => (x.Name!, x.MinVersion))
+            .Distinct()
+            .ToList();
+        return list.Count > 0 ? list : null;
+    }
+
+    /// <summary>下载依赖包；rg-adguard 的临时 CDN 链接可能已过期或被要求 UA，失败时重新解析一次。</summary>
+    private static async Task DownloadDependencyAsync(string packageName, string? minVersion, string path)
+    {
+        for (var attempt = 1; attempt <= 2; attempt++)
+        {
+            var url = await GetUwpPackageDownloadUrlAsync(packageName, minVersion).ConfigureAwait(false);
+            if (string.IsNullOrEmpty(url))
+                throw new InvalidOperationException("无法获取下载地址");
+
+            try
+            {
+                using var client = new HttpClient { Timeout = TimeSpan.FromMinutes(10) };
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
+                client.DefaultRequestHeaders.Referrer = new Uri("https://store.rg-adguard.net/");
+                using var response = await client.GetAsync(url).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+                await using var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                await using var file = File.Create(path);
+                await stream.CopyToAsync(file).ConfigureAwait(false);
+                return;
+            }
+            catch (Exception ex) when (attempt == 1)
+            {
+                ModBase.Log($"[Bedrock] 依赖 {packageName} 下载失败，重新解析地址后重试: {ex.Message}",
+                    ModBase.LogLevel.Normal);
+            }
+        }
+    }
+
     /// <summary>
     ///     对应 BedrockBoot 的 UwpFileUrl.GetUwpPackageDownloadUrl。
     /// </summary>
@@ -854,7 +948,8 @@ public static class ModBedrockUwp
     {
         try
         {
-            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
             client.DefaultRequestHeaders.Add("Origin", "https://store.rg-adguard.net");
             client.DefaultRequestHeaders.Add("Referer", "https://store.rg-adguard.net/");
 

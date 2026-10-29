@@ -2270,8 +2270,8 @@ public partial class PageBedrockRight
                 // 结束正在运行的基岩版，避免文件被占用
                 ModBedrockUwp.StopMinecraftProcesses();
 
-                // 参考 BedrockBoot：安装前补齐 VCLibs / .NET Native 等 UWP 依赖
-                await ModBedrockUwp.EnsureDependenciesAsync().ConfigureAwait(false);
+                // 参考 BedrockBoot：安装前补齐安装包 Manifest 声明的 VCLibs / .NET Native 等 UWP 依赖
+                await ModBedrockUwp.EnsureDependenciesAsync(filePath).ConfigureAwait(false);
 
                 ModBase.RunInUi(() =>
                 {
