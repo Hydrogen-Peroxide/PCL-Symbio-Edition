@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 
 namespace PCL;
 
@@ -54,6 +55,9 @@ public class StartupSplash : Window
     protected override void OnContentRendered(EventArgs e)
     {
         base.OnContentRendered(e);
+        // 若窗口在首次渲染前就被要求关闭，不要再用淡入动画覆盖关闭时的淡出，
+        // 否则淡出的 Completed 永远不触发，Logo 会一直留在屏幕上
+        if (_closing) return;
         BeginAnimation(OpacityProperty, new DoubleAnimation(0d, 1d, TimeSpan.FromMilliseconds(150))
         {
             EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
@@ -77,5 +81,17 @@ public class StartupSplash : Window
         };
         fade.Completed += (_, _) => Close();
         BeginAnimation(OpacityProperty, fade);
+
+        // 兜底：淡出动画可能被首次渲染的淡入替换而收不到 Completed，超时后强制关闭
+        var timer = new DispatcherTimer(DispatcherPriority.Send)
+        {
+            Interval = fadeOut + TimeSpan.FromMilliseconds(100)
+        };
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            Close();
+        };
+        timer.Start();
     }
 }
