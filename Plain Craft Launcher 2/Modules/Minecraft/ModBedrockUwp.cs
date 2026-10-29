@@ -46,7 +46,8 @@ public static class ModBedrockUwp
     {
         var literalPath = "'" + path.Replace("'", "''") + "'";
         var command = $"Add-AppxPackage -{(register ? "Register" : "Path")} {literalPath} -ErrorAction Stop 2>&1";
-        return "-NoProfile -EncodedCommand " + Convert.ToBase64String(Encoding.Unicode.GetBytes(command));
+        return "-NoProfile -NonInteractive -OutputFormat Text -EncodedCommand " +
+               Convert.ToBase64String(Encoding.Unicode.GetBytes(command));
     }
 
     #region 版本号
@@ -471,27 +472,68 @@ public static class ModBedrockUwp
 
     /// <summary>
     ///     卸载已安装的基岩版，并保留存档等应用数据。
+    ///     商店安装的包可能不支持保留数据卸载，此时会抛出带诊断输出的异常，由调用方提示用户手动处理。
     /// </summary>
     public static void UninstallPreservingData()
     {
         StopMinecraftProcesses();
 
         // 只处理旧版 UWP 包（Microsoft.MinecraftUWP），避免误卸新版 GDK 包（Microsoft.Minecraft）
-        // PreserveApplicationData 需要 Windows 10 1809 及以上
-        var result = ModBase.ShellAndGetOutputChecked("powershell.exe",
-            $"-NoProfile -Command \"$p = Get-AppxPackage -Name '{ReleasePackageName}' -ErrorAction Stop; if ($p) {{ foreach ($x in $p) {{ Remove-AppxPackage -Package $x.PackageFullName -PreserveApplicationData -ErrorAction Stop }} }} else {{ Write-Output 'None' }}\"",
+        // PreserveApplicationData 需要 Windows 10 1809 及以上；商店包可能不支持该参数
+        const string script =
+            "$ProgressPreference='SilentlyContinue'; " +
+            "$ErrorActionPreference='Stop'; " +
+            $"$pkgs=@(Get-AppxPackage -Name '{ReleasePackageName}' -ErrorAction Stop); " +
+            "if($pkgs.Count -eq 0){'None'; exit 0}; " +
+            "$failed=@(); " +
+            "foreach($p in $pkgs){ try { Remove-AppxPackage -Package $p.PackageFullName -PreserveApplicationData -ErrorAction Stop } " +
+            "catch { $failed += ($p.Version.ToString() + ': ' + $_.Exception.Message) } }; " +
+            "if($failed.Count -gt 0){ $failed -join '; '; exit 2 }; " +
+            "'Removed'";
+
+        var result = ModBase.ShellAndGetResult("powershell.exe",
+            "-NoProfile -NonInteractive -OutputFormat Text -Command \"" + script + "\"",
             timeout: 120000);
+        ModBase.Log($"[Bedrock] 保留数据卸载结果（{result.ExitCode}）: {Tail(result.Output)}", ModBase.LogLevel.Normal);
 
-        ModBase.Log($"[Bedrock] 卸载结果: {result.Trim()}", ModBase.LogLevel.Normal);
-
-        var verify = ModBase.ShellAndGetOutputChecked("powershell.exe",
-            $"-NoProfile -Command \"if (Get-AppxPackage -Name '{ReleasePackageName}' -ErrorAction Stop) {{ 'StillInstalled' }} else {{ 'Cleared' }}\"",
+        var verify = ModBase.ShellAndGetResult("powershell.exe",
+            $"-NoProfile -NonInteractive -OutputFormat Text -Command \"$ProgressPreference='SilentlyContinue'; " +
+            $"if (Get-AppxPackage -Name '{ReleasePackageName}' -ErrorAction Stop) {{ 'StillInstalled' }} else {{ 'Cleared' }}\"",
             timeout: 20000);
 
-        // 普通卸载会删除应用数据。无法确认保留数据的卸载成功时必须中止，不能降级为普通卸载。
-        if (verify.Trim() != "Cleared")
-            throw new InvalidOperationException(
-                $"无法确认基岩版已保留数据卸载，已中止安装以保护存档。{Environment.NewLine}{result.Trim()}{Environment.NewLine}{verify.Trim()}");
+        if (verify.Output.Trim() == "Cleared") return;
+
+        var kind = GetInstalledSignatureKind();
+        var hint = string.Equals(kind, "Store", StringComparison.OrdinalIgnoreCase)
+            ? "商店安装的版本可能不支持保留数据卸载。请先备份 %LOCALAPPDATA%\\Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe 下的存档，再在 Windows 设置 → 应用 中卸载商店版 Minecraft 后重试。"
+            : "请关闭 Minecraft 后重试，或在 Windows 设置 → 应用 中手动卸载 Microsoft.MinecraftUWP。";
+        throw new InvalidOperationException(
+            $"无法保留数据卸载已安装的基岩版（类型：{kind ?? "未知"}）。{Environment.NewLine}{hint}" +
+            $"{Environment.NewLine}{Tail(result.Output)}{Environment.NewLine}{Tail(verify.Output)}");
+    }
+
+    /// <summary>获取已安装包的签名类型（Store / Developer / Enterprise 等），未安装时返回 null。</summary>
+    public static string? GetInstalledSignatureKind(string packageName = ReleasePackageName)
+    {
+        try
+        {
+            var output = ModBase.ShellAndGetOutputChecked("powershell.exe",
+                $"-NoProfile -NonInteractive -OutputFormat Text -Command \"Get-AppxPackage -Name '{packageName}' -ErrorAction Stop | Select-Object -First 1 -ExpandProperty SignatureKind\"",
+                timeout: 20000);
+            var kind = output.Trim();
+            return kind.Length == 0 ? null : kind;
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 查询包签名类型失败: {ex.Message}", ModBase.LogLevel.Normal);
+            return null;
+        }
+    }
+
+    private static string Tail(string text, int length = 400)
+    {
+        var value = text.Trim();
+        return value.Length <= length ? value : "..." + value[^length..];
     }
 
     /// <summary>

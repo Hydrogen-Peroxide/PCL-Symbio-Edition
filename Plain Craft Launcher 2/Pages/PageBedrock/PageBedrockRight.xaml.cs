@@ -2264,6 +2264,21 @@ public partial class PageBedrockRight
                     LabDetail.Text = Lang.Text("Bedrock.Install.InstallingVersion", versionId);
                 });
 
+                // 商店版是「已打包」版本，未打包的旧版本无法覆盖注册（0x80073CFB），
+                // 必须先保留数据卸载；开发者注册版可以直接覆盖注册
+                if (ModBedrockUwp.GetInstalledPackage() is not null &&
+                    string.Equals(ModBedrockUwp.GetInstalledSignatureKind(), "Store",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    ModBase.Log("[Bedrock] 检测到商店版基岩版，先保留数据卸载后再安装旧版本", ModBase.LogLevel.Normal);
+                    ModBase.RunInUi(() =>
+                    {
+                        LabStatus.Text = Lang.Text("Bedrock.Install.Replacing");
+                        LabDetail.Text = Lang.Text("Bedrock.Install.PreservingData");
+                    });
+                    ModBedrockUwp.UninstallPreservingData();
+                }
+
                 try
                 {
                     // Manifest 已被改写为更高的版本号，可直接覆盖注册已安装的新版本（降级）
@@ -2427,17 +2442,18 @@ public partial class PageBedrockRight
         // 方式1：使用 Add-AppxPackage -Register 注册（开发模式，Store 不会自动更新）
         if (IsDeveloperModeEnabled())
         {
-            var registerResult = ModBase.ShellAndGetOutput("powershell.exe",
+            var registerResult = ModBase.ShellAndGetResult("powershell.exe",
                 ModBedrockUwp.GetAppxInstallArguments(manifestPath, register: true),
                 timeout: 300000);
 
-            if (!registerResult.Contains("Exception") && !registerResult.Contains("错误"))
+            if (registerResult.Succeeded)
             {
                 ModBase.Log("[Bedrock] 开发模式注册成功，Store 不会自动更新此版本", ModBase.LogLevel.Normal);
                 return;
             }
 
-            ModBase.Log($"[Bedrock] -Register 失败，尝试重新打包为 .appx: {registerResult.Trim()}", ModBase.LogLevel.Normal);
+            ModBase.Log($"[Bedrock] -Register 失败（退出码 {registerResult.ExitCode}），尝试重新打包为 .appx: {Tail(registerResult.Output)}",
+                ModBase.LogLevel.Normal);
         }
 
         // 方式2：重新打包为 .appx 后安装（回退方案）
@@ -2445,12 +2461,18 @@ public partial class PageBedrockRight
         if (File.Exists(appxPath)) File.Delete(appxPath);
         ZipFile.CreateFromDirectory(extractDir, appxPath);
 
-        var appxResult = ModBase.ShellAndGetOutput("powershell.exe",
+        var appxResult = ModBase.ShellAndGetResult("powershell.exe",
             ModBedrockUwp.GetAppxInstallArguments(appxPath),
             timeout: 300000);
 
-        if (appxResult.Contains("Exception") || appxResult.Contains("错误"))
-            throw new Exception(appxResult.Length > 300 ? appxResult[..300] : appxResult);
+        if (!appxResult.Succeeded)
+            throw new Exception($"安装包部署失败（退出码 {appxResult.ExitCode}）：{Tail(appxResult.Output)}");
+    }
+
+    private static string Tail(string text, int length = 400)
+    {
+        var value = text.Trim();
+        return value.Length <= length ? value : "..." + value[^length..];
     }
 
     #region 开发者模式检测（参考 BedrockBoot DeveloperModeHelper）

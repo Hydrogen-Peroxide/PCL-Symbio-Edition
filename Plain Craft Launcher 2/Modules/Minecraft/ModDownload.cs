@@ -2557,12 +2557,16 @@ public static class ModDownload
     {
         try
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(BedrockDataCacheFile)!);
-            ModBase.WriteFile(BedrockDataCacheFile, data.ToJsonString());
+            var path = BedrockDataCacheFile;
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            // 文件被设为只读时会导致写入失败，缓存本身可以重建，直接清除只读后重试
+            if (File.Exists(path) && File.GetAttributes(path).HasFlag(FileAttributes.ReadOnly))
+                File.SetAttributes(path, File.GetAttributes(path) & ~FileAttributes.ReadOnly);
+            ModBase.WriteFile(path, data.ToJsonString());
         }
         catch (Exception ex)
         {
-            ModBase.Log($"[Bedrock] 写入版本数据缓存失败: {ex.Message}");
+            ModBase.Log($"[Bedrock] 写入版本数据缓存失败（{BedrockDataCacheFile}）: {ex.Message}");
         }
     }
 

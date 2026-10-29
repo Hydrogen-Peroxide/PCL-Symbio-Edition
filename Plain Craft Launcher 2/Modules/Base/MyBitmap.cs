@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -33,8 +34,8 @@ public class MyBitmap
         {
             try
             {
-                filePathOrResourceName =
-                    filePathOrResourceName.Replace("pack://application:,,,/images/", ModBase.pathImage);
+                filePathOrResourceName = filePathOrResourceName.Replace(
+                    "pack://application:,,,/images/", ModBase.pathImage, StringComparison.OrdinalIgnoreCase);
                 if (filePathOrResourceName.StartsWithF(ModBase.pathImage))
                 {
                     if (_Cache.ContainsKey(filePathOrResourceName))
