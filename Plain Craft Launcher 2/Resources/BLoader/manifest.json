@@ -1,0 +1,33 @@
+{
+  "name": "BLoader",
+  "version": "0.2.80",
+  "target": "x86_64-pc-windows-msvc",
+  "profile": "release",
+  "source_commit": "3d2db1fab96b2eaec0eefcb086456a7ee220fef0",
+  "workflow_commit": "3d2db1fab96b2eaec0eefcb086456a7ee220fef0",
+  "github_run_id": "39922597755",
+  "built_at_utc": "2026-10-23T08:12:06Z",
+  "files": {
+    "BLoader.dll": {
+      "size": 1495552,
+      "sha256": "fc99379bc3ba3338c4e74850ccc178edf37aea285867840453af4aa2ac78ca9b"
+    }
+  },
+  "console": {
+    "default_backend": "classic-direct",
+    "terminal_spawn": false,
+    "named_pipe_handshake": false,
+    "shell": false,
+    "rundll32": false,
+    "extra_host_executable": false,
+    "startup_handshake_ms": 0
+  },
+  "xuser_bridge": {
+    "platform": "Win32 GDK only",
+    "activation": "authenticated BMCBL process-scoped named pipe only",
+    "hook": "Microsoft xgameruntime.dll!QueryApiImpl only",
+    "without_session": "no hook; official Microsoft XUser remains untouched",
+    "signature": "SHA-256 + ECDSA P-256 Xbox proof-of-possession",
+    "credential_environment_variables": false
+  }
+}

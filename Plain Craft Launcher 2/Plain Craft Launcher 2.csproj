@@ -118,5 +118,6 @@
     </ItemGroup>
     <ItemGroup>
         <Content Include="LICENCE" />
+        <Content Include="THIRD-PARTY\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
 </Project>

@@ -118,10 +118,10 @@
     <sys:String x:Key="Bedrock.Isolation.RunningHint">Close the running Minecraft Bedrock before switching version isolation</sys:String>
     <sys:String x:Key="Bedrock.Isolation.Title">Version isolation</sys:String>
     <sys:String x:Key="Bedrock.Loader.BLoader">BLoader</sys:String>
-    <sys:String x:Key="Bedrock.Loader.BLoader.Description">Rust-based Bedrock mod loader, downloaded on first use; supports native mods, log capture and file redirection</sys:String>
+    <sys:String x:Key="Bedrock.Loader.BLoader.Description">Rust-based Bedrock mod loader bundled with the launcher; supports native mods, log capture and file redirection</sys:String>
     <sys:String x:Key="Bedrock.Loader.BLoader.Failed">Could not prepare BLoader; launching vanilla this time: {0}</sys:String>
     <sys:String x:Key="Bedrock.Loader.BLoader.Missing">BLoader.dll is not ready; launching vanilla this time</sys:String>
-    <sys:String x:Key="Bedrock.Loader.BLoader.Preparing">Preparing BLoader…</sys:String>
+    <sys:String x:Key="Bedrock.Loader.BLoader.Preparing">Unpacking BLoader…</sys:String>
     <sys:String x:Key="Bedrock.Loader.CurrentTag">Current</sys:String>
     <sys:String x:Key="Bedrock.Loader.LeviLamina">LeviLamina</sys:String>
     <sys:String x:Key="Bedrock.Loader.LeviLamina.Description">Injects DLL mods from the mods folder</sys:String>

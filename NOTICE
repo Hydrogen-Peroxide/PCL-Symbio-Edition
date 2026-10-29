@@ -43,23 +43,28 @@ Apache-2.0 / 自定义许可条款。
 未提供时构建产物不包含基岩版 GDK 解包能力。
 
 ===============================================================================
-三、BLoader（运行时可选组件）
+三、BLoader（随启动器分发的可选组件）
 ===============================================================================
 
-基岩版 GDK 版本的「BLoader」加载器由本项目在用户选用时从上游发布页下载，
-不随启动器分发：
+基岩版 GDK 版本的「BLoader」加载器以未修改的 BLoader.dll（v0.2.80）随启动器
+一起分发，仅在用户为某个版本选择 BLoader 时释放到：
+  .minecraft\bedrock\loaders\BLoader\0.2.80\BLoader.dll
 
   * BLoader
     https://github.com/Chlna6666/BLoader
     License: GNU General Public License v3.0
+    完整许可证：Plain Craft Launcher 2/THIRD-PARTY/BLoader/LICENSE
+    （发布产物中位于 THIRD-PARTY/BLoader/LICENSE）
 
-本项目只负责下载、SHA-256 校验并把 BLoader.dll 注入游戏进程；BLoader 本身的
-著作权归 Chlna6666 及其贡献者所有，按 GPL-3.0 提供。相关文件：
+本项目只负责释放、SHA-256 校验并把 BLoader.dll 注入游戏进程，未修改其代码；
+BLoader 的著作权归 Chlna6666 及其贡献者所有，按 GPL-3.0 提供。相关文件：
 
   * Plain Craft Launcher 2/Modules/Minecraft/ModBedrockBLoader.cs
-      下载、校验与部署 BLoader.dll
+      释放、校验与部署 BLoader.dll
   * Plain Craft Launcher 2/Modules/Minecraft/ModBedrockLoader.cs
       加载器选项（原版 / LeviLamina / BLoader）
+  * Plain Craft Launcher 2/Resources/BLoader/BLoader.dll
+      随启动器内置的 BLoader 发布文件
 
 ===============================================================================
 Third-Party Notices (English Summary)
@@ -71,10 +76,12 @@ from the following GPL-3.0 licensed projects by Round Studio:
   * BedrockBoot             - https://github.com/Round-Studio/BedrockBoot
   * BedrockLauncher.Core    - https://github.com/Round-Studio/BedrockLauncher.Core
 
-The optional "BLoader" loader is downloaded at runtime from
-https://github.com/Chlna6666/BLoader (GPL-3.0) and is not distributed with
-the launcher. This project only downloads, verifies (SHA-256) and injects
-BLoader.dll; copyright in BLoader belongs to Chlna6666 and its contributors.
+The optional "BLoader" loader is distributed with this launcher as the
+unmodified BLoader.dll (v0.2.80) from https://github.com/Chlna6666/BLoader
+(GPL-3.0). The full license text ships at THIRD-PARTY/BLoader/LICENSE; this
+project only unpacks, verifies (SHA-256) and injects the DLL. Copyright in
+BLoader belongs to Chlna6666 and its contributors and is licensed under
+GPL-3.0, not under this project's Apache-2.0 / custom terms.
 
 Affected files are listed above and marked inline in the source comments.
 Copyright in those portions belongs to Round Studio and its contributors and

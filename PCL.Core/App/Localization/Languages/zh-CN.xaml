@@ -118,10 +118,10 @@
     <sys:String x:Key="Bedrock.Isolation.RunningHint">请先关闭正在运行的基岩版，再切换版本隔离</sys:String>
     <sys:String x:Key="Bedrock.Isolation.Title">版本隔离</sys:String>
     <sys:String x:Key="Bedrock.Loader.BLoader">BLoader</sys:String>
-    <sys:String x:Key="Bedrock.Loader.BLoader.Description">Rust 编写的基岩版 Mod 加载器，首次选用时自动下载；支持原生 Mod、日志捕获与文件重定向</sys:String>
+    <sys:String x:Key="Bedrock.Loader.BLoader.Description">Rust 编写的基岩版 Mod 加载器，随启动器分发；支持原生 Mod、日志捕获与文件重定向</sys:String>
     <sys:String x:Key="Bedrock.Loader.BLoader.Failed">BLoader 准备失败，本次按原版启动：{0}</sys:String>
     <sys:String x:Key="Bedrock.Loader.BLoader.Missing">BLoader.dll 尚未就绪，本次按原版启动</sys:String>
-    <sys:String x:Key="Bedrock.Loader.BLoader.Preparing">正在准备 BLoader…</sys:String>
+    <sys:String x:Key="Bedrock.Loader.BLoader.Preparing">正在释放 BLoader…</sys:String>
     <sys:String x:Key="Bedrock.Loader.CurrentTag">当前</sys:String>
     <sys:String x:Key="Bedrock.Loader.LeviLamina">LeviLamina</sys:String>
     <sys:String x:Key="Bedrock.Loader.LeviLamina.Description">从 mods 目录注入 DLL 模组</sys:String>

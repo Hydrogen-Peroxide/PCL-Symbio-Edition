@@ -40,7 +40,7 @@ PCL SE has no affiliation with the official PCL, so please do not report PCL SE 
 - Detects the Minecraft Bedrock editions installed on your system, distinguishing legacy UWP builds from GDK builds
 - Imports installation packages and unpacks them into a separate directory without affecting other versions
 - Built-in Xbox account sign-in, so you can launch right after logging in
-- GDK portable builds can pick a per-version loader: Vanilla, LeviLamina or BLoader (downloaded on first use)
+- GDK portable builds can pick a per-version loader: Vanilla, LeviLamina or BLoader (bundled with the launcher)
 - Filter by version type, search by version number and manage local installs
 
 ### Resource downloads
@@ -151,7 +151,7 @@ See the [contribution guide](CONTRIBUTING.md#本地构建与测试) for test com
 - [PCL](https://github.com/Meloong-Git/PCL) — original author 龙腾猫跃 (LTCat)
 - PCL CE — community-maintained branch and the direct upstream of this project
 - [BedrockBoot](https://github.com/Round-Studio/BedrockBoot) and [BedrockLauncher.Core](https://github.com/Round-Studio/BedrockLauncher.Core) — Bedrock projects by Round Studio (GPL-3.0), porting reference for this project's Bedrock installation, decryption and launching; see [NOTICE](NOTICE) for scope
-- [BLoader](https://github.com/Chlna6666/BLoader) — Bedrock mod loader by Chlna6666 (GPL-3.0), downloaded and injected on demand and not distributed with this project
+- [BLoader](https://github.com/Chlna6666/BLoader) — Bedrock mod loader by Chlna6666 (GPL-3.0), bundled and injected with the launcher; see [THIRD-PARTY/BLoader/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/BLoader/LICENSE>)
 - Plus open-source projects such as Dapper, Downloader, Markdig.Wpf, NAudio, Microsoft.Data.Sqlite, protobuf-net and Lucide. See [metadata.json](Plain%20Craft%20Launcher%202/metadata.json) and the launcher's "About" page for the complete list of third-party components and licenses
 
 ## Statistics
