@@ -110,6 +110,13 @@
     <sys:String x:Key="Bedrock.Install.ManifestMissing">AppxManifest.xml not found in the extracted package</sys:String>
     <sys:String x:Key="Bedrock.Install.PreservingData">Uninstalling the old version while keeping saves, then reinstalling...</sys:String>
     <sys:String x:Key="Bedrock.Install.Replacing">Replacing the installed version...</sys:String>
+    <sys:String x:Key="Bedrock.Install.StoreMigrate.Title">Install an older version</sys:String>
+    <sys:String x:Key="Bedrock.Install.StoreMigrate.Message">The Microsoft Store version of Minecraft is installed. An unpackaged older version cannot replace it, so the Store version must be uninstalled first.&#10;&#10;PCL will back up LocalState / RoamingState to .minecraft\bedrock\backup, uninstall the Store version, install the older version and restore the data automatically. Continue?</sys:String>
+    <sys:String x:Key="Bedrock.Install.StoreMigrate.Continue">Back up and continue</sys:String>
+    <sys:String x:Key="Bedrock.Install.SavingData">Backing up Store version data...</sys:String>
+    <sys:String x:Key="Bedrock.Install.SavingDataDetail">This may take a few minutes for large worlds; do not close the launcher</sys:String>
+    <sys:String x:Key="Bedrock.Install.RestoringData">Restoring Store version data...</sys:String>
+    <sys:String x:Key="Bedrock.Install.RestoringDataDetail">The game can be launched once restoring finishes</sys:String>
     <sys:String x:Key="Bedrock.Install.Success">Bedrock installed successfully!</sys:String>
     <sys:String x:Key="Bedrock.Install.SuccessSummary">Bedrock {0} installed successfully!</sys:String>
     <sys:String x:Key="Bedrock.Isolation.Failed">Failed to enable version isolation: {0}</sys:String>

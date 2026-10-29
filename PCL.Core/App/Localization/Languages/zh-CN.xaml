@@ -110,6 +110,13 @@
     <sys:String x:Key="Bedrock.Install.ManifestMissing">解压后的包中找不到 AppxManifest.xml</sys:String>
     <sys:String x:Key="Bedrock.Install.PreservingData">正在保留存档卸载旧版本，随后重新安装...</sys:String>
     <sys:String x:Key="Bedrock.Install.Replacing">正在替换已安装版本...</sys:String>
+    <sys:String x:Key="Bedrock.Install.StoreMigrate.Title">安装旧版本</sys:String>
+    <sys:String x:Key="Bedrock.Install.StoreMigrate.Message">检测到商店版 Minecraft。未打包的旧版本无法直接覆盖商店版，需要先卸载商店版。&#10;&#10;PCL 会先把 LocalState / RoamingState 备份到 .minecraft\bedrock\backup，卸载并安装旧版本后再自动恢复。是否继续？</sys:String>
+    <sys:String x:Key="Bedrock.Install.StoreMigrate.Continue">备份并继续</sys:String>
+    <sys:String x:Key="Bedrock.Install.SavingData">正在备份商店版数据...</sys:String>
+    <sys:String x:Key="Bedrock.Install.SavingDataDetail">存档较大时可能需要几分钟，请勿关闭启动器</sys:String>
+    <sys:String x:Key="Bedrock.Install.RestoringData">正在恢复商店版数据...</sys:String>
+    <sys:String x:Key="Bedrock.Install.RestoringDataDetail">请稍候，恢复完成后即可启动游戏</sys:String>
     <sys:String x:Key="Bedrock.Install.Success">基岩版安装成功！</sys:String>
     <sys:String x:Key="Bedrock.Install.SuccessSummary">基岩版 {0} 安装成功！</sys:String>
     <sys:String x:Key="Bedrock.Isolation.Failed">启用版本隔离失败：{0}</sys:String>

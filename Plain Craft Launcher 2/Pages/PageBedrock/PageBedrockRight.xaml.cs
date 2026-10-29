@@ -1476,6 +1476,20 @@ public partial class PageBedrockRight
             return;
         }
 
+        // 商店版是「已打包」版本，未打包的旧版本无法覆盖注册（0x80073CFB）。
+        // 先备份应用数据再完整卸载，安装完成后恢复；开发者注册版则可以直接覆盖注册。
+        var migrateStore = false;
+        if (ModBedrockUwp.GetInstalledPackage() is not null &&
+            string.Equals(ModBedrockUwp.GetInstalledSignatureKind(), "Store", StringComparison.OrdinalIgnoreCase))
+        {
+            if (ModMain.MyMsgBox(Lang.Text("Bedrock.Install.StoreMigrate.Message"),
+                    Lang.Text("Bedrock.Install.StoreMigrate.Title"),
+                    Lang.Text("Bedrock.Install.StoreMigrate.Continue"),
+                    Lang.Text("Common.Action.Cancel"), isWarn: true) != 1)
+                return;
+            migrateStore = true;
+        }
+
         _installingVersions.Add(versionId);
         RefreshLocalVersions();
 
@@ -1483,7 +1497,7 @@ public partial class PageBedrockRight
         LabDetail.Text = Lang.Text("Bedrock.Install.InstallingVersion", versionId);
         BtnLaunch.IsEnabled = false;
 
-        InstallBedrockPackage(filePath, versionId);
+        InstallBedrockPackage(filePath, versionId, migrateStore);
     }
 
     /// <summary>
@@ -2238,10 +2252,11 @@ public partial class PageBedrockRight
 
     #region 安装
 
-    private void InstallBedrockPackage(string filePath, string versionId)
+    private void InstallBedrockPackage(string filePath, string versionId, bool migrateStore = false)
     {
         Task.Run(async () =>
         {
+            string? dataBackup = null;
             try
             {
                 ModBase.Log($"[Bedrock] 开始安装: {filePath}", ModBase.LogLevel.Normal);
@@ -2264,19 +2279,24 @@ public partial class PageBedrockRight
                     LabDetail.Text = Lang.Text("Bedrock.Install.InstallingVersion", versionId);
                 });
 
-                // 商店版是「已打包」版本，未打包的旧版本无法覆盖注册（0x80073CFB），
-                // 必须先保留数据卸载；开发者注册版可以直接覆盖注册
-                if (ModBedrockUwp.GetInstalledPackage() is not null &&
-                    string.Equals(ModBedrockUwp.GetInstalledSignatureKind(), "Store",
-                        StringComparison.OrdinalIgnoreCase))
+                // 商店版是「已打包」版本，未打包的旧版本无法覆盖注册（0x80073CFB）。
+                // 先备份应用数据再完整卸载，安装完成后恢复；开发者注册版则可以直接覆盖注册。
+                if (migrateStore)
                 {
-                    ModBase.Log("[Bedrock] 检测到商店版基岩版，先保留数据卸载后再安装旧版本", ModBase.LogLevel.Normal);
+                    ModBase.Log("[Bedrock] 检测到商店版基岩版，先备份应用数据并完整卸载", ModBase.LogLevel.Normal);
+                    ModBase.RunInUi(() =>
+                    {
+                        LabStatus.Text = Lang.Text("Bedrock.Install.SavingData");
+                        LabDetail.Text = Lang.Text("Bedrock.Install.SavingDataDetail");
+                    });
+                    dataBackup = ModBedrockUwp.BackupPackageData(versionId,
+                        text => ModBase.RunInUi(() => LabDetail.Text = text));
                     ModBase.RunInUi(() =>
                     {
                         LabStatus.Text = Lang.Text("Bedrock.Install.Replacing");
                         LabDetail.Text = Lang.Text("Bedrock.Install.PreservingData");
                     });
-                    ModBedrockUwp.UninstallPreservingData();
+                    ModBedrockUwp.UninstallCompletely();
                 }
 
                 try
@@ -2286,7 +2306,7 @@ public partial class PageBedrockRight
                 }
                 catch (Exception firstEx)
                 {
-                    if (ModBedrockUwp.GetInstalledPackage() is null)
+                    if (migrateStore || ModBedrockUwp.GetInstalledPackage() is null)
                         throw;
 
                     // 覆盖注册失败时，保留存档卸载后重新安装
@@ -2303,6 +2323,17 @@ public partial class PageBedrockRight
                     InstallWithRegister(filePath, versionId);
                 }
 
+                if (dataBackup is not null)
+                {
+                    ModBase.Log($"[Bedrock] 正在恢复商店版数据: {dataBackup}", ModBase.LogLevel.Normal);
+                    ModBase.RunInUi(() =>
+                    {
+                        LabStatus.Text = Lang.Text("Bedrock.Install.RestoringData");
+                        LabDetail.Text = Lang.Text("Bedrock.Install.RestoringDataDetail");
+                    });
+                    ModBedrockUwp.RestorePackageData(dataBackup);
+                }
+
                 ModBase.Log($"[Bedrock] 安装完成: {versionId}",
                     ModBase.LogLevel.Normal,
                     userSummary: Lang.Text("Bedrock.Install.SuccessSummary", versionId));
@@ -2317,9 +2348,15 @@ public partial class PageBedrockRight
             }
             catch (Exception ex)
             {
-                ModBase.Log(ex, "基岩版安装失败",
-                    ModBase.LogLevel.Feedback,
-                    userSummary: Lang.Text("Bedrock.Install.FailedSummary", versionId, ex.Message));
+                var summary = Lang.Text("Bedrock.Install.FailedSummary", versionId, ex.Message);
+                if (dataBackup is not null)
+                {
+                    summary += Environment.NewLine + $"商店版数据已备份到：{dataBackup}";
+                    ModBase.Log($"[Bedrock] 商店版数据备份保留在 {dataBackup}，修复后可在该目录手动恢复存档",
+                        ModBase.LogLevel.Normal);
+                }
+
+                ModBase.Log(ex, "基岩版安装失败", ModBase.LogLevel.Feedback, userSummary: summary);
 
                 ModBase.RunInUi(() =>
                 {

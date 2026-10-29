@@ -536,6 +536,96 @@ public static class ModBedrockUwp
         return value.Length <= length ? value : "..." + value[^length..];
     }
 
+    /// <summary>商店版 Minecraft 的用户数据目录（LocalState / RoamingState 所在位置）。</summary>
+    public static string GetPackageDataDirectory() => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "Packages", ReleasePackageName + "_8wekyb3d8bbwe");
+
+    /// <summary>把商店版应用数据备份到 .minecraft\bedrock\backup，返回备份目录；没有数据时返回 null。</summary>
+    public static string? BackupPackageData(string versionId, Action<string>? onProgress = null)
+    {
+        var source = GetPackageDataDirectory();
+        if (!Directory.Exists(source)) return null;
+
+        var backupRoot = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".minecraft", "bedrock", "backup",
+            $"UWP-{versionId}-{DateTime.Now:yyyyMMdd-HHmmss}");
+        Directory.CreateDirectory(backupRoot);
+        var copied = 0;
+        foreach (var name in new[] { "LocalState", "RoamingState" })
+        {
+            var directory = Path.Combine(source, name);
+            if (Directory.Exists(directory))
+                CopyDirectory(directory, Path.Combine(backupRoot, name), ref copied, onProgress);
+        }
+
+        ModBase.Log($"[Bedrock] 商店版数据已备份到 {backupRoot}（{copied} 个文件）", ModBase.LogLevel.Normal);
+        return backupRoot;
+    }
+
+    /// <summary>把备份的应用数据恢复到当前安装的包目录。</summary>
+    public static void RestorePackageData(string backupRoot)
+    {
+        StopMinecraftProcesses();
+        var target = GetPackageDataDirectory();
+        Directory.CreateDirectory(target);
+        var copied = 0;
+        foreach (var name in new[] { "LocalState", "RoamingState" })
+        {
+            var source = Path.Combine(backupRoot, name);
+            if (Directory.Exists(source))
+                CopyDirectory(source, Path.Combine(target, name), ref copied, null);
+        }
+
+        ModBase.Log($"[Bedrock] 已恢复商店版数据到 {target}（{copied} 个文件）", ModBase.LogLevel.Normal);
+    }
+
+    /// <summary>完整卸载旧版 UWP 包（不保留应用数据）。调用方必须提前备份。</summary>
+    public static void UninstallCompletely()
+    {
+        StopMinecraftProcesses();
+
+        const string script =
+            "$ProgressPreference='SilentlyContinue'; " +
+            "$ErrorActionPreference='Stop'; " +
+            $"$pkgs=@(Get-AppxPackage -Name '{ReleasePackageName}' -ErrorAction Stop); " +
+            "if($pkgs.Count -eq 0){'None'; exit 0}; " +
+            "foreach($p in $pkgs){ Remove-AppxPackage -Package $p.PackageFullName -ErrorAction Stop }; " +
+            "'Removed'";
+
+        var result = ModBase.ShellAndGetResult("powershell.exe",
+            "-NoProfile -NonInteractive -OutputFormat Text -Command \"" + script + "\"",
+            timeout: 120000);
+        ModBase.Log($"[Bedrock] 完整卸载结果（{result.ExitCode}）: {Tail(result.Output)}", ModBase.LogLevel.Normal);
+
+        var verify = ModBase.ShellAndGetResult("powershell.exe",
+            $"-NoProfile -NonInteractive -OutputFormat Text -Command \"$ProgressPreference='SilentlyContinue'; " +
+            $"if (Get-AppxPackage -Name '{ReleasePackageName}' -ErrorAction Stop) {{ 'StillInstalled' }} else {{ 'Cleared' }}\"",
+            timeout: 20000);
+
+        if (verify.Output.Trim() == "Cleared") return;
+
+        throw new InvalidOperationException(
+            $"无法卸载已安装的基岩版，安装已中止（数据备份仍保留）。{Environment.NewLine}" +
+            $"{Tail(result.Output)}{Environment.NewLine}{Tail(verify.Output)}");
+    }
+
+    private static void CopyDirectory(string source, string target, ref int copied, Action<string>? onProgress)
+    {
+        Directory.CreateDirectory(target);
+        foreach (var file in Directory.GetFiles(source))
+        {
+            File.Copy(file, Path.Combine(target, Path.GetFileName(file)), true);
+            copied++;
+            if (copied % 200 == 0) onProgress?.Invoke($"已备份 {copied} 个文件…");
+        }
+
+        foreach (var directory in Directory.GetDirectories(source))
+        {
+            if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) != 0) continue;
+            CopyDirectory(directory, Path.Combine(target, Path.GetFileName(directory)), ref copied, onProgress);
+        }
+    }
+
     /// <summary>
     ///     通过 shell:AppsFolder 启动已安装的 UWP 应用（等价于 BedrockBoot 的 AppDiagnosticInfo.LaunchAsync）。
     ///     Manifest 被设为 AppListEntry=none 后无法从开始菜单启动，但 AppsFolder 仍可用。
