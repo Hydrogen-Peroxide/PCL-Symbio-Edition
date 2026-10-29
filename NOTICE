@@ -43,6 +43,25 @@ Apache-2.0 / 自定义许可条款。
 未提供时构建产物不包含基岩版 GDK 解包能力。
 
 ===============================================================================
+三、BLoader（运行时可选组件）
+===============================================================================
+
+基岩版 GDK 版本的「BLoader」加载器由本项目在用户选用时从上游发布页下载，
+不随启动器分发：
+
+  * BLoader
+    https://github.com/Chlna6666/BLoader
+    License: GNU General Public License v3.0
+
+本项目只负责下载、SHA-256 校验并把 BLoader.dll 注入游戏进程；BLoader 本身的
+著作权归 Chlna6666 及其贡献者所有，按 GPL-3.0 提供。相关文件：
+
+  * Plain Craft Launcher 2/Modules/Minecraft/ModBedrockBLoader.cs
+      下载、校验与部署 BLoader.dll
+  * Plain Craft Launcher 2/Modules/Minecraft/ModBedrockLoader.cs
+      加载器选项（原版 / LeviLamina / BLoader）
+
+===============================================================================
 Third-Party Notices (English Summary)
 ===============================================================================
 
@@ -51,6 +70,11 @@ from the following GPL-3.0 licensed projects by Round Studio:
 
   * BedrockBoot             - https://github.com/Round-Studio/BedrockBoot
   * BedrockLauncher.Core    - https://github.com/Round-Studio/BedrockLauncher.Core
+
+The optional "BLoader" loader is downloaded at runtime from
+https://github.com/Chlna6666/BLoader (GPL-3.0) and is not distributed with
+the launcher. This project only downloads, verifies (SHA-256) and injects
+BLoader.dll; copyright in BLoader belongs to Chlna6666 and its contributors.
 
 Affected files are listed above and marked inline in the source comments.
 Copyright in those portions belongs to Round Studio and its contributors and

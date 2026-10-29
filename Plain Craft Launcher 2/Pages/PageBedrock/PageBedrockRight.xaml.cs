@@ -656,9 +656,26 @@ public partial class PageBedrockRight
 
                     // 原版加载器优先尝试注册式启动：注册后的包具备包身份与完整授权，
                     // 不会像裸跑那样被当作试用版而要求「解锁完整游戏」；
-                    // LeviLamina 需要注入 DLL，只能直接运行解包目录里的主程序。
+                    // LeviLamina / BLoader 需要注入 DLL，只能直接运行解包目录里的主程序。
                     // preload 目录内有 DLL 时同样必须裸跑，注册式启动由 explorer 拉起进程，无法注入。
                     var loader = ModBedrockLoader.GetLoader(BedrockVersion);
+
+                    // BLoader 按需下载并校验 DLL；失败时退回原版启动，不阻断游戏
+                    if (loader == ModBedrockLoader.BLoader)
+                    {
+                        SetLaunchStage(0.18, Lang.Text("Bedrock.Loader.BLoader.Preparing"));
+                        try
+                        {
+                            ModBedrockBLoader.EnsureInstalled();
+                        }
+                        catch (Exception ex)
+                        {
+                            ModBase.Log(ex, "BLoader 准备失败，本次按原版启动",
+                                ModBase.LogLevel.Hint,
+                                userSummary: Lang.Text("Bedrock.Loader.BLoader.Failed", ex.Message));
+                        }
+                    }
+
                     var hasPreload = ModBedrockMods.GetPreloadFiles(installPath).Length > 0;
                     if (!hasPreload && loader == ModBedrockLoader.Vanilla &&
                         TryLaunchGdkRegistered(installPath, BedrockVersion))
@@ -1224,7 +1241,12 @@ public partial class PageBedrockRight
             return;
 
         var current = ModBedrockLoader.GetLoader(versionId);
-        var isLeviLamina = current == ModBedrockLoader.LeviLamina;
+        var currentIndex = current switch
+        {
+            ModBedrockLoader.LeviLamina => 1,
+            ModBedrockLoader.BLoader => 2,
+            _ => 0
+        };
         List<MyMsgCardOption> options =
         [
             new()
@@ -1232,25 +1254,36 @@ public partial class PageBedrockRight
                 Title = Lang.Text("Bedrock.Loader.Vanilla"),
                 Description = Lang.Text("Bedrock.Loader.Vanilla.Description"),
                 SvgIcon = "lucide/box",
-                Tag = isLeviLamina ? "" : Lang.Text("Bedrock.Loader.CurrentTag")
+                Tag = currentIndex == 0 ? Lang.Text("Bedrock.Loader.CurrentTag") : ""
             },
             new()
             {
                 Title = Lang.Text("Bedrock.Loader.LeviLamina"),
                 Description = Lang.Text("Bedrock.Loader.LeviLamina.Description"),
                 SvgIcon = "lucide/puzzle",
-                Tag = isLeviLamina ? Lang.Text("Bedrock.Loader.CurrentTag") : ""
+                Tag = currentIndex == 1 ? Lang.Text("Bedrock.Loader.CurrentTag") : ""
+            },
+            new()
+            {
+                Title = Lang.Text("Bedrock.Loader.BLoader"),
+                Description = Lang.Text("Bedrock.Loader.BLoader.Description"),
+                SvgIcon = "lucide/boxes",
+                Tag = currentIndex == 2 ? Lang.Text("Bedrock.Loader.CurrentTag") : ""
             }
         ];
 
-        var selected = ModMain.MyMsgBoxCardSelect(options, isLeviLamina ? 1 : 0,
+        var selected = ModMain.MyMsgBoxCardSelect(options, currentIndex,
             Lang.Text("Bedrock.Loader.SelectTitle"),
             Lang.Text("Bedrock.Loader.SelectCaption", versionId),
             button2: Lang.Text("Common.Action.Cancel"));
         if (selected is null) return;
 
-        ModBedrockLoader.SetLoader(versionId,
-            selected == 1 ? ModBedrockLoader.LeviLamina : ModBedrockLoader.Vanilla);
+        ModBedrockLoader.SetLoader(versionId, selected switch
+        {
+            1 => ModBedrockLoader.LeviLamina,
+            2 => ModBedrockLoader.BLoader,
+            _ => ModBedrockLoader.Vanilla
+        });
         RefreshLocalVersions();
     }
 

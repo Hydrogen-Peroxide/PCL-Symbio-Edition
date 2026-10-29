@@ -40,6 +40,7 @@ PCL SE 與 PCL 官方版沒有隸屬關係，請不要向官方儲存庫回報 P
 - 讀取系統中已安裝的 Minecraft 基岩版，區分 UWP 舊版與 GDK 新版
 - 支援匯入安裝包並解包到獨立目錄，不影響其他版本
 - 內建 Xbox 帳號登入，登入後可直接啟動
+- GDK 可攜版可依版本選擇載入器：原版、LeviLamina 或 BLoader（首次選用時自動下載）
 - 依版本類型篩選，支援依版本號搜尋與本機管理
 
 ### 資源下載
@@ -150,6 +151,7 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 - [PCL](https://github.com/Meloong-Git/PCL) — 原作者 龍騰貓躍
 - PCL CE — 社群維護分支，本專案的直接上游
 - [BedrockBoot](https://github.com/Round-Studio/BedrockBoot) 與 [BedrockLauncher.Core](https://github.com/Round-Studio/BedrockLauncher.Core) — Round Studio 開發的基岩版專案（GPL-3.0），本專案基岩版安裝、解密與啟動方案的移植參考，來源與適用範圍見 [NOTICE](NOTICE)
+- [BLoader](https://github.com/Chlna6666/BLoader) — Chlna6666 開發的基岩版 Mod 載入器（GPL-3.0），由啟動器按需下載並注入，不隨本專案分發
 - 以及 Dapper、Downloader、Markdig.Wpf、NAudio、Microsoft.Data.Sqlite、protobuf-net、Lucide 等開源專案，完整的第三方元件與授權資訊見 [metadata.json](Plain%20Craft%20Launcher%202/metadata.json) 與啟動器「關於」頁面
 
 ## 統計資料
