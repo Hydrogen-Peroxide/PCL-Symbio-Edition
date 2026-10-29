@@ -85,8 +85,8 @@ public static class ModBedrockGdk
 
     /// <summary>
     ///     直接启动 GDK 版：不经过系统包注册，多版本可同时运行。
-    ///     版本目录下的 preload 文件夹中的 DLL 一律注入；LeviLamina 额外加载 mods 目录内的 DLL，
-    ///     BLoader 则先注入 BLoader.dll（均需要 x64 启动器）。
+    ///     版本目录下的 preload 文件夹中的 DLL 一律注入；BLoader 会先注入 BLoader.dll（均需要 x64 启动器）。
+    ///     LeviLamina 通过 lip 给 exe 打补丁后自行加载，这里不再重复注入 mods 目录，否则会重复装载。
     ///     返回游戏进程，供调用方在游戏退出后做清理（例如还原版本隔离）；找不到主程序时返回 null。
     /// </summary>
     public static Process? Launch(string gameDirectory, string? arguments = null, string? versionId = null)
@@ -96,7 +96,6 @@ public static class ModBedrockGdk
 
         var workingDirectory = Path.GetDirectoryName(exePath) ?? gameDirectory;
         var loader = ModBedrockLoader.GetLoader(versionId);
-        var useLeviLamina = loader == ModBedrockLoader.LeviLamina;
         var mods = new List<string>();
 
         // BLoader 需要最先进入进程，后续原生 Mod 由它接管装载
@@ -110,7 +109,6 @@ public static class ModBedrockGdk
                     ModBase.LogLevel.Hint, userSummary: Lang.Text("Bedrock.Loader.BLoader.Missing"));
         }
 
-        if (useLeviLamina) mods.AddRange(ModBedrockMods.GetModFiles(gameDirectory));
         var preloads = ModBedrockMods.GetPreloadFiles(gameDirectory);
         mods.AddRange(preloads);
 
@@ -118,9 +116,6 @@ public static class ModBedrockGdk
             ModBase.Log(
                 $"[Bedrock] 检测到 {mods.Count} 个待注入 DLL（preload {preloads.Length} 个，加载器 {loader}）: {ModBedrockMods.GetPreloadDirectory(gameDirectory)}",
                 ModBase.LogLevel.Normal);
-        else if (useLeviLamina)
-            ModBase.Log($"[Bedrock] 版本 {versionId} 已选择 LeviLamina，但 mods 目录内没有 DLL，本次按原版启动",
-                ModBase.LogLevel.Hint, userSummary: Lang.Text("Bedrock.Loader.Missing"));
 
         return ModBedrockMods.Launch(exePath, workingDirectory, arguments, mods);
     }

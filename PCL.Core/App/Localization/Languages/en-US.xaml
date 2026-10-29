@@ -124,7 +124,9 @@
     <sys:String x:Key="Bedrock.Loader.BLoader.Preparing">Unpacking BLoader…</sys:String>
     <sys:String x:Key="Bedrock.Loader.CurrentTag">Current</sys:String>
     <sys:String x:Key="Bedrock.Loader.LeviLamina">LeviLamina</sys:String>
-    <sys:String x:Key="Bedrock.Loader.LeviLamina.Description">Injects DLL mods from the mods folder</sys:String>
+    <sys:String x:Key="Bedrock.Loader.LeviLamina.Description">Installs and loads LeviLamina for the current game version via lip (about 50 MB on first use; patches the game exe)</sys:String>
+    <sys:String x:Key="Bedrock.Loader.LeviLamina.Failed">Could not install LeviLamina; launching vanilla this time: {0}</sys:String>
+    <sys:String x:Key="Bedrock.Loader.LeviLamina.Preparing">Installing LeviLamina…</sys:String>
     <sys:String x:Key="Bedrock.Loader.Missing">LeviLamina is selected but no DLL mods were found; launching vanilla this time</sys:String>
     <sys:String x:Key="Bedrock.Loader.SelectCaption">Choose the loader used when launching version {0}. Changes take effect on the next launch.</sys:String>
     <sys:String x:Key="Bedrock.Loader.SelectTitle">Select mod loader</sys:String>

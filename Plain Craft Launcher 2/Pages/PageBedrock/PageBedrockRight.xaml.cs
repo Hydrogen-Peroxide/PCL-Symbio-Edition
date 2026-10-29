@@ -660,7 +660,23 @@ public partial class PageBedrockRight
                     // preload 目录内有 DLL 时同样必须裸跑，注册式启动由 explorer 拉起进程，无法注入。
                     var loader = ModBedrockLoader.GetLoader(BedrockVersion);
 
-                    // BLoader 按需下载并校验 DLL；失败时退回原版启动，不阻断游戏
+                    // LeviLamina 需要按游戏版本通过 lip 安装（会给 Minecraft.Windows.exe 打补丁）
+                    if (loader == ModBedrockLoader.LeviLamina)
+                    {
+                        SetLaunchStage(0.12, Lang.Text("Bedrock.Loader.LeviLamina.Preparing"));
+                        try
+                        {
+                            ModBedrockLeviLamina.EnsureInstalled(installPath, BedrockVersion ?? "");
+                        }
+                        catch (Exception ex)
+                        {
+                            ModBase.Log(ex, "LeviLamina 安装失败，本次按原版启动",
+                                ModBase.LogLevel.Hint,
+                                userSummary: Lang.Text("Bedrock.Loader.LeviLamina.Failed", ex.Message));
+                        }
+                    }
+
+                    // BLoader 按需释放并校验 DLL；失败时退回原版启动，不阻断游戏
                     if (loader == ModBedrockLoader.BLoader)
                     {
                         SetLaunchStage(0.18, Lang.Text("Bedrock.Loader.BLoader.Preparing"));

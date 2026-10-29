@@ -67,6 +67,26 @@ BLoader 的著作权归 Chlna6666 及其贡献者所有，按 GPL-3.0 提供。�
       随启动器内置的 BLoader 发布文件
 
 ===============================================================================
+四、LeviLamina / lip（运行时安装）
+===============================================================================
+
+选择「LeviLamina」加载器时，启动器会按游戏版本通过官方 lip 包管理器安装
+LeviLamina 客户端，不随本项目分发：
+
+  * LeviLamina
+    https://github.com/LiteLDev/LeviLamina
+    License: GNU Lesser General Public License v3.0
+  * lip
+    https://github.com/LiteLDev/lip
+    License: GNU General Public License v3.0
+
+安装过程会下载约 50 MB 依赖，并执行 lip 包自带的 post_install 脚本
+（PeEditor）修改 Minecraft.Windows.exe（生成 .bak 备份）。相关文件：
+
+  * Plain Craft Launcher 2/Modules/Minecraft/ModBedrockLeviLamina.cs
+      按游戏版本解析、下载 lip 并执行安装
+
+===============================================================================
 Third-Party Notices (English Summary)
 ===============================================================================
 
@@ -82,6 +102,13 @@ unmodified BLoader.dll (v0.2.80) from https://github.com/Chlna6666/BLoader
 project only unpacks, verifies (SHA-256) and injects the DLL. Copyright in
 BLoader belongs to Chlna6666 and its contributors and is licensed under
 GPL-3.0, not under this project's Apache-2.0 / custom terms.
+
+When the "LeviLamina" loader is selected, the launcher installs LeviLamina for
+the matching game version through the official lip package manager at runtime.
+Neither LeviLamina (LGPL-3.0) nor lip (GPL-3.0) is redistributed with this
+launcher. The installation downloads about 50 MB and runs the package's
+post_install script (PeEditor), which patches Minecraft.Windows.exe and keeps
+a .bak backup.
 
 Affected files are listed above and marked inline in the source comments.
 Copyright in those portions belongs to Round Studio and its contributors and

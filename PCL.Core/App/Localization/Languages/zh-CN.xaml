@@ -124,7 +124,9 @@
     <sys:String x:Key="Bedrock.Loader.BLoader.Preparing">正在释放 BLoader…</sys:String>
     <sys:String x:Key="Bedrock.Loader.CurrentTag">当前</sys:String>
     <sys:String x:Key="Bedrock.Loader.LeviLamina">LeviLamina</sys:String>
-    <sys:String x:Key="Bedrock.Loader.LeviLamina.Description">从 mods 目录注入 DLL 模组</sys:String>
+    <sys:String x:Key="Bedrock.Loader.LeviLamina.Description">按游戏版本通过 lip 自动安装并加载 LeviLamina（首次约 50 MB，会修改游戏 exe）</sys:String>
+    <sys:String x:Key="Bedrock.Loader.LeviLamina.Failed">LeviLamina 安装失败，本次按原版启动：{0}</sys:String>
+    <sys:String x:Key="Bedrock.Loader.LeviLamina.Preparing">正在安装 LeviLamina…</sys:String>
     <sys:String x:Key="Bedrock.Loader.Missing">已选择 LeviLamina，但没有找到 DLL 模组，本次按原版启动</sys:String>
     <sys:String x:Key="Bedrock.Loader.SelectCaption">为版本 {0} 选择启动时使用的加载器，修改后下次启动生效</sys:String>
     <sys:String x:Key="Bedrock.Loader.SelectTitle">选择加载器</sys:String>
