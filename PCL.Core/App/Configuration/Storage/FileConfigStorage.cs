@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using PCL.Core.App.IoC;
 using PCL.Core.App.Localization;
 using PCL.Core.Logging;
 using PCL.Core.UI;
@@ -25,14 +26,16 @@ public class FileConfigStorage : ConfigStorage
 
     private readonly Channel<(string, Action)> _writeActionChannel;
     private readonly CancellationTokenSource _writeActionCts;
-    private readonly ManualResetEventSlim _writeStopEvent = new(false);
+    private readonly Task _writeTask;
+    private int _stopRequested;
+    private int _saveErrorNotificationPending;
 
     public FileConfigStorage(IKeyValueFileProvider file)
     {
         File = file;
         _writeActionChannel = Channel.CreateUnbounded<(string, Action)>();
         _writeActionCts = new CancellationTokenSource();
-        Task.Run(async () =>
+        _writeTask = Task.Run(async () =>
         {
             const long syncInterval = 10000; // ms
             var lastSyncTick = 0L;
@@ -62,7 +65,6 @@ public class FileConfigStorage : ConfigStorage
                     writeActionMap[pendingItem.Item1] = pendingItem.Item2;
                 // 结束时执行一次同步
                 Sync();
-                _writeStopEvent.Set();
             }
             void Sync()
             {
@@ -75,12 +77,7 @@ public class FileConfigStorage : ConfigStorage
                 catch (Exception ex)
                 {
                     LogWrapper.Error(ex, "Config", "配置文件保存失败");
-                    var summary = Lang.Text("Config.Error.SaveFailed.Message", File.FilePath);
-                    var message = ExceptionDetails.Compose(summary, ex);
-                    MsgBoxWrapper.Show(
-                        message,
-                        Lang.Text("Config.Error.SaveFailed.Title"),
-                        MsgBoxTheme.Error);
+                    NotifySaveFailure(ex);
                 }
             }
         });
@@ -88,9 +85,48 @@ public class FileConfigStorage : ConfigStorage
 
     protected override void OnStop()
     {
-        _writeActionCts.Cancel();
-        _writeStopEvent.Wait();
-        _writeStopEvent.Dispose();
+        var firstStop = Interlocked.Exchange(ref _stopRequested, 1) == 0;
+        if (firstStop) _writeActionCts.Cancel();
+        try
+        {
+            // 等待真实写入任务：即使最终保存或错误处理抛异常，也不会漏发完成信号而永久等待。
+            _writeTask.GetAwaiter().GetResult();
+        }
+        finally
+        {
+            if (firstStop) _writeActionCts.Dispose();
+        }
+    }
+
+    private void NotifySaveFailure(Exception exception)
+    {
+        // 退出时主窗口可能已经隐藏或关闭，只保留上面的错误日志，不再等待交互。
+        if (Volatile.Read(ref _stopRequested) != 0 || Lifecycle.HasShutdownStarted) return;
+        if (Interlocked.CompareExchange(ref _saveErrorNotificationPending, 1, 0) != 0) return;
+
+        // 提示处理器即使阻塞或抛异常，也不能拖住保存线程；每个存储最多保留一个待处理提示。
+        _ = Task.Run(() =>
+        {
+            try
+            {
+                if (Volatile.Read(ref _stopRequested) != 0 || Lifecycle.HasShutdownStarted) return;
+                var summary = Lang.Text("Config.Error.SaveFailed.Message", File.FilePath);
+                MsgBoxWrapper.Show(
+                    ExceptionDetails.Compose(summary, exception),
+                    Lang.Text("Config.Error.SaveFailed.Title"),
+                    MsgBoxTheme.Error);
+            }
+            catch (Exception notificationException)
+            {
+                // 日志订阅者也可能已经停止或出错，不能把二次异常留给未观察的后台任务。
+                try { LogWrapper.Warn(notificationException, "Config", "配置文件保存失败提示无法显示"); }
+                catch (Exception) { /* 退出期间通知失败不影响保存任务完成。 */ }
+            }
+            finally
+            {
+                Volatile.Write(ref _saveErrorNotificationPending, 0);
+            }
+        });
     }
 
     protected override bool OnAccess<TKey, TValue>(
