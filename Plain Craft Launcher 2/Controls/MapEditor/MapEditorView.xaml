@@ -29,6 +29,12 @@
                                     Click="BtnZoomIn_Click" />
                 <local:MyIconButton SvgIcon="lucide/refresh-cw" ToolTip="{DynamicResource Instance.Saves.MapEditor.Reload}"
                                     Margin="8,0,0,0" Click="BtnReload_Click" />
+                <local:MyIconButton SvgIcon="lucide/copy" ToolTip="{DynamicResource Instance.Saves.MapEditor.CopySelected}"
+                                    Margin="8,0,0,0" Click="BtnCopy_Click" />
+                <local:MyIconButton SvgIcon="lucide/upload" ToolTip="{DynamicResource Instance.Saves.MapEditor.Import}"
+                                    Margin="8,0,0,0" Click="BtnImport_Click" />
+                <local:MyIconButton SvgIcon="lucide/download" ToolTip="{DynamicResource Instance.Saves.MapEditor.Export}"
+                                    Margin="8,0,0,0" Click="BtnExport_Click" />
                 <local:MyButton x:Name="BtnDelete" Text="{DynamicResource Instance.Saves.MapEditor.DeleteSelected}"
                                 ColorType="Red" Height="32" MinWidth="120" Margin="14,0,0,0" Padding="12,0"
                                 Click="BtnDelete_Click" IsEnabled="False" />

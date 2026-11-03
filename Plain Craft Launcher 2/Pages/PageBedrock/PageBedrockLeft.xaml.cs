@@ -517,6 +517,38 @@ public partial class PageBedrockLeft
         ModMain.MyMsgBox(Lang.Text("Bedrock.Editor.Failed"), Lang.Text("Bedrock.Editor.Title"));
     }
 
+    private void BackupWorlds_Click(object sender, MouseButtonEventArgs e)
+    {
+        var worlds = ModBedrockWorldBackup.GetWorlds();
+        if (worlds.Count == 0)
+        {
+            HintService.Hint(Lang.Text("Bedrock.Backup.None"), HintType.Error);
+            return;
+        }
+
+        var path = SystemDialogs.SelectSaveFile(
+            Lang.Text("Bedrock.Backup.Title"),
+            $"Bedrock-Worlds-{DateTime.Now:yyyyMMdd-HHmmss}.zip",
+            Lang.Text("Bedrock.Backup.Filter"));
+        if (string.IsNullOrEmpty(path)) return;
+
+        Task.Run(() =>
+        {
+            try
+            {
+                var count = ModBedrockWorldBackup.BackupAll(path,
+                    name => ModBase.RunInUi(() => HintService.Hint(Lang.Text("Bedrock.Backup.Running", name), log: false)));
+                ModBase.Log($"[Bedrock] 已备份 {count} 个世界到 {path}", ModBase.LogLevel.Normal);
+                HintService.Hint(Lang.Text("Bedrock.Backup.Success", count));
+            }
+            catch (Exception ex)
+            {
+                ModBase.Log(ex, "备份基岩版世界失败", ModBase.LogLevel.Feedback,
+                    userSummary: Lang.Text("Bedrock.Backup.Failed", ex.Message));
+            }
+        });
+    }
+
     private void OpenSavesFolder_Click(object sender, MouseButtonEventArgs e)
     {
         var dataDir = FindBedrockDataDir();

@@ -343,6 +343,99 @@ public partial class MapEditorView
         BtnDelete.IsEnabled = _selected.Count > 0 && !_loading;
     }
 
+    private async void BtnCopy_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (_worldPath is null || _selected.Count == 0 || _loading) return;
+        var worldPath = _worldPath;
+        var chunks = _selected.ToList();
+        _loading = true;
+        BtnDelete.IsEnabled = false;
+        LabStatus.Text = Lang.Text("Instance.Saves.MapEditor.Loading");
+
+        try
+        {
+            var count = await Task.Run(() => ModRegionFile.CopyChunks(worldPath, chunks, 1, 0));
+            HintService.Hint(Lang.Text("Instance.Saves.MapEditor.Copied", count));
+            _loading = false;
+            await LoadWorldAsync(worldPath);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "复制区块失败", ModBase.LogLevel.Feedback);
+            HintService.Hint(Lang.Text("Instance.Saves.MapEditor.CopyFailed", ex.Message), HintType.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async void BtnExport_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (_worldPath is null || _selected.Count == 0 || _loading) return;
+        var folder = SystemDialogs.SelectFolder(Lang.Text("Instance.Saves.MapEditor.ExportSelectFolder"), _worldPath);
+        if (string.IsNullOrEmpty(folder)) return;
+
+        var worldPath = _worldPath;
+        var chunks = _selected.ToList();
+        _loading = true;
+        BtnDelete.IsEnabled = false;
+        LabStatus.Text = Lang.Text("Instance.Saves.MapEditor.Loading");
+
+        try
+        {
+            var count = await Task.Run(() => ModRegionFile.ExportChunks(worldPath, chunks, folder));
+            HintService.Hint(Lang.Text("Instance.Saves.MapEditor.Exported", count));
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "导出区块失败", ModBase.LogLevel.Feedback);
+            HintService.Hint(Lang.Text("Instance.Saves.MapEditor.ExportFailed", ex.Message), HintType.Error);
+        }
+        finally
+        {
+            _loading = false;
+            if (!string.IsNullOrEmpty(_worldPath)) await LoadWorldAsync(_worldPath);
+        }
+    }
+
+    private async void BtnImport_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (_worldPath is null || _loading) return;
+        var files = SystemDialogs.SelectFiles(Lang.Text("Instance.Saves.MapEditor.ImportFilter"),
+            Lang.Text("Instance.Saves.MapEditor.Import"), _worldPath, false);
+        if (files.Length == 0) return;
+
+        if (ModMain.MyMsgBox(Lang.Text("Instance.Saves.MapEditor.ImportConfirmMessage"),
+                Lang.Text("Instance.Saves.MapEditor.ImportConfirmTitle"),
+                Lang.Text("Common.Action.Confirm"), Lang.Text("Common.Action.Cancel"), isWarn: true) != 1)
+            return;
+
+        var worldPath = _worldPath;
+        _loading = true;
+        BtnDelete.IsEnabled = false;
+        LabStatus.Text = Lang.Text("Instance.Saves.MapEditor.Loading");
+
+        try
+        {
+            var count = 0;
+            foreach (var file in files)
+                count += await Task.Run(() => ModRegionFile.ImportChunks(worldPath, file));
+            HintService.Hint(Lang.Text("Instance.Saves.MapEditor.Imported", count));
+            _loading = false;
+            await LoadWorldAsync(worldPath);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "导入区块失败", ModBase.LogLevel.Feedback);
+            HintService.Hint(Lang.Text("Instance.Saves.MapEditor.ImportFailed", ex.Message), HintType.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
     private async void BtnDelete_Click(object sender, MouseButtonEventArgs e)
     {
         if (_worldPath is null || _selected.Count == 0 || _loading) return;

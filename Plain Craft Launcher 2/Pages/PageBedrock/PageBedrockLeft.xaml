@@ -74,6 +74,9 @@
                 <local:MyListItem Height="36" VerticalAlignment="Top" IsScaleAnimationEnabled="False"
                                   Type="Clickable" Title="{DynamicResource Bedrock.Shortcuts.OpenXbox}"
                                   SvgIcon="lucide/play" Click="OpenXboxApp_Click" />
+                <local:MyListItem Height="36" VerticalAlignment="Top" IsScaleAnimationEnabled="False"
+                                  Type="Clickable" Title="{DynamicResource Bedrock.Shortcuts.BackupWorlds}"
+                                  SvgIcon="lucide/download" Click="BackupWorlds_Click" />
 
                 <!-- 基岩版状态 -->
                 <TextBlock Text="{DynamicResource Bedrock.Status.Title}" Margin="13,10,5,4" Opacity="0.6" FontSize="12" />

@@ -65,6 +65,7 @@ public static class ModRegionFile
                 }
 
                 var (surface, floor) = heightmap.Value;
+                var sections = ReadSections(chunk);
                 for (var pixelZ = 0; pixelZ < ChunkPixels; pixelZ++)
                 for (var pixelX = 0; pixelX < ChunkPixels; pixelX++)
                 {
@@ -74,7 +75,10 @@ public static class ModRegionFile
                     var height = GetHeight(surface, column);
                     var floorHeight = GetHeight(floor, column);
                     var water = height > 0 && floorHeight > 0 && height <= 63 && height > floorHeight;
-                    var color = GetColor(height, water);
+                    var blockName = GetTopBlockName(sections, blockX, height - 1, blockZ);
+                    if (blockName is not null && blockName.Contains("water", StringComparison.OrdinalIgnoreCase))
+                        water = true;
+                    var color = GetBlockColor(blockName, height, water);
 
                     var targetX = chunkX * ChunkPixels + pixelX;
                     var targetZ = chunkZ * ChunkPixels + pixelZ;
@@ -131,6 +135,114 @@ public static class ModRegionFile
         var surface = (heightmaps?["WORLD_SURFACE"] ?? heightmaps?["WORLD_SURFACE_WG"]) as NbtLongArray;
         var floor = (heightmaps?["OCEAN_FLOOR"] ?? heightmaps?["OCEAN_FLOOR_WG"]) as NbtLongArray;
         return surface is null || floor is null ? null : (surface.Value, floor.Value);
+    }
+
+    private sealed class SectionData
+    {
+        public required NbtList Palette { get; init; }
+        public NbtLongArray? Data { get; init; }
+        public int Bits => Math.Max(4, (int)Math.Ceiling(Math.Log2(Math.Max(1, Palette.Count))));
+    }
+
+    private static Dictionary<int, SectionData> ReadSections(NbtCompound chunk)
+    {
+        var result = new Dictionary<int, SectionData>();
+        var level = chunk["Level"] as NbtCompound ?? chunk;
+        var list = level["sections"] as NbtList ?? level["Sections"] as NbtList;
+        if (list is null) return result;
+
+        foreach (var tag in list)
+        {
+            if (tag is not NbtCompound section) continue;
+            var blockStates = section["block_states"] as NbtCompound;
+            var palette = blockStates?["palette"] as NbtList ?? section["Palette"] as NbtList;
+            if (palette is null || palette.Count == 0) continue;
+
+            result[GetInt(section["Y"])] = new SectionData
+            {
+                Palette = palette,
+                Data = blockStates?["data"] as NbtLongArray ?? section["BlockStates"] as NbtLongArray
+            };
+        }
+
+        return result;
+    }
+
+    private static int GetInt(NbtTag? tag) => tag switch
+    {
+        NbtByte value => value.Value,
+        NbtShort value => value.Value,
+        NbtInt value => value.Value,
+        NbtLong value => (int)value.Value,
+        _ => 0
+    };
+
+    private static string? GetTopBlockName(Dictionary<int, SectionData> sections, int x, int y, int z)
+    {
+        if (y < 0) return null;
+        if (!sections.TryGetValue(y >> 4, out var section)) return null;
+
+        var index = (y & 15) * 256 + (z & 15) * 16 + (x & 15);
+        var paletteIndex = section.Data is { Value.Length: > 0 } data
+            ? ReadPacked(data.Value, index, section.Bits)
+            : 0;
+        if (paletteIndex < 0 || paletteIndex >= section.Palette.Count) return null;
+        return section.Palette[paletteIndex] is NbtCompound entry ? entry["Name"]?.ToString() : null;
+    }
+
+    private static int ReadPacked(long[] values, int index, int bits)
+    {
+        var perLong = 64 / bits;
+        var nonSpanningLength = (4096 + perLong - 1) / perLong;
+        if (values.Length == nonSpanningLength)
+        {
+            var longIndex = index / perLong;
+            if (longIndex >= values.Length) return 0;
+            var offset = index % perLong * bits;
+            return (int)(((ulong)values[longIndex] >> offset) & ((1UL << bits) - 1));
+        }
+
+        // 1.15 及更早版本的调色板数据允许跨 long
+        var bitIndex = (long)index * bits;
+        var oldLongIndex = (int)(bitIndex >> 6);
+        if (oldLongIndex >= values.Length) return 0;
+        var oldOffset = (int)(bitIndex & 63);
+        var value = (ulong)values[oldLongIndex] >> oldOffset;
+        if (oldOffset > 64 - bits && oldLongIndex + 1 < values.Length)
+            value |= (ulong)values[oldLongIndex + 1] << (64 - oldOffset);
+        return (int)(value & ((1UL << bits) - 1));
+    }
+
+    private static (byte R, byte G, byte B) GetBlockColor(string? name, int height, bool water)
+    {
+        if (water) return (44, 98, 190);
+        if (string.IsNullOrEmpty(name)) return GetColor(height, false);
+
+        var block = name.StartsWith("minecraft:", StringComparison.OrdinalIgnoreCase) ? name[10..] : name;
+        if (block.Contains("lava", StringComparison.OrdinalIgnoreCase)) return (220, 100, 20);
+        if (block.Contains("water", StringComparison.OrdinalIgnoreCase)) return (44, 98, 190);
+        if (block.Contains("grass", StringComparison.OrdinalIgnoreCase) ||
+            block.Contains("moss", StringComparison.OrdinalIgnoreCase)) return (92, 148, 68);
+        if (block.Contains("leaves", StringComparison.OrdinalIgnoreCase)) return (60, 118, 48);
+        if (block.Contains("sand", StringComparison.OrdinalIgnoreCase)) return (214, 199, 148);
+        if (block.Contains("gravel", StringComparison.OrdinalIgnoreCase)) return (130, 124, 114);
+        if (block.Contains("snow", StringComparison.OrdinalIgnoreCase) ||
+            block.Contains("ice", StringComparison.OrdinalIgnoreCase) ||
+            block.Contains("powder", StringComparison.OrdinalIgnoreCase)) return (232, 240, 245);
+        if (block.Contains("stone", StringComparison.OrdinalIgnoreCase) ||
+            block.Contains("cobble", StringComparison.OrdinalIgnoreCase) ||
+            block.Contains("deepslate", StringComparison.OrdinalIgnoreCase) ||
+            block.Contains("andesite", StringComparison.OrdinalIgnoreCase)) return (120, 120, 120);
+        if (block.Contains("dirt", StringComparison.OrdinalIgnoreCase) ||
+            block.Contains("mud", StringComparison.OrdinalIgnoreCase)) return (118, 84, 52);
+        if (block.Contains("wood", StringComparison.OrdinalIgnoreCase) ||
+            block.Contains("plank", StringComparison.OrdinalIgnoreCase) ||
+            block.Contains("log", StringComparison.OrdinalIgnoreCase)) return (150, 110, 66);
+        if (block.Contains("terracotta", StringComparison.OrdinalIgnoreCase) ||
+            block.Contains("concrete", StringComparison.OrdinalIgnoreCase)) return (160, 120, 100);
+        if (block.Contains("netherrack", StringComparison.OrdinalIgnoreCase)) return (110, 50, 50);
+        if (block.Contains("end_stone", StringComparison.OrdinalIgnoreCase)) return (210, 208, 160);
+        return GetColor(height, false);
     }
 
     private static int GetHeight(long[] heights, int index)
@@ -192,6 +304,201 @@ public static class ModRegionFile
             var path = Path.Combine(worldPath, folder, $"r.{group.Key.RegionX}.{group.Key.RegionZ}.mca");
             if (File.Exists(path))
                 DeleteChunksInRegion(path, group.Key.RegionX, group.Key.RegionZ, group.ToHashSet());
+        }
+    }
+
+    public sealed record ChunkData(int X, int Z, byte[] Raw);
+
+    /// <summary>读取区域文件中的原始区块数据（含 4 字节长度、压缩类型与压缩负载）。</summary>
+    public static List<ChunkData> ReadChunks(string regionPath)
+    {
+        var result = new List<ChunkData>();
+        var (regionX, regionZ) = ParseRegionName(regionPath);
+        var data = File.ReadAllBytes(regionPath);
+        if (data.Length < 8192) return result;
+
+        for (var index = 0; index < RegionChunks * RegionChunks; index++)
+        {
+            var offset = ((data[index * 4] << 16) | (data[index * 4 + 1] << 8) | data[index * 4 + 2]) * 4096;
+            if (offset == 0 || data[index * 4 + 3] == 0 || offset + 4 > data.Length) continue;
+
+            var length = ReadInt32BigEndian(data, offset);
+            if (length <= 1 || offset + 4 + length > data.Length) continue;
+
+            var raw = new byte[length + 4];
+            Array.Copy(data, offset, raw, 0, raw.Length);
+            result.Add(new ChunkData(regionX * 32 + index % 32, regionZ * 32 + index / 32, raw));
+        }
+
+        return result;
+    }
+
+    /// <summary>导出选中区块到目录，按原区域坐标生成 .mca 文件。</summary>
+    public static int ExportChunks(string worldPath, IReadOnlyCollection<(int X, int Z)> chunks, string outputDirectory)
+    {
+        Directory.CreateDirectory(outputDirectory);
+        var exported = 0;
+        foreach (var group in chunks.GroupBy(chunk => (RegionX: FloorDiv(chunk.X, 32), RegionZ: FloorDiv(chunk.Z, 32))))
+        {
+            var regionPath = Path.Combine(worldPath, "region",
+                $"r.{group.Key.RegionX}.{group.Key.RegionZ}.mca");
+            if (!File.Exists(regionPath)) continue;
+
+            var selected = group.Select(chunk => (chunk.X, chunk.Z)).ToHashSet();
+            var payloads = ReadChunks(regionPath)
+                .Where(chunk => selected.Contains((chunk.X, chunk.Z)))
+                .ToDictionary(chunk => (chunk.X - group.Key.RegionX * 32) +
+                                       (chunk.Z - group.Key.RegionZ * 32) * 32, chunk => chunk.Raw);
+            if (payloads.Count == 0) continue;
+
+            var outputPath = Path.Combine(outputDirectory,
+                $"r.{group.Key.RegionX}.{group.Key.RegionZ}.mca");
+            WriteRegionFile(outputPath, payloads);
+            exported += payloads.Count;
+        }
+
+        return exported;
+    }
+
+    /// <summary>把另一个区域文件中的全部区块合并进当前世界（同坐标覆盖）。</summary>
+    public static int ImportChunks(string worldPath, string sourceRegionPath)
+    {
+        var chunks = ReadChunks(sourceRegionPath);
+        if (chunks.Count == 0) return 0;
+        WriteChunkPayloads(worldPath, chunks);
+        return chunks.Count;
+    }
+
+    /// <summary>复制选中区块到偏移位置（会同步修改区块 NBT 中的 xPos/zPos）。</summary>
+    public static int CopyChunks(string worldPath, IReadOnlyCollection<(int X, int Z)> chunks,
+        int offsetX, int offsetZ)
+    {
+        var copied = new List<ChunkData>();
+        foreach (var group in chunks.GroupBy(chunk => (RegionX: FloorDiv(chunk.X, 32), RegionZ: FloorDiv(chunk.Z, 32))))
+        {
+            var regionPath = Path.Combine(worldPath, "region",
+                $"r.{group.Key.RegionX}.{group.Key.RegionZ}.mca");
+            if (!File.Exists(regionPath)) continue;
+
+            var selected = group.Select(chunk => (chunk.X, chunk.Z)).ToHashSet();
+            copied.AddRange(ReadChunks(regionPath)
+                .Where(chunk => selected.Contains((chunk.X, chunk.Z)))
+                .Select(chunk => new ChunkData(chunk.X + offsetX, chunk.Z + offsetZ,
+                    MoveChunk(chunk.Raw, chunk.X + offsetX, chunk.Z + offsetZ))));
+        }
+
+        if (copied.Count == 0) return 0;
+        WriteChunkPayloads(worldPath, copied);
+        return copied.Count;
+    }
+
+    private static void WriteChunkPayloads(string worldPath, IEnumerable<ChunkData> chunks)
+    {
+        foreach (var group in chunks.GroupBy(chunk => (RegionX: FloorDiv(chunk.X, 32), RegionZ: FloorDiv(chunk.Z, 32))))
+        {
+            var regionPath = Path.Combine(worldPath, "region",
+                $"r.{group.Key.RegionX}.{group.Key.RegionZ}.mca");
+            var payloads = File.Exists(regionPath)
+                ? ReadChunks(regionPath).ToDictionary(chunk => (chunk.X - group.Key.RegionX * 32) +
+                                                              (chunk.Z - group.Key.RegionZ * 32) * 32,
+                    chunk => chunk.Raw)
+                : new Dictionary<int, byte[]>();
+
+            foreach (var chunk in group)
+                payloads[(chunk.X - group.Key.RegionX * 32) + (chunk.Z - group.Key.RegionZ * 32) * 32] = chunk.Raw;
+
+            WriteRegionFile(regionPath, payloads);
+        }
+    }
+
+    private static void WriteRegionFile(string regionPath, IReadOnlyDictionary<int, byte[]> chunks)
+    {
+        using var output = new MemoryStream();
+        output.Write(new byte[8192]);
+        var header = new byte[8192];
+
+        foreach (var (index, raw) in chunks.OrderBy(pair => pair.Key))
+        {
+            if (index < 0 || index >= 1024 || raw.Length < 5) continue;
+
+            var sectors = (raw.Length + 4095) / 4096;
+            while (output.Length % 4096 != 0) output.WriteByte(0);
+            var sectorOffset = (int)(output.Length / 4096);
+            if (sectorOffset > 0xFFFFFF) throw new InvalidDataException("区域文件过大，无法写入 3 字节偏移");
+
+            output.Write(raw, 0, raw.Length);
+            for (var i = raw.Length; i < sectors * 4096; i++) output.WriteByte(0);
+
+            header[index * 4] = (byte)(sectorOffset >> 16);
+            header[index * 4 + 1] = (byte)(sectorOffset >> 8);
+            header[index * 4 + 2] = (byte)sectorOffset;
+            header[index * 4 + 3] = (byte)sectors;
+        }
+
+        output.Position = 0;
+        output.Write(header, 0, header.Length);
+
+        if (File.Exists(regionPath))
+            File.Copy(regionPath, regionPath + ".bak", true);
+
+        var temp = regionPath + ".tmp";
+        File.WriteAllBytes(temp, output.ToArray());
+        File.Move(temp, regionPath, true);
+
+        ModBase.Log($"[MapEditor] 已写入区域文件 {Path.GetFileName(regionPath)}（{chunks.Count} 个区块）",
+            ModBase.LogLevel.Normal);
+    }
+
+    private static byte[] MoveChunk(byte[] raw, int x, int z)
+    {
+        try
+        {
+            var length = ReadInt32BigEndian(raw, 0);
+            if (length <= 1 || length + 4 > raw.Length) return raw;
+
+            using var payload = new MemoryStream(raw, 5, length - 1);
+            using Stream decompressed = raw[4] switch
+            {
+                1 => new GZipStream(payload, CompressionMode.Decompress),
+                2 => new ZLibStream(payload, CompressionMode.Decompress),
+                3 => payload,
+                _ => throw new NotSupportedException($"不支持的区块压缩类型：{raw[4]}")
+            };
+
+            var nbt = new NbtFile();
+            nbt.LoadFromStream(decompressed, NbtCompression.None);
+            if (nbt.RootTag is not NbtCompound root) return raw;
+
+            var level = root["Level"] as NbtCompound;
+            root["xPos"] = new NbtInt("xPos", x);
+            root["zPos"] = new NbtInt("zPos", z);
+            if (level is not null)
+            {
+                level["xPos"] = new NbtInt("xPos", x);
+                level["zPos"] = new NbtInt("zPos", z);
+            }
+
+            using var plain = new MemoryStream();
+            nbt.SaveToStream(plain, NbtCompression.None);
+            using var compressed = new MemoryStream();
+            using (var zlib = new ZLibStream(compressed, CompressionLevel.Optimal, true))
+                zlib.Write(plain.ToArray());
+
+            var body = compressed.ToArray();
+            var result = new byte[body.Length + 5];
+            var newLength = body.Length + 1;
+            result[0] = (byte)(newLength >> 24);
+            result[1] = (byte)(newLength >> 16);
+            result[2] = (byte)(newLength >> 8);
+            result[3] = (byte)newLength;
+            result[4] = 2; // zlib
+            body.CopyTo(result, 5);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "复制区块时修改坐标失败", ModBase.LogLevel.Hint);
+            return raw;
         }
     }
 
