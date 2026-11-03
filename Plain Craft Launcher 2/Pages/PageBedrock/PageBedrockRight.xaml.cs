@@ -1018,9 +1018,11 @@ public partial class PageBedrockRight
         iconTile.SetResourceReference(Border.BackgroundProperty,
             isSelected ? "ColorBrush3" : isInstalled ? "ColorBrush6" : "ColorBrushGray7");
 
+        var displayName = ModBedrockInstance.GetDisplayName(BedrockVersionsDir, versionId);
         var title = new TextBlock
         {
-            Text = versionId,
+            Text = displayName,
+            ToolTip = string.Equals(displayName, versionId, StringComparison.Ordinal) ? null : versionId,
             FontSize = 14.5,
             FontWeight = FontWeights.Bold,
             VerticalAlignment = VerticalAlignment.Center
@@ -1110,6 +1112,44 @@ public partial class PageBedrockRight
             VerticalAlignment = VerticalAlignment.Center,
             Children = { launchBtn }
         };
+
+        var openFolderBtn = new MyIconButton
+        {
+            SvgIcon = "lucide/folder-open",
+            Tag = versionId,
+            Height = 30,
+            Margin = new Thickness(6, 0, 0, 0),
+            ToolTip = Lang.Text("Bedrock.Local.OpenFolder")
+        };
+        openFolderBtn.Click += LocalOpenFolder_Click;
+        buttons.Children.Add(openFolderBtn);
+
+        var renameBtn = new MyIconButton
+        {
+            SvgIcon = "lucide/pencil",
+            Tag = versionId,
+            Height = 30,
+            Margin = new Thickness(6, 0, 0, 0),
+            ToolTip = Lang.Text("Bedrock.Local.Rename")
+        };
+        renameBtn.Click += LocalRename_Click;
+        buttons.Children.Add(renameBtn);
+
+        // 只有已解包的 GDK 便携版才值得复制：复制安装包对 UWP 没有意义
+        if (gdkReady)
+        {
+            var copyBtn = new MyIconButton
+            {
+                SvgIcon = "lucide/copy",
+                Tag = versionId,
+                Height = 30,
+                Margin = new Thickness(6, 0, 0, 0),
+                IsEnabled = !isInstalling,
+                ToolTip = Lang.Text("Bedrock.Local.Copy")
+            };
+            copyBtn.Click += LocalCopy_Click;
+            buttons.Children.Add(copyBtn);
+        }
 
         // GDK 便携版解包完成后可以在版本卡片里选择加载器：原版不注入，LeviLamina 注入 mods 内的 DLL
         if (gdkReady)
@@ -1597,6 +1637,128 @@ public partial class PageBedrockRight
         });
     }
 
+    private void LocalOpenFolder_Click(object sender, EventArgs e)
+    {
+        if (sender is not MyIconButton button || button.Tag is not string versionId)
+            return;
+
+        try
+        {
+            var folder = ModBedrockInstance.GetInstanceFolder(BedrockVersionsDir, versionId);
+            if (!Directory.Exists(folder))
+                throw new DirectoryNotFoundException(folder);
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"\"{folder}\"",
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "打开基岩版实例目录失败", ModBase.LogLevel.Hint);
+            HintService.Hint(Lang.Text("Bedrock.Local.OpenFolderFailed", ex.Message), HintType.Error);
+        }
+    }
+
+    private void LocalRename_Click(object sender, EventArgs e)
+    {
+        if (sender is not MyIconButton button || button.Tag is not string versionId)
+            return;
+
+        var current = ModBedrockInstance.GetDisplayName(BedrockVersionsDir, versionId);
+        var input = ModMain.MyMsgBoxInput(
+            Lang.Text("Bedrock.Local.RenameTitle"),
+            Lang.Text("Bedrock.Local.RenameMessage"),
+            current,
+            hintText: Lang.Text("Bedrock.Local.RenameHint"),
+            button1: Lang.Text("Common.Action.Confirm"),
+            button2: Lang.Text("Common.Action.Cancel"));
+        if (input is null) return;
+
+        var name = input.Trim();
+        if (name.Length == 0 || name.Length > 32 || name.Any(char.IsControl))
+        {
+            HintService.Hint(Lang.Text("Bedrock.Local.RenameInvalid"), HintType.Error);
+            return;
+        }
+
+        try
+        {
+            ModBedrockInstance.SetDisplayName(BedrockVersionsDir, versionId, name);
+            RefreshLocalVersions();
+            ModBase.Log($"[Bedrock] 实例 {versionId} 显示名改为 {name}", ModBase.LogLevel.Normal,
+                userSummary: Lang.Text("Bedrock.Local.Renamed", name));
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "重命名基岩版实例失败", ModBase.LogLevel.Hint);
+            HintService.Hint(Lang.Text("Bedrock.Local.RenameFailed", ex.Message), HintType.Error);
+        }
+    }
+
+    private void LocalCopy_Click(object sender, EventArgs e)
+    {
+        if (sender is not MyIconButton button || button.Tag is not string versionId)
+            return;
+        if (_installingVersions.Contains(versionId)) return;
+
+        if (ModBedrockIsolation.IsAnyGameRunning())
+        {
+            HintService.Hint(Lang.Text("Bedrock.Local.RunningHint"), HintType.Error);
+            return;
+        }
+
+        var displayName = ModBedrockInstance.GetDisplayName(BedrockVersionsDir, versionId);
+        if (ModMain.MyMsgBox(
+                Lang.Text("Bedrock.Local.CopyConfirmMessage", displayName),
+                Lang.Text("Bedrock.Local.CopyConfirmTitle"),
+                Lang.Text("Bedrock.Local.CopyConfirmButton"),
+                Lang.Text("Common.Action.Cancel")) != 1)
+            return;
+
+        var newVersionId = ModBedrockInstance.CreateCopyId(BedrockVersionsDir, versionId);
+        _installingVersions.Add(newVersionId);
+        LabStatus.Text = Lang.Text("Bedrock.Local.Copying");
+        LabDetail.Text = Lang.Text("Bedrock.Local.CopyingDetail", displayName);
+
+        Task.Run(() =>
+        {
+            try
+            {
+                ModBedrockInstance.CopyPortableInstance(BedrockVersionsDir, versionId, newVersionId,
+                    text => ModBase.RunInUi(() => LabDetail.Text = text));
+                ModBedrockLoader.SetLoader(newVersionId, ModBedrockLoader.GetLoader(versionId));
+
+                ModBase.Log($"[Bedrock] 已复制实例: {versionId} -> {newVersionId}",
+                    ModBase.LogLevel.Normal,
+                    userSummary: Lang.Text("Bedrock.Local.Copied", newVersionId));
+                ModBase.RunInUi(() =>
+                {
+                    LabStatus.Text = Lang.Text("Bedrock.Local.Copied", newVersionId);
+                    LabDetail.Text = Lang.Text("Bedrock.Local.CopiedDetail", newVersionId);
+                });
+            }
+            catch (Exception ex)
+            {
+                ModBase.Log(ex, "复制基岩版实例失败",
+                    ModBase.LogLevel.Feedback,
+                    userSummary: Lang.Text("Bedrock.Local.CopyFailed", ex.Message));
+                ModBase.RunInUi(() =>
+                {
+                    LabStatus.Text = Lang.Text("Bedrock.Local.CopyFailed", ex.Message);
+                    LabDetail.Text = "";
+                });
+            }
+            finally
+            {
+                _installingVersions.Remove(newVersionId);
+                ModBase.RunInUi(RefreshLocalVersions);
+            }
+        });
+    }
+
     private void LocalDelete_Click(object sender, EventArgs e)
     {
         if (sender is not MyIconButton btn || btn.Tag is not string versionId)
@@ -1607,6 +1769,14 @@ public partial class PageBedrockRight
             Path.Combine(BedrockVersionsDir, "extracted"), versionId);
         var isRegistered = string.Equals(_registeredVersionId, versionId, StringComparison.OrdinalIgnoreCase);
         var isGdk = IsGdkVersion(versionId);
+
+        var displayName = ModBedrockInstance.GetDisplayName(BedrockVersionsDir, versionId);
+        if (ModMain.MyMsgBox(
+                Lang.Text("Bedrock.Local.DeleteConfirmMessage", displayName),
+                Lang.Text("Bedrock.Local.DeleteConfirmTitle"),
+                Lang.Text("Bedrock.Local.DeleteConfirmButton"),
+                Lang.Text("Common.Action.Cancel"), isWarn: true) != 1)
+            return;
 
         Task.Run(() =>
         {
