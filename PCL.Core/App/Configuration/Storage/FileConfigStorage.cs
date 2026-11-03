@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using PCL.Core.App.IoC;
 using PCL.Core.App.Localization;
 using PCL.Core.Logging;
 using PCL.Core.UI;
@@ -26,6 +27,7 @@ public class FileConfigStorage : ConfigStorage
     private readonly Channel<(string, Action)> _writeActionChannel;
     private readonly Task _writeTask;
     private int _saveFailureReportPending;
+    private int _stopRequested;
 
     public FileConfigStorage(IKeyValueFileProvider file) : this(file, TimeSpan.FromSeconds(10)) { }
 
@@ -108,6 +110,11 @@ public class FileConfigStorage : ConfigStorage
 
     private void ReportSaveFailure(Exception error)
     {
+        // 退出期间只记录日志，不再弹窗（主窗口可能已经隐藏或关闭）。
+        try { LogWrapper.Error(error, "Config", "配置文件保存失败"); }
+        catch (Exception) { /* 退出期间日志处理器可能已经停止。 */ }
+        if (Volatile.Read(ref _stopRequested) != 0 || Lifecycle.HasShutdownStarted) return;
+
         // 报告回调可能调度 UI 或等待隐藏窗口；保存线程和 Stop 均不能等待它。
         // 同一实例只允许一个未完成的报告，避免持续保存失败时堆积 UI 通知。
         if (Interlocked.CompareExchange(ref _saveFailureReportPending, 1, 0) != 0) return;
@@ -115,8 +122,7 @@ public class FileConfigStorage : ConfigStorage
         {
             try
             {
-                try { LogWrapper.Error(error, "Config", "配置文件保存失败"); }
-                catch (Exception) { /* 报告失败不得影响保存工作。 */ }
+                if (Volatile.Read(ref _stopRequested) != 0 || Lifecycle.HasShutdownStarted) return;
                 try
                 {
                     var summary = Lang.Text("Config.Error.SaveFailed.Message", File.FilePath);
@@ -135,6 +141,7 @@ public class FileConfigStorage : ConfigStorage
 
     protected override void OnStop()
     {
+        Interlocked.Exchange(ref _stopRequested, 1);
         _writeActionChannel.Writer.TryComplete();
         _writeTask.GetAwaiter().GetResult();
     }

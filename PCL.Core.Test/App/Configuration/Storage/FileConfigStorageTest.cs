@@ -9,6 +9,7 @@ using PCL.Core.UI;
 namespace PCL.Core.Test.App.Configuration.Storage;
 
 [TestClass]
+[DoNotParallelize]
 public class FileConfigStorageTest
 {
     [TestMethod]
@@ -72,6 +73,40 @@ public class FileConfigStorageTest
         Assert.IsTrue(Enumerable.Range(0, 1000).All(i => provider.Persisted("key" + i, i)));
         Assert.IsFalse(provider.Exists("same"));
         Assert.IsTrue(provider.Persisted("last", 5));
+    }
+
+    [TestMethod]
+    public void Stop_ShouldAllowConcurrentAndRepeatedCalls()
+    {
+        var provider = new TestFileProvider();
+        var storage = new FileConfigStorage(provider);
+        storage.SetValue("JvmArgs", "-Xmx2G");
+
+        var first = Task.Run(storage.Stop);
+        var second = Task.Run(storage.Stop);
+        Assert.IsTrue(Task.WaitAll(new[] { first, second }, 3000), "Concurrent Stop calls must not deadlock.");
+        storage.Stop();
+
+        Assert.AreEqual("-Xmx2G", provider.Get<string>("JvmArgs"));
+    }
+
+    [TestMethod]
+    public void Stop_WhenFinalSaveFails_ShouldNotNotify()
+    {
+        var provider = new TestFileProvider { ThrowOnSync = true };
+        var notifications = 0;
+        MsgBoxHandler handler = (string message, string caption,
+            System.Collections.Generic.ICollection<MsgBoxButtonInfo> buttons,
+            MsgBoxTheme theme, bool block, ref int result) => Interlocked.Increment(ref notifications);
+        MsgBoxWrapper.OnShow += handler;
+        var storage = new FileConfigStorage(provider);
+        try
+        {
+            storage.Stop();
+            Assert.AreEqual(0, Volatile.Read(ref notifications),
+                "Save failures during Stop must only be logged, not shown on the closing window.");
+        }
+        finally { MsgBoxWrapper.OnShow -= handler; }
     }
 
     [TestMethod]
