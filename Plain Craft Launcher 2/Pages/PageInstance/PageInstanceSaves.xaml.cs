@@ -275,6 +275,12 @@ public partial class PageInstanceSaves : IRefreshable
                                 userSummary: Lang.Text("Instance.Saves.CopyFailed"));
                         }
                     };
+                    var btnMap = new MyIconButton
+                    {
+                        SvgIcon = "lucide/grid-2x2",
+                        ToolTip = Lang.Text("Instance.Saves.MapEditor")
+                    };
+                    btnMap.Click += (_, _) => OpenMapEditor(tmpCurFolder);
                     var btnInfo = new MyIconButton
                     {
                         SvgIcon = "lucide/info",
@@ -300,9 +306,9 @@ public partial class PageInstanceSaves : IRefreshable
                         ModMain.frmMain.PageChange(new FormMain.PageStackData { page = FormMain.PageType.Launch });
                     };
                     if ((bool)quickPlayFeature)
-                        worldItem.Buttons = new[] { btnOpen, btnDelete, btnCopy, btnInfo, btnLaunch };
+                        worldItem.Buttons = new[] { btnOpen, btnDelete, btnCopy, btnMap, btnInfo, btnLaunch };
                     else
-                        worldItem.Buttons = new[] { btnOpen, btnDelete, btnCopy, btnInfo };
+                        worldItem.Buttons = new[] { btnOpen, btnDelete, btnCopy, btnMap, btnInfo };
 
                     PanList.Children.Add(worldItem);
                 }
@@ -379,6 +385,26 @@ public partial class PageInstanceSaves : IRefreshable
             return;
         PanList.Children.Remove(item);
         RefreshUI();
+    }
+
+    private void BtnMapBack_Click(object sender, MouseButtonEventArgs e)
+    {
+        CloseMapEditor();
+    }
+
+    private async void OpenMapEditor(string savePath)
+    {
+        PanBack.Visibility = Visibility.Collapsed;
+        PanMapEditor.Visibility = Visibility.Visible;
+        await MapEditor.LoadWorldAsync(savePath);
+    }
+
+    private void CloseMapEditor()
+    {
+        MapEditor.CloseWorld();
+        PanMapEditor.Visibility = Visibility.Collapsed;
+        PanBack.Visibility = Visibility.Visible;
+        Reload();
     }
 
     private void BtnOpenFolder_Click(object sender, MouseButtonEventArgs e)

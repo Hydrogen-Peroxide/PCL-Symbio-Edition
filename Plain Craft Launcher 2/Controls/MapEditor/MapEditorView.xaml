@@ -1,0 +1,57 @@
+<UserControl x:Class="PCL.MapEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:PCL">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,8,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock x:Name="LabWorld" FontSize="14.5" FontWeight="Bold"
+                           VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <TextBlock x:Name="LabSelection" Margin="14,0,0,0" VerticalAlignment="Center"
+                           Foreground="{DynamicResource ColorBrushGray3}" />
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <local:MyIconButton SvgIcon="lucide/circle-minus" ToolTip="{DynamicResource Instance.Saves.MapEditor.ZoomOut}"
+                                    Click="BtnZoomOut_Click" />
+                <TextBlock x:Name="LabZoom" MinWidth="46" TextAlignment="Center" VerticalAlignment="Center"
+                           Foreground="{DynamicResource ColorBrushGray3}" />
+                <local:MyIconButton SvgIcon="lucide/circle-plus" ToolTip="{DynamicResource Instance.Saves.MapEditor.ZoomIn}"
+                                    Click="BtnZoomIn_Click" />
+                <local:MyIconButton SvgIcon="lucide/refresh-cw" ToolTip="{DynamicResource Instance.Saves.MapEditor.Reload}"
+                                    Margin="8,0,0,0" Click="BtnReload_Click" />
+                <local:MyButton x:Name="BtnDelete" Text="{DynamicResource Instance.Saves.MapEditor.DeleteSelected}"
+                                ColorType="Red" Height="32" MinWidth="120" Margin="14,0,0,0" Padding="12,0"
+                                Click="BtnDelete_Click" IsEnabled="False" />
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Background="{DynamicResource ColorBrushGray7}" CornerRadius="8" ClipToBounds="True">
+            <ScrollViewer x:Name="PanScroll" HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto" PanningMode="Both">
+                <Grid x:Name="PanMapRoot" HorizontalAlignment="Left" VerticalAlignment="Top"
+                      RenderTransformOrigin="0,0">
+                    <Canvas x:Name="PanRegions" />
+                    <Canvas x:Name="PanSelection" IsHitTestVisible="False" />
+                    <Canvas x:Name="PanInput" Background="Transparent"
+                            MouseLeftButtonDown="PanInput_MouseLeftButtonDown"
+                            MouseMove="PanInput_MouseMove"
+                            MouseLeftButtonUp="PanInput_MouseLeftButtonUp"
+                            PreviewMouseWheel="PanInput_PreviewMouseWheel" />
+                </Grid>
+            </ScrollViewer>
+        </Border>
+
+        <TextBlock x:Name="LabStatus" Grid.Row="2" Margin="2,8,2,0" FontSize="11"
+                   Foreground="{DynamicResource ColorBrushGray3}" TextWrapping="Wrap" />
+    </Grid>
+</UserControl>
