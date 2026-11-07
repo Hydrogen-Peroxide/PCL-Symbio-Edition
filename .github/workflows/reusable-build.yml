@@ -41,8 +41,7 @@ jobs:
           PCL_BEDROCK_PREVIEW_CIK: ${{ secrets.BEDROCK_PREVIEW_CIK }}
         run: |
           if [ -z "$PCL_BEDROCK_RELEASE_CIK" ]; then
-            echo "::error::仓库未配置 BEDROCK_RELEASE_CIK，产物将无法解包基岩版 GDK 安装包。请在 Settings → Secrets and variables → Actions 中添加该 Secret。"
-            exit 1
+            echo "::warning::仓库未配置 BEDROCK_RELEASE_CIK，产物将无法解包基岩版 GDK 安装包。请在 Settings → Secrets and variables → Actions 中添加该 Secret。"
           fi
           if [ -z "$PCL_BEDROCK_PREVIEW_CIK" ]; then
             echo "::warning::未配置 BEDROCK_PREVIEW_CIK，预览版 GDK 安装包将无法解包。"
