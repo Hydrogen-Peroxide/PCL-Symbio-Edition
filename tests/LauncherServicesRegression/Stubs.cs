@@ -35,6 +35,11 @@ namespace PCL.Network.Loaders
     public sealed class LoaderDownload(string name, List<PCL.Network.DownloadFile> files) : PCL.ModLoader.LoaderBase;
 }
 namespace PCL.Core.App { }
+namespace PCL.Core.App.IoC
+{
+    // FileConfigStorage 仅依赖 HasShutdownStarted，测试宿主无需引入完整生命周期实现。
+    public static class Lifecycle { public static bool HasShutdownStarted => false; }
+}
 namespace PCL.Core.App.Localization
 {
     public static class Lang { public static string Text(string key, params object[] args) => key; }

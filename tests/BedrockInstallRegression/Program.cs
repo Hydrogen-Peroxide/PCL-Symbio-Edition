@@ -62,7 +62,8 @@ foreach (var result in new[] { "StillInstalled", "", "Access denied", "Cleared\n
         Require(removals.All(command => command.Contains("-PreserveApplicationData")),
             "Uninstall fell back to deleting application data.");
         Require(aborted, "Installation would continue without confirmed data preservation.");
-        Require(ModBase.Commands.Count == 2, "Unexpected uninstall retry.");
+        // 保留数据卸载（1 次）+ 安装状态校验（1 次）+ 签名类型查询（1 次）
+        Require(ModBase.Commands.Count == 3, "Unexpected uninstall retry.");
     });
 }
 
@@ -84,9 +85,12 @@ foreach (var path in new[] { @"C:\Games\Minecraft.appx", @"C:\O'Brien\Minecraft.
         Check($"literal installation path [{path}], register={register}", () =>
         {
             var arguments = ModBedrockUwp.GetAppxInstallArguments(path, register);
-            const string prefix = "-NoProfile -EncodedCommand ";
-            Require(arguments.StartsWith(prefix, StringComparison.Ordinal), "Script is exposed to command-line parsing.");
-            var script = Encoding.Unicode.GetString(Convert.FromBase64String(arguments[prefix.Length..]));
+            const string marker = "-EncodedCommand "; // 同时允许其前方的 -NonInteractive / -OutputFormat Text 等参数
+            Require(arguments.StartsWith("-NoProfile ", StringComparison.Ordinal) &&
+                    arguments.Contains(marker, StringComparison.Ordinal),
+                "Script is exposed to command-line parsing.");
+            var script = Encoding.Unicode.GetString(Convert.FromBase64String(
+                arguments[(arguments.IndexOf(marker, StringComparison.Ordinal) + marker.Length)..]));
             var literal = "'" + path.Replace("'", "''") + "'";
             Require(script == $"Add-AppxPackage -{(register ? "Register" : "Path")} {literal} -ErrorAction Stop 2>&1",
                 "Installation path is not a PowerShell string literal.");

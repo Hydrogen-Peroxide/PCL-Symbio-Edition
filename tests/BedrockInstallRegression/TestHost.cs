@@ -11,16 +11,26 @@ internal static class ModBase
 
     public static void Log(string message, LogLevel level = LogLevel.Normal) { }
 
-    public static string ShellAndGetOutput(string fileName, string arguments = "", int timeout = 1000000)
+    public sealed record ProcessExecutionResult(int ExitCode, bool TimedOut, string StandardOutput, string StandardError)
+    {
+        public bool Succeeded => !TimedOut && ExitCode == 0;
+        public string Output => StandardOutput + StandardError;
+    }
+
+    public static ProcessExecutionResult ShellAndGetResult(string fileName, string arguments = "", int timeout = 1000000,
+        string? workingDirectory = null)
     {
         Commands.Add(arguments);
         if (fileName != "powershell.exe" || Responses.Count == 0)
             throw new InvalidOperationException("Unexpected shell command: " + arguments);
-        return Responses.Dequeue();
+        return new ProcessExecutionResult(0, false, Responses.Dequeue(), "");
     }
 
+    public static string ShellAndGetOutput(string fileName, string arguments = "", int timeout = 1000000)
+        => ShellAndGetResult(fileName, arguments, timeout).Output;
+
     public static string ShellAndGetOutputChecked(string fileName, string arguments = "", int timeout = 1000000,
-        string? workingDirectory = null) => ShellAndGetOutput(fileName, arguments, timeout);
+        string? workingDirectory = null) => ShellAndGetResult(fileName, arguments, timeout, workingDirectory).Output;
 }
 
 internal sealed class Process
