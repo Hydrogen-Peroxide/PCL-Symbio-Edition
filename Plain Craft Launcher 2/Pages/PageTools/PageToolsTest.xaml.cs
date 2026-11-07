@@ -672,57 +672,8 @@ public partial class PageToolsTest
 
     private Bitmap GenerateHeadFromSkin(Bitmap skinBitmap)
     {
-        var scale = skinBitmap.Width / 64;
         headSize = GetHeadSize();
-        var headBitmap = new Bitmap(headSize, headSize);
-
-        using (var g = Graphics.FromImage(headBitmap))
-        {
-            g.InterpolationMode = InterpolationMode.NearestNeighbor;
-            g.PixelOffsetMode = PixelOffsetMode.Half;
-
-            DrawFaceLayer(g, skinBitmap, scale);
-            if (skinBitmap.Width >= 64) DrawHairLayer(headBitmap, skinBitmap, scale);
-        }
-
-        return headBitmap;
-    }
-
-    private void DrawFaceLayer(Graphics g, Bitmap skinBitmap, int scale)
-    {
-        var faceRect = new Rectangle(8 * scale, 8 * scale, 8 * scale, 8 * scale);
-        var faceSize = headSize - headSize / 8;
-        var faceScaled = new Bitmap(faceSize, faceSize);
-
-        using (var gFace = Graphics.FromImage(faceScaled))
-        {
-            gFace.InterpolationMode = InterpolationMode.NearestNeighbor;
-            gFace.PixelOffsetMode = PixelOffsetMode.Half;
-            gFace.DrawImage(skinBitmap, new Rectangle(0, 0, faceSize, faceSize), faceRect, GraphicsUnit.Pixel);
-        }
-
-        var offset = headSize / 16;
-        g.DrawImage(faceScaled, offset, offset, faceSize, faceSize);
-    }
-
-    private void DrawHairLayer(Bitmap headBitmap, Bitmap skinBitmap, int scale)
-    {
-        var hairRect = new Rectangle(40 * scale, 8 * scale, 8 * scale, 8 * scale);
-        var hairScaled = new Bitmap(headSize, headSize);
-
-        using (var gHair = Graphics.FromImage(hairScaled))
-        {
-            gHair.InterpolationMode = InterpolationMode.NearestNeighbor;
-            gHair.PixelOffsetMode = PixelOffsetMode.Half;
-            gHair.DrawImage(skinBitmap, new Rectangle(0, 0, headSize, headSize), hairRect, GraphicsUnit.Pixel);
-        }
-
-        for (int x = 0, loopTo = headSize - 1; x <= loopTo; x++)
-        for (int y = 0, loopTo1 = headSize - 1; y <= loopTo1; y++)
-        {
-            var pixel = hairScaled.GetPixel(x, y);
-            if (pixel.A > 0) headBitmap.SetPixel(x, y, pixel);
-        }
+        return ModSkinAvatar.Generate(skinBitmap, headSize);
     }
 
     private void BtnSaveHead_Click(object sender, MouseButtonEventArgs e)

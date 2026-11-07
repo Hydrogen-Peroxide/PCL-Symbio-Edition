@@ -9,6 +9,10 @@ public partial class PageToolsLeft
 {
     private bool isLoad;
     private bool isPageSwitched; // 如果在 Loaded 前切换到其他页面，会导致触发 Loaded 时再次切换一次
+    private PageInstanceSaves? frmSaves;
+    private PageToolsSkinLibrary? frmSkins;
+    private PageToolsDeviceInfo? frmDeviceInfo;
+    private PageToolsSchematic? frmSchematic;
 
     public PageToolsLeft()
     {
@@ -35,7 +39,34 @@ public partial class PageToolsLeft
         // 选择第一个未被禁用的子页面
         if (isPageSwitched) 
             return;
-        ItemTest.SetChecked(true, false, false);
+        if (pageID == FormMain.PageSubType.ToolsSaves)
+        {
+            ItemSaves.SetChecked(true, false, false);
+            return;
+        }
+
+        if (pageID == FormMain.PageSubType.ToolsSkins)
+        {
+            ItemSkins.SetChecked(true, false, false);
+            return;
+        }
+
+        if (pageID == FormMain.PageSubType.ToolsDeviceInfo)
+        {
+            ItemDeviceInfo.SetChecked(true, false, false);
+            return;
+        }
+
+        if (pageID == FormMain.PageSubType.ToolsSchematic)
+        {
+            ItemSchematic.SetChecked(true, false, false);
+            return;
+        }
+
+        if (hide.ToolsTest && !PageSetupUI.HiddenForceShow)
+            ItemSaves.SetChecked(true, false, false);
+        else
+            ItemTest.SetChecked(true, false, false);
     }
 
     private void PageOtherLeft_Unloaded(object sender, RoutedEventArgs e)
@@ -58,8 +89,29 @@ public partial class PageToolsLeft
         var sender = (MyListItem)senderRaw;
         // 尚未初始化控件属性时，sender.Tag 为 Nothing，会导致切换到页面 0
         // 若使用 IsLoaded，则会导致模拟点击不被执行（模拟点击切换页面时，控件的 IsLoaded 为 False）
-        if (sender.Tag is not null)
-            PageChange((FormMain.PageSubType)ModBase.Val(sender.Tag));
+        if (sender.Tag is null)
+            return;
+
+        var id = (FormMain.PageSubType)ModBase.Val(sender.Tag);
+        if ((id == FormMain.PageSubType.ToolsSaves || id == FormMain.PageSubType.ToolsSchematic) &&
+            !EnsureInstance())
+        {
+            HintService.Hint(Lang.Text("Tools.Saves.NoInstance"), HintType.Error);
+            return;
+        }
+
+        PageChange(id);
+    }
+
+    /// <summary>存档页依赖当前实例，未选择时回退到启动页选中的实例。</summary>
+    private static bool EnsureInstance()
+    {
+        if (PageInstanceLeft.McInstance is not null) return true;
+        var selected = ModInstanceList.McMcInstanceSelected;
+        if (selected is null) return false;
+        selected.Load();
+        PageInstanceLeft.McInstance = selected;
+        return true;
     }
 
     public object PageGet(FormMain.PageSubType? id = null)
@@ -72,6 +124,27 @@ public partial class PageToolsLeft
                 if (ModMain.frmToolsTest is null)
                     ModMain.frmToolsTest = new PageToolsTest();
                 return ModMain.frmToolsTest;
+            }
+            case FormMain.PageSubType.ToolsSaves:
+            {
+                frmSaves ??= new PageInstanceSaves();
+                frmSaves.EnableStandaloneMode();
+                return frmSaves;
+            }
+            case FormMain.PageSubType.ToolsSkins:
+            {
+                frmSkins ??= new PageToolsSkinLibrary();
+                return frmSkins;
+            }
+            case FormMain.PageSubType.ToolsDeviceInfo:
+            {
+                frmDeviceInfo ??= new PageToolsDeviceInfo();
+                return frmDeviceInfo;
+            }
+            case FormMain.PageSubType.ToolsSchematic:
+            {
+                frmSchematic ??= new PageToolsSchematic();
+                return frmSchematic;
             }
             default:
             {

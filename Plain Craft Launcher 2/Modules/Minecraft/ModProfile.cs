@@ -766,6 +766,32 @@ public static class ModProfile
         var skinInfo = ModSkin.McSkinSelect();
         if (!skinInfo.IsVaild)
             return;
+        ChangeSkinMs(skinInfo.LocalFile, skinInfo.IsSlim);
+    }
+
+    /// <summary>
+    ///     使用指定的本地皮肤文件更改正版账号皮肤。
+    /// </summary>
+    public static void ChangeSkinMs(string localFile, bool isSlim)
+    {
+        if (_isMsSkinChanging)
+        {
+            HintService.Hint(Lang.Text("Launch.Skin.Change.Busy"));
+            return;
+        }
+
+        if (ModLaunch.mcLoginLoader.State == ModBase.LoadState.Failed)
+        {
+            HintService.Hint(Lang.Text("Launch.Skin.Change.LoginFailed"), HintType.Error);
+            return;
+        }
+
+        if (string.IsNullOrEmpty(localFile) || !File.Exists(localFile))
+        {
+            HintService.Hint(Lang.Text("Tools.SkinLibrary.Apply.FileMissing"), HintType.Error);
+            return;
+        }
+
         HintService.Hint(Lang.Text("Launch.Skin.Change.Starting"));
         _isMsSkinChanging = true;
         // 开始实际获取
@@ -795,10 +821,10 @@ public static class ModProfile
                 headers.Add("User-Agent", "MojangSharp/0.1");
                 var contents = new MultipartFormDataContent
                 {
-                    { new StringContent(skinInfo.IsSlim ? "slim" : "classic"), "variant" },
+                    { new StringContent(isSlim ? "slim" : "classic"), "variant" },
                     {
-                        new ByteArrayContent(ModBase.ReadFileBytes(skinInfo.LocalFile)), "file",
-                        ModBase.GetFileNameFromPath(skinInfo.LocalFile)
+                        new ByteArrayContent(ModBase.ReadFileBytes(localFile)), "file",
+                        ModBase.GetFileNameFromPath(localFile)
                     }
                 };
                 var res = Requester.Fetch("https://api.minecraftservices.com/minecraft/profile/skins", 

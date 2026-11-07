@@ -829,16 +829,10 @@ public partial class PageSetupUI
                 ModMain.frmToolsLeft.ItemTest.Visibility =
                     !HiddenForceShow && conf.ToolsTest ? Visibility.Collapsed : Visibility.Visible;
 
-                var isToolsVisible = (!HiddenForceShow && !conf.ToolsTest) || HiddenForceShow;
-                ModMain.frmToolsLeft.TextToolsCategory.Visibility = isToolsVisible ? Visibility.Visible : Visibility.Collapsed;
-                if (isToolsVisible) ModMain.frmToolsLeft.TextToolsCategory.Opacity = 0.6;
-                
-                // 统计工具页可用项数量
-                var toolsCount = 0;
-                if (!conf.ToolsTest)
-                    toolsCount += 1;
-                ModMain.frmToolsLeft.PanItem.Visibility =
-                    toolsCount < 2 && !HiddenForceShow ? Visibility.Collapsed : Visibility.Visible;
+                // 存档入口始终可见，因此工具分类与左侧面板始终显示
+                ModMain.frmToolsLeft.TextToolsCategory.Visibility = Visibility.Visible;
+                ModMain.frmToolsLeft.TextToolsCategory.Opacity = 0.6;
+                ModMain.frmToolsLeft.PanItem.Visibility = Visibility.Visible;
             }
 
             // 其他入口刷新

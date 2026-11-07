@@ -89,6 +89,8 @@ public partial class PageInstanceCompResource : IRefreshable
     private void Page_Unloaded(object sender, RoutedEventArgs e)
     {
         modFileInfoCache.Clear();
+        // 离开页面时收起预览，避免再次进入时页面仍停留在预览上
+        CloseSchematicPreview();
     }
 
     #endregion
@@ -658,17 +660,38 @@ public partial class PageInstanceCompResource : IRefreshable
         ToolTipService.SetVerticalOffset(btnCont, 30d);
         ToolTipService.SetHorizontalOffset(btnCont, 2d);
         btnCont.Click += Info_Click;
-        sender.MouseRightButtonUp += Info_Click;
+        // 投影文件提供独立的预览入口，不再依赖右键
+        var isSchematicFile = currentCompType == ModComp.CompType.Schematic && !sender.Entry.IsFolder &&
+                              (sender.Entry.path.EndsWithF(".litematic", true) ||
+                               sender.Entry.path.EndsWithF(".schem", true) ||
+                               sender.Entry.path.EndsWithF(".schematic", true) ||
+                               sender.Entry.path.EndsWithF(".nbt", true));
+        if (!isSchematicFile) sender.MouseRightButtonUp += Info_Click;
+        MyIconButton? btnPreview = null;
+        if (isSchematicFile)
+        {
+            btnPreview = new MyIconButton { LogoScale = 1d, SvgIcon = "lucide/layers", Tag = sender };
+            btnPreview.ToolTip = Lang.Text("Common.Action.Preview");
+            ToolTipService.SetPlacement(btnPreview, PlacementMode.Center);
+            ToolTipService.SetVerticalOffset(btnPreview, 30d);
+            ToolTipService.SetHorizontalOffset(btnPreview, 2d);
+            btnPreview.Click += (_, _) => ShowSchematicInfoAsync(sender.Entry);
+        }
         var btnDelete = new MyIconButton { LogoScale = 1d, SvgIcon = "lucide/trash-2", Tag = sender };
         btnDelete.ToolTip = Lang.Text("Common.Action.Delete");
         ToolTipService.SetPlacement(btnDelete, PlacementMode.Center);
         ToolTipService.SetVerticalOffset(btnDelete, 30d);
         ToolTipService.SetHorizontalOffset(btnDelete, 2d);
         btnDelete.Click += (ss, ee) => Delete_Click((MyIconButton)ss, ee);
+        var buttons = new List<MyIconButton>();
+        if (btnPreview is not null) buttons.Add(btnPreview);
+        buttons.Add(btnCont);
+        buttons.Add(btnOpen);
         if (currentCompType != ModComp.CompType.Mod ||
             sender.Entry.State == ModLocalComp.LocalCompFile.LocalFileStatus.Unavailable)
         {
-            sender.Buttons = new[] { btnCont, btnOpen, btnDelete };
+            buttons.Add(btnDelete);
+            sender.Buttons = buttons.ToArray();
         }
         else
         {
@@ -685,7 +708,9 @@ public partial class PageInstanceCompResource : IRefreshable
             ToolTipService.SetVerticalOffset(btnED, 30d);
             ToolTipService.SetHorizontalOffset(btnED, 2d);
             btnED.Click += (ss, ee) => ED_Click((MyIconButton)ss, ee);
-            sender.Buttons = new[] { btnCont, btnOpen, btnED, btnDelete };
+            buttons.Add(btnED);
+            buttons.Add(btnDelete);
+            sender.Buttons = buttons.ToArray();
         }
     }
 
@@ -2807,11 +2832,19 @@ public partial class PageInstanceCompResource : IRefreshable
 
 
         // 记录错误日志但不显示错误提示，因为通用的文件状态检查已经处理了
+        var instance = PageInstanceLeft.McInstance;
+        var jarPath = instance is null ? null : Path.Combine(instance.PathInstance, instance.Name + ".jar");
         ModBase.RunInNewThread(() =>
         {
             try
             {
                 modEntry.LoadNbtDataIfNeeded();
+                var previewData = ModSchematicPreview.Read(modEntry.path);
+                var hasPreview = previewData is { IsEmpty: false };
+                // 在后台线程提取客户端贴图，避免打开预览窗口时卡住 UI
+                var textures = hasPreview && SchematicViewer3D.CanRender(previewData)
+                    ? ModSchematicTextures.Build(previewData.Blocks.Select(b => b.Name).Distinct(), jarPath)
+                    : null;
                 ModBase.RunInUi(() =>
                 {
                     try
@@ -2829,7 +2862,7 @@ public partial class PageInstanceCompResource : IRefreshable
                             ShowSchematicDetails(contentLines, modEntry);
                         else if (modEntry.path.EndsWithF(".nbt", true)) ShowNbtDetails(contentLines, modEntry);
                         ShowDebugInfo(contentLines, modEntry);
-                        ShowSchematicDialog(contentLines, modEntry);
+                        ShowSchematicDialog(contentLines, modEntry, hasPreview ? previewData : null, textures);
                     }
                     catch (Exception ex)
                     {
@@ -3019,13 +3052,43 @@ public partial class PageInstanceCompResource : IRefreshable
         }
     }
 
-    private void ShowSchematicDialog(List<string> contentLines, ModLocalComp.LocalCompFile modEntry)
+    private void ShowSchematicDialog(List<string> contentLines, ModLocalComp.LocalCompFile modEntry,
+        ModSchematicPreview.Data? schematic, ModSchematicTextures? textures)
     {
+        var text = contentLines.Join("\r\n");
+
+        // 有可预览的方块数据时在当前页面内打开预览子界面，不再单独开窗口
+        if (schematic is not null)
+        {
+            OpenSchematicPreview(modEntry.Name, text, schematic, textures, modEntry.Url);
+            return;
+        }
+
         // 投影原理图文件不显示百科搜索选项
         if (modEntry.Url is null)
-            ModMain.MyMsgBox(contentLines.Join("\r\n"), modEntry.Name, Lang.Text("Instance.Resource.Item.Info.Return"));
-        else if (ModMain.MyMsgBox(contentLines.Join("\r\n"), modEntry.Name, Lang.Text("Instance.Resource.Item.Info.OpenWebsite"), Lang.Text("Instance.Resource.Item.Info.Return")) == 1)
+            ModMain.MyMsgBox(text, modEntry.Name, Lang.Text("Instance.Resource.Item.Info.Return"));
+        else if (ModMain.MyMsgBox(text, modEntry.Name, Lang.Text("Instance.Resource.Item.Info.OpenWebsite"), Lang.Text("Instance.Resource.Item.Info.Return")) == 1)
             ModBase.OpenWebsite(modEntry.Url);
+    }
+
+    /// <summary>像存档编辑一样，把预览嵌进实例页面。</summary>
+    private void OpenSchematicPreview(string title, string info, ModSchematicPreview.Data schematic,
+        ModSchematicTextures? textures, string? url)
+    {
+        PanSchematicPreview.Children.Clear();
+        var instance = PageInstanceLeft.McInstance;
+        var jarPath = instance is null ? null : Path.Combine(instance.PathInstance, instance.Name + ".jar");
+        var view = new SchematicPreviewView(title, info, schematic, textures, url, CloseSchematicPreview, jarPath);
+        PanSchematicPreview.Children.Add(view);
+        PanAllBack.Visibility = Visibility.Collapsed;
+        PanSchematicPreview.Visibility = Visibility.Visible;
+    }
+
+    private void CloseSchematicPreview()
+    {
+        PanSchematicPreview.Children.Clear();
+        PanSchematicPreview.Visibility = Visibility.Collapsed;
+        PanAllBack.Visibility = Visibility.Visible;
     }
 
     #endregion
@@ -3091,6 +3154,14 @@ public partial class PageInstanceCompResource : IRefreshable
                 if ((Entry.Comp.Description ?? "") != (Entry.Description ?? ""))
                     searchSource.Add(new ModBase.SearchSource(Entry.Comp.Description, 0.4d));
                 searchSource.Add(new ModBase.SearchSource(string.Join("", Entry.Comp.Tags), 0.2d));
+            }
+
+            // 未缓存网络信息时，通过 ModID / 文件名关联 MC 百科中文名，让本地 Mod 也支持中文搜索
+            if (currentCompType == ModComp.CompType.Mod)
+            {
+                var chineseName = ModComp.GetCompChineseNameByLocal(Entry.ModId, Entry.RawFileName);
+                if (!string.IsNullOrWhiteSpace(chineseName) && chineseName != Entry.Comp?.TranslatedName)
+                    searchSource.Add(new ModBase.SearchSource(chineseName, 1d));
             }
 
             queryList.Add(new ModBase.SearchEntry<ModLocalComp.LocalCompFile>

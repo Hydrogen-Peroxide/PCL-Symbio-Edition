@@ -15,6 +15,11 @@ public static class HardwareInfo
     public static string CPUName = "Unknown";
 
     /// <summary>
+    /// 系统 CPU 物理核心数
+    /// </summary>
+    public static int CPUPhysicalCores = Environment.ProcessorCount;
+
+    /// <summary>
     /// 系统 GPU 信息
     /// </summary>
     public static IReadOnlyList<GPUInfo> GPUs { get; private set; } = [];
@@ -33,12 +38,15 @@ public static class HardwareInfo
     {
         // CPU
         var cpuName = (string?)null;
+        var cpuCores = 0;
         try
         {
             using var searcher = new ManagementObjectSearcher(@"root\CIMV2", "SELECT * FROM Win32_Processor");
             foreach (ManagementObject queryObj in searcher.Get())
             {
                 cpuName = queryObj["Name"]?.ToString()?.Trim();
+                if (queryObj["NumberOfCores"] is not null and not DBNull)
+                    cpuCores = Convert.ToInt32(queryObj["NumberOfCores"]);
                 break;
             }
         }
@@ -75,6 +83,8 @@ public static class HardwareInfo
         {
             if (cpuName is not null)
                 CPUName = cpuName;
+            if (cpuCores > 0)
+                CPUPhysicalCores = cpuCores;
             if (gpuList.Count > 0)
                 GPUs = gpuList;
         }

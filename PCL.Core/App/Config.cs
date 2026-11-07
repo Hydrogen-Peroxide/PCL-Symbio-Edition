@@ -554,6 +554,11 @@ public static partial class Config
         [ConfigItem<string>("BedrockSelectedVersion", "", ConfigSource.Local)] public partial string BedrockSelectedVersion { get; set; }
 
         /// <summary>
+        /// 基岩版安装包与解包版本的存放目录，留空表示启动器目录下的 .minecraft\bedrock。
+        /// </summary>
+        [ConfigItem<string>("BedrockFolder", "", ConfigSource.Local)] public partial string BedrockFolder { get; set; }
+
+        /// <summary>
         /// 是否对基岩版 GDK 便携版启用版本隔离。
         /// </summary>
         [ConfigItem<bool>("BedrockVersionIsolation", false, ConfigSource.Local)] public partial bool BedrockVersionIsolation { get; set; }

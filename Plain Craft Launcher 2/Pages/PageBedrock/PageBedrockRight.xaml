@@ -109,6 +109,31 @@
                                         Click="ImportPackage_Click" />
                     </Grid>
                     <StackPanel Name="PanLocalVersions" Margin="0,12,0,0" />
+                    <!-- 下载路径：安装包与解包后的版本都保存在该目录的 versions 子文件夹中 -->
+                    <Grid Margin="0,14,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0">
+                            <TextBlock Text="{DynamicResource Bedrock.Folder.DownloadPath}" FontSize="12"
+                                       Foreground="{DynamicResource ColorBrushGray3}" />
+                            <TextBlock x:Name="LabBedrockPath" FontSize="11.5" Margin="0,3,0,0"
+                                       TextTrimming="CharacterEllipsis"
+                                       Foreground="{DynamicResource ColorBrushGray4}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <local:MyTextButton x:Name="BtnBedrockPathReset"
+                                                Text="{DynamicResource Bedrock.Folder.ResetPath}"
+                                                FontSize="12" Padding="6,0,6,0" Height="22"
+                                                VerticalAlignment="Center" Visibility="Collapsed"
+                                                Click="ResetBedrockPath_Click" />
+                            <local:MyButton x:Name="BtnBedrockPathChange"
+                                            Text="{DynamicResource Bedrock.Folder.ChangePath}"
+                                            Height="30" Padding="14,0,14,0" Margin="6,0,0,0"
+                                            Click="ChangeBedrockPath_Click" />
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
             </local:MyCard>
 

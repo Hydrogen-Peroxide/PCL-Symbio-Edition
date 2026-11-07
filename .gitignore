@@ -355,3 +355,5 @@ MaskFiles/
 /*.exe
 /PCL SE 宣传*.pptx
 /local-secrets.ps1
+/dist/
+/assets/

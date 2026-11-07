@@ -3,12 +3,88 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:PCL" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:svgIcon="clr-namespace:PCL.Core.UI.Controls.SvgIcon;assembly=PCL.Core"
     mc:Ignorable="d" x:Class="PCL.PageInstanceSaves"
     PanScroll="{Binding ElementName=PanBack}" Grid.IsSharedSizeScope="True">
     <Grid>
         <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                               x:Name="PanBack">
             <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <StackPanel x:Name="PanInstanceSelect" Grid.Row="0" Margin="25,30,25,0" Visibility="Collapsed">
+                    <Border x:Name="PanVersionCard" Background="{DynamicResource ColorBrushGray7}"
+                            BorderBrush="{DynamicResource ColorBrushGray5}" BorderThickness="1"
+                            CornerRadius="6" ClipToBounds="True" Cursor="Hand"
+                            RenderTransformOrigin="0.5,0.5"
+                            MouseLeftButtonUp="PanVersionCard_MouseLeftButtonUp"
+                            MouseEnter="PanVersionCard_MouseEnter" MouseLeave="PanVersionCard_MouseLeave">
+                        <Border.RenderTransform>
+                            <ScaleTransform ScaleX="1" ScaleY="1" />
+                        </Border.RenderTransform>
+                        <Grid Height="52" x:Name="PanVersionCardContent" RenderTransformOrigin="0.5,0.5">
+                            <Grid.RenderTransform>
+                                <TranslateTransform Y="0" />
+                            </Grid.RenderTransform>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <local:MyImage x:Name="ImgVersionLogo" Width="30" Height="30" Margin="14,0,0,0"
+                                           VerticalAlignment="Center" Stretch="Uniform" />
+                            <StackPanel Grid.Column="1" Margin="12,0,10,0" VerticalAlignment="Center">
+                                <TextBlock x:Name="LabVersionTitle" FontSize="14.5" FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock x:Name="LabVersionInfo" FontSize="11" Margin="0,2,0,0"
+                                           Foreground="{DynamicResource ColorBrushGray3}"
+                                           TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                            <svgIcon:SvgIcon x:Name="IconVersionChevron" Grid.Column="2"
+                                             Icon="lucide/chevron-right"
+                                             Width="18" Height="18" Margin="0,0,16,0"
+                                             VerticalAlignment="Center"
+                                             IconBrush="{DynamicResource ColorBrushGray3}" IsHitTestVisible="False"
+                                             RenderTransformOrigin="0.5,0.5">
+                                <svgIcon:SvgIcon.RenderTransform>
+                                    <RotateTransform Angle="90" />
+                                </svgIcon:SvgIcon.RenderTransform>
+                            </svgIcon:SvgIcon>
+                        </Grid>
+                    </Border>
+                    <Popup x:Name="PopupVersion" PlacementTarget="{Binding ElementName=PanVersionCard}"
+                           Placement="Bottom" StaysOpen="False" AllowsTransparency="True"
+                           PopupAnimation="Fade" VerticalOffset="6"
+                           Opened="PopupVersion_Opened" Closed="PopupVersion_Closed">
+                        <Border x:Name="PanVersionPopup" Background="{DynamicResource ColorBrushWhite}" CornerRadius="6"
+                                Padding="8" RenderTransformOrigin="0.5,0.15"
+                                Width="{Binding ActualWidth, ElementName=PanVersionCard}"
+                                BorderBrush="{DynamicResource ColorBrushGray5}" BorderThickness="1"
+                                MaxHeight="360">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1" ScaleY="1" />
+                            </Border.RenderTransform>
+                            <Border.Effect>
+                                <DropShadowEffect Opacity="0.35" BlurRadius="6" ShadowDepth="2" />
+                            </Border.Effect>
+                            <StackPanel>
+                                <TextBlock Text="{DynamicResource Instance.Saves.VersionSelect}" FontSize="12"
+                                           Margin="6,2,6,6" Foreground="{DynamicResource ColorBrushGray3}" />
+                                <local:MyScrollViewer VerticalScrollBarVisibility="Auto"
+                                                      HorizontalScrollBarVisibility="Disabled"
+                                                      MaxHeight="300">
+                                    <StackPanel x:Name="PanVersionList" />
+                                </local:MyScrollViewer>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </StackPanel>
+                <Grid Grid.Row="1" x:Name="PanSavesBody" RenderTransformOrigin="0.5,0.5">
+                    <Grid.RenderTransform>
+                        <TranslateTransform Y="0" />
+                    </Grid.RenderTransform>
                 <local:MyCard HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40" x:Name="PanNoWorld">
                     <Grid Margin="20,17">
                         <Grid.RowDefinitions>
@@ -51,7 +127,7 @@
                     </Grid>
                 </local:MyCard>
                 <StackPanel Orientation="Vertical" Margin="25,10,25,10" x:Name="PanContent">
-                    <local:MySearchBox Margin="0,15" HintText="{DynamicResource Instance.Saves.SearchHint}"
+                    <local:MySearchBox Margin="0,10,0,15" HintText="{DynamicResource Instance.Saves.SearchHint}"
                                        x:Name="SearchBox" />
 
                     <local:MyCard Margin="0,0,0,15" Title="{DynamicResource Instance.Saves.QuickActions}">
@@ -90,6 +166,7 @@
                         <StackPanel Margin="20,48,18,22" Name="PanList" VerticalAlignment="Top" />
                     </local:MyCard>
                 </StackPanel>
+                </Grid>
             </Grid>
         </local:MyScrollViewer>
 

@@ -2511,6 +2511,29 @@ public static class ModLaunch
         mcLaunchArgument = finalArguments;
     }
 
+    /// <summary>
+    ///     是否使用 JavaWrapper 作为主 Jar 启动。
+    ///     JavaWrapper 通过 -jar 启动，JVM 会忽略 -cp；若实例用 -Djava.system.class.loader 指定了
+    ///     自定义系统类加载器（例如 GTNH / lwjgl3ify 的 RetroFuturaBootstrap），该类的 jar 只在 -cp 里，
+    ///     JVM 初始化时会因找不到类直接崩溃，因此这类实例必须绕开 JavaWrapper、直接用 -cp 启动。
+    /// </summary>
+    private static bool McLaunchShouldUseJavaWrapper(IEnumerable<string> arguments)
+    {
+        if (!ModBase.IsUtf8CodePage()) return false;
+        if (Config.Launch.DisableJlw) return false;
+        if (Config.Instance.DisableJlw[ModInstanceList.McMcInstanceSelected?.PathInstance]) return false;
+
+        foreach (var argument in arguments)
+            if (argument.Contains("-Djava.system.class.loader", StringComparison.OrdinalIgnoreCase))
+            {
+                ModBase.Log("[Launch] 实例指定了自定义系统类加载器，已跳过 JavaWrapper，直接使用 -cp 启动",
+                    ModBase.LogLevel.Developer);
+                return false;
+            }
+
+        return true;
+    }
+
     // Jvm 部分（第一段）
     private static string McLaunchArgumentsJvmOld(McInstance instance)
     {
@@ -2635,8 +2658,7 @@ public static class ModLaunch
         }
 
         // 添加 Java Wrapper 作为主 Jar
-        if (ModBase.IsUtf8CodePage() && !Config.Launch.DisableJlw &&
-            !Config.Instance.DisableJlw[ModInstanceList.McMcInstanceSelected?.PathInstance])
+        if (McLaunchShouldUseJavaWrapper(dataList))
         {
             if (mcLaunchJavaSelected.Installation.MajorVersion >= 9)
                 dataList.Add("--add-exports cpw.mods.bootstraplauncher/cpw.mods.bootstraplauncher=ALL-UNNAMED");
@@ -2760,8 +2782,7 @@ public static class ModLaunch
             }
 
         // 添加 Java Wrapper 作为主 Jar
-        if (ModBase.IsUtf8CodePage() && !Config.Launch.DisableJlw &&
-            !Config.Instance.DisableJlw[ModInstanceList.McMcInstanceSelected?.PathInstance])
+        if (McLaunchShouldUseJavaWrapper(dataList))
         {
             if (mcLaunchJavaSelected.Installation.MajorVersion >= 9)
                 dataList.Add("--add-exports cpw.mods.bootstraplauncher/cpw.mods.bootstraplauncher=ALL-UNNAMED");

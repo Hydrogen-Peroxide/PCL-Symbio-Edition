@@ -73,12 +73,20 @@
     <sys:String x:Key="Bedrock.Filter.All">全部</sys:String>
     <sys:String x:Key="Bedrock.Filter.Gdk">GDK 新版</sys:String>
     <sys:String x:Key="Bedrock.Filter.Uwp">UWP 旧版</sys:String>
+    <sys:String x:Key="Bedrock.Folder.ChangePath">更改路径</sys:String>
+    <sys:String x:Key="Bedrock.Folder.ChangePathBusy">有基岩版下载或安装任务正在进行，请完成后再更改下载路径。</sys:String>
+    <sys:String x:Key="Bedrock.Folder.ChangePathTitle">选择基岩版下载路径</sys:String>
+    <sys:String x:Key="Bedrock.Folder.DownloadPath">下载路径</sys:String>
     <sys:String x:Key="Bedrock.Folder.NoPackages">还没有下载过基岩版安装包，请先在右侧下载。</sys:String>
     <sys:String x:Key="Bedrock.Folder.NoScreenshots">未找到截图目录，可能是还没有在游戏中截图。</sys:String>
     <sys:String x:Key="Bedrock.Folder.NotFound">未找到基岩版数据目录，请先启动一次游戏后再试。</sys:String>
     <sys:String x:Key="Bedrock.Folder.NotFoundPath">没有找到{0}：&#xA;{1}</sys:String>
     <sys:String x:Key="Bedrock.Folder.OpenTitle">打开{0}</sys:String>
     <sys:String x:Key="Bedrock.Folder.Packages">安装包目录</sys:String>
+    <sys:String x:Key="Bedrock.Folder.PathChangeFailed">更改下载路径失败：{0}</sys:String>
+    <sys:String x:Key="Bedrock.Folder.PathChanged">下载路径已更改为 {0}，原路径下的版本仍保留在原处</sys:String>
+    <sys:String x:Key="Bedrock.Folder.PathReset">下载路径已恢复为默认位置</sys:String>
+    <sys:String x:Key="Bedrock.Folder.ResetPath">恢复默认</sys:String>
     <sys:String x:Key="Bedrock.Folder.Saves">存档目录</sys:String>
     <sys:String x:Key="Bedrock.Folder.Screenshots">截图目录</sys:String>
     <sys:String x:Key="Bedrock.Folder.XboxNotInstalled">未能打开 Xbox 应用，请确认系统中已安装 Xbox 应用。</sys:String>
@@ -300,6 +308,7 @@
     <sys:String x:Key="Common.Action.Open">打开</sys:String>
     <sys:String x:Key="Common.Action.OpenFolder">打开文件夹</sys:String>
     <sys:String x:Key="Common.Action.Overwrite">覆盖</sys:String>
+    <sys:String x:Key="Common.Action.Preview">预览</sys:String>
     <sys:String x:Key="Common.Action.Refresh">刷新</sys:String>
     <sys:String x:Key="Common.Action.Reset">重置</sys:String>
     <sys:String x:Key="Common.Action.Search">搜索</sys:String>
@@ -1475,6 +1484,18 @@
     <sys:String x:Key="Instance.Resource.Item.Schematic.TotalVolume">总体积：</sys:String>
     <sys:String x:Key="Instance.Resource.Item.Schematic.Version">原理图版本：</sys:String>
 
+    <!-- Instance.Resource.Schematic.Preview -->
+
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.BlockList">所需方块 · {0} 种 / {1} 个</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.BuildFailed">3D 预览构建失败，详情见日志</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.Detail">详情</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.Hint">拖动旋转 · 滚轮缩放</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerAll">全部层</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerInfo">已显示 {0} / {1} 层（Y ≤ {2}）</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerOnly">分层显示</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerTotal">共 {0} 层</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.TooLarge">该原理图包含 {0} 个方块，超出 3D 预览上限（{1}），仅显示详情与方块列表</sys:String>
+
     <!-- Instance.Resource.Update -->
 
     <sys:String x:Key="Instance.Resource.Update">更新</sys:String>
@@ -1552,6 +1573,46 @@
     <sys:String x:Key="Instance.Saves.MapEditor.Deleting">正在删除 {0} 个区块...</sys:String>
     <sys:String x:Key="Instance.Saves.MapEditor.Deleted">已删除 {0} 个区块</sys:String>
     <sys:String x:Key="Instance.Saves.MapEditor.DeleteFailed">删除区块失败：{0}</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.DimensionOverworld">主世界</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.DimensionNether">下界</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.DimensionEnd">末地</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Grid">显示区块网格</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Layer">按 Y 范围查看（洞穴模式）</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.LayerTop">上 {0}</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.LayerBottom">下 {0}</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.SelectionMode">选区模式</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.RectSelect">矩形</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.BrushSelect">笔刷</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.BrushToolTip">拖动涂抹选中，按住 Alt 擦除</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter">筛选</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter.None">全部区块</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter.NotFull">未完全生成</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter.VersionMismatch">版本不一致</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter.Recent">7 天内修改</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter.SelectMatching">选中匹配</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter.Selected">已选中 {0} 个匹配区块</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveOffset">移动偏移</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Move">移动</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveXToolTip">区块 X 偏移</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveZToolTip">区块 Z 偏移</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveInvalid">请输入非零的区块偏移</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveConfirmTitle">移动区块</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveConfirmMessage">将把选中的 {0} 个区块移动到偏移 ({1}, {2})，原位置会被删除。是否继续？</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Moving">正在移动 {0} 个区块...</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Moved">已移动 {0} 个区块</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveFailed">移动区块失败：{0}</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Undo">撤销上一次修改</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Undoing">正在撤销...</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Undone">已撤销上一次修改</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.UndoFailed">撤销失败：{0}</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Jump">定位</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.JumpX">X</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.JumpZ">Z</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.JumpXToolTip">区块 X 坐标</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.JumpZToolTip">区块 Z 坐标</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.JumpInvalid">请输入有效的区块坐标</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.JumpMissing">区块 ({0}, {1}) 不存在或未生成</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.ChunkInfo">区块 ({0}, {1}) · {2} · 版本 {3} · {4} · 驻留 {5} 分钟</sys:String>
     <sys:String x:Key="Instance.Saves.PasteFile">粘贴剪贴板文件</sys:String>
     <sys:String x:Key="Instance.Saves.PasteFolderFailed">粘贴存档文件夹失败</sys:String>
     <sys:String x:Key="Instance.Saves.PastedCount">已粘贴 {0} 个文件夹</sys:String>
@@ -1559,6 +1620,11 @@
     <sys:String x:Key="Instance.Saves.QuickPlay">快捷启动</sys:String>
     <sys:String x:Key="Instance.Saves.RefreshUiFailed">刷新存档UI失败</sys:String>
     <sys:String x:Key="Instance.Saves.SaveListTitle">存档列表 ({0})</sys:String>
+    <sys:String x:Key="Instance.Saves.Version">版本</sys:String>
+    <sys:String x:Key="Instance.Saves.VersionInfo">{0} 个存档</sys:String>
+    <sys:String x:Key="Instance.Saves.VersionSelect">选择版本</sys:String>
+    <sys:String x:Key="Instance.Saves.VersionShared">共享存档</sys:String>
+    <sys:String x:Key="Instance.Saves.VersionDisabled">不可选择</sys:String>
     <sys:String x:Key="Instance.Saves.SearchError">搜索过程中发生异常</sys:String>
     <sys:String x:Key="Instance.Saves.SearchHint">搜索存档名称</sys:String>
     <sys:String x:Key="Instance.Saves.SearchResultTitle">搜索结果 ({0})</sys:String>
@@ -3473,8 +3539,69 @@
     <!-- Tools -->
 
     <sys:String x:Key="Tools.Error.OperationFailed">工具页操作失败。请查看错误详情。</sys:String>
+    <sys:String x:Key="Tools.Device.Cores">{0} 核心</sys:String>
+    <sys:String x:Key="Tools.Device.CPU">处理器</sys:String>
+    <sys:String x:Key="Tools.Device.GPU">显卡 {0}</sys:String>
+    <sys:String x:Key="Tools.Device.Memory">内存</sys:String>
+    <sys:String x:Key="Tools.Device.OS">操作系统</sys:String>
+    <sys:String x:Key="Tools.Device.System">系统信息</sys:String>
+    <sys:String x:Key="Tools.Device.SystemMemory">系统内存 {0} GB</sys:String>
+    <sys:String x:Key="Tools.Device.Title">设备信息</sys:String>
+    <sys:String x:Key="Tools.Device.Unknown">未知</sys:String>
     <sys:String x:Key="Tools.Left.Utilities">奇妙小工具</sys:String>
     <sys:String x:Key="Tools.Left.Utilities.Title">百宝箱</sys:String>
+    <sys:String x:Key="Tools.Left.Saves.Title">存档管理</sys:String>
+    <sys:String x:Key="Tools.Left.Schematic.Title">投影管理</sys:String>
+    <sys:String x:Key="Tools.Left.SkinLibrary.Title">皮肤库</sys:String>
+    <sys:String x:Key="Tools.Schematic.Title">投影预览</sys:String>
+    <sys:String x:Key="Tools.Schematic.Version">实例</sys:String>
+    <sys:String x:Key="Tools.Schematic.Refresh">刷新列表</sys:String>
+    <sys:String x:Key="Tools.Schematic.Count">共 {0} 个投影文件</sys:String>
+    <sys:String x:Key="Tools.Schematic.Empty">当前实例的 schematics 文件夹中还没有投影文件。把 .litematic / .schem 文件放入该文件夹后点击刷新。</sys:String>
+    <sys:String x:Key="Tools.Schematic.Loading">正在读取投影…</sys:String>
+    <sys:String x:Key="Tools.Schematic.LoadFailed">读取投影「{0}」失败</sys:String>
+    <sys:String x:Key="Tools.Schematic.InstancePick">选择投影所在实例</sys:String>
+    <sys:String x:Key="Tools.Schematic.NoInstance">未找到任何实例</sys:String>
+    <sys:String x:Key="Tools.Schematic.SearchHint">搜索投影文件</sys:String>
+    <sys:String x:Key="Tools.Schematic.QuickActions">快捷操作</sys:String>
+    <sys:String x:Key="Tools.Schematic.ListTitle">投影列表</sys:String>
+    <sys:String x:Key="Tools.Schematic.VersionInfo">{0} 个投影文件</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Title">皮肤库</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Current">当前</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.LayerThickness">外层厚度</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.SlimModel">纤细模型（手臂 3 像素）</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.SlimModel.ToolTip">关闭为经典模型，手臂宽 4 像素（Steve）；打开为纤细模型，手臂宽 3 像素（Alex）。切换后会记住选择</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.CurrentSkin">当前皮肤</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.AddNew">添加新皮肤</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.AddToLibrary">添加到皮肤库</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.ApplyToAccount">应用到账号</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.RemoveFromLibrary">从皮肤库删除</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Rename">重命名</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Import">导入皮肤</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.OpenFolder">打开皮肤文件夹</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Refresh">刷新</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Empty">皮肤库还是空的。点击「添加新皮肤」导入 64×32 或 64×64 的 PNG 皮肤文件。</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.ImportFilter">皮肤图片 (*.png)|*.png</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.ImportTitle">选择皮肤文件</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.ImportSuccess">已导入 {0} 个皮肤</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.ImportFailed">导入皮肤「{0}」失败</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Invalid">「{0}」不是有效的皮肤（需要 64×32 或 64×64 的 PNG 图片）</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.LoadFailed">读取皮肤库失败，请查看错误详情。</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Refreshed">皮肤库已刷新</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Added">已添加到皮肤库</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.AddFailed">添加到皮肤库失败：{0}</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Apply.NoProfile">请先在启动页登录账号后再应用皮肤</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Apply.AuthHint">第三方登录的皮肤需要在皮肤站网页中上传，已为你打开皮肤衣柜。</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Apply.FileMissing">皮肤文件已不存在，请刷新皮肤库后重试</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.DeleteConfirmTitle">删除皮肤</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.DeleteConfirmMessage">确定要从皮肤库删除「{0}」吗？此操作不会影响账号上已有的皮肤。</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Deleted">已删除皮肤「{0}」</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.DeleteFailed">删除皮肤「{0}」失败</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.RenameTitle">重命名皮肤</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.RenameSuccess">已重命名为「{0}」</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.RenameFailed">重命名皮肤失败：{0}</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.RenameExists">皮肤库中已存在名为「{0}」的皮肤</sys:String>
+    <sys:String x:Key="Tools.Saves.NoInstance">请先在启动页选择一个 Minecraft 实例</sys:String>
 
     <!-- Tools.ServerQuery -->
 

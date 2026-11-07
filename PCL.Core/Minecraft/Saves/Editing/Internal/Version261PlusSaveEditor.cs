@@ -16,17 +16,21 @@ internal sealed class Version261PlusSaveEditor : ISaveEditor
         if (changes.IsEmpty)
             return false;
 
-        // 确保 difficulty_settings 复合标签存在
-        if (!data.TryGet<NbtCompound>("difficulty_settings", out var ds) || ds is null)
-        {
-            ds = new NbtCompound("difficulty_settings");
-            data.Add(ds);
-        }
-
         var changed = false;
         changed |= Pre261SaveEditor.WriteAllowCommands(data, changes);
-        changed |= WriteDifficulty(ds!, changes);
-        changed |= WriteLocked(ds!, changes);
+
+        // 只有确实要改难度相关字段时才创建 difficulty_settings，避免留下空复合标签
+        if (changes.Difficulty.HasValue || changes.LockDifficulty.HasValue)
+        {
+            if (!data.TryGet<NbtCompound>("difficulty_settings", out var ds) || ds is null)
+            {
+                ds = new NbtCompound("difficulty_settings");
+                data.Add(ds);
+            }
+
+            changed |= WriteDifficulty(ds, changes);
+            changed |= WriteLocked(ds, changes);
+        }
 
         return changed;
     }

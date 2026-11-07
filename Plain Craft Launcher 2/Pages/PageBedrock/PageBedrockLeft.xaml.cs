@@ -564,7 +564,7 @@ public partial class PageBedrockLeft
 
     private void OpenPackageFolder_Click(object sender, MouseButtonEventArgs e)
     {
-        var dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".minecraft", "bedrock", "versions");
+        var dir = ModBedrockInstance.VersionsDirectory;
         if (!Directory.Exists(dir))
         {
             ModMain.MyMsgBox(Lang.Text("Bedrock.Folder.NoPackages"), Lang.Text("Bedrock.Shortcuts.OpenPackages"));

@@ -73,12 +73,20 @@
     <sys:String x:Key="Bedrock.Filter.All">All</sys:String>
     <sys:String x:Key="Bedrock.Filter.Gdk">GDK (new)</sys:String>
     <sys:String x:Key="Bedrock.Filter.Uwp">UWP (legacy)</sys:String>
+    <sys:String x:Key="Bedrock.Folder.ChangePath">Change path</sys:String>
+    <sys:String x:Key="Bedrock.Folder.ChangePathBusy">A Bedrock download or installation is in progress. Change the download path after it finishes.</sys:String>
+    <sys:String x:Key="Bedrock.Folder.ChangePathTitle">Select Bedrock download path</sys:String>
+    <sys:String x:Key="Bedrock.Folder.DownloadPath">Download path</sys:String>
     <sys:String x:Key="Bedrock.Folder.NoPackages">No Bedrock package has been downloaded yet. Download one on the right first.</sys:String>
     <sys:String x:Key="Bedrock.Folder.NoScreenshots">Screenshots folder not found. You may not have taken any in-game screenshots yet.</sys:String>
     <sys:String x:Key="Bedrock.Folder.NotFound">Bedrock data folder not found. Launch the game once and try again.</sys:String>
     <sys:String x:Key="Bedrock.Folder.NotFoundPath">Could not find {0}:&#xA;{1}</sys:String>
     <sys:String x:Key="Bedrock.Folder.OpenTitle">Open {0}</sys:String>
     <sys:String x:Key="Bedrock.Folder.Packages">packages folder</sys:String>
+    <sys:String x:Key="Bedrock.Folder.PathChangeFailed">Failed to change the download path: {0}</sys:String>
+    <sys:String x:Key="Bedrock.Folder.PathChanged">Download path changed to {0}; versions in the old path stay where they are</sys:String>
+    <sys:String x:Key="Bedrock.Folder.PathReset">Download path restored to the default location</sys:String>
+    <sys:String x:Key="Bedrock.Folder.ResetPath">Restore default</sys:String>
     <sys:String x:Key="Bedrock.Folder.Saves">saves folder</sys:String>
     <sys:String x:Key="Bedrock.Folder.Screenshots">screenshots folder</sys:String>
     <sys:String x:Key="Bedrock.Folder.XboxNotInstalled">Could not open the Xbox app. Make sure it is installed on this system.</sys:String>
@@ -300,6 +308,7 @@
     <sys:String x:Key="Common.Action.Open">Open</sys:String>
     <sys:String x:Key="Common.Action.OpenFolder">Open folder</sys:String>
     <sys:String x:Key="Common.Action.Overwrite">Override</sys:String>
+    <sys:String x:Key="Common.Action.Preview">Preview</sys:String>
     <sys:String x:Key="Common.Action.Refresh">Refresh</sys:String>
     <sys:String x:Key="Common.Action.Reset">Reset</sys:String>
     <sys:String x:Key="Common.Action.Search">Search</sys:String>
@@ -1475,6 +1484,18 @@
     <sys:String x:Key="Instance.Resource.Item.Schematic.TotalVolume">Total volume: </sys:String>
     <sys:String x:Key="Instance.Resource.Item.Schematic.Version">Schematic version: </sys:String>
 
+    <!-- Instance.Resource.Schematic.Preview -->
+
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.BlockList">Required blocks · {0} types / {1} blocks</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.BuildFailed">Failed to build the 3D preview, see the log for details</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.Detail">Details</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.Hint">Drag to rotate · Scroll to zoom</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerAll">All layers</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerInfo">Showing {0} / {1} layers (Y ≤ {2})</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerOnly">Show layers</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerTotal">{0} layers</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.TooLarge">This schematic contains {0} blocks, exceeding the 3D preview limit ({1}). Only details and the block list are shown.</sys:String>
+
     <!-- Instance.Resource.Update -->
 
     <sys:String x:Key="Instance.Resource.Update">Update</sys:String>
@@ -1552,6 +1573,46 @@
     <sys:String x:Key="Instance.Saves.MapEditor.Deleting">Deleting {0} chunks...</sys:String>
     <sys:String x:Key="Instance.Saves.MapEditor.Deleted">Deleted {0} chunks</sys:String>
     <sys:String x:Key="Instance.Saves.MapEditor.DeleteFailed">Failed to delete chunks: {0}</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.DimensionOverworld">Overworld</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.DimensionNether">Nether</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.DimensionEnd">The End</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Grid">Show chunk grid</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Layer">View by Y range (cave mode)</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.LayerTop">Top {0}</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.LayerBottom">Bottom {0}</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.SelectionMode">Selection</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.RectSelect">Rectangle</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.BrushSelect">Brush</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.BrushToolTip">Drag to paint; hold Alt to erase</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter">Filter</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter.None">All chunks</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter.NotFull">Not fully generated</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter.VersionMismatch">Version mismatch</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter.Recent">Modified in 7 days</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter.SelectMatching">Select matching</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Filter.Selected">Selected {0} matching chunks</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveOffset">Move offset</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Move">Move</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveXToolTip">Chunk X offset</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveZToolTip">Chunk Z offset</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveInvalid">Enter a non-zero chunk offset.</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveConfirmTitle">Move chunks</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveConfirmMessage">Move the {0} selected chunks by ({1}, {2})? The original chunks will be deleted.</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Moving">Moving {0} chunks...</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Moved">Moved {0} chunks</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.MoveFailed">Failed to move chunks: {0}</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Undo">Undo last change</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Undoing">Undoing...</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Undone">Undid the last change</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.UndoFailed">Failed to undo: {0}</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.Jump">Go</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.JumpX">X</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.JumpZ">Z</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.JumpXToolTip">Chunk X coordinate</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.JumpZToolTip">Chunk Z coordinate</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.JumpInvalid">Enter valid chunk coordinates.</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.JumpMissing">Chunk ({0}, {1}) does not exist or is not generated.</sys:String>
+    <sys:String x:Key="Instance.Saves.MapEditor.ChunkInfo">Chunk ({0}, {1}) · {2} · version {3} · {4} · inhabited {5} min</sys:String>
     <sys:String x:Key="Instance.Saves.PasteFile">Paste clipboard file</sys:String>
     <sys:String x:Key="Instance.Saves.PasteFolderFailed">Failed to paste save folder</sys:String>
     <sys:String x:Key="Instance.Saves.PastedCount">Pasted {0} folder(s)</sys:String>
@@ -1559,6 +1620,11 @@
     <sys:String x:Key="Instance.Saves.QuickPlay">Quick launch</sys:String>
     <sys:String x:Key="Instance.Saves.RefreshUiFailed">Failed to refresh save UI</sys:String>
     <sys:String x:Key="Instance.Saves.SaveListTitle">Save list ({0})</sys:String>
+    <sys:String x:Key="Instance.Saves.Version">Version</sys:String>
+    <sys:String x:Key="Instance.Saves.VersionInfo">{0} saves</sys:String>
+    <sys:String x:Key="Instance.Saves.VersionSelect">Select version</sys:String>
+    <sys:String x:Key="Instance.Saves.VersionShared">shared saves</sys:String>
+    <sys:String x:Key="Instance.Saves.VersionDisabled">unavailable</sys:String>
     <sys:String x:Key="Instance.Saves.SearchError">Error occurred during search</sys:String>
     <sys:String x:Key="Instance.Saves.SearchHint">Search save name</sys:String>
     <sys:String x:Key="Instance.Saves.SearchResultTitle">Search results ({0})</sys:String>
@@ -3473,8 +3539,69 @@
     <!-- Tools -->
 
     <sys:String x:Key="Tools.Error.OperationFailed">A utilities operation failed. See the details below.</sys:String>
+    <sys:String x:Key="Tools.Device.Cores">{0} cores</sys:String>
+    <sys:String x:Key="Tools.Device.CPU">Processor</sys:String>
+    <sys:String x:Key="Tools.Device.GPU">Graphics {0}</sys:String>
+    <sys:String x:Key="Tools.Device.Memory">Memory</sys:String>
+    <sys:String x:Key="Tools.Device.OS">Operating System</sys:String>
+    <sys:String x:Key="Tools.Device.System">System Info</sys:String>
+    <sys:String x:Key="Tools.Device.SystemMemory">System memory {0} GB</sys:String>
+    <sys:String x:Key="Tools.Device.Title">Device Info</sys:String>
+    <sys:String x:Key="Tools.Device.Unknown">Unknown</sys:String>
     <sys:String x:Key="Tools.Left.Utilities">Utilities</sys:String>
     <sys:String x:Key="Tools.Left.Utilities.Title">Toolbox</sys:String>
+    <sys:String x:Key="Tools.Left.Saves.Title">Saves</sys:String>
+    <sys:String x:Key="Tools.Left.Schematic.Title">Schematics</sys:String>
+    <sys:String x:Key="Tools.Left.SkinLibrary.Title">Skin Library</sys:String>
+    <sys:String x:Key="Tools.Schematic.Title">Schematic Preview</sys:String>
+    <sys:String x:Key="Tools.Schematic.Version">Instance</sys:String>
+    <sys:String x:Key="Tools.Schematic.Refresh">Refresh list</sys:String>
+    <sys:String x:Key="Tools.Schematic.Count">{0} schematic file(s)</sys:String>
+    <sys:String x:Key="Tools.Schematic.Empty">There are no schematics in this instance's schematics folder yet. Put .litematic / .schem files there, then click refresh.</sys:String>
+    <sys:String x:Key="Tools.Schematic.Loading">Loading schematic…</sys:String>
+    <sys:String x:Key="Tools.Schematic.LoadFailed">Failed to load schematic "{0}"</sys:String>
+    <sys:String x:Key="Tools.Schematic.InstancePick">Select the instance</sys:String>
+    <sys:String x:Key="Tools.Schematic.NoInstance">No instance found</sys:String>
+    <sys:String x:Key="Tools.Schematic.SearchHint">Search schematic files</sys:String>
+    <sys:String x:Key="Tools.Schematic.QuickActions">Quick actions</sys:String>
+    <sys:String x:Key="Tools.Schematic.ListTitle">Schematic files</sys:String>
+    <sys:String x:Key="Tools.Schematic.VersionInfo">{0} schematic file(s)</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Title">Skin Library</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Current">Current</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.LayerThickness">Outer layer</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.SlimModel">Slim model (3 px arms)</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.SlimModel.ToolTip">Off: classic model with 4-pixel arms (Steve); on: slim model with 3-pixel arms (Alex). The choice is remembered</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.CurrentSkin">Current skin</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.AddNew">Add new skin</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.AddToLibrary">Add to skin library</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.ApplyToAccount">Apply to account</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.RemoveFromLibrary">Remove from library</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Rename">Rename</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Import">Import skin</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.OpenFolder">Open skin folder</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Refresh">Refresh</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Empty">Your skin library is empty. Click "Add new skin" to import a 64×32 or 64×64 PNG skin.</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.ImportFilter">Skin image (*.png)|*.png</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.ImportTitle">Select skin files</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.ImportSuccess">Imported {0} skin(s)</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.ImportFailed">Failed to import skin "{0}"</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Invalid">"{0}" is not a valid skin (a 64×32 or 64×64 PNG image is required)</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.LoadFailed">Failed to read the skin library. Check the error details.</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Refreshed">Skin library refreshed</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Added">Added to the skin library</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.AddFailed">Failed to add to the skin library: {0}</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Apply.NoProfile">Sign in to an account on the launch page before applying a skin</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Apply.AuthHint">Skins for third-party login must be uploaded on the skin site. Your skin closet has been opened.</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Apply.FileMissing">The skin file no longer exists. Refresh the skin library and try again</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.DeleteConfirmTitle">Delete skin</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.DeleteConfirmMessage">Delete "{0}" from the skin library? The skin already applied to your account will not be affected.</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Deleted">Deleted skin "{0}"</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.DeleteFailed">Failed to delete skin "{0}"</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.RenameTitle">Rename Skin</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.RenameSuccess">Renamed to "{0}"</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.RenameFailed">Failed to rename skin: {0}</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.RenameExists">A skin named "{0}" already exists in the library</sys:String>
+    <sys:String x:Key="Tools.Saves.NoInstance">Select a Minecraft instance on the Launch page first.</sys:String>
 
     <!-- Tools.ServerQuery -->
 

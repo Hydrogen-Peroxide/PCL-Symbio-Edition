@@ -135,10 +135,15 @@ public partial class PageInstanceSavesInfo : IRefreshable
                 await WriteLock.WaitAsync();
                 try
                 {
-                    await SaveManager.ApplyChangesAsync(folder, new SaveChanges
+                    var applied = await SaveManager.ApplyChangesAsync(folder, new SaveChanges
                     {
                         AllowCommands = new Editable<bool>((int)combo.SelectedValue == 1),
                     });
+                    if (!applied)
+                    {
+                        HintService.Hint(Lang.Text("Instance.Saves.Info.Modify.CheatFailed"), HintType.Error);
+                        return;
+                    }
                 }
                 finally
                 {
@@ -170,6 +175,7 @@ public partial class PageInstanceSavesInfo : IRefreshable
             Width = 100d, HorizontalAlignment = HorizontalAlignment.Left,
             ToolTip = Lang.Text("Instance.Saves.Info.Modify.BeforeSave"),
             SelectedValuePath = "Value", DisplayMemberPath = "Display",
+            IsEnabled = !isHardcore, // 极限模式的难度在游戏内固定为困难，不能修改
         };
         combo.Items.Add(new { Value = 0, Display = Lang.Text("Instance.Saves.Info.Difficulty.Peaceful") });
         combo.Items.Add(new { Value = 1, Display = Lang.Text("Instance.Saves.Info.Difficulty.Easy") });
@@ -198,11 +204,21 @@ public partial class PageInstanceSavesInfo : IRefreshable
                 await WriteLock.WaitAsync();
                 try
                 {
-                    await SaveManager.ApplyChangesAsync(folder, new SaveChanges
+                    // 极限模式的难度固定为困难且必须锁定，这里不写入难度相关字段
+                    var applied = await SaveManager.ApplyChangesAsync(folder, new SaveChanges
                     {
-                        Difficulty = new Editable<Difficulty>((Difficulty)(int)combo.SelectedValue),
-                        LockDifficulty = new Editable<bool>(!isHardcore && lockCheckBox.Checked == true),
+                        Difficulty = isHardcore
+                            ? default(Editable<Difficulty>)
+                            : new Editable<Difficulty>((Difficulty)(int)combo.SelectedValue),
+                        LockDifficulty = isHardcore
+                            ? default(Editable<bool>)
+                            : new Editable<bool>(lockCheckBox.Checked == true),
                     });
+                    if (!applied)
+                    {
+                        HintService.Hint(Lang.Text("Instance.Saves.Info.Modify.DifficultyFailed"), HintType.Error);
+                        return;
+                    }
                 }
                 finally
                 {

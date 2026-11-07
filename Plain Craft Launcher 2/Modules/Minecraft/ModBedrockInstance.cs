@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Text.Json.Nodes;
+using PCL.Core.App;
 
 namespace PCL;
 
@@ -11,6 +12,33 @@ namespace PCL;
 public static class ModBedrockInstance
 {
     private const string MetadataFileName = ".pcl-instance.json";
+
+    /// <summary>
+    ///     基岩版数据根目录。默认在启动器目录下的 .minecraft\bedrock，可在基岩版页面改为其它磁盘。
+    /// </summary>
+    public static string DataRoot
+    {
+        get
+        {
+            var custom = Config.Launch.BedrockFolder;
+            if (!string.IsNullOrWhiteSpace(custom))
+            {
+                try
+                {
+                    return Path.GetFullPath(custom);
+                }
+                catch (Exception ex)
+                {
+                    ModBase.Log($"[Bedrock] 自定义下载路径无效（{custom}）：{ex.Message}", ModBase.LogLevel.Hint);
+                }
+            }
+
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".minecraft", "bedrock");
+        }
+    }
+
+    /// <summary>下载、导入的安装包与解包产物所在的 versions 目录。</summary>
+    public static string VersionsDirectory => Path.Combine(DataRoot, "versions");
 
     private static string GetMetadataPath(string versionsDirectory, string versionId) =>
         Path.Combine(versionsDirectory, versionId, MetadataFileName);

@@ -99,6 +99,7 @@
                 </StackPanel>
             </local:MyCard>
         </Grid>
+        <Grid x:Name="PanSchematicPreview" Visibility="Collapsed" Margin="25,10,25,10" />
         <local:MyCard HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40,0" SnapsToDevicePixels="True"
                       x:Name="PanLoad" UseAnimation="False">
             <local:MyLoading Text="{DynamicResource Instance.Resource.Loading}" Margin="20,20,20,17" x:Name="Load" HorizontalAlignment="Center"

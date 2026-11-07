@@ -13,7 +13,7 @@ public partial class PageLoginProfileSkin
         // Handles
         PanData.MouseEnter += ShowPanel;
         PanData.MouseLeave += HidePanel;
-        BtnSkin.Click += BtnSkin_Click;
+        BtnSkinRefresh.Click += BtnSkinRefresh_Click;
         BtnEdit.Click += BtnEdit_Click;
         BtnSelect.Click += ChangeProfile;
     }
@@ -60,7 +60,7 @@ public partial class PageLoginProfileSkin
 
     private void HidePanel(object sender, EventArgs e)
     {
-        if (BtnEdit.ContextMenu.IsOpen || BtnSkin.ContextMenu.IsOpen || PanData.IsMouseOver)
+        if (BtnEdit.ContextMenu.IsOpen || PanData.IsMouseOver)
             return;
         ModAnimation.AniStart(ModAnimation.AaOpacity(PanButtons, -PanButtons.Opacity, 120),
             "PageLoginProfileSkin Button");
@@ -69,12 +69,6 @@ public partial class PageLoginProfileSkin
     private void MenuAccountOptions_Closed(object sender, RoutedEventArgs e)
     {
         HidePanel(sender, e);
-    }
-
-    // 皮肤与披风子菜单
-    private void BtnSkin_Click(object sender, EventArgs e)
-    {
-        BtnSkin.ContextMenu.IsOpen = true;
     }
 
     // 账号信息子菜单
@@ -119,40 +113,16 @@ public partial class PageLoginProfileSkin
         });
     }
 
-    // 修改皮肤
-    private void Skin_Click(object sender, RoutedEventArgs e)
-    {
-        if (ModProfile.selectedProfile.Type == ModLaunch.McLoginType.Ms)
-            ModProfile.ChangeSkinMs();
-        else if (ModProfile.selectedProfile.Type == ModLaunch.McLoginType.Auth)
-            ModBase.OpenWebsite(ModProfile.selectedProfile.Server.BeforeFirst("api/yggdrasil/authserver") +
-                                "user/closet");
-        else
-                HintService.Hint(Lang.Text("Launch.Account.ProfileSkin.SkinUnsupported"));
-    }
-
-    // 保存皮肤
-    private void BtnSkinSave_Click(object sender, RoutedEventArgs e)
-    {
-        Skin.BtnSkinSave_Click(sender, e);
-    }
-
-    // 刷新皮肤
-    private void BtnSkinRefresh_Click(object sender, RoutedEventArgs e)
+    // 刷新头像
+    private void BtnSkinRefresh_Click(object sender, EventArgs e)
     {
         Skin.RefreshClick(sender, e);
     }
 
-    // 修改披风
-    private void BtnSkinCape_Click(object sender, RoutedEventArgs e)
+    // 跳转到皮肤库
+    private void BtnSkinLibrary_Click(object sender, EventArgs e)
     {
-        if (ModProfile.selectedProfile.Type == ModLaunch.McLoginType.Ms)
-            Skin.BtnSkinCape_Click(sender, e);
-        else if (ModProfile.selectedProfile.Type == ModLaunch.McLoginType.Auth)
-            ModBase.OpenWebsite(ModProfile.selectedProfile.Server.BeforeFirst("api/yggdrasil/authserver") +
-                                "user/closet");
-        else
-            HintService.Hint(Lang.Text("Launch.Account.ProfileSkin.CapeUnsupported"));
+        ModMain.frmMain.PageChange(FormMain.PageType.Tools, FormMain.PageSubType.ToolsSkins);
     }
 
     #endregion

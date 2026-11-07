@@ -15,8 +15,8 @@ public partial class MySkin
 {
     public delegate void ClickEventHandler(object sender, MouseButtonEventArgs e);
 
-    // 皮肤储存
-    private bool isChanging;
+    // 披风更换状态
+    private static bool isCapeChanging;
 
     // 点击
     private bool isSkinMouseDown;
@@ -29,11 +29,6 @@ public partial class MySkin
         MouseLeave += PanSkin_MouseLeave;
         MouseLeftButtonDown += PanSkin_MouseLeftButtonDown;
         MouseLeftButtonUp += PanSkin_MouseLeftButtonUp;
-        // Handles
-        BtnSkinSave.Click += BtnSkinSave_Click;
-        BtnSkinSave.Checked += BtnSkinSave_Checked;
-        BtnSkinRefresh.Click += RefreshClick;
-        BtnSkinCape.Click += BtnSkinCape_Click;
     }
 
     public string Address
@@ -46,13 +41,6 @@ public partial class MySkin
                 ? Lang.Text("Common.State.Loading")
                 : Lang.Text("Launch.Skin.Change.ToolTip");
         }
-    }
-
-    // 披风
-    public bool HasCape
-    {
-        get => BtnSkinCape.Visibility == Visibility.Collapsed;
-        set => BtnSkinCape.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
     }
 
     // 事件
@@ -89,57 +77,6 @@ public partial class MySkin
         if (!isSkinMouseDown) return;
         isSkinMouseDown = false;
         Click?.Invoke(sender, e);
-    }
-
-    // 保存皮肤
-    public void BtnSkinSave_Click(object sender, RoutedEventArgs e)
-    {
-        Save(loader);
-    }
-
-    public static void Save(ModLoader.LoaderTask<ModBase.EqualableList<string>, string> loader)
-    {
-        var address = loader.output;
-        if (loader.State != ModBase.LoadState.Finished)
-        {
-            HintService.Hint(Lang.Text("Launch.Skin.Fetching"), HintType.Error);
-            if (loader.State != ModBase.LoadState.Loading)
-                loader.Start();
-            return;
-        }
-
-        try
-        {
-            var fileAddress = SystemDialogs.SelectSaveFile(Lang.Text("Launch.Skin.SaveDialog.Title"),
-                ModBase.GetFileNameFromPath(address),
-                Lang.Text("Launch.Skin.SaveDialog.Filter"));
-            if (!fileAddress.Contains(@"\")) return;
-            File.Delete(fileAddress);
-            if (address.StartsWith(ModBase.pathImage))
-            {
-                var image = new MyBitmap(address);
-                image.Save(fileAddress);
-            }
-            else
-            {
-                ModBase.CopyFile(address, fileAddress);
-            }
-
-            HintService.Hint(Lang.Text("Launch.Skin.SaveSuccess"), HintType.Success);
-        }
-        catch (Exception ex)
-        {
-            ModBase.Log(
-                ex,
-                Lang.Text("Launch.Skin.Save.Error"),
-                ModBase.LogLevel.Hint,
-                userSummary: Lang.Text("Launch.Skin.Save.Error"));
-        }
-    }
-
-    private void BtnSkinSave_Checked(object sender, RoutedEventArgs e)
-    {
-        ((MyMenuItem)sender).IsEnabled = string.IsNullOrEmpty(Address);
     }
 
     /// <summary>
@@ -271,7 +208,7 @@ public partial class MySkin
     }
 
     // 刷新缓存
-    public void RefreshClick(object sender, RoutedEventArgs e)
+    public void RefreshClick(object sender, EventArgs e)
     {
         RefreshCache(loader);
     }
@@ -350,10 +287,13 @@ public partial class MySkin
         });
     }
 
-    public void BtnSkinCape_Click(object sender, RoutedEventArgs e)
+    /// <summary>
+    ///     打开披风选择界面并更换披风。
+    /// </summary>
+    public static void ChangeCape()
     {
         // 检查条件，获取新披风
-        if (isChanging)
+        if (isCapeChanging)
         {
             HintService.Hint(Lang.Text("Launch.Skin.Cape.Changing"));
             return;
@@ -366,7 +306,7 @@ public partial class MySkin
         }
 
         HintService.Hint(Lang.Text("Launch.Skin.Cape.FetchingList"));
-        isChanging = true;
+        isCapeChanging = true;
         // 开始实际获取
         ModBase.RunInNewThread(() =>
         {
@@ -478,7 +418,7 @@ public partial class MySkin
             }
             finally
             {
-                isChanging = false;
+                isCapeChanging = false;
             }
         }, "Cape Change");
     }

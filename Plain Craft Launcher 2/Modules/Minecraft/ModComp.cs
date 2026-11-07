@@ -863,6 +863,94 @@ public static class ModComp
         }
     }
 
+    private static readonly ConcurrentDictionary<string, string> LocalChineseNameCache = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    ///     尝试将本地资源关联到 MC 百科条目，返回其中文名。找不到时返回 Nothing。
+    /// </summary>
+    /// <param name="modId">资源内声明的 ModID，可为 Nothing。</param>
+    /// <param name="fileName">资源文件名，在 ModID 无法匹配时用于推测 Slug。</param>
+    public static string GetCompChineseNameByLocal(string modId, string fileName)
+    {
+        var cacheKey = (modId ?? "") + "|" + (fileName ?? "");
+        if (LocalChineseNameCache.TryGetValue(cacheKey, out var cached))
+            return string.IsNullOrEmpty(cached) ? null : cached;
+
+        var result = QueryLocalChineseName(modId, fileName);
+        LocalChineseNameCache[cacheKey] = result ?? "";
+        return result;
+    }
+
+    private static string QueryLocalChineseName(string modId, string fileName)
+    {
+        try
+        {
+            var candidates = new List<string>();
+            if (!string.IsNullOrWhiteSpace(modId)) candidates.Add(modId.Trim().ToLowerInvariant());
+            candidates.AddRange(GetSlugCandidatesFromFileName(fileName));
+            if (candidates.Count == 0) return null;
+
+            using var conn = CompDB;
+            foreach (var slug in candidates.Distinct())
+            {
+                var name = conn.ExecuteScalar<string>(
+                    "SELECT ChineseName FROM ModTranslation WHERE (CurseForgeSlug = @s OR ModrinthSlug = @s) AND ChineseName IS NOT NULL AND ChineseName <> '' LIMIT 1",
+                    new { s = slug });
+                if (!string.IsNullOrWhiteSpace(name)) return name;
+            }
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[Comp] 关联本地资源中文名失败", ModBase.LogLevel.Developer);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    ///     从文件名推测可能的 CurseForge / Modrinth Slug，例如 create-1.20.1-0.5.1 -> create。
+    /// </summary>
+    private static IEnumerable<string> GetSlugCandidatesFromFileName(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName)) yield break;
+
+        var name = Path.GetFileName(fileName);
+        foreach (var suffix in new[] { ".disabled", ".old" })
+            if (name.EndsWithF(suffix, true))
+                name = name[..^suffix.Length];
+        name = Path.GetFileNameWithoutExtension(name);
+        if (string.IsNullOrEmpty(name)) yield break;
+
+        var tokens = name.ToLowerInvariant().Replace('_', '-').Replace(' ', '-')
+            .Split('-', StringSplitOptions.RemoveEmptyEntries).ToList();
+        if (tokens.Count == 0) yield break;
+
+        // 截断到第一个版本号或加载器标记之前
+        var cut = tokens.Count;
+        for (var i = 1; i < tokens.Count; i++)
+            if (IsVersionOrLoaderToken(tokens[i]))
+            {
+                cut = i;
+                break;
+            }
+
+        var slug = string.Join("-", tokens.Take(cut));
+        if (slug.Length >= 3 && slug.Any(char.IsLetter)) yield return slug;
+
+        // 没有可截断的版本号时，整名也可能就是 Slug
+        var full = string.Join("-", tokens);
+        if (full != slug && full.Length >= 3) yield return full;
+    }
+
+    private static bool IsVersionOrLoaderToken(string token)
+    {
+        if (string.IsNullOrEmpty(token)) return false;
+        if (char.IsDigit(token[0])) return true;
+        if (token.Length > 1 && (token[0] is 'v' or 'V') && char.IsDigit(token[1])) return true;
+        if (token.StartsWith("mc") && token.Length > 2 && char.IsDigit(token[2])) return true;
+        return token is "forge" or "fabric" or "neoforge" or "quilt";
+    }
+
     [ProtoContract]
     private class CompDatabaseEntry
     {
@@ -1501,7 +1589,7 @@ public static class ModComp
                 if (!loadedDatabase)
                 {
                     loadedDatabase = true;
-                    if (Type == CompType.Mod || Type == CompType.DataPack)
+                    if (Type == CompType.Mod || Type == CompType.DataPack || Type == CompType.ModPack)
                         _DatabaseEntry = GetCompWikiEntryBySlug(Slug);
                 }
 
@@ -2528,28 +2616,45 @@ public static class ModComp
         var isChineseSearch = Lang.IsChineseMainland &&
                               RegexPatterns.HasChineseChar.IsMatch(rawFilter) &&
                               !string.IsNullOrEmpty(rawFilter);
-        if (isChineseSearch && request.type is CompType.Mod or CompType.DataPack)
+        if (isChineseSearch && request.type is CompType.Mod or CompType.DataPack or CompType.ModPack)
         {
             var searchEntries = new List<ModBase.SearchEntry<CompDatabaseEntry>>();
+            // 中文查询可能包含多个词（如「机械动力 火车」），逐词匹配并合并，避免整句匹配不到
+            var searchTerms = rawFilter
+                .Split(new[] { ' ', '　', ',', '，', '、', '/', '|' }, StringSplitOptions.RemoveEmptyEntries)
+                .Where(term => RegexPatterns.HasChineseChar.IsMatch(term))
+                .Distinct()
+                .ToList();
+            if (searchTerms.Count == 0) searchTerms.Add(rawFilter);
+            var searchResMap = new Dictionary<string, CompDatabaseEntry>();
             using (var conn = CompDB)
             {
-                var likeEscaped = rawFilter.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
-                var searchRes = conn.Query<CompDatabaseEntry>(
-                    "SELECT * FROM ModTranslation WHERE ChineseName LIKE @p ESCAPE '\\' OR CurseForgeSlug LIKE @p ESCAPE '\\' OR ModrinthSlug LIKE @p ESCAPE '\\'",
-                    new { p = $"%{likeEscaped}%" }).ToList();
-                foreach (var searchItem in searchRes)
+                foreach (var term in searchTerms)
                 {
-                    if (searchItem.ChineseName.Contains("动态的树")) continue;
-                    searchEntries.Add(new ModBase.SearchEntry<CompDatabaseEntry>
-                    {
-                        item = searchItem,
-                        searchSource = new List<ModBase.SearchSource>
-                        {
-                            new(searchItem.ChineseName.BeforeFirst(" (").Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries), 1),
-                            new(searchItem.ChineseName.AfterFirst(" (") + (searchItem.CurseForgeSlug ?? "") + (searchItem.ModrinthSlug ?? ""), 0.5)
-                        }
-                    });
+                    var likeEscaped = term.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_");
+                    var searchRes = conn.Query<CompDatabaseEntry>(
+                        "SELECT * FROM ModTranslation WHERE ChineseName LIKE @p ESCAPE '\\' OR CurseForgeSlug LIKE @p ESCAPE '\\' OR ModrinthSlug LIKE @p ESCAPE '\\'",
+                        new { p = $"%{likeEscaped}%" });
+                    foreach (var searchItem in searchRes)
+                        searchResMap.TryAdd(
+                            searchItem.CurseForgeSlug ?? searchItem.ModrinthSlug ?? searchItem.WikiId.ToString(),
+                            searchItem);
                 }
+            }
+
+            foreach (var searchItem in searchResMap.Values)
+            {
+                if (string.IsNullOrEmpty(searchItem.ChineseName)) continue;
+                if (searchItem.ChineseName.Contains("动态的树")) continue;
+                searchEntries.Add(new ModBase.SearchEntry<CompDatabaseEntry>
+                {
+                    item = searchItem,
+                    searchSource = new List<ModBase.SearchSource>
+                    {
+                        new(searchItem.ChineseName.BeforeFirst(" (").Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries), 1),
+                        new(searchItem.ChineseName.AfterFirst(" (") + (searchItem.CurseForgeSlug ?? "") + (searchItem.ModrinthSlug ?? ""), 0.5)
+                    }
+                });
             }
 
             var searchResults = ModBase.Search(searchEntries, request.searchText, 40, 0.2);

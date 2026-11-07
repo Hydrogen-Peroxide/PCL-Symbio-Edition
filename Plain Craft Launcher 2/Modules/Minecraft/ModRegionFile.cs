@@ -17,19 +17,29 @@ public static class ModRegionFile
     public const int RegionChunks = 32;
     public const int RegionPixels = ChunkPixels * RegionChunks;
 
-    public sealed record RegionRender(int RegionX, int RegionZ, byte[] Pixels, bool[] Present, int ChunkCount);
+    /// <summary>
+    ///     区块元数据。区域文件没有逐区块的保存时间，LastSavedUtc 取区域文件的最后写入时间。
+    ///     区块 NBT 内的 LastUpdate 是世界游戏刻，不是 Unix 时间，不能直接当日期显示。
+    /// </summary>
+    public sealed record ChunkMeta(string? Status, int DataVersion, long InhabitedTime, DateTime LastSavedUtc);
+
+    public sealed record RegionRender(int RegionX, int RegionZ, byte[] Pixels, bool[] Present, int ChunkCount,
+        ChunkMeta?[] Meta);
 
     /// <summary>把区域文件渲染成 128×128 的 BGRA 地形图；无法读取时返回 null。</summary>
-    public static RegionRender? RenderRegion(string regionPath)
+    /// <param name="layer">不为 null 时渲染指定 Y 范围顶部的方块（洞穴模式），空气保持透明。</param>
+    public static RegionRender? RenderRegion(string regionPath, (int Bottom, int Top)? layer = null)
     {
         try
         {
             var (regionX, regionZ) = ParseRegionName(regionPath);
             var data = File.ReadAllBytes(regionPath);
             if (data.Length < 8192) return null;
+            var lastSavedUtc = File.GetLastWriteTimeUtc(regionPath);
 
             var pixels = new byte[RegionPixels * RegionPixels * 4];
             var present = new bool[RegionChunks * RegionChunks];
+            var meta = new ChunkMeta?[RegionChunks * RegionChunks];
             var chunkCount = 0;
             for (var chunkZ = 0; chunkZ < RegionChunks; chunkZ++)
             for (var chunkX = 0; chunkX < RegionChunks; chunkX++)
@@ -44,6 +54,13 @@ public static class ModRegionFile
 
                 present[index] = true;
                 chunkCount++;
+                meta[index] = ReadChunkMeta(chunk, lastSavedUtc);
+
+                if (layer is { } range)
+                {
+                    RenderLayer(chunk, range.Bottom, range.Top, chunkX, chunkZ, pixels);
+                    continue;
+                }
 
                 var heightmap = ReadHeightmap(chunk);
                 if (heightmap is null)
@@ -64,7 +81,7 @@ public static class ModRegionFile
                     continue;
                 }
 
-                var (surface, floor) = heightmap.Value;
+                var (surface, floor, minY) = heightmap.Value;
                 var sections = ReadSections(chunk);
                 for (var pixelZ = 0; pixelZ < ChunkPixels; pixelZ++)
                 for (var pixelX = 0; pixelX < ChunkPixels; pixelX++)
@@ -72,8 +89,8 @@ public static class ModRegionFile
                     var blockX = pixelX * 4 + 2;
                     var blockZ = pixelZ * 4 + 2;
                     var column = blockZ * 16 + blockX;
-                    var height = GetHeight(surface, column);
-                    var floorHeight = GetHeight(floor, column);
+                    var height = GetHeight(surface, column) + minY;
+                    var floorHeight = GetHeight(floor, column) + minY;
                     var water = height > 0 && floorHeight > 0 && height <= 63 && height > floorHeight;
                     var blockName = GetTopBlockName(sections, blockX, height - 1, blockZ);
                     if (blockName is not null && blockName.Contains("water", StringComparison.OrdinalIgnoreCase))
@@ -90,12 +107,47 @@ public static class ModRegionFile
                 }
             }
 
-            return new RegionRender(regionX, regionZ, pixels, present, chunkCount);
+            return new RegionRender(regionX, regionZ, pixels, present, chunkCount, meta);
         }
         catch (Exception ex)
         {
             ModBase.Log(ex, $"读取区域文件失败：{regionPath}", ModBase.LogLevel.Normal);
             return null;
+        }
+    }
+
+    private static void RenderLayer(NbtCompound chunk, int bottomY, int topY, int chunkX, int chunkZ, byte[] pixels)
+    {
+        if (bottomY > topY) (bottomY, topY) = (topY, bottomY);
+        var sections = ReadSections(chunk);
+        for (var pixelZ = 0; pixelZ < ChunkPixels; pixelZ++)
+        for (var pixelX = 0; pixelX < ChunkPixels; pixelX++)
+        {
+            var blockX = pixelX * 4 + 2;
+            var blockZ = pixelZ * 4 + 2;
+            string? blockName = null;
+            var blockY = topY;
+            for (var y = topY; y >= bottomY; y--)
+            {
+                var name = GetTopBlockName(sections, blockX, y, blockZ);
+                if (name is null or "minecraft:air" or "minecraft:cave_air" or "minecraft:void_air") continue;
+                blockName = name;
+                blockY = y;
+                break;
+            }
+
+            if (blockName is null) continue;
+
+            var water = blockName.Contains("water", StringComparison.OrdinalIgnoreCase);
+            var color = GetBlockColor(blockName, blockY, water);
+
+            var targetX = chunkX * ChunkPixels + pixelX;
+            var targetZ = chunkZ * ChunkPixels + pixelZ;
+            var target = (targetZ * RegionPixels + targetX) * 4;
+            pixels[target] = color.B;
+            pixels[target + 1] = color.G;
+            pixels[target + 2] = color.R;
+            pixels[target + 3] = 255;
         }
     }
 
@@ -127,14 +179,38 @@ public static class ModRegionFile
         }
     }
 
-    private static (long[] Surface, long[] Floor)? ReadHeightmap(NbtCompound chunk)
+    private static ChunkMeta ReadChunkMeta(NbtCompound chunk, DateTime lastSavedUtc)
+    {
+        var level = chunk["Level"] as NbtCompound ?? chunk;
+        var status = (chunk["Status"] ?? level["Status"]) is NbtString value ? value.Value : null;
+        return new ChunkMeta(status, GetInt(chunk["DataVersion"]),
+            GetLong(chunk["InhabitedTime"] ?? level["InhabitedTime"]), lastSavedUtc);
+    }
+
+    private static long GetLong(NbtTag? tag) => tag switch
+    {
+        NbtByte value => unchecked((sbyte)value.Value),
+        NbtShort value => value.Value,
+        NbtInt value => value.Value,
+        NbtLong value => value.Value,
+        _ => 0
+    };
+
+    private static (long[] Surface, long[] Floor, int MinY)? ReadHeightmap(NbtCompound chunk)
     {
         var level = chunk["Level"] as NbtCompound ?? chunk;
         var heightmaps = level["Heightmaps"] as NbtCompound;
         // 新生成、尚未升级的区块可能只有 *_WG 世界生成高度图
         var surface = (heightmaps?["WORLD_SURFACE"] ?? heightmaps?["WORLD_SURFACE_WG"]) as NbtLongArray;
         var floor = (heightmaps?["OCEAN_FLOOR"] ?? heightmaps?["OCEAN_FLOOR_WG"]) as NbtLongArray;
-        return surface is null || floor is null ? null : (surface.Value, floor.Value);
+        if (surface is null || floor is null || surface.Value.Length == 0 || floor.Value.Length == 0) return null;
+
+        // 1.18 起高度图存储的是相对最低建造高度的值（如 -64 会记为 0），而非绝对 Y 坐标
+        var minY = 0;
+        if (GetInt(chunk["DataVersion"]) >= 2825)
+            minY = chunk["yPos"] is NbtInt yPos ? yPos.Value * 16 : -64;
+
+        return (surface.Value, floor.Value, minY);
     }
 
     private sealed class SectionData
@@ -170,7 +246,8 @@ public static class ModRegionFile
 
     private static int GetInt(NbtTag? tag) => tag switch
     {
-        NbtByte value => value.Value,
+        // NbtByte.Value 是 byte，1.18 起区块节的 Y 可能为负（如 -4 存成 0xFC），必须按有符号字节解释
+        NbtByte value => unchecked((sbyte)value.Value),
         NbtShort value => value.Value,
         NbtInt value => value.Value,
         NbtLong value => (int)value.Value,
@@ -179,7 +256,7 @@ public static class ModRegionFile
 
     private static string? GetTopBlockName(Dictionary<int, SectionData> sections, int x, int y, int z)
     {
-        if (y < 0) return null;
+        // 1.18 起主世界存在 Y < 0 的区块节，负数同样可以渲染（旧版本没有负数节，查表自然返回 null）
         if (!sections.TryGetValue(y >> 4, out var section)) return null;
 
         var index = (y & 15) * 256 + (z & 15) * 16 + (x & 15);
@@ -187,7 +264,9 @@ public static class ModRegionFile
             ? ReadPacked(data.Value, index, section.Bits)
             : 0;
         if (paletteIndex < 0 || paletteIndex >= section.Palette.Count) return null;
-        return section.Palette[paletteIndex] is NbtCompound entry ? entry["Name"]?.ToString() : null;
+        return section.Palette[paletteIndex] is NbtCompound entry
+            ? (entry["Name"] as NbtString)?.Value
+            : null;
     }
 
     private static int ReadPacked(long[] values, int index, int bits)
@@ -213,7 +292,7 @@ public static class ModRegionFile
         return (int)(value & ((1UL << bits) - 1));
     }
 
-    private static (byte R, byte G, byte B) GetBlockColor(string? name, int height, bool water)
+    internal static (byte R, byte G, byte B) GetBlockColor(string? name, int height, bool water)
     {
         if (water) return (44, 98, 190);
         if (string.IsNullOrEmpty(name)) return GetColor(height, false);
@@ -392,6 +471,17 @@ public static class ModRegionFile
         return copied.Count;
     }
 
+    /// <summary>把选中区块移动到偏移后的坐标；重叠时不会误删刚复制出的区块。</summary>
+    public static int MoveChunks(string worldPath, IReadOnlyCollection<(int X, int Z)> chunks, int offsetX, int offsetZ)
+    {
+        if (chunks.Count == 0 || offsetX == 0 && offsetZ == 0) return 0;
+
+        var copied = CopyChunks(worldPath, chunks, offsetX, offsetZ);
+        var destinations = chunks.Select(chunk => (chunk.X + offsetX, chunk.Z + offsetZ)).ToHashSet();
+        DeleteChunksInWorld(worldPath, chunks.Where(chunk => !destinations.Contains(chunk)).ToList());
+        return copied;
+    }
+
     private static void WriteChunkPayloads(string worldPath, IEnumerable<ChunkData> chunks)
     {
         foreach (var group in chunks.GroupBy(chunk => (RegionX: FloorDiv(chunk.X, 32), RegionZ: FloorDiv(chunk.Z, 32))))
@@ -422,6 +512,7 @@ public static class ModRegionFile
             if (index < 0 || index >= 1024 || raw.Length < 5) continue;
 
             var sectors = (raw.Length + 4095) / 4096;
+            if (sectors > 255) throw new InvalidDataException($"区块数据过大（{sectors} 个扇区），无法写入区域文件");
             while (output.Length % 4096 != 0) output.WriteByte(0);
             var sectorOffset = (int)(output.Length / 4096);
             if (sectorOffset > 0xFFFFFF) throw new InvalidDataException("区域文件过大，无法写入 3 字节偏移");
@@ -527,15 +618,15 @@ public static class ModRegionFile
             var globalZ = regionZ * 32 + chunkZ;
             if (chunks.Contains((globalX, globalZ)))
             {
-                header[index * 4] = 0;
-                header[index * 4 + 1] = 0;
-                header[index * 4 + 2] = 0;
-                header[index * 4 + 3] = 0;
-                header[4096 + index * 4] = 0;
-                header[4096 + index * 4 + 1] = 0;
-                header[4096 + index * 4 + 2] = 0;
-                header[4096 + index * 4 + 3] = 0;
+                ClearHeaderSlot(header, index);
                 anyDeleted = true;
+                continue;
+            }
+
+            // 头部条目可能指向文件外，先确认长度字段可读，避免整个删除因一个坏条目失败
+            if (offset + 4 > data.Length)
+            {
+                ClearHeaderSlot(header, index);
                 continue;
             }
 
@@ -544,14 +635,7 @@ public static class ModRegionFile
             if (length <= 0 || offset + total > data.Length)
             {
                 // 丢弃损坏或未使用的条目，避免复制到新文件后仍指向无效数据
-                header[index * 4] = 0;
-                header[index * 4 + 1] = 0;
-                header[index * 4 + 2] = 0;
-                header[index * 4 + 3] = 0;
-                header[4096 + index * 4] = 0;
-                header[4096 + index * 4 + 1] = 0;
-                header[4096 + index * 4 + 2] = 0;
-                header[4096 + index * 4 + 3] = 0;
+                ClearHeaderSlot(header, index);
                 continue;
             }
 
@@ -559,6 +643,7 @@ public static class ModRegionFile
             var newSectorOffset = (int)(output.Length / 4096);
             var newSectors = (total + 4095) / 4096;
             if (newSectorOffset > 0xFFFFFF) throw new InvalidDataException("区域文件过大，无法写入 3 字节偏移");
+            if (newSectors > 255) throw new InvalidDataException($"区块数据过大（{newSectors} 个扇区），无法写入区域文件");
 
             output.Write(data, offset, total);
             for (var i = total; i < newSectors * 4096; i++) output.WriteByte(0);
@@ -583,6 +668,13 @@ public static class ModRegionFile
 
         ModBase.Log($"[MapEditor] 已从 {Path.GetFileName(regionPath)} 删除 {chunks.Count} 个区块（备份：{backup}）",
             ModBase.LogLevel.Normal);
+    }
+
+    /// <summary>清空区域文件头部中某个区块的偏移与时间戳。</summary>
+    private static void ClearHeaderSlot(byte[] header, int index)
+    {
+        Array.Clear(header, index * 4, 4);
+        Array.Clear(header, 4096 + index * 4, 4);
     }
 
     private static (int X, int Z) ParseRegionName(string path)

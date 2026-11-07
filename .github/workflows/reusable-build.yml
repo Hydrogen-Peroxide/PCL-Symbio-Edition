@@ -35,16 +35,28 @@ jobs:
         with:
           global-json-file: global.json
 
-      - name: Verify Bedrock CIK
+      - name: Verify Build Secrets
         env:
           PCL_BEDROCK_RELEASE_CIK: ${{ secrets.BEDROCK_RELEASE_CIK }}
           PCL_BEDROCK_PREVIEW_CIK: ${{ secrets.BEDROCK_PREVIEW_CIK }}
+          PCL_MS_CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          PCL_CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+          PCL_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: |
           if [ -z "$PCL_BEDROCK_RELEASE_CIK" ]; then
             echo "::warning::仓库未配置 BEDROCK_RELEASE_CIK，产物将无法解包基岩版 GDK 安装包。请在 Settings → Secrets and variables → Actions 中添加该 Secret。"
           fi
           if [ -z "$PCL_BEDROCK_PREVIEW_CIK" ]; then
             echo "::warning::未配置 BEDROCK_PREVIEW_CIK，预览版 GDK 安装包将无法解包。"
+          fi
+          if [ -z "$PCL_MS_CLIENT_ID" ]; then
+            echo "::warning::未配置 CLIENT_ID，产物将回退到内置的公共 Client ID（d4915fd6-8245-4bd4-a150-396834b705b5）。"
+          fi
+          if [ -z "$PCL_CURSEFORGE_API_KEY" ]; then
+            echo "::warning::未配置 CURSEFORGE_API_KEY，CurseForge 资源搜索与下载将返回错误。"
+          fi
+          if [ -z "$PCL_SENTRY_DSN" ]; then
+            echo "::notice::未配置 SENTRY_DSN，遥测与崩溃上报功能将保持关闭。"
           fi
 
       - name: Build Project

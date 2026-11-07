@@ -1,0 +1,6 @@
+<UserControl x:Class="PCL.SkinViewer3D"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="Transparent" ClipToBounds="True">
+    <Viewport3D x:Name="Viewport" IsHitTestVisible="False" ClipToBounds="True" />
+</UserControl>

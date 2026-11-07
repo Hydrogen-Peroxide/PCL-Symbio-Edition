@@ -1473,6 +1473,10 @@ public partial class FormMain
         SetupLauncherMisc = 10,
         SetupLauncherLanguage = 11,
 
+        ToolsSaves = 4,
+        ToolsSkins = 5,
+        ToolsDeviceInfo = 6,
+        ToolsSchematic = 7,
         ToolsTest = 3,
 
         VersionOverall = 0,

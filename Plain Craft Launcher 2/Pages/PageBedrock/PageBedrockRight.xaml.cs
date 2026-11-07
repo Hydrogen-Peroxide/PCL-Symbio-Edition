@@ -51,8 +51,7 @@ public partial class PageBedrockRight
     private bool _launching;
     private int _launchGeneration;
 
-    private static string BedrockVersionsDir =>
-        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".minecraft", "bedrock", "versions");
+    private static string BedrockVersionsDir => ModBedrockInstance.VersionsDirectory;
 
     public PageBedrockRight()
     {
@@ -106,6 +105,86 @@ public partial class PageBedrockRight
         }
     }
 
+    #region 下载路径
+
+    /// <summary>刷新界面上的基岩版下载路径。</summary>
+    private void UpdateBedrockPathDisplay()
+    {
+        LabBedrockPath.Text = ModBedrockInstance.DataRoot;
+        LabBedrockPath.ToolTip = BedrockVersionsDir;
+        BtnBedrockPathReset.Visibility = string.IsNullOrWhiteSpace(Config.Launch.BedrockFolder)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+    }
+
+    private void ChangeBedrockPath_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (HasActiveBedrockTask())
+        {
+            HintService.Hint(Lang.Text("Bedrock.Folder.ChangePathBusy"), HintType.Error);
+            return;
+        }
+
+        var folder = SystemDialogs.SelectFolder(Lang.Text("Bedrock.Folder.ChangePathTitle"), ModBedrockInstance.DataRoot);
+        if (string.IsNullOrWhiteSpace(folder)) return;
+
+        ApplyBedrockPath(folder);
+    }
+
+    private void ResetBedrockPath_Click(object sender, EventArgs e)
+    {
+        if (HasActiveBedrockTask())
+        {
+            HintService.Hint(Lang.Text("Bedrock.Folder.ChangePathBusy"), HintType.Error);
+            return;
+        }
+
+        ApplyBedrockPath("");
+    }
+
+    private bool HasActiveBedrockTask() => _downloadingVersions.Count > 0 || _installingVersions.Count > 0;
+
+    /// <summary>保存新的下载路径；folder 为空表示恢复默认的启动器目录。</summary>
+    private void ApplyBedrockPath(string folder)
+    {
+        try
+        {
+            var target = Path.TrimEndingDirectorySeparator(folder.Trim());
+            // 选中的就是默认目录时按“未自定义”处理，避免多出一个无意义的记录
+            var defaultRoot = Path.TrimEndingDirectorySeparator(
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".minecraft", "bedrock"));
+            if (string.Equals(target, defaultRoot, StringComparison.OrdinalIgnoreCase))
+                target = "";
+
+            if (string.IsNullOrEmpty(target))
+            {
+                Config.Launch.BedrockFolder = "";
+            }
+            else
+            {
+                // 提前创建，路径不可写时立刻提示，避免下载开始后才失败
+                Directory.CreateDirectory(target);
+                Config.Launch.BedrockFolder = target;
+            }
+
+            UpdateBedrockPathDisplay();
+            DetectBedrockInstallation();
+            HintService.Hint(
+                string.IsNullOrEmpty(Config.Launch.BedrockFolder)
+                    ? Lang.Text("Bedrock.Folder.PathReset")
+                    : Lang.Text("Bedrock.Folder.PathChanged", ModBedrockInstance.DataRoot),
+                HintType.Success);
+            ModBase.Log($"[Bedrock] 基岩版下载路径已切换到 {ModBedrockInstance.DataRoot}", ModBase.LogLevel.Normal);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, $"[Bedrock] 更改基岩版下载路径失败（{folder}）", ModBase.LogLevel.Feedback,
+                userSummary: Lang.Text("Bedrock.Folder.PathChangeFailed", ex.Message));
+        }
+    }
+
+    #endregion
+
     private void PageBedrockRight_Loaded(object sender, RoutedEventArgs e)
     {
         if (isLoad) return;
@@ -119,6 +198,7 @@ public partial class PageBedrockRight
         });
 
         CheckIsolation.Checked = Config.Launch.BedrockVersionIsolation;
+        UpdateBedrockPathDisplay();
         DetectBedrockInstallation();
         RefreshLocalVersions();
         LoadVersionList();
@@ -128,6 +208,7 @@ public partial class PageBedrockRight
 
     public void RefreshPage()
     {
+        UpdateBedrockPathDisplay();
         DetectBedrockInstallation();
         RefreshLocalVersions();
         LoadVersionList();
@@ -532,6 +613,9 @@ public partial class PageBedrockRight
                 BtnLaunch.IsEnabled = true;
                 return;
             }
+
+            // 启动成功计入总启动次数，百宝箱的启动计数同时统计 Java 版与基岩版
+            States.System.LaunchCount += 1;
 
             _launchActualProgress = 1d;
             var generation = ++_launchGeneration;

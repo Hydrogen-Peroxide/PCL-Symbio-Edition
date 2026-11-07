@@ -133,8 +133,11 @@ $outPath = if ([System.IO.Path]::IsPathRooted($OutputDir)) { $OutputDir } else {
 
 Write-Host "构建配置：$Configuration / $Platform"
 Write-Host "输出目录：$outPath"
-$injectedCik = @($cikNames | Where-Object { $missingCik -notcontains $_ })
-Write-Host "已注入密钥：$(if ($injectedCik.Count -gt 0) { $injectedCik -join '、' } else { '无' })"
+$injectedSecrets = @(
+    [Environment]::GetEnvironmentVariables().Keys |
+        Where-Object { $_ -like 'PCL_*' -and $_ -ne 'PCL_WRITE_SECRET' -and -not [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_)) }
+)
+Write-Host "已注入密钥：$(if ($injectedSecrets.Count -gt 0) { $injectedSecrets -join '、' } else { '无' })"
 if ($missingCik.Count -gt 0) { Write-Host "缺少密钥：$($missingCik -join '、')" }
 
 & $dotnetPath publish 'Plain Craft Launcher 2/Plain Craft Launcher 2.csproj' `
