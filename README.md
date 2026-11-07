@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img src="Plain Craft Launcher 2/Images/icon.ico" alt="Logo" width="80" height="80">
+<img src="Plain Craft Launcher 2/Images/icon.png" alt="Logo" width="80" height="80">
 
 # PCL Symbio Edition
 
@@ -21,7 +21,7 @@
 
 PCL SE（Plain Craft Launcher Symbio Edition）是由 Hydrogen-Peroxide 维护的第三方 Minecraft 启动器，基于 PCL 开源代码开发，在保留原有交互习惯的基础上补齐了基岩版支持、实例管理与资源下载等能力。
 
-- 当前版本：`2.17.12`
+- 当前版本：`2.17.13`
 - 上游基线：PCL `2.12.1`
 - 技术栈：C# / WPF / .NET 10
 
@@ -128,7 +128,7 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 
 - 新增基岩版管理：版本检测、安装包导入、Xbox 账号登录与本地筛选
 - 移除联机大厅及配套模块，不再提供大厅与联机相关入口
-- 使用独立版本号（`2.17.12`），上游基线为 PCL `2.12.1`
+- 使用独立版本号（`2.17.13`），上游基线为 PCL `2.12.1`
 
 ## 声明
 
