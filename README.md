@@ -21,7 +21,7 @@
 
 PCL SE（Plain Craft Launcher Symbio Edition）是由 Hydrogen-Peroxide 维护的第三方 Minecraft 启动器，基于 PCL 开源代码开发，在保留原有交互习惯的基础上补齐了基岩版支持、实例管理与资源下载等能力。
 
-- 当前版本：`2.17.13`
+- 当前版本：`2.17.14`
 - 上游基线：PCL `2.12.1`
 - 技术栈：C# / WPF / .NET 10
 
@@ -147,6 +147,11 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 
 - `Plain Craft Launcher 2/` 使用 [自定义许可证](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/Plain%20Craft%20Launcher%202/LICENCE)
 - 其余所有目录使用 [Apache License 2.0](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/LICENSE)
+- 本项目中，**基岩版适配模块、新增独立代码、配套脚本**：采用 GNU GPLv3，见 [LICENSE-GPL-3.0](./LICENSE-GPL-3.0)
+
+> 重要：仅本项目作者独立新增的代码受 GPLv3 约束；上游原有代码许可不变。
+> 若你修改/分发本项目内 GPLv3 部分对应的衍生程序，衍生作品需要继续使用 GPLv3 开源。
+> Minecraft 及其商标、游戏资源版权属于 Mojang/Microsoft。
 
 ## 致谢
 
