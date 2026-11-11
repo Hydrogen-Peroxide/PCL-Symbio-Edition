@@ -146,7 +146,7 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 ## 许可证
 
 - `Plain Craft Launcher 2/` 使用 [自定义许可证](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/Plain%20Craft%20Launcher%202/LICENCE)
-- 其余所有目录使用 [Apache License 2.0](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/LICENSE)
+- 从PCL CE Fork目录使用 [Apache License 2.0](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/LICENSE)
 - 本项目中，**基岩版适配模块、新增独立代码、配套脚本**：采用 GNU GPLv3，见 [LICENSE-GPL-3.0](./LICENSE-GPL-3.0)
 
 > 重要：仅本项目作者独立新增的代码受 GPLv3 约束；上游原有代码许可不变。
