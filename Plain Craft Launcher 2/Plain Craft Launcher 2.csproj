@@ -28,8 +28,8 @@
         <Description>Minecraft 启动器 (作者: 龙腾猫跃; Symbio Edition)</Description>
         <Product>Plain Craft Launcher Symbio Edition</Product>
         <Copyright>Copyright © 龙腾猫跃 2016. All Rights Reserved.</Copyright>
-        <AssemblyVersion>2.17.13</AssemblyVersion>
-        <FileVersion>2.17.13</FileVersion>
+        <AssemblyVersion>2.17.14</AssemblyVersion>
+        <FileVersion>2.17.14</FileVersion>
         <NoWarn>
             41999;42016;42017;42018;42019;42020;42021;42022;42032;42036;42314;
             VSTHRD002;VSTHRD003;VSTHRD110;VSTHRD200
@@ -118,6 +118,7 @@
     </ItemGroup>
     <ItemGroup>
         <Content Include="LICENCE" />
+        <Content Include="LICENSE-APACHE-2.0" />
         <Content Include="THIRD-PARTY\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
 </Project>

@@ -2,7 +2,9 @@ PCL Symbio Edition
 Copyright (c) PCL Symbio Edition contributors
 
 本文件用于说明本项目中的第三方来源。除下列内容外，本项目的许可条款见 LICENSE
-（Apache License 2.0）与 Plain Craft Launcher 2/LICENCE（自定义许可证）。
+（GNU GPLv3）；PCL CE 目录 `Plain Craft Launcher 2/` 采用 Apache License 2.0，
+见 `Plain Craft Launcher 2/LICENSE-APACHE-2.0`。上游 PCL 原有内容仍见
+`Plain Craft Launcher 2/LICENCE`。
 
 ===============================================================================
 一、基岩版功能的参考实现来源
@@ -32,7 +34,7 @@ Round Studio 以下项目的部分代码逻辑：
 
 上述文件中的具体出处已在源码注释中以「移植自」「对应」「参考」等字样逐处标注。
 这些部分的著作权归 Round Studio 及其贡献者所有，按 GPL-3.0 提供，不适用本项目的
-Apache-2.0 / 自定义许可条款。
+GPLv3 / 自定义许可条款。
 
 ===============================================================================
 二、内容密钥（CIK）说明
@@ -87,6 +89,33 @@ LeviLamina 客户端，不随本项目分发：
       按游戏版本解析、下载 lip 并执行安装
 
 ===============================================================================
+五、存档编辑页引用的外部工具
+===============================================================================
+
+存档编辑页的跨版本转换与地图编辑功能引用以下 MIT 许可项目：
+
+  * Chunker
+    https://github.com/HiveGamesOSS/Chunker
+    License: MIT
+    完整许可证：Plain Craft Launcher 2/THIRD-PARTY/Chunker/LICENSE
+    （发布产物中位于 THIRD-PARTY/Chunker/LICENSE）
+
+  * MCA Selector
+    https://github.com/Querz/mcaselector
+    License: MIT
+    完整许可证：Plain Craft Launcher 2/THIRD-PARTY/MCA-Selector/LICENSE
+    （发布产物中位于 THIRD-PARTY/MCA-Selector/LICENSE）
+
+这些工具不随本项目分发：Chunker CLI 在首次转换时按需下载，MCA Selector 仅作为外部工具链接。相关功能位置：
+
+  * Plain Craft Launcher 2/Modules/Minecraft/ModSaveConverter.cs
+      下载并调用 Chunker CLI
+  * Plain Craft Launcher 2/Pages/PageInstance/PageInstanceSaves.xaml.cs
+      存档编辑页的跨版本转换入口
+
+上述项目的著作权归各自作者所有，按 MIT 许可提供。
+
+===============================================================================
 Third-Party Notices (English Summary)
 ===============================================================================
 
@@ -101,7 +130,7 @@ unmodified BLoader.dll (v0.2.80) from https://github.com/Chlna6666/BLoader
 (GPL-3.0). The full license text ships at THIRD-PARTY/BLoader/LICENSE; this
 project only unpacks, verifies (SHA-256) and injects the DLL. Copyright in
 BLoader belongs to Chlna6666 and its contributors and is licensed under
-GPL-3.0, not under this project's Apache-2.0 / custom terms.
+GPL-3.0, not under this project's GPLv3 / custom terms.
 
 When the "LeviLamina" loader is selected, the launcher installs LeviLamina for
 the matching game version through the official lip package manager at runtime.
@@ -112,7 +141,18 @@ a .bak backup.
 
 Affected files are listed above and marked inline in the source comments.
 Copyright in those portions belongs to Round Studio and its contributors and
-is licensed under GPL-3.0, not under this project's Apache-2.0 / custom terms.
+is licensed under GPL-3.0, not under this project's GPLv3 / custom terms.
 
 No Xbox GDK Content Integrity Keys (CIK) are bundled or distributed with this
 project. They must be supplied at build time via environment variables.
+
+The save editor references two MIT-licensed tools:
+
+  * Chunker         - https://github.com/HiveGamesOSS/Chunker
+  * MCA Selector    - https://github.com/Querz/mcaselector
+
+Neither tool is redistributed with this launcher: the Chunker CLI is downloaded
+on demand for local conversion, and MCA Selector is only linked as an external
+tool. The full MIT license texts ship at THIRD-PARTY/Chunker/LICENSE and
+THIRD-PARTY/MCA-Selector/LICENSE. Copyright in these tools belongs to their
+respective authors and is licensed under MIT.

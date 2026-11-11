@@ -1,15 +1,15 @@
 {
   "name": "Plain Craft Launcher Symbio Edition",
   "version": {
-    "base": "2.17.13",
+    "base": "2.17.14",
     "upstream": "2.12.1",
     "suffix": "",
-    "code": 538
+    "code": 539
   },
   "licenses": [
     {
       "name": "PCL.Core",
-      "info": "Copyright © PCL Symbio Edition",
+      "info": "Copyright © PCL Symbio Edition\nLicensed under the GNU GPLv3 license.",
       "website": "https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/tree/dev/PCL.Core",
       "license": "https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/LICENSE"
     },
@@ -126,6 +126,18 @@
       "info": "Copyright © 2015-present Darrell Tunnell\nLicensed under the MIT license.",
       "website": "https://github.com/dazinator/DotNet.Glob",
       "license": "https://github.com/dazinator/DotNet.Glob/blob/master/LICENSE"
+    },
+    {
+      "name": "Chunker",
+      "info": "Copyright © 2024 Hive Games\nLicensed under the MIT License.",
+      "website": "https://github.com/HiveGamesOSS/Chunker",
+      "license": "https://github.com/HiveGamesOSS/Chunker/blob/main/LICENSE"
+    },
+    {
+      "name": "MCA Selector",
+      "info": "Copyright © 2018-2026 Querz\nLicensed under the MIT License.",
+      "website": "https://github.com/Querz/mcaselector",
+      "license": "https://github.com/Querz/mcaselector/blob/master/LICENSE"
     }
   ]
 }

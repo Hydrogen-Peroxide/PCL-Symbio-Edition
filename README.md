@@ -27,6 +27,20 @@ PCL SE（Plain Craft Launcher Symbio Edition）是由 Hydrogen-Peroxide 维护�
 
 PCL SE 与 PCL 官方版没有隶属关系，请不要向官方仓库反馈 PCL SE 的问题。
 
+## 更新与提交日历
+
+<div align="center">
+
+<a href="https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/releases">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/Hydrogen-Peroxide/PCL-Symbio-Edition/dev/docs/assets/calendar-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/Hydrogen-Peroxide/PCL-Symbio-Edition/dev/docs/assets/calendar-light.svg">
+    <img alt="PCL SE 更新与提交日历" src="docs/assets/calendar-light.svg" width="100%">
+  </picture>
+</a>
+
+</div>
+
 ## 功能概览
 
 ### Java 版
@@ -128,7 +142,7 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 
 - 新增基岩版管理：版本检测、安装包导入、Xbox 账号登录与本地筛选
 - 移除联机大厅及配套模块，不再提供大厅与联机相关入口
-- 使用独立版本号（`2.17.13`），上游基线为 PCL `2.12.1`
+- 使用独立版本号（`2.17.14`），上游基线为 PCL `2.12.1`
 
 ## 声明
 
@@ -145,22 +159,28 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 
 ## 许可证
 
-- `Plain Craft Launcher 2/` 使用 [自定义许可证](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/Plain%20Craft%20Launcher%202/LICENCE)
-- 从PCL CE Fork目录使用 [Apache License 2.0](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/LICENSE)
-- 本项目中，**基岩版适配模块、新增独立代码、配套脚本**：采用 GNU GPLv3，见 [LICENSE-GPL-3.0](./LICENSE-GPL-3.0)
+- 本项目整体采用 **GNU General Public License v3.0（GPLv3）**，完整文本见 [LICENSE](./LICENSE)
+- `Plain Craft Launcher 2/`（PCL CE 目录）采用 [Apache License 2.0](<Plain Craft Launcher 2/LICENSE-APACHE-2.0>)；本项目新增的基岩版适配模块、独立代码与配套脚本按 GPLv3 提供
+- 例外：`Plain Craft Launcher 2/Modules/Base/ModLivingForkEgg.cs`（百宝箱彩蛋）改编自 [PCL Living Fork](https://github.com/DDZmumo/PCL-Living-Fork)，按 [Mozilla Public License 2.0](https://www.mozilla.org/MPL/2.0/) 提供，不适用 GPLv3 约定
+- 例外：存档编辑页引用的 [Chunker](https://github.com/HiveGamesOSS/Chunker) 与 [MCA Selector](https://github.com/Querz/mcaselector) 为第三方工具，不随本项目分发，按 MIT 许可提供，完整许可证见 [THIRD-PARTY/Chunker/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/Chunker/LICENSE>) 与 [THIRD-PARTY/MCA-Selector/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/MCA-Selector/LICENSE>)
 
-> 重要：仅本项目作者独立新增的代码受 GPLv3 约束；上游原有代码许可不变。
-> 若你修改/分发本项目内 GPLv3 部分对应的衍生程序，衍生作品需要继续使用 GPLv3 开源。
+> 重要：除上述例外与上游原有代码外，本项目新增代码均以 GPLv3 授权。
+> 若你修改/分发本项目，衍生作品需要继续使用 GPLv3 开源。
 > Minecraft 及其商标、游戏资源版权属于 Mojang/Microsoft。
 
 ## 致谢
 
 - [PCL](https://github.com/Meloong-Git/PCL) — 原作者 龙腾猫跃
-- PCL CE — 社区维护分支，本项目的直接上游
+- [PCL CE](https://github.com/PCL-Community/PCL-CE) — 社区维护分支，本项目的直接上游
+- [PCL Living Fork](https://github.com/DDZmumo/PCL-Living-Fork) — DDZmumo 维护的 PCL 分支，百宝箱彩蛋的查找、下载与切换流程改写自其 `SymbioLauncherSwitch`（MPL-2.0）
 - [BedrockBoot](https://github.com/Round-Studio/BedrockBoot) 与 [BedrockLauncher.Core](https://github.com/Round-Studio/BedrockLauncher.Core) — Round Studio 开发的基岩版项目（GPL-3.0），本项目基岩版安装、解密与启动方案的移植参考，来源与适用范围见 [NOTICE](NOTICE)
 - [BLoader](https://github.com/Chlna6666/BLoader) — Chlna6666 开发的基岩版 Mod 加载器（GPL-3.0），随启动器分发并注入，许可证见 [THIRD-PARTY/BLoader/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/BLoader/LICENSE>)
 - [LeviLamina](https://github.com/LiteLDev/LeviLamina) 与 [lip](https://github.com/LiteLDev/lip) — 按游戏版本通过官方 lip 安装的 LeviLamina 客户端（LGPL-3.0 / GPL-3.0），不随本项目分发
+- [Chunker](https://github.com/HiveGamesOSS/Chunker) — Hive Games 开发的存档跨版本转换工具（MIT），存档编辑页按需下载其 CLI，许可证见 [THIRD-PARTY/Chunker/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/Chunker/LICENSE>)
+- [MCA Selector](https://github.com/Querz/mcaselector) — Querz 开发的 Minecraft 地图与区块编辑工具（MIT），存档编辑页的地图编辑功能参考其实现，许可证见 [THIRD-PARTY/MCA-Selector/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/MCA-Selector/LICENSE>)
 - 以及 Dapper、Downloader、Markdig.Wpf、NAudio、Microsoft.Data.Sqlite、protobuf-net、Lucide 等开源项目，完整的第三方组件与许可信息见 [metadata.json](Plain%20Craft%20Launcher%202/metadata.json) 与启动器「关于」页面
+
+此外，[PCL Living Fork](https://github.com/DDZmumo/PCL-Living-Fork) 提供了部分功能修复。
 
 
 **此页浏览量**（总计 / 今日）：[![Hits](https://hits.zkitefly.eu.org/?tag=https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition)](https://hits.zkitefly.eu.org/?tag=https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition&web=true)

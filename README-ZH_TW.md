@@ -21,7 +21,7 @@
 
 PCL SE（Plain Craft Launcher Symbio Edition）是由 Hydrogen-Peroxide 維護的第三方 Minecraft 啟動器，基於 PCL 開源程式碼開發，在保留原有互動習慣的基礎上補齊了基岩版支援、實例管理與資源下載等能力。
 
-- 目前版本：`2.17.13`
+- 目前版本：`2.17.14`
 - 上游基線：PCL `2.12.1`
 - 技術棧：C# / WPF / .NET 10
 
@@ -126,7 +126,7 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 
 - 新增基岩版管理：版本偵測、安裝包匯入、Xbox 帳號登入與本機篩選
 - 移除多人遊戲大廳及配套模組，不再提供大廳與多人遊戲相關入口
-- 使用獨立版本號（`2.17.13`），上游基線為 PCL `2.12.1`
+- 使用獨立版本號（`2.17.14`），上游基線為 PCL `2.12.1`
 
 ## 聲明
 
@@ -143,8 +143,10 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 
 ## 授權條款
 
-- `Plain Craft Launcher 2/` 使用 [自訂授權條款](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/Plain%20Craft%20Launcher%202/LICENCE)
-- 其餘所有目錄使用 [Apache License 2.0](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/LICENSE)
+- 本專案整體採用 [GNU General Public License v3.0（GPLv3）](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/LICENSE)
+- `Plain Craft Launcher 2/`（PCL CE 目錄）採用 [Apache License 2.0](<Plain Craft Launcher 2/LICENSE-APACHE-2.0>)；本專案新增的基岩版適配模組、獨立程式碼與配套腳本按 GPLv3 提供
+- 例外：`Plain Craft Launcher 2/Modules/Base/ModLivingForkEgg.cs` 改編自 [PCL Living Fork](https://github.com/DDZmumo/PCL-Living-Fork)，按 [Mozilla Public License 2.0](https://www.mozilla.org/MPL/2.0/) 提供
+- 例外：存檔編輯頁引用的 [Chunker](https://github.com/HiveGamesOSS/Chunker) 與 [MCA Selector](https://github.com/Querz/mcaselector) 為第三方工具，不隨本專案分發，按 MIT 授權提供，完整授權條款見 [THIRD-PARTY/Chunker/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/Chunker/LICENSE>) 與 [THIRD-PARTY/MCA-Selector/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/MCA-Selector/LICENSE>)
 
 ## 致謝
 

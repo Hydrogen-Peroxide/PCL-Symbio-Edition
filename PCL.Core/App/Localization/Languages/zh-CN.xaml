@@ -1489,7 +1489,7 @@
     <sys:String x:Key="Instance.Resource.Schematic.Preview.BlockList">所需方块 · {0} 种 / {1} 个</sys:String>
     <sys:String x:Key="Instance.Resource.Schematic.Preview.BuildFailed">3D 预览构建失败，详情见日志</sys:String>
     <sys:String x:Key="Instance.Resource.Schematic.Preview.Detail">详情</sys:String>
-    <sys:String x:Key="Instance.Resource.Schematic.Preview.Hint">拖动旋转 · 滚轮缩放</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.Hint">拖动旋转 · 滚轮缩放 · WASD 移动 · R 复位</sys:String>
     <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerAll">全部层</sys:String>
     <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerInfo">已显示 {0} / {1} 层（Y ≤ {2}）</sys:String>
     <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerOnly">分层显示</sys:String>
@@ -1614,6 +1614,32 @@
     <sys:String x:Key="Instance.Saves.MapEditor.JumpMissing">区块 ({0}, {1}) 不存在或未生成</sys:String>
     <sys:String x:Key="Instance.Saves.MapEditor.ChunkInfo">区块 ({0}, {1}) · {2} · 版本 {3} · {4} · 驻留 {5} 分钟</sys:String>
     <sys:String x:Key="Instance.Saves.PasteFile">粘贴剪贴板文件</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Button">跨版本转换</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Title">跨版本存档转换</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Message">用 Chunker 在本机把存档在 Java 版和基岩版之间转换（需要 Java 17+，首次会自动下载约 32 MB 的 CLI）。&#xA;&#xA;点「本地转换」后选择存档文件夹，再选择转换方向；转换完成后会自动放进对应版本的存档目录。&#xA;&#xA;注意：Chunker 不转换实体和结构数据（村庄、要塞等）。</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.OpenChunker">打开 Chunker 网页</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Import">导入转换结果</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.ImportTypeTitle">导入转换结果</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.ImportTypeMessage">请选择转换结果的类型：</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.ImportFolder">存档文件夹</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.ImportFile">.mcworld 文件</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.PathCopied">已复制当前实例的存档文件夹路径</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.InvalidFolder">该文件夹不像是 Minecraft 存档（缺少 level.dat 或 db 文件夹）</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Success">已导入存档：{0}</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Failed">导入存档失败，详情见日志</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.Button">本地转换</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.SelectSource">选择要转换的存档文件夹</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.DirectionTitle">转换方向</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.DirectionMessage">要把这个存档转成哪一边？</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.ToBedrock">转成基岩版</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.ToJava">转成 Java 版</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.Preparing">正在准备 Chunker CLI…</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.NoJava">未找到 Java 17 或更高版本，无法运行 Chunker CLI</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.NoFormat">Chunker CLI 没有返回可用的目标格式</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.Converting">正在转换存档（目标格式 {0}），请稍候…</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.DoneBedrock">已转换并放入基岩版存档目录：{0}</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.DoneBedrockFile">已转换并导出为：{0}</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.Failed">转换失败，详情见日志</sys:String>
     <sys:String x:Key="Instance.Saves.PasteFolderFailed">粘贴存档文件夹失败</sys:String>
     <sys:String x:Key="Instance.Saves.PastedCount">已粘贴 {0} 个文件夹</sys:String>
     <sys:String x:Key="Instance.Saves.QuickActions">快捷操作</sys:String>
@@ -3434,6 +3460,7 @@
     <sys:String x:Key="Setup.Ui.Theme.Color.CatBlue">龙猫蓝</sys:String>
     <sys:String x:Key="Setup.Ui.Theme.Color.CrashBlue">死机蓝</sys:String>
     <sys:String x:Key="Setup.Ui.Theme.Color.Hmcl">HMCL</sys:String>
+    <sys:String x:Key="Setup.Ui.Theme.Color.Klein">克莱因蓝</sys:String>
     <sys:String x:Key="Setup.Ui.Theme.Color.SkyBlue">天空蓝</sys:String>
     <sys:String x:Key="Setup.Ui.Theme.Dark">深色</sys:String>
     <sys:String x:Key="Setup.Ui.Theme.DarkColor">深色配色</sys:String>
@@ -3636,6 +3663,17 @@
     <sys:String x:Key="Tools.Test.LaunchCount.Message">PCL SE 已经为你启动了 {0} 次游戏了。</sys:String>
     <sys:String x:Key="Tools.Test.LaunchCount.Title">查看启动计数</sys:String>
     <sys:String x:Key="Tools.Test.ServerQuery.Title">瞅眼服务器</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Busy">小惊喜还在打包中，别催嘛～</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Cancelled">神秘包裹先收好，下次再拆吧～</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.DownloadName">悄悄搬运神秘包裹</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.DownloadTitle">正在准备一份小惊喜</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Exists">咦？彩蛋居然已经藏在这里了～</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Failed">小惊喜好像迷路了，稍后再来找找看～</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Fetching">正在搬运神秘包裹，它好像有点沉……</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Preparing">正在悄悄打包一份小惊喜，请稍候～</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Ready">惊喜就位，准备出发！</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Title">千万别点</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Warning">此操作可能导致软件无响应或崩溃，请先保存正在进行的操作。&#xA;&#xA;真的要拆开吗？</sys:String>
     <sys:String x:Key="Tools.Test.Title">百宝箱</sys:String>
 
     <!-- Tools.Test.Achievement -->

@@ -4,4 +4,4 @@
 
 ## 🔒 协议
 
-遵循 Apache License 2.0 开源协议
+遵循 GNU GPLv3 开源协议，见根目录 [LICENSE](../LICENSE)

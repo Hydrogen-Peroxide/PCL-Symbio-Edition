@@ -1489,7 +1489,7 @@
     <sys:String x:Key="Instance.Resource.Schematic.Preview.BlockList">Required blocks · {0} types / {1} blocks</sys:String>
     <sys:String x:Key="Instance.Resource.Schematic.Preview.BuildFailed">Failed to build the 3D preview, see the log for details</sys:String>
     <sys:String x:Key="Instance.Resource.Schematic.Preview.Detail">Details</sys:String>
-    <sys:String x:Key="Instance.Resource.Schematic.Preview.Hint">Drag to rotate · Scroll to zoom</sys:String>
+    <sys:String x:Key="Instance.Resource.Schematic.Preview.Hint">Drag to rotate · Scroll to zoom · WASD to move · R to reset</sys:String>
     <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerAll">All layers</sys:String>
     <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerInfo">Showing {0} / {1} layers (Y ≤ {2})</sys:String>
     <sys:String x:Key="Instance.Resource.Schematic.Preview.LayerOnly">Show layers</sys:String>
@@ -1614,6 +1614,32 @@
     <sys:String x:Key="Instance.Saves.MapEditor.JumpMissing">Chunk ({0}, {1}) does not exist or is not generated.</sys:String>
     <sys:String x:Key="Instance.Saves.MapEditor.ChunkInfo">Chunk ({0}, {1}) · {2} · version {3} · {4} · inhabited {5} min</sys:String>
     <sys:String x:Key="Instance.Saves.PasteFile">Paste clipboard file</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Button">Convert save</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Title">Convert saves between editions</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Message">Convert a save between Java and Bedrock on this machine with Chunker (Java 17+, the ~32 MB CLI is downloaded on first use).&#xA;&#xA;Click "Convert locally", pick the save folder, then choose the direction; the result is copied into the matching saves folder automatically.&#xA;&#xA;Note: Chunker does not convert entities or structure data (villages, strongholds, etc.).</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.OpenChunker">Open Chunker</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Import">Import result</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.ImportTypeTitle">Import result</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.ImportTypeMessage">What did the converter produce?</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.ImportFolder">Save folder</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.ImportFile">.mcworld file</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.PathCopied">Current saves path copied to clipboard</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.InvalidFolder">That folder does not look like a Minecraft save (no level.dat or db folder)</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Success">Imported save: {0}</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Failed">Failed to import the save, see the log</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.Button">Convert locally</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.SelectSource">Select the save folder to convert</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.DirectionTitle">Conversion direction</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.DirectionMessage">Which edition should this save be converted to?</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.ToBedrock">To Bedrock</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.ToJava">To Java</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.Preparing">Preparing Chunker CLI…</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.NoJava">Java 17 or newer is required to run Chunker CLI</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.NoFormat">Chunker CLI returned no usable output format</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.Converting">Converting ({0}), please wait…</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.DoneBedrock">Converted and placed into the Bedrock worlds folder: {0}</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.DoneBedrockFile">Converted and exported: {0}</sys:String>
+    <sys:String x:Key="Instance.Saves.Convert.Local.Failed">Conversion failed, see the log</sys:String>
     <sys:String x:Key="Instance.Saves.PasteFolderFailed">Failed to paste save folder</sys:String>
     <sys:String x:Key="Instance.Saves.PastedCount">Pasted {0} folder(s)</sys:String>
     <sys:String x:Key="Instance.Saves.QuickActions">Quick actions</sys:String>
@@ -3434,6 +3460,7 @@
     <sys:String x:Key="Setup.Ui.Theme.Color.CatBlue">LTCat Blue</sys:String>
     <sys:String x:Key="Setup.Ui.Theme.Color.CrashBlue">Crash Blue</sys:String>
     <sys:String x:Key="Setup.Ui.Theme.Color.Hmcl">HMCL</sys:String>
+    <sys:String x:Key="Setup.Ui.Theme.Color.Klein">Klein Blue</sys:String>
     <sys:String x:Key="Setup.Ui.Theme.Color.SkyBlue">Sky Blue</sys:String>
     <sys:String x:Key="Setup.Ui.Theme.Dark">Dark</sys:String>
     <sys:String x:Key="Setup.Ui.Theme.DarkColor">Dark theme color</sys:String>
@@ -3636,6 +3663,17 @@
     <sys:String x:Key="Tools.Test.LaunchCount.Message">PCL SE has launched games for you {0} times.</sys:String>
     <sys:String x:Key="Tools.Test.LaunchCount.Title">View launch count</sys:String>
     <sys:String x:Key="Tools.Test.ServerQuery.Title">Check server</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Busy">The surprise is still being wrapped, no rush...</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Cancelled">The mystery package is tucked away for next time...</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.DownloadName">Quietly carrying the mystery package</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.DownloadTitle">Preparing a little surprise</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Exists">Oh? The surprise is already hidden here...</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Failed">The surprise seems to have wandered off. Try again later...</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Fetching">Carrying the mystery package... it feels a little heavy...</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Preparing">Quietly wrapping a little surprise, please wait...</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Ready">Surprise ready, off we go!</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Title">Don't click</sys:String>
+    <sys:String x:Key="Tools.Test.Surprise.Warning">This may make the software unresponsive or crash. Save your work first.&#xA;&#xA;Really want to open it?</sys:String>
     <sys:String x:Key="Tools.Test.Title">Utilities</sys:String>
 
     <!-- Tools.Test.Achievement -->

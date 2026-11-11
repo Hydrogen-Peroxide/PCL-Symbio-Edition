@@ -21,7 +21,7 @@
 
 PCL SE (Plain Craft Launcher Symbio Edition) is a third-party Minecraft launcher maintained by Hydrogen-Peroxide. Built on PCL's open-source code, it keeps the familiar interaction while adding Bedrock edition support, instance management and resource downloads.
 
-- Current version: `2.17.13`
+- Current version: `2.17.14`
 - Upstream baseline: PCL `2.12.1`
 - Tech stack: C# / WPF / .NET 10
 
@@ -126,7 +126,7 @@ See the [contribution guide](CONTRIBUTING.md#本地构建与测试) for test com
 
 - Added Bedrock edition management: version detection, package import, Xbox sign-in and local filtering
 - Removed the multiplayer lobby and its modules; no lobby or multiplayer entry points are provided
-- Uses an independent version number (`2.17.13`) based on PCL `2.12.1`
+- Uses an independent version number (`2.17.14`) based on PCL `2.12.1`
 
 ## Legal notice
 
@@ -143,8 +143,10 @@ See the [contribution guide](CONTRIBUTING.md#本地构建与测试) for test com
 
 ## License
 
-- `Plain Craft Launcher 2/` uses a [custom license](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/Plain%20Craft%20Launcher%202/LICENCE)
-- All other directories use [Apache License 2.0](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/LICENSE)
+- This project is licensed under the [GNU General Public License v3.0 (GPLv3)](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/LICENSE)
+- The `Plain Craft Launcher 2/` (PCL CE) directory uses the [Apache License 2.0](<Plain Craft Launcher 2/LICENSE-APACHE-2.0>); new Bedrock adaptation modules, independent code and companion scripts are provided under GPLv3
+- Exception: `Plain Craft Launcher 2/Modules/Base/ModLivingForkEgg.cs` is adapted from [PCL Living Fork](https://github.com/DDZmumo/PCL-Living-Fork) and provided under the [Mozilla Public License 2.0](https://www.mozilla.org/MPL/2.0/)
+- Exception: [Chunker](https://github.com/HiveGamesOSS/Chunker) and [MCA Selector](https://github.com/Querz/mcaselector), referenced by the save editor, are third-party tools not redistributed with this project and are provided under the MIT License; see [THIRD-PARTY/Chunker/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/Chunker/LICENSE>) and [THIRD-PARTY/MCA-Selector/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/MCA-Selector/LICENSE>)
 
 ## Acknowledgements
 
