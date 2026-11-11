@@ -161,8 +161,8 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 
 - 本项目整体采用 **GNU General Public License v3.0（GPLv3）**，完整文本见 [LICENSE](./LICENSE)
 - `Plain Craft Launcher 2/`（PCL CE 目录）采用 [Apache License 2.0](<Plain Craft Launcher 2/LICENSE-APACHE-2.0>)；本项目新增的基岩版适配模块、独立代码与配套脚本按 GPLv3 提供
-- 例外：`Plain Craft Launcher 2/Modules/Base/ModLivingForkEgg.cs`（百宝箱彩蛋）改编自 [PCL Living Fork](https://github.com/DDZmumo/PCL-Living-Fork)，按 [Mozilla Public License 2.0](https://www.mozilla.org/MPL/2.0/) 提供，不适用 GPLv3 约定
-- 例外：存档编辑页引用的 [Chunker](https://github.com/HiveGamesOSS/Chunker) 与 [MCA Selector](https://github.com/Querz/mcaselector) 为第三方工具，不随本项目分发，按 MIT 许可提供，完整许可证见 [THIRD-PARTY/Chunker/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/Chunker/LICENSE>) 与 [THIRD-PARTY/MCA-Selector/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/MCA-Selector/LICENSE>)
+- `Plain Craft Launcher 2/Modules/Base/ModLivingForkEgg.cs`（百宝箱彩蛋）改编自 [PCL Living Fork](https://github.com/DDZmumo/PCL-Living-Fork)，按 [Mozilla Public License 2.0](https://www.mozilla.org/MPL/2.0/) 提供，不适用 GPLv3 约定
+- 存档编辑页引用的 [Chunker](https://github.com/HiveGamesOSS/Chunker) 与 [MCA Selector](https://github.com/Querz/mcaselector) 按 MIT 许可提供，完整许可证见 [THIRD-PARTY/Chunker/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/Chunker/LICENSE>) 与 [THIRD-PARTY/MCA-Selector/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/MCA-Selector/LICENSE>)
 
 > 重要：除上述例外与上游原有代码外，本项目新增代码均以 GPLv3 授权。
 > 若你修改/分发本项目，衍生作品需要继续使用 GPLv3 开源。
