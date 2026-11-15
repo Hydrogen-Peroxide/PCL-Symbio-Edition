@@ -53,4 +53,7 @@
                     Text="{DynamicResource Launch.Account.Auth.Back}" HorizontalAlignment="Center" />
     <local:MyButton x:Name="BtnLogin" Grid.Row="9" Grid.Column="1" Width="50" Margin="20,0,0,0" ColorType="Highlight"
                     Text="{DynamicResource Launch.Account.Auth.Login}" HorizontalAlignment="Center" />
+    <local:MyButton x:Name="BtnWebLogin" Grid.Row="7" Grid.ColumnSpan="2" HorizontalAlignment="Left" Margin="0,12,0,0"
+                    Padding="16,0,16,0" ColorType="Normal" Visibility="Collapsed"
+                    Text="{DynamicResource Launch.Account.Auth.WebLogin}" />
 </Grid>

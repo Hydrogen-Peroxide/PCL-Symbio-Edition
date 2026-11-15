@@ -1916,6 +1916,12 @@
     <sys:String x:Key="Launch.Account.Auth.Register">Register</sys:String>
     <sys:String x:Key="Launch.Account.Auth.Server">Authentication server</sys:String>
     <sys:String x:Key="Launch.Account.Auth.ServerLabel">Authentication server: {0}</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.WebLogin">Sign in on the web</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.WebLogin.FailedTitle">Web sign-in failed</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.WebLogin.Instructions">Open {1} in your browser and enter the code {0} (already copied to the clipboard).&#xA;The launcher continues automatically once you finish; no need to close this dialog.</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.WebLogin.Success">Signed in on the web, profile added</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.WebLogin.Title">Web sign-in</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.WebLogin.Unsupported">This authentication server does not support web sign-in</sys:String>
 
     <!-- Launch.Account.LoginDialog -->
 
@@ -2594,6 +2600,7 @@
     <sys:String x:Key="Minecraft.Launch.Login.Auth.RefreshFailed.WithDetail">Login refresh failed.&#xA;&#xA;Details:&#xA;{0}</sys:String>
     <sys:String x:Key="Minecraft.Launch.Login.Auth.SecondRefreshFailed">Second login refresh failed</sys:String>
     <sys:String x:Key="Minecraft.Launch.Login.Auth.SelectProfile">Select profile</sys:String>
+    <sys:String x:Key="Minecraft.Launch.Login.Auth.ConnectExpired">The web authorization for this profile has expired. Select it in the account list and sign in on the web again.</sys:String>
     <sys:String x:Key="Minecraft.Launch.Login.Auth.Timeout.DetailMessage">$Login failed: Connection to login server timed out.&#xA;Please check your network connection!&#xA;Details:</sys:String>
     <sys:String x:Key="Minecraft.Launch.Login.Auth.Timeout.Message">Login failed: Connection to login server timed out.&#xA;Please check your network connection!</sys:String>
     <sys:String x:Key="Minecraft.Launch.Login.Auth.Timeout.WithDetail">Login failed because the connection to the login server timed out.&#xA;Please check your network connection.&#xA;&#xA;Details:&#xA;{0}</sys:String>

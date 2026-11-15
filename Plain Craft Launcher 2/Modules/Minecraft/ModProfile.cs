@@ -138,6 +138,16 @@ public static class ModProfile
         public string RefreshToken;
 
         /// <summary>
+        ///     Yggdrasil Connect 的 OpenID Discovery 地址；为空表示该第三方档案不使用网页登录
+        /// </summary>
+        public string Discovery;
+
+        /// <summary>
+        ///     Yggdrasil Connect 使用的 OAuth 客户端 ID
+        /// </summary>
+        public string OAuthClientId;
+
+        /// <summary>
         ///     验证服务器地址，用于第三方验证
         /// </summary>
         public string Server;

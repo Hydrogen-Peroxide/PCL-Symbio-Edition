@@ -1916,6 +1916,12 @@
     <sys:String x:Key="Launch.Account.Auth.Register">注册账号</sys:String>
     <sys:String x:Key="Launch.Account.Auth.Server">服务器</sys:String>
     <sys:String x:Key="Launch.Account.Auth.ServerLabel">验证服务器: {0}</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.WebLogin">网页登录</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.WebLogin.FailedTitle">网页登录失败</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.WebLogin.Instructions">请在浏览器中打开 {1} 并输入授权码 {0}（已复制到剪贴板）。&#xA;完成授权后启动器会自动继续，无需关闭此弹窗。</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.WebLogin.Success">网页登录成功，已添加档案</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.WebLogin.Title">网页登录</sys:String>
+    <sys:String x:Key="Launch.Account.Auth.WebLogin.Unsupported">该验证服务器不支持网页登录</sys:String>
 
     <!-- Launch.Account.LoginDialog -->
 
@@ -2594,6 +2600,7 @@
     <sys:String x:Key="Minecraft.Launch.Login.Auth.RefreshFailed.WithDetail">刷新登录失败。&#xA;&#xA;详细信息：&#xA;{0}</sys:String>
     <sys:String x:Key="Minecraft.Launch.Login.Auth.SecondRefreshFailed">二轮刷新登录失败</sys:String>
     <sys:String x:Key="Minecraft.Launch.Login.Auth.SelectProfile">选择使用的角色</sys:String>
+    <sys:String x:Key="Minecraft.Launch.Login.Auth.ConnectExpired">该档案的网页登录授权已失效，请在账号列表中选择它并重新使用「网页登录」授权</sys:String>
     <sys:String x:Key="Minecraft.Launch.Login.Auth.Timeout.DetailMessage">$登录失败：连接登录服务器超时。&#xA;请检查你的网络状况是否良好，或尝试使用 VPN！&#xA;详细信息：</sys:String>
     <sys:String x:Key="Minecraft.Launch.Login.Auth.Timeout.Message">登录失败：连接登录服务器超时。&#xA;请检查你的网络状况是否良好，或尝试使用 VPN！</sys:String>
     <sys:String x:Key="Minecraft.Launch.Login.Auth.Timeout.WithDetail">登录失败：连接登录服务器超时。&#xA;请检查网络连接，或尝试使用 VPN。&#xA;&#xA;详细信息：&#xA;{0}</sys:String>

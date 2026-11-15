@@ -1383,6 +1383,55 @@ public static class ModLaunch
         ModProfile.ProfileLog("验证方式：" + input.Description);
         data.Progress = 0.05d;
 
+        // Yggdrasil Connect 档案（网页登录）没有密码，先用 refresh_token 静默续期
+        var connectProfile = ModProfile.selectedProfile;
+        if (!input.ForceReselectProfile && !ModProfile.isCreatingProfile &&
+            connectProfile is not null && !string.IsNullOrWhiteSpace(connectProfile.Discovery) &&
+            !string.IsNullOrWhiteSpace(connectProfile.RefreshToken))
+        {
+            try
+            {
+                ThrowIfAborted(data);
+                var connectInfo = new ModYggdrasilConnect.ServerInfo(
+                    ModYggdrasilConnect.GetAuthServer(input.BaseUrl),
+                    ModYggdrasilConnect.GetRoot(input.BaseUrl),
+                    connectProfile.Discovery,
+                    connectProfile.OAuthClientId);
+                var renewed = ModYggdrasilConnect.TryRefreshAsync(connectInfo, connectProfile.RefreshToken,
+                    connectProfile.Username, connectProfile.Uuid).GetAwaiter().GetResult();
+                if (renewed is not null)
+                {
+                    connectProfile.AccessToken = renewed.AccessToken;
+                    connectProfile.RefreshToken = renewed.RefreshToken;
+                    connectProfile.ClientToken = renewed.Uuid;
+                    connectProfile.Username = renewed.UserName;
+                    connectProfile.Uuid = renewed.Uuid;
+                    connectProfile.Expires = renewed.Expires;
+                    ModProfile.SaveProfile();
+                    data.output.AccessToken = renewed.AccessToken;
+                    data.output.ClientToken = renewed.Uuid;
+                    data.output.Uuid = renewed.Uuid;
+                    data.output.Name = renewed.UserName;
+                    data.output.Type = "Auth";
+                    data.Progress = 0.95d;
+                    ModProfile.ProfileLog("Yggdrasil Connect 续期成功（Refresh, Connect）");
+                    return;
+                }
+            }
+            catch (ThreadInterruptedException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                ModProfile.ProfileLog("Yggdrasil Connect 续期失败：" + ex);
+            }
+
+            // 续期失败且档案没有密码时，经典 Yggdrasil 的 refresh / login 都不可能成功，直接给出可读提示
+            if (string.IsNullOrWhiteSpace(connectProfile.Password))
+                throw new Exception("$" + Lang.Text("Minecraft.Launch.Login.Auth.ConnectExpired"));
+        }
+
         // 尝试验证登录（如果不需要重新选择档案且不是创建档案）
         if (!input.ForceReselectProfile && !ModProfile.isCreatingProfile)
         {

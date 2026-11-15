@@ -1,4 +1,5 @@
-﻿using System.Windows;
+using System.Text.Json.Nodes;
+using System.Windows;
 using System.Windows.Controls;
 using PCL.Core.App;
 using PCL.Core.App.Localization;
@@ -23,6 +24,11 @@ public partial class PageLoginAuth
 
     private bool _isRegisterMode = true;
 
+    /// <summary>
+    ///     当前服务器支持的 Yggdrasil Connect（网页登录）信息，为 null 表示不支持
+    /// </summary>
+    private ModYggdrasilConnect.ServerInfo _connectInfo;
+
     public PageLoginAuth()
     {
         InitializeComponent();
@@ -31,6 +37,7 @@ public partial class PageLoginAuth
         // Handles
         BtnBack.Click += BtnBack_Click;
         BtnLogin.Click += BtnLogin_Click;
+        BtnWebLogin.Click += BtnWebLogin_Click;
         TextServer.TextChanged += TextServer_TextChanged;
         BtnLink.Click += Btn_Click;
     }
@@ -43,6 +50,120 @@ public partial class PageLoginAuth
             serverItems.Add(new MyComboBoxItem { Content = serverName });
         TextServer.Text = draggedAuthServer;
         draggedAuthServer = null;
+        RefreshWebLogin();
+    }
+
+    /// <summary>
+    ///     探测当前验证服务器是否支持 Yggdrasil Connect，并据此显示网页登录按钮
+    /// </summary>
+    private async void RefreshWebLogin()
+    {
+        var server = TextServer?.Text?.Trim();
+        _connectInfo = null;
+        if (BtnWebLogin is not null) BtnWebLogin.Visibility = Visibility.Collapsed;
+        if (string.IsNullOrWhiteSpace(server) || !server.IsMatch(RegexPatterns.HttpUri)) return;
+        try
+        {
+            var info = await ModYggdrasilConnect.DiscoverAsync(server);
+            if (!string.Equals(TextServer?.Text?.Trim(), server, StringComparison.Ordinal)) return;
+            _connectInfo = info;
+            if (BtnWebLogin is not null)
+                BtnWebLogin.Visibility = info is null ? Visibility.Collapsed : Visibility.Visible;
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "探测网页登录支持失败");
+        }
+    }
+
+    /// <summary>
+    ///     用设备代码流在浏览器里完成 Yggdrasil Connect 登录
+    /// </summary>
+    private void BtnWebLogin_Click(object sender, EventArgs e)
+    {
+        var info = _connectInfo;
+        if (info is null)
+        {
+            HintService.Hint(Lang.Text("Launch.Account.Auth.WebLogin.Unsupported"), HintType.Error);
+            return;
+        }
+
+        BtnWebLogin.IsEnabled = false;
+        BtnLogin.IsEnabled = false;
+        BtnBack.IsEnabled = false;
+        Dispatcher.BeginInvoke(new Func<Task>(async () =>
+        {
+            try
+            {
+                ModProfile.isCreatingProfile = true;
+                var result = await ModYggdrasilConnect.LoginAsync(info, code =>
+                {
+                    var website = string.IsNullOrWhiteSpace(code.VerificationUriComplete)
+                        ? code.VerificationUri ?? ""
+                        : code.VerificationUriComplete!;
+                    ModBase.RunInUi(() =>
+                    {
+                        ModBase.ClipboardSet(code.UserCode ?? "");
+                        if (!string.IsNullOrWhiteSpace(website)) ModBase.OpenWebsite(website);
+                        ModMain.MyMsgBox(
+                            Lang.Text("Launch.Account.Auth.WebLogin.Instructions", code.UserCode ?? "", website),
+                            Lang.Text("Launch.Account.Auth.WebLogin.Title"));
+                    });
+                });
+
+                // 服务器名称，取不到就退回根地址
+                var serverName = info.Root;
+                try
+                {
+                    using var response = await HttpRequest.Create(info.Root).SendAsync();
+                    if (response.IsSuccess)
+                    {
+                        var json = ModBase.GetJson(await response.AsStringAsync()) as JsonObject;
+                        serverName = json?["meta"]?["serverName"]?.ToString() ?? info.Root;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ModBase.Log(ex, "获取验证服务器名称失败");
+                }
+
+                var newProfile = new ModProfile.McProfile
+                {
+                    Type = ModLaunch.McLoginType.Auth,
+                    Uuid = result.Uuid,
+                    Username = result.UserName,
+                    Server = info.AuthServer,
+                    ServerName = serverName,
+                    Name = "",
+                    Password = "",
+                    AccessToken = result.AccessToken,
+                    RefreshToken = result.RefreshToken,
+                    ClientToken = result.Uuid,
+                    Discovery = info.Discovery,
+                    OAuthClientId = info.ClientId,
+                    Expires = result.Expires,
+                    Desc = ""
+                };
+                ModProfile.profileList.Add(newProfile);
+                ModProfile.selectedProfile = newProfile;
+                ModProfile.SaveProfile();
+                ModProfile.ProfileLog($"登录成功（Yggdrasil Connect, {result.UserName}）");
+                HintService.Hint(Lang.Text("Launch.Account.Auth.WebLogin.Success"), HintType.Success);
+                ModMain.frmLaunchLeft.RefreshPage(true);
+            }
+            catch (Exception ex)
+            {
+                ModBase.Log(ex, Lang.Text("Launch.Account.Auth.WebLogin.FailedTitle"), ModBase.LogLevel.Msgbox,
+                    userSummary: Lang.Text("Launch.Account.Auth.WebLogin.FailedTitle"));
+            }
+            finally
+            {
+                ModProfile.isCreatingProfile = false;
+                BtnWebLogin.IsEnabled = true;
+                BtnLogin.IsEnabled = true;
+                BtnBack.IsEnabled = true;
+            }
+        }));
     }
 
     private void BtnBack_Click(object sender, EventArgs e)
@@ -206,5 +327,6 @@ public partial class PageLoginAuth
     {
         predefinedAuthServers.TryGetValue(TextServer.Text, out var server);
         if (server is not null) TextServer.Text = server;
+        RefreshWebLogin();
     }
 }
