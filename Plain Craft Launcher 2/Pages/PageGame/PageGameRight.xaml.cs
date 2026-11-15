@@ -82,22 +82,7 @@ public partial class PageGameRight
             return;
         }
 
-        // 与左侧一致：快照交叉淡化，动画只作用在一张位图上
-        ModAnimation.AniStop("Game Edition Right");
-        if (!GameEditionTransition.CrossFade(PanHost, hide, show, bedrock ? -14d : 14d, 240, "Game Edition Right"))
-        {
-            if (hide is not null)
-            {
-                hide.Visibility = Visibility.Collapsed;
-                hide.Opacity = 1d;
-                hide.RenderTransform = null;
-                hide.CacheMode = null;
-            }
-
-            show.Visibility = Visibility.Visible;
-            show.Opacity = 1d;
-            show.RenderTransform = null;
-            show.CacheMode = null;
-        }
+        // 与左侧一致：新页面滑入并淡入，旧页面立即收起
+        GameEditionTransition.SlideIn(hide, show, bedrock ? 20d : -20d, 260, "Game Edition Right");
     }
 }

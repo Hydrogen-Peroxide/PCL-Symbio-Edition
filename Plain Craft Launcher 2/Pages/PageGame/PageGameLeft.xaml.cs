@@ -108,17 +108,8 @@ public partial class PageGameLeft
             return;
         }
 
-        // 把即将隐藏的页面拍成快照，真正的页面瞬间切换，动画只作用在快照上，
-        // 避免整页内容（滚动列表、SVG 图标、大量文本）在动效期间逐帧重绘
-        ModAnimation.AniStop("Game Edition Left");
-        if (!GameEditionTransition.CrossFade(PanHost, hide, show, bedrock ? -12d : 12d, 220, "Game Edition Left"))
-        {
-            if (hide is not null) hide.Visibility = Visibility.Collapsed;
-            show.Visibility = Visibility.Visible;
-            show.Opacity = 1d;
-            show.RenderTransform = null;
-            show.CacheMode = null;
-        }
+        // 新页面按切换方向滑入并淡入，旧页面立即收起：每帧只有一页参与合成
+        GameEditionTransition.SlideIn(hide, show, bedrock ? 18d : -18d, 240, "Game Edition Left");
     }
 
     /// <summary>
