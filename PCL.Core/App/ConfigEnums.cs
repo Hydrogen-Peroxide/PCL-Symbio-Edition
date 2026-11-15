@@ -18,7 +18,12 @@ public enum ColorTheme
     SkyBlue = 0,
     CatBlue = 1,
     DeathBlue = 2,
-    HmclBlue = 3
+    HmclBlue = 3,
+
+    /// <summary>
+    /// 归藏设计 · 克莱因：纸白界面、墨黑文字，以国际克莱因蓝（IKB）作唯一强调色。
+    /// </summary>
+    KleinBlue = 4
 }
 
 /// <summary>

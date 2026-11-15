@@ -97,6 +97,9 @@ public partial class FormMain
         HintWrapper.OnShow += HintService.HintWrapper_OnShow;
         // 加载 UI
         InitializeComponent();
+        // 统一的游戏页：Java 版与基岩版共用同一个入口
+        ModMain.frmGameRight = new PageGameRight();
+        ModMain.frmGameLeft = new PageGameLeft();
         Opacity = 0d;
         try
         {
@@ -128,15 +131,15 @@ public partial class FormMain
             _helper.DragDrop += (_, _) => FileDrag(_helper.DropFilePaths);
         }
 
-        if (ModMain.frmLaunchLeft.Parent is not null)
-            ModMain.frmLaunchLeft.SetValue(ContentPresenter.ContentProperty, null);
-        if (ModMain.frmLaunchRight.Parent is not null)
-            ModMain.frmLaunchRight.SetValue(ContentPresenter.ContentProperty, null);
-        PanMainLeft.Child = ModMain.frmLaunchLeft;
-        pageLeft = ModMain.frmLaunchLeft;
-        PanMainRight.Child = ModMain.frmLaunchRight;
-        pageRight = ModMain.frmLaunchRight;
-        ModMain.frmLaunchRight.PageState = MyPageRight.PageStates.ContentStay;
+        if (ModMain.frmGameLeft.Parent is not null)
+            ModMain.frmGameLeft.SetValue(ContentPresenter.ContentProperty, null);
+        if (ModMain.frmGameRight.Parent is not null)
+            ModMain.frmGameRight.SetValue(ContentPresenter.ContentProperty, null);
+        PanMainLeft.Child = ModMain.frmGameLeft;
+        pageLeft = ModMain.frmGameLeft;
+        PanMainRight.Child = ModMain.frmGameRight;
+        pageRight = ModMain.frmGameRight;
+        ModMain.frmGameRight.PageState = MyPageRight.PageStates.ContentStay;
         // 调试模式提醒
         if (ModBase.modeDebug)
             HintService.Hint(Lang.Text("Main.DebugMode.Hint"));
@@ -1590,6 +1593,13 @@ public partial class FormMain
                     return ModMain.frmSetupLeft.pageID;
                 }
 
+                case PageType.Tools:
+                {
+                    if (ModMain.frmToolsLeft is null)
+                        ModMain.frmToolsLeft = new PageToolsLeft();
+                    return ModMain.frmToolsLeft.pageID;
+                }
+
                 case PageType.InstanceSetup:
                 {
                     if (ModMain.frmInstanceLeft is null)
@@ -1697,9 +1707,10 @@ public partial class FormMain
             // 切换到主页面
             PageChangeExit();
             isChangingPage = true; // 防止下面的勾选直接触发了 PageChangeActual
-            // 顶部栏按钮顺序与 PageType 数值不再一致，按 Tag 匹配
+            // 顶部栏按钮顺序与 PageType 数值不再一致，按 Tag 匹配；基岩版与 Java 版共用“游戏”入口
+            var tabPage = stack.page == PageType.Bedrock ? PageType.Launch : stack.page;
             foreach (var child in PanTitleSelect.Children)
-                if (child is MyRadioButton button && ModBase.Val(button.Tag) == (double)stack.page)
+                if (child is MyRadioButton button && ModBase.Val(button.Tag) == (double)tabPage)
                 {
                     button.SetChecked(true, true, string.IsNullOrEmpty(PageNameGet(pageCurrent)));
                     break;
@@ -1872,18 +1883,21 @@ public partial class FormMain
             pageCurrent = stack;
             switch (stack.page)
             {
-                case PageType.Launch: // 启动
-                    {
-                        PageChangeAnim(ModMain.frmLaunchLeft, ModMain.frmLaunchRight);
-                        break;
-                    }
-                case PageType.Bedrock: // 基岩版
-                    {
-                        ModMain.frmBedrockLeft ??= new PageBedrockLeft();
-                        ModMain.frmBedrockRight ??= new PageBedrockRight();
-                        PageChangeAnim(ModMain.frmBedrockLeft, ModMain.frmBedrockRight);
-                        break;
-                    }
+                case PageType.Launch: // 游戏（Java 版）
+                {
+                    ModMain.frmGameLeft ??= new PageGameLeft();
+                    ModMain.frmGameRight ??= new PageGameRight();
+                    PageChangeAnim(ModMain.frmGameLeft, ModMain.frmGameRight);
+                    break;
+                }
+                case PageType.Bedrock: // 游戏（基岩版）
+                {
+                    ModMain.frmGameLeft ??= new PageGameLeft();
+                    ModMain.frmGameRight ??= new PageGameRight();
+                    ModMain.frmGameLeft.SwitchEdition(true, false);
+                    PageChangeAnim(ModMain.frmGameLeft, ModMain.frmGameRight);
+                    break;
+                }
                 case PageType.Download: // 下载
                     {
                         ModMain.frmDownloadLeft ??= new PageDownloadLeft();
@@ -1895,10 +1909,13 @@ public partial class FormMain
                         PageChangeAnim(ModMain.frmDownloadLeft, (FrameworkElement)ModMain.frmDownloadLeft.PageGet(subType));
                         break;
                     }
-                case PageType.Tools: // 联机
+                case PageType.Tools: // 工具
                     {
                         ModMain.frmToolsLeft ??= new PageToolsLeft();
-                        subType = ModMain.frmToolsLeft.pageID;
+                        if (subType != PageSubType.Default)
+                            ModMain.frmToolsLeft.SelectPage(subType);
+                        else
+                            subType = ModMain.frmToolsLeft.pageID;
                         PageChangeAnim(ModMain.frmToolsLeft, (FrameworkElement)ModMain.frmToolsLeft.PageGet(subType));
                         break;
                     }

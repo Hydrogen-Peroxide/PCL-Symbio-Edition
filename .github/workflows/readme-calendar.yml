@@ -1,0 +1,48 @@
+name: Update README calendar
+
+on:
+  release:
+    types: [published, edited]
+  schedule:
+    - cron: '5 16 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: readme-calendar
+  cancel-in-progress: true
+
+jobs:
+  calendar:
+    if: github.repository == 'Hydrogen-Peroxide/PCL-Symbio-Edition'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Generate dual-theme calendar SVGs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python docs/assets/Generate-ReadmeCalendar.py --style pulse --output-dir docs/assets
+
+      - name: Commit refreshed calendars
+        run: |
+          set -euo pipefail
+          git add docs/assets/calendar-light.svg docs/assets/calendar-dark.svg
+          if git diff --cached --quiet -- docs/assets/calendar-light.svg docs/assets/calendar-dark.svg; then
+            echo "Calendar SVGs are already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs: refresh README release and commit calendar"
+          git push origin HEAD:dev

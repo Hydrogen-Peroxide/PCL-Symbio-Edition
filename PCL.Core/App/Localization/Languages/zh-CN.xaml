@@ -2212,6 +2212,10 @@
     <sys:String x:Key="Main.SpecialVersion.Title">特殊版本提示</sys:String>
     <sys:String x:Key="Main.Tab.Bedrock">基岩版</sys:String>
     <sys:String x:Key="Main.Tab.Download">下载</sys:String>
+    <sys:String x:Key="Main.Tab.Game">启动</sys:String>
+    <sys:String x:Key="Game.Edition.Bedrock">基岩版</sys:String>
+    <sys:String x:Key="Game.Edition.Java">Java 版</sys:String>
+    <sys:String x:Key="Game.Edition.Switch.ToolTip">Java 版与基岩版共用同一个启动入口，可随时切换</sys:String>
     <sys:String x:Key="Main.Tab.Launch">Java版</sys:String>
     <sys:String x:Key="Main.Tab.Settings">设置</sys:String>
     <sys:String x:Key="Main.Tab.Tools">工具</sys:String>
@@ -2516,6 +2520,7 @@
     <sys:String x:Key="Minecraft.Launch.Error.CancelProcess">取消启动结束进程失败</sys:String>
     <sys:String x:Key="Minecraft.Launch.Error.CannotConnectAuthServer">无法连接到第三方登录服务器（{0}）</sys:String>
     <sys:String x:Key="Minecraft.Launch.Error.CannotConnectAuthServerWithDetail">无法连接到第三方登录服务器（{0}）&#xA;详细信息：</sys:String>
+    <sys:String x:Key="Minecraft.Launch.Error.AuthlibInjectorMissing">本地皮肤所需的 authlib-injector 释放失败，请检查启动器目录的写入权限</sys:String>
     <sys:String x:Key="Minecraft.Launch.Error.CannotLaunch">无法启动 Minecraft：{0}</sys:String>
     <sys:String x:Key="Minecraft.Launch.Error.CustomCommand">执行自定义命令失败</sys:String>
     <sys:String x:Key="Minecraft.Launch.Error.DispatcherUnavailable">启动器界面不可用，无法执行此操作。</sys:String>
@@ -3620,6 +3625,15 @@
     <sys:String x:Key="Tools.SkinLibrary.Apply.NoProfile">请先在启动页登录账号后再应用皮肤</sys:String>
     <sys:String x:Key="Tools.SkinLibrary.Apply.AuthHint">第三方登录的皮肤需要在皮肤站网页中上传，已为你打开皮肤衣柜。</sys:String>
     <sys:String x:Key="Tools.SkinLibrary.Apply.FileMissing">皮肤文件已不存在，请刷新皮肤库后重试</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Apply.OfflineApplied">已应用到离线档案，启动游戏后生效</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.Title">本地披风</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.Pick">选择新的披风图片</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.Remove">移除当前披风</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.PickTitle">选择披风图片</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.Invalid">披风尺寸不合法（当前 {0}），应为 64×32 的整数倍</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.Applied">已应用披风「{0}」，启动游戏后生效</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.Removed">已移除本地披风</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.ImportFailed">导入披风失败：{0}</sys:String>
     <sys:String x:Key="Tools.SkinLibrary.DeleteConfirmTitle">删除皮肤</sys:String>
     <sys:String x:Key="Tools.SkinLibrary.DeleteConfirmMessage">确定要从皮肤库删除「{0}」吗？此操作不会影响账号上已有的皮肤。</sys:String>
     <sys:String x:Key="Tools.SkinLibrary.Deleted">已删除皮肤「{0}」</sys:String>

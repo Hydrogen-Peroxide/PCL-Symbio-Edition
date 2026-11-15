@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using PCL.Core.Utils;
 
@@ -25,7 +26,29 @@ public abstract class CommonFileProvider(string path) : IKeyValueFileProvider
             stream.Flush(true);
         }
 
-        if (File.Exists(FilePath)) File.Replace(tmpFile, FilePath, bakFile);
-        else File.Move(tmpFile, FilePath);
+        try
+        {
+            if (File.Exists(FilePath)) File.Replace(tmpFile, FilePath, bakFile);
+            else File.Move(tmpFile, FilePath);
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+        {
+            // 部分目录（只读 ACL、同步盘、沙箱）不允许删除或重命名其中的文件，
+            // 此时退化为直接覆盖目标文件，避免整个配置保存失败。
+            using (var source = new FileStream(tmpFile, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var target = new FileStream(FilePath, FileMode.Create, FileAccess.Write, FileShare.Read))
+            {
+                source.CopyTo(target);
+            }
+
+            try
+            {
+                File.Delete(tmpFile);
+            }
+            catch (Exception)
+            {
+                // 临时文件无法删除时忽略，下次保存会重新生成
+            }
+        }
     }
 }

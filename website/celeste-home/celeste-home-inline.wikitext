@@ -1,0 +1,63 @@
+<!-- ============================================================
+     蔚蓝中文资料库 · 首页（零依赖内联版）
+     不需要改 Common.css，整段粘进首页即可
+     缺点：没有 hover 动效，窄屏表现不如样式表版
+     ============================================================ -->
+<div style="max-width:1000px;margin:0 auto;padding:36px 8px 40px;font-family:'Inter','Noto Sans SC','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;font-size:15.5px;line-height:1.85;color:#2d2d2a;">
+<div style="height:2px;background:#0b0b0a;"></div>
+<div style="overflow:hidden;padding-top:12px;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#74746e;"><span style="float:left;">蔚蓝 WIKI · CELESTE ARCHIVE</span><span style="float:right;color:#9a9a93;">首页 / MAIN PAGE</span></div>
+<div style="padding-top:58px;">
+<p style="margin:0 0 16px;"><span style="display:inline-block;width:18px;height:2px;background:#16688f;vertical-align:middle;margin-right:10px;"></span><span style="font-size:13px;font-weight:600;color:#16688f;">欢迎来到</span></p>
+<div style="font-size:50px;line-height:1.16;font-weight:300;color:#0b0b0a;">蔚蓝中文资料库</div>
+<div style="margin-top:18px;font-size:16px;color:#74746e;">Celeste 中文资料库 · 地图 · 音乐 · 角色 · Mod</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:56px;border-top:1px solid #e4e4dd;margin-top:44px;padding-top:30px;">
+<div style="flex:1 1 420px;max-width:38em;">
+<p style="margin:0;font-size:15.5px;line-height:1.95;text-align:start;">本网站致力于收录蔚蓝相关地图、音乐、角色、Mod<br>（不包括同人作品）等相关要素。</p>
+<p style="margin:10px 0 0;font-size:14px;color:#74746e;">该网站刚成立不久，欢迎各位朋友协助我们一起编写。</p>
+</div>
+<div style="flex:0 0 224px;">
+<div style="background:#16688f;padding:22px;min-height:136px;text-align:center;">[[文件:Celeste-text.webp|无框|180px]]</div>
+<div style="margin-top:12px;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#9a9a93;">Celeste · 官方标识</div>
+</div>
+</div>
+<div style="margin-top:78px;background:#16688f;color:#fff;padding:24px 30px;">
+<span style="font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.16em;color:#a8c6d6;margin-right:24px;">01</span><span style="font-size:24px;font-weight:500;">游戏总体介绍</span><span style="float:right;margin-top:10px;font-size:14px;border-bottom:1px solid #7fa8bc;">[[蔚蓝|<span style="color:#fff;">进入 →</span>]]</span>
+</div>
+<div style="margin-top:78px;">
+<div style="margin-bottom:26px;"><span style="font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:42px;font-weight:700;color:#e7e7e0;letter-spacing:-.02em;">02</span><span style="font-size:21px;font-weight:600;color:#0b0b0a;margin-left:14px;">原版游戏章节介绍</span><span style="float:right;margin-top:20px;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#9a9a93;">12 Chapters</span></div>
+<p style="margin:0 0 13px;font-size:12px;font-weight:600;color:#16688f;">主线章节</p>
+<div style="display:flex;flex-wrap:wrap;margin:0 -5px;">
+<div style="flex:1 1 250px;margin:5px;min-height:88px;background:#f2f3f1;padding:15px 18px 17px;"><span style="display:block;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a93;margin-bottom:12px;">Prologue</span><span style="display:block;font-size:15.5px;font-weight:500;color:#0b0b0a;">[[序章]]</span></div>
+<div style="flex:1 1 250px;margin:5px;min-height:88px;background:#f2f3f1;padding:15px 18px 17px;"><span style="display:block;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a93;margin-bottom:12px;">01</span><span style="display:block;font-size:15.5px;font-weight:500;color:#0b0b0a;">[[被遗弃的城市]]</span></div>
+<div style="flex:1 1 250px;margin:5px;min-height:88px;background:#f2f3f1;padding:15px 18px 17px;"><span style="display:block;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a93;margin-bottom:12px;">02</span><span style="display:block;font-size:15.5px;font-weight:500;color:#0b0b0a;">[[旧址]]</span></div>
+<div style="flex:1 1 250px;margin:5px;min-height:88px;background:#f2f3f1;padding:15px 18px 17px;"><span style="display:block;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a93;margin-bottom:12px;">03</span><span style="display:block;font-size:15.5px;font-weight:500;color:#0b0b0a;">[[天空度假山庄]]</span></div>
+<div style="flex:1 1 250px;margin:5px;min-height:88px;background:#f2f3f1;padding:15px 18px 17px;"><span style="display:block;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a93;margin-bottom:12px;">04</span><span style="display:block;font-size:15.5px;font-weight:500;color:#0b0b0a;">[[黄金山脊]]</span></div>
+<div style="flex:1 1 250px;margin:5px;min-height:88px;background:#f2f3f1;padding:15px 18px 17px;"><span style="display:block;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a93;margin-bottom:12px;">05</span><span style="display:block;font-size:15.5px;font-weight:500;color:#0b0b0a;">[[镜之寺庙]]</span></div>
+<div style="flex:1 1 250px;margin:5px;min-height:88px;background:#f2f3f1;padding:15px 18px 17px;"><span style="display:block;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a93;margin-bottom:12px;">06</span><span style="display:block;font-size:15.5px;font-weight:500;color:#0b0b0a;">[[沉思]]</span></div>
+<div style="flex:1 1 250px;margin:5px;min-height:88px;background:#f2f3f1;padding:15px 18px 17px;"><span style="display:block;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a93;margin-bottom:12px;">07</span><span style="display:block;font-size:15.5px;font-weight:500;color:#0b0b0a;">[[山顶]]</span></div>
+<div style="flex:1 1 250px;margin:5px;min-height:88px;background:#f2f3f1;padding:15px 18px 17px;"><span style="display:block;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a93;margin-bottom:12px;">Epilogue</span><span style="display:block;font-size:15.5px;font-weight:500;color:#0b0b0a;">[[尾声]]</span></div>
+</div>
+<p style="margin:26px 0 13px;font-size:12px;font-weight:600;color:#16688f;">后续与附加内容</p>
+<div style="display:flex;flex-wrap:wrap;margin:0 -5px;">
+<div style="flex:1 1 250px;margin:5px;min-height:88px;background:#f2f3f1;padding:15px 18px 17px;"><span style="display:block;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a93;margin-bottom:12px;">08</span><span style="display:block;font-size:15.5px;font-weight:500;color:#0b0b0a;">[[核心]]</span></div>
+<div style="flex:1 1 250px;margin:5px;min-height:88px;background:#f2f3f1;padding:15px 18px 17px;"><span style="display:block;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a93;margin-bottom:12px;">09</span><span style="display:block;font-size:15.5px;font-weight:500;color:#0b0b0a;">[[再见]]</span></div>
+<div style="flex:1 1 250px;margin:5px;min-height:88px;background:#f2f3f1;padding:15px 18px 17px;"><span style="display:block;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#9a9a93;margin-bottom:12px;">Extra</span><span style="display:block;font-size:15.5px;font-weight:500;color:#0b0b0a;">[[附加面]]</span></div>
+</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px;margin-top:78px;">
+<div style="flex:1 1 360px;background:#f2f3f1;padding:26px 26px 18px;">
+<div style="margin-bottom:14px;"><span style="font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:11px;letter-spacing:.12em;color:#9a9a93;">03</span><span style="font-size:17px;font-weight:600;color:#0b0b0a;margin-left:10px;">游戏机制介绍</span></div>
+<div style="overflow:hidden;padding:12px 0;font-size:15px;color:#0b0b0a;">[[实体]]<span style="float:right;color:#9a9a93;">→</span></div>
+<div style="overflow:hidden;padding:12px 0;font-size:15px;color:#0b0b0a;">[[技巧]]<span style="float:right;color:#9a9a93;">→</span></div>
+<div style="overflow:hidden;padding:12px 0;font-size:15px;color:#0b0b0a;">[[收集品]]<span style="float:right;color:#9a9a93;">→</span></div>
+<div style="overflow:hidden;padding:12px 0;font-size:15px;color:#0b0b0a;">[[角色]]<span style="float:right;color:#9a9a93;">→</span></div>
+</div>
+<div style="flex:1 1 360px;background:#f2f3f1;padding:26px 26px 18px;">
+<div style="margin-bottom:14px;"><span style="font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:11px;letter-spacing:.12em;color:#9a9a93;">04</span><span style="font-size:17px;font-weight:600;color:#0b0b0a;margin-left:10px;">Mod</span></div>
+<div style="overflow:hidden;padding:12px 0;font-size:15px;color:#0b0b0a;">[[Mod|Mod 总体介绍]]<span style="float:right;color:#9a9a93;">→</span></div>
+<div style="overflow:hidden;padding:12px 0;font-size:15px;color:#0b0b0a;">[[草莓酱]]<span style="float:right;color:#9a9a93;">→</span></div>
+</div>
+</div>
+<div style="overflow:hidden;margin-top:88px;padding-top:18px;border-top:1px solid #e4e4dd;font-family:'JetBrains Mono','Cascadia Mono',Consolas,monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#9a9a93;"><span style="float:left;">蔚蓝中文资料库</span><span style="float:right;">欢迎参与编写</span></div>
+</div>

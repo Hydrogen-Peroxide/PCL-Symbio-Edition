@@ -27,6 +27,8 @@ public static class ModMain
     public static StartupSplash? frmStart;
     public static PageLaunchLeft? frmLaunchLeft;
     public static PageLaunchRight? frmLaunchRight;
+    public static PageGameLeft? frmGameLeft;
+    public static PageGameRight? frmGameRight;
     public static PageLogLeft? frmLogLeft;
     public static PageLogRight? frmLogRight;
     public static PageSelectLeft? frmSelectLeft;

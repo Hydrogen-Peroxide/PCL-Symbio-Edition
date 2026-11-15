@@ -81,11 +81,41 @@ public partial class PageToolsLeft
     /// </summary>
     public FormMain.PageSubType pageID = FormMain.PageSubType.ToolsTest;
 
+    private bool _suppressPageCheck;
+
+    /// <summary>
+    ///     从外部入口（如启动页的「皮肤库」）直接切到指定子页面，并同步左侧勾选。
+    /// </summary>
+    public void SelectPage(FormMain.PageSubType id)
+    {
+        pageID = id;
+        if (!IsLoaded)
+            return; // 尚未加载时由 Loaded 根据 pageID 勾选对应项
+
+        _suppressPageCheck = true;
+        try
+        {
+            foreach (var child in PanItem.Children)
+                if (child is MyListItem item && ModBase.Val(item.Tag) == (double)id)
+                {
+                    item.SetChecked(true, false, false);
+                    break;
+                }
+        }
+        finally
+        {
+            _suppressPageCheck = false;
+        }
+    }
+
     /// <summary>
     ///     勾选事件改变页面。
     /// </summary>
     private void PageCheck(object senderRaw, ModBase.RouteEventArgs e)
     {
+        if (_suppressPageCheck)
+            return;
+
         var sender = (MyListItem)senderRaw;
         // 尚未初始化控件属性时，sender.Tag 为 Nothing，会导致切换到页面 0
         // 若使用 IsLoaded，则会导致模拟点击不被执行（模拟点击切换页面时，控件的 IsLoaded 为 False）
@@ -117,7 +147,7 @@ public partial class PageToolsLeft
     public object PageGet(FormMain.PageSubType? id = null)
     {
         var targetID = id ?? pageID;
-        switch (id)
+        switch (targetID)
         {
             case FormMain.PageSubType.ToolsTest:
             {
@@ -148,7 +178,7 @@ public partial class PageToolsLeft
             }
             default:
             {
-                throw new Exception("未知的更多子页面种类：" + (int)id);
+                throw new Exception("未知的更多子页面种类：" + (int)targetID);
             }
         }
     }

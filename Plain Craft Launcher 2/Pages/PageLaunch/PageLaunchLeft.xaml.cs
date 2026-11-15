@@ -923,8 +923,12 @@ public partial class PageLaunchLeft
 
     private static ModBase.EqualableList<string> SkinLegacyInput()
     {
+        // 把本地皮肤也纳入输入，换皮肤或切换模型后才能重新渲染
+        var profile = ModProfile.selectedProfile;
         return new ModBase.EqualableList<string>
-            { ModProfile.selectedProfile.Username, ModProfile.selectedProfile.Uuid };
+        {
+            profile.Username, profile.Uuid, profile.LocalSkin ?? "", profile.LocalSkinSlim ? "slim" : "classic"
+        };
     }
 
     private static void SkinLegacyLoad(ModLoader.LoaderTask<ModBase.EqualableList<string>, string> data)
@@ -935,7 +939,11 @@ public partial class PageLaunchLeft
             if (ModMain.frmLoginProfileSkin is not null && ModMain.frmLoginProfileSkin.Skin is not null)
                 ModMain.frmLoginProfileSkin.Skin.Clear();
         });
-        data.output = ModBase.pathImage + "Skins/" + ModSkin.McSkinSex(data.input[1]) + ".png";
+        // 离线档案启用了本地皮肤时优先显示它，否则回退到按 UUID 推断的默认皮肤
+        var localSkin = ModProfile.selectedProfile?.LocalSkin;
+        data.output = !string.IsNullOrWhiteSpace(localSkin) && File.Exists(localSkin)
+            ? localSkin
+            : ModBase.pathImage + "Skins/" + ModSkin.McSkinSex(data.input[1]) + ".png";
         // 刷新显示
         if (ModMain.frmLoginProfileSkin is not null && ReferenceEquals(ModMain.frmLoginProfileSkin.Skin.loader, data))
             ModBase.RunInUi(() => ModMain.frmLoginProfileSkin.Skin.Load());

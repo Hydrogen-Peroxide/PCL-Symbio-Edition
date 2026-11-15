@@ -970,7 +970,24 @@ public static class ModBase
                 var bytes = encoding is null ? new UTF8Encoding(false).GetBytes(text) : encoding.GetBytes(text);
                 var tempPath = filePath + ".pcltmp." + Guid.NewGuid().ToString("N");
                 File.WriteAllBytes(tempPath, bytes);
-                File.Move(tempPath, filePath, true);
+                try
+                {
+                    File.Move(tempPath, filePath, true);
+                }
+                catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+                {
+                    // 只读 ACL / 同步盘 / 沙箱会拒绝删除或重命名文件，
+                    // 退化为直接覆盖，保证日志、缓存与配置仍然能写出去。
+                    File.WriteAllBytes(filePath, bytes);
+                    try
+                    {
+                        File.Delete(tempPath);
+                    }
+                    catch (Exception)
+                    {
+                        // 忽略无法清理的临时文件
+                    }
+                }
             }
     }
 
@@ -3033,10 +3050,29 @@ public static class ModBase
             path += @"\";
         if (!Directory.Exists(path))
             throw new DirectoryNotFoundException("文件夹不存在！");
-        if (File.Exists(path + "CheckPermission"))
+        try
+        {
+            if (File.Exists(path + "CheckPermission"))
+                File.Delete(path + "CheckPermission");
+            File.Create(path + "CheckPermission").Dispose();
             File.Delete(path + "CheckPermission");
-        File.Create(path + "CheckPermission").Dispose();
-        File.Delete(path + "CheckPermission");
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            // 同步盘、沙箱或只读 ACL 会拒绝创建/删除探测文件。
+            // 只要目录本身还能读取，就按"只读实例"继续，而不是直接判为不可用。
+            try
+            {
+                using var entries = Directory.EnumerateFileSystemEntries(path).GetEnumerator();
+                entries.MoveNext();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            Log($"[权限] 没有对文件夹 {path} 的写入权限，将以只读方式继续：{ex.Message}", LogLevel.Debug);
+        }
     }
 
     #region UI

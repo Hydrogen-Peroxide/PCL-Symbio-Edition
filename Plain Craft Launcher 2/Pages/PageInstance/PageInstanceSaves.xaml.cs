@@ -728,6 +728,139 @@ public partial class PageInstanceSaves : IRefreshable
         ModMain.frmMain.BtnExtraDownload.Ribble();
     }
 
+    private void BtnConvert_Click(object sender, MouseButtonEventArgs e)
+    {
+        var choice = ModMain.MyMsgBox(
+            Lang.Text("Instance.Saves.Convert.Message"),
+            Lang.Text("Instance.Saves.Convert.Title"),
+            Lang.Text("Instance.Saves.Convert.Local.Button"),
+            Lang.Text("Common.Action.Cancel"));
+        if (choice == 1)
+            Dispatcher.BeginInvoke(new Action(LocalConvert), DispatcherPriority.Background);
+    }
+
+    private void LocalConvert()
+    {
+        var dialog = new Microsoft.Win32.OpenFolderDialog
+        {
+            Title = Lang.Text("Instance.Saves.Convert.SelectSource"),
+            InitialDirectory = Directory.Exists(worldPath) ? worldPath : ""
+        };
+        if (dialog.ShowDialog() != true) return;
+        var source = dialog.FolderName;
+        if (!File.Exists(Path.Combine(source, "level.dat")) && !Directory.Exists(Path.Combine(source, "db")))
+        {
+            HintService.Hint(Lang.Text("Instance.Saves.Convert.InvalidFolder"));
+            return;
+        }
+
+        var direction = ModMain.MyMsgBox(
+            Lang.Text("Instance.Saves.Convert.DirectionMessage"),
+            Lang.Text("Instance.Saves.Convert.DirectionTitle"),
+            Lang.Text("Instance.Saves.Convert.ToBedrock"),
+            Lang.Text("Instance.Saves.Convert.ToJava"),
+            Lang.Text("Common.Action.Cancel"));
+        if (direction is not (1 or 2)) return;
+        var toBedrock = direction == 1;
+        var sourceName = Path.GetFileName(source.TrimEnd(Path.DirectorySeparatorChar));
+
+        ModBase.RunInNewThread(() =>
+        {
+            try
+            {
+                ModBase.RunInUi(() => HintService.Hint(Lang.Text("Instance.Saves.Convert.Local.Preparing")));
+                var java = ModSaveConverter.FindJava() ??
+                           throw new InvalidOperationException(Lang.Text("Instance.Saves.Convert.Local.NoJava"));
+                var cli = ModSaveConverter.EnsureCliAsync().GetAwaiter().GetResult();
+                var formats = ModSaveConverter.ListFormats(java, cli);
+                // Java 输出优先用当前实例的版本，避免把存档升到过新的格式
+                string? preferred = null;
+                if (!toBedrock)
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(currentInstance.Name,
+                        @"(\d+)\.(\d+)(?:\.(\d+))?");
+                    if (match.Success)
+                        preferred = "JAVA_" + match.Groups[1].Value + "_" + match.Groups[2].Value +
+                                    (match.Groups[3].Success ? "_" + match.Groups[3].Value : "");
+                }
+
+                var format = formats.FirstOrDefault(item =>
+                                 string.Equals(item, preferred, StringComparison.OrdinalIgnoreCase)) ??
+                             (toBedrock
+                                 ? ModSaveConverter.PickBedrockFormat(formats)
+                                 : ModSaveConverter.PickLatestFormat(formats, "JAVA")) ??
+                             throw new InvalidOperationException(Lang.Text("Instance.Saves.Convert.Local.NoFormat"));
+                var output = Path.Combine(ModSaveConverter.CacheDirectory, "out",
+                    $"{sourceName}-{DateTime.Now:yyyyMMdd-HHmmss}");
+                ModBase.RunInUi(() => HintService.Hint(Lang.Text("Instance.Saves.Convert.Local.Converting", format)));
+                ModSaveConverter.Convert(java, cli, source, format, output);
+
+                if (toBedrock) ImportBedrockOutput(output, sourceName);
+                else ImportJavaOutput(output);
+
+                ModBase.RunInUi(() => Reload());
+            }
+            catch (Exception ex)
+            {
+                ModBase.Log(ex, "Chunker 转换失败", ModBase.LogLevel.Hint,
+                    userSummary: Lang.Text("Instance.Saves.Convert.Local.Failed"));
+            }
+        }, "Chunker convert");
+    }
+
+    private void ImportJavaOutput(string folder)
+    {
+        var name = Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar));
+        var target = Path.Combine(worldPath, name);
+        var index = 2;
+        while (Directory.Exists(target)) target = Path.Combine(worldPath, $"{name} ({index++})");
+        ModBase.CopyDirectory(folder, target);
+        ModBase.RunInUi(() => HintService.Hint(
+            Lang.Text("Instance.Saves.Convert.Success", Path.GetFileName(target)), HintType.Success));
+    }
+
+    private void ImportBedrockOutput(string folder, string name)
+    {
+        var worlds = FindBedrockWorldsFolder();
+        if (worlds is not null)
+        {
+            var target = Path.Combine(worlds, name);
+            var index = 2;
+            while (Directory.Exists(target)) target = Path.Combine(worlds, $"{name} ({index++})");
+            ModBase.CopyDirectory(folder, target);
+            ModBase.RunInUi(() =>
+            {
+                HintService.Hint(Lang.Text("Instance.Saves.Convert.Local.DoneBedrock", Path.GetFileName(target)),
+                    HintType.Success);
+                ModBase.OpenExplorer(worlds);
+            });
+            return;
+        }
+
+        var desktop = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+        var zip = Path.Combine(desktop, name + ".mcworld");
+        var fileIndex = 2;
+        while (File.Exists(zip)) zip = Path.Combine(desktop, $"{name} ({fileIndex++}).mcworld");
+        System.IO.Compression.ZipFile.CreateFromDirectory(folder, zip);
+        ModBase.RunInUi(() =>
+        {
+            HintService.Hint(Lang.Text("Instance.Saves.Convert.Local.DoneBedrockFile", zip), HintType.Success);
+            ModBase.OpenExplorer(desktop);
+        });
+    }
+
+    private static string? FindBedrockWorldsFolder()
+    {
+        var candidates = new[]
+        {
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages",
+                "Microsoft.MinecraftUWP_8wekyb3d8bbwe", "LocalState", "games", "com.mojang", "minecraftWorlds"),
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Minecraft Bedrock",
+                "Users", "Shared", "games", "com.mojang", "minecraftWorlds")
+        };
+        return candidates.FirstOrDefault(Directory.Exists);
+    }
+
     private void BtnDownloadNew_Click(object sender, MouseButtonEventArgs e)
     {
         ModMain.frmMain.PageChange(FormMain.PageType.Download, FormMain.PageSubType.DownloadWorld);

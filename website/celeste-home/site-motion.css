@@ -1,0 +1,197 @@
+/* ============================================================
+   蔚蓝中文资料库 · 全站动效
+   适用：Citizen 皮肤（MediaWiki 1.46）
+   用法：整段放进 MediaWiki:Common.css（或 Citizen.css 末尾）
+   原则：只动 color / background / opacity / transform，
+        不改尺寸与布局；系统开启「减少动态效果」时全部关闭
+   ============================================================ */
+
+:root{
+  --mz-fast:140ms;
+  --mz-base:220ms;
+  --mz-slow:420ms;
+  --mz-ease:cubic-bezier(.2,0,.2,1);
+  --mz-ease-out:cubic-bezier(.16,1,.3,1);
+}
+
+@media (prefers-reduced-motion: no-preference){
+
+  /* ---------- 0. 基础 ---------- */
+  html{scroll-behavior:smooth;}
+
+  a,
+  button,
+  summary,
+  .cdx-button,
+  .citizen-menu a,
+  .citizen-page-actions a,
+  .citizen-toc a,
+  .citizen-footer a{
+    transition:
+      color var(--mz-fast) var(--mz-ease),
+      background-color var(--mz-fast) var(--mz-ease),
+      border-color var(--mz-fast) var(--mz-ease),
+      box-shadow var(--mz-base) var(--mz-ease),
+      opacity var(--mz-fast) var(--mz-ease);
+  }
+
+  input,
+  textarea,
+  select,
+  .cdx-text-input__input{
+    transition:
+      border-color var(--mz-fast) var(--mz-ease),
+      background-color var(--mz-fast) var(--mz-ease),
+      box-shadow var(--mz-base) var(--mz-ease);
+  }
+
+  :focus-visible{
+    transition:outline-color var(--mz-fast) var(--mz-ease),
+               outline-offset var(--mz-fast) var(--mz-ease);
+  }
+
+  /* ---------- 1. 页面进入 ---------- */
+  .mw-body-content{
+    animation:mz-page-in 320ms var(--mz-ease-out) both;
+  }
+  @keyframes mz-page-in{
+    from{opacity:0;transform:translateY(6px);}
+    to{opacity:1;transform:none;}
+  }
+
+  /* 首屏标题稍微晚一点，形成层次 */
+  .citizen-page-header-inner{
+    animation:mz-page-in 320ms var(--mz-ease-out) both;
+    animation-delay:50ms;
+  }
+
+  /* ---------- 2. 正文链接：下划线从左滑出 ---------- */
+  .mw-parser-output p a[href]:not(.new):not(.image):not(.mw-file-description):not(.external),
+  .mw-parser-output li a[href]:not(.new):not(.image):not(.mw-file-description):not(.external),
+  .mw-parser-output dd a[href]:not(.new):not(.image):not(.mw-file-description):not(.external),
+  .mw-parser-output blockquote a[href]:not(.new):not(.image):not(.mw-file-description):not(.external){
+    background-image:linear-gradient(currentColor,currentColor);
+    background-repeat:no-repeat;
+    background-position:0 100%;
+    background-size:0 1px;
+    transition:
+      background-size var(--mz-base) var(--mz-ease),
+      color var(--mz-fast) var(--mz-ease),
+      opacity var(--mz-fast) var(--mz-ease);
+  }
+  .mw-parser-output p a[href]:not(.new):not(.image):not(.mw-file-description):not(.external):hover,
+  .mw-parser-output li a[href]:not(.new):not(.image):not(.mw-file-description):not(.external):hover,
+  .mw-parser-output dd a[href]:not(.new):not(.image):not(.mw-file-description):not(.external):hover,
+  .mw-parser-output blockquote a[href]:not(.new):not(.image):not(.mw-file-description):not(.external):hover{
+    background-size:100% 1px;
+  }
+
+  /* 红链（页面不存在）也给一点反馈，但不抢眼 */
+  .mw-parser-output a.new{
+    transition:opacity var(--mz-fast) var(--mz-ease);
+  }
+  .mw-parser-output a.new:hover{opacity:.75;}
+
+  /* ---------- 3. 图片与图注 ---------- */
+  .mw-parser-output .thumb .thumbinner{
+    overflow:hidden;
+    transition:box-shadow var(--mz-base) var(--mz-ease);
+  }
+  .mw-parser-output .thumb img{
+    transition:transform var(--mz-slow) var(--mz-ease-out);
+  }
+  .mw-parser-output .thumb:hover img{
+    transform:scale(1.03);
+  }
+  .mw-parser-output figure img,
+  .mw-parser-output .mw-file-description img{
+    transition:transform var(--mz-slow) var(--mz-ease-out);
+  }
+
+  /* ---------- 4. 表格：行悬停 ---------- */
+  .mw-parser-output table.wikitable tr{
+    transition:background-color var(--mz-fast) var(--mz-ease);
+  }
+  .mw-parser-output table.wikitable tr:hover{
+    background-color:color-mix(in srgb,currentColor 5%,transparent);
+  }
+
+  /* ---------- 5. 编辑区小铅笔：悬停标题才出现（仅限有悬停的设备） ---------- */
+  @media (hover:hover){
+    .mw-parser-output .mw-editsection{
+      opacity:0;
+      transition:opacity var(--mz-fast) var(--mz-ease);
+    }
+    .mw-parser-output h2:hover .mw-editsection,
+    .mw-parser-output h3:hover .mw-editsection,
+    .mw-parser-output h4:hover .mw-editsection,
+    .mw-parser-output .mw-editsection:focus-within{
+      opacity:1;
+    }
+  }
+
+  /* ---------- 6. 顶栏 / 菜单 / 目录 ---------- */
+  .citizen-header__logo,
+  .citizen-drawer__logo,
+  .citizen-ui-icon{
+    transition:transform var(--mz-base) var(--mz-ease-out),
+               opacity var(--mz-fast) var(--mz-ease);
+  }
+  .citizen-header__logo:hover,
+  .citizen-drawer__logo:hover{
+    transform:scale(1.04);
+  }
+
+  .citizen-menu__card,
+  .citizen-page-aside__panel{
+    transition:background-color var(--mz-fast) var(--mz-ease),
+               transform var(--mz-base) var(--mz-ease-out);
+  }
+
+  .citizen-toc-indicator,
+  .citizen-toc-current__track{
+    transition:transform var(--mz-base) var(--mz-ease),
+               opacity var(--mz-base) var(--mz-ease);
+  }
+
+  .citizen-page-actions__tabs a:hover{
+    transform:translateY(-1px);
+  }
+
+  /* ---------- 7. 按钮按压 ---------- */
+  .cdx-button:active,
+  .citizen-cdx-button--size-large:active{
+    transform:scale(.985);
+  }
+  .cdx-button{
+    transition:transform var(--mz-fast) var(--mz-ease),
+               background-color var(--mz-fast) var(--mz-ease),
+               color var(--mz-fast) var(--mz-ease);
+  }
+
+  /* ---------- 8. 首页卡片：进入时依次出现 ---------- */
+  .cz-home .cz-tile,
+  .cz-home .cz-panel{
+    animation:mz-card-in var(--mz-slow) var(--mz-ease-out) both;
+  }
+  .cz-home .cz-tile:nth-child(2){animation-delay:30ms;}
+  .cz-home .cz-tile:nth-child(3){animation-delay:60ms;}
+  .cz-home .cz-tile:nth-child(4){animation-delay:90ms;}
+  .cz-home .cz-tile:nth-child(5){animation-delay:120ms;}
+  .cz-home .cz-tile:nth-child(6){animation-delay:150ms;}
+  .cz-home .cz-tile:nth-child(7){animation-delay:180ms;}
+  .cz-home .cz-tile:nth-child(8){animation-delay:210ms;}
+  .cz-home .cz-tile:nth-child(9){animation-delay:240ms;}
+  @keyframes mz-card-in{
+    from{opacity:0;transform:translateY(12px);}
+    to{opacity:1;transform:none;}
+  }
+}
+
+/* ---------- 9. 打印与降级 ---------- */
+@media print{
+  *{animation:none !important;transition:none !important;}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important;}
+}

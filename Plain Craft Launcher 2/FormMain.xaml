@@ -158,14 +158,10 @@
                         </Grid>
                         <StackPanel Grid.Column="1" x:Name="PanTitleSelect" HorizontalAlignment="Left" Height="27"
                                     VerticalAlignment="Center" Orientation="Horizontal" Margin="13,0">
-                            <local:MyRadioButton x:Name="BtnTitleSelect0" Text="{DynamicResource Main.Tab.Launch}" Tag="0" Margin="5,0" Checked="True"
+                            <local:MyRadioButton x:Name="BtnTitleSelect0" Text="{DynamicResource Main.Tab.Game}" Tag="0" Margin="5,0" Checked="True"
                                                  Padding="2,0" Check="BtnTitleSelect_Click"
                                                  LogoScale="0.9"
                                                  SvgIcon="lucide/play" />
-                            <local:MyRadioButton x:Name="BtnTitleSelect1" Text="{DynamicResource Main.Tab.Bedrock}" Tag="13" Margin="5,0" Padding="2,0"
-                                                 Check="BtnTitleSelect_Click"
-                                                 LogoScale="0.9"
-                                                 SvgIcon="lucide/box" />
                             <local:MyRadioButton x:Name="BtnTitleSelect2" Text="{DynamicResource Main.Tab.Download}" Tag="1" Margin="5,0" Padding="2,0"
                                                  Check="BtnTitleSelect_Click"
                                                  LogoScale="0.9"

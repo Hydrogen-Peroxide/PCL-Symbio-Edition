@@ -135,15 +135,22 @@ public static class ModLaunch
         return;
         #endif
 
-        // 正版购买提示
+        // 正版购买提示：不再每次离线启动都弹，改成每 5~15 次启动提醒一次
         if (Lang.IsFeaturesUnrestricted && !ModProfile.profileList.Any(x => x.Type == McLoginType.Ms))
         {
-            if (ModMain.MyMsgBox(
-                    Lang.Text("Minecraft.Launch.PurchaseHint.Message"),
-                    Lang.Text("Minecraft.Launch.PurchaseHint.Title"), Lang.Text("Minecraft.Launch.PurchaseHint.Purchase"), Lang.Text("Minecraft.Launch.PurchaseHint.Later")) ==
-                1)
-                ModBase.OpenWebsite(
-                    "https://www.xbox.com/zh-cn/games/store/minecraft-java-bedrock-edition-for-pc/9nxp44l49shj");
+            var nextHintLaunch = States.System.PurchaseHintNextLaunch;
+            if (nextHintLaunch <= 0)
+                States.System.PurchaseHintNextLaunch = States.System.LaunchCount + RandomUtils.NextInt(5, 15);
+            else if (States.System.LaunchCount >= nextHintLaunch)
+            {
+                States.System.PurchaseHintNextLaunch = States.System.LaunchCount + RandomUtils.NextInt(5, 15);
+                if (ModMain.MyMsgBox(
+                        Lang.Text("Minecraft.Launch.PurchaseHint.Message"),
+                        Lang.Text("Minecraft.Launch.PurchaseHint.Title"), Lang.Text("Minecraft.Launch.PurchaseHint.Purchase"), Lang.Text("Minecraft.Launch.PurchaseHint.Later")) ==
+                    1)
+                    ModBase.OpenWebsite(
+                        "https://www.xbox.com/zh-cn/games/store/minecraft-java-bedrock-edition-for-pc/9nxp44l49shj");
+            }
         }
     }
 
@@ -2584,10 +2591,7 @@ public static class ModLaunch
             try
             {
                 var response = Requester.FetchString(server);
-                dataList.Insert(0,
-                    "-javaagent:\"" + Path.Combine(ModBase.pathPure, "authlib-injector.jar") + "\"=" + server +
-                    " -Dauthlibinjector.side=client" + " -Dauthlibinjector.yggdrasil.prefetched=" +
-                    Convert.ToBase64String(Encoding.UTF8.GetBytes(response)));
+                dataList.Insert(0, BuildAuthlibInjectorArgument(server, response));
             }
             catch (WebException ex)
             {
@@ -2598,6 +2602,10 @@ public static class ModLaunch
             {
                 throw new Exception(Lang.Text("Minecraft.Launch.Error.CannotConnectAuthServer", server ?? null), ex);
             }
+        }
+        else if (ModLocalSkin.IsEnabledFor(ModProfile.selectedProfile))
+        {
+            dataList.Insert(0, McLaunchLocalSkinArgument());
         }
 
         if (Config.Instance.UseDebugLof4j2Config[instance.PathIndie])
@@ -2719,15 +2727,16 @@ public static class ModLaunch
             try
             {
                 var response = ModNet.NetGetCodeByRequestRetry(server, Encoding.UTF8)?.ToString();
-                dataList.Insert(0,
-                    "-javaagent:\"" + Path.Combine(ModBase.pathPure, "authlib-injector.jar") + "\"=" + server +
-                    " -Dauthlibinjector.side=client" + " -Dauthlibinjector.yggdrasil.prefetched=" +
-                    Convert.ToBase64String(Encoding.UTF8.GetBytes(response)));
+                dataList.Insert(0, BuildAuthlibInjectorArgument(server, response));
             }
             catch (Exception ex)
             {
                 throw new Exception(Lang.Text("Minecraft.Launch.Error.CannotConnectAuthServer", server ?? null), ex);
             }
+        }
+        else if (ModLocalSkin.IsEnabledFor(ModProfile.selectedProfile))
+        {
+            dataList.Insert(0, McLaunchLocalSkinArgument());
         }
         
         // LWJGL Unsafe Agent
@@ -2821,6 +2830,30 @@ public static class ModLaunch
         result += " " + instance.JsonObject["mainClass"];
 
         return result;
+    }
+
+    /// <summary>
+    ///     生成 authlib-injector 的 JVM 参数（须置于主类参数之前）。
+    /// </summary>
+    /// <param name="server">Yggdrasil API 地址</param>
+    /// <param name="metadataJson">API 根返回的元数据，用于预获取</param>
+    private static string BuildAuthlibInjectorArgument(string server, string metadataJson)
+    {
+        return "-javaagent:\"" + Path.Combine(ModBase.pathPure, "authlib-injector.jar") + "\"=" + server +
+               " -Dauthlibinjector.side=client" + " -Dauthlibinjector.yggdrasil.prefetched=" +
+               Convert.ToBase64String(Encoding.UTF8.GetBytes(metadataJson));
+    }
+
+    /// <summary>
+    ///     离线档案启用本地皮肤时，把客户端的会话请求劫持到启动器内置的本地皮肤服务。
+    /// </summary>
+    private static string McLaunchLocalSkinArgument()
+    {
+        ModLocalSkin.EnsureAuthlibInjector();
+        var server = ModLocalSkin.EnsureServer();
+        ModLocalSkin.Register(ModProfile.selectedProfile);
+        ModBase.Log("[Launch] 已启用本地皮肤服务：" + server.ApiRoot, ModBase.LogLevel.Developer);
+        return BuildAuthlibInjectorArgument(server.ApiRoot, server.MetadataJson);
     }
 
     // Game 部分（第二段）
@@ -2990,7 +3023,8 @@ public static class ModLaunch
         gameArguments.Add("${auth_access_token}", mcLoginLoader.output.AccessToken);
         gameArguments.Add("${access_token}", mcLoginLoader.output.AccessToken);
         gameArguments.Add("${auth_session}", mcLoginLoader.output.AccessToken);
-        gameArguments.Add("${user_type}", "msa"); // #1221
+        gameArguments.Add("${user_type}",
+            ModLocalSkin.IsEnabledFor(ModProfile.selectedProfile) ? "mojang" : "msa"); // #1221
 
         // 窗口尺寸参数
         Size gameSize;

@@ -500,6 +500,26 @@ public partial class PageToolsTest
         ModMain.MyMsgBox(Lang.Text("Tools.Test.LaunchCount.Message", States.System.LaunchCount), Lang.Text("Tools.Test.LaunchCount.Title"));
     }
 
+    // 千万别点
+    private void BtnSurprise_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (!ModLivingForkEgg.TryBegin())
+        {
+            HintService.Hint(Lang.Text("Tools.Test.Surprise.Busy"));
+            return;
+        }
+
+        if (ModMain.MyMsgBox(Lang.Text("Tools.Test.Surprise.Warning"), Lang.Text("Tools.Test.Surprise.Title"),
+                Lang.Text("Common.Action.Cancel"), Lang.Text("Common.Action.Continue"),
+                isWarn: true, highLight: false) != 2)
+        {
+            ModLivingForkEgg.End();
+            return;
+        }
+
+        ModBase.RunInNewThread(ModLivingForkEgg.Run, "Toolbox Surprise");
+    }
+
     private async void BtnAchievementPreview_Click(object sender, MouseButtonEventArgs e)
     {
         var url = GetAchievementUrl();

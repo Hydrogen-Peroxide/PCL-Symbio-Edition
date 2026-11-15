@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Http;
 using System.Security.Cryptography;
@@ -153,6 +153,21 @@ public static class ModProfile
         public string SkinHeadId;
 
         /// <summary>
+        ///     离线档案启用的本地皮肤文件路径，为空表示不启用
+        /// </summary>
+        public string LocalSkin;
+
+        /// <summary>
+        ///     离线档案的本地皮肤是否使用纤细模型
+        /// </summary>
+        public bool LocalSkinSlim;
+
+        /// <summary>
+        ///     离线档案启用的本地披风文件路径，为空表示不启用
+        /// </summary>
+        public string LocalCape;
+
+        /// <summary>
         ///     档案类型
         /// </summary>
         public ModLaunch.McLoginType Type;
@@ -230,10 +245,21 @@ public static class ModProfile
                         Uuid = (string)Profile["uuid"],
                         Username = (string)Profile["username"],
                         Desc = (string)Profile["desc"],
-                        SkinHeadId = (string)Profile["skinHeadId"]
+                        SkinHeadId = (string)Profile["skinHeadId"],
+                        LocalSkin = (string)Profile["localSkin"],
+                        LocalSkinSlim = (bool?)Profile["localSkinSlim"] ?? false,
+                        LocalCape = (string)Profile["localCape"]
                     };
                 profileList.Add(newProfile);
             }
+
+            // 列表被重新读取后，让当前选中项指向新对象，否则后续修改会写到已废弃的旧实例上，保存时丢失
+            var previous = selectedProfile;
+            if (previous is not null)
+                selectedProfile = profileList.FirstOrDefault(profile =>
+                                      profile.Type == previous.Type &&
+                                      string.Equals(profile.Uuid, previous.Uuid, StringComparison.OrdinalIgnoreCase))
+                                  ?? previous;
 
             ProfileLog($"获取到 {profileList.Count} 个档案");
         }
@@ -255,6 +281,25 @@ public static class ModProfile
                 ModBase.LogLevel.Msgbox,
                 userSummary: Lang.Text("Launch.Account.Profile.Error.Corrupted"));
         }
+    }
+
+    /// <summary>
+    ///     把当前选中的档案与档案列表对齐并返回。<br/>
+    ///     档案列表被重新读取后，<see cref="selectedProfile" /> 可能仍指向已被替换的旧对象，
+    ///     此时直接修改会写不到列表里、保存时丢失，因此改动档案前应先调用本方法。
+    /// </summary>
+    public static McProfile SyncSelectedProfile()
+    {
+        if (selectedProfile is null) return null;
+        if (profileList.Contains(selectedProfile)) return selectedProfile;
+
+        var matched = profileList.FirstOrDefault(profile =>
+            profile.Type == selectedProfile.Type &&
+            string.Equals(profile.Uuid, selectedProfile.Uuid, StringComparison.OrdinalIgnoreCase));
+        if (matched is null) return selectedProfile;
+
+        selectedProfile = matched;
+        return matched;
     }
 
     /// <summary>
@@ -301,7 +346,9 @@ public static class ModProfile
                         profileJobj = new JsonObject
                         {
                             { "type", "offline" }, { "uuid", Profile.Uuid }, { "username", Profile.Username },
-                            { "desc", Profile.Desc }, { "skinHeadId", Profile.SkinHeadId }
+                            { "desc", Profile.Desc }, { "skinHeadId", Profile.SkinHeadId },
+                            { "localSkin", Profile.LocalSkin }, { "localSkinSlim", Profile.LocalSkinSlim },
+                            { "localCape", Profile.LocalCape }
                         };
                     list.Add(profileJobj);
                 }
@@ -313,11 +360,29 @@ public static class ModProfile
             var actualFile = Path.Combine(ModBase.pathAppdataConfig, "profiles.json");
             var tempFile = actualFile + ".tmp";
             var bakFile = actualFile + ".bak";
-            File.WriteAllBytes(tempFile, Encoding.UTF8.GetBytes(json.ToJsonString()));
-            if (File.Exists(actualFile))
-                File.Replace(tempFile, actualFile, bakFile);
-            else
-                File.Move(tempFile, actualFile);
+            var bytes = Encoding.UTF8.GetBytes(json.ToJsonString());
+            File.WriteAllBytes(tempFile, bytes);
+            try
+            {
+                if (File.Exists(actualFile))
+                    File.Replace(tempFile, actualFile, bakFile);
+                else
+                    File.Move(tempFile, actualFile);
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+            {
+                // 只读 ACL、同步盘或沙箱会拒绝删除/重命名文件，退化为直接覆盖
+                File.WriteAllBytes(actualFile, bytes);
+                try
+                {
+                    File.Delete(tempFile);
+                }
+                catch (Exception)
+                {
+                    // 忽略无法清理的临时文件
+                }
+            }
+
             ProfileLog("档案已保存");
         }
         catch (Exception ex)

@@ -262,9 +262,13 @@ public partial class PageToolsSkinLibrary
         else
         {
             selectedFile = null;
-            // 账号皮肤没有单独记录，按经典模型预览
-            ViewerCurrent.SlimModel = false;
-            UpdateSlimSwitch(false, false);
+            // 账号皮肤没有单独记录，离线档案按已应用皮肤的模型预览，其余按经典模型预览
+            var slim = ModProfile.selectedProfile is { Type: ModLaunch.McLoginType.Legacy } &&
+                       !string.IsNullOrWhiteSpace(ModProfile.selectedProfile.LocalSkin) &&
+                       File.Exists(ModProfile.selectedProfile.LocalSkin) &&
+                       ModProfile.selectedProfile.LocalSkinSlim;
+            ViewerCurrent.SlimModel = slim;
+            UpdateSlimSwitch(slim, false);
             ViewerCurrent.SetSkin(GetAccountSkinSource());
             LabCurrentName.Text = ModProfile.selectedProfile?.Username ??
                                   Lang.Text("Tools.SkinLibrary.CurrentSkin");
@@ -284,7 +288,20 @@ public partial class PageToolsSkinLibrary
         ViewerCurrent.SlimModel = slim;
         UpdateSlimSwitch(slim, true);
         // 只记录到当前选中的皮肤；未选中皮肤时仅临时预览
-        if (selectedFile is not null) SaveSkinModel(selectedFile, slim);
+        if (selectedFile is not null)
+        {
+            SaveSkinModel(selectedFile, slim);
+            // 已应用到离线档案的皮肤，模型切换要同步生效
+            var profile = ModProfile.SyncSelectedProfile();
+            if (profile is { Type: ModLaunch.McLoginType.Legacy } && profile.LocalSkin == selectedFile)
+            {
+                profile.LocalSkinSlim = slim;
+                ModProfile.SaveProfile();
+                ModLocalSkin.Register(profile);
+                ModLocalSkin.RefreshPreview();
+            }
+        }
+
         // 右侧缩略图也按新模型重画
         Reload();
     }
@@ -399,6 +416,17 @@ public partial class PageToolsSkinLibrary
             File.Delete(file);
             // 一起删掉模型记录，免得下次同名皮肤继承旧设置
             if (File.Exists(ModelFile(file))) File.Delete(ModelFile(file));
+            // 正在被离线档案使用的皮肤被删除时，同步解除应用，避免启动时静默失效
+            var profile = ModProfile.SyncSelectedProfile();
+            if (profile is { Type: ModLaunch.McLoginType.Legacy } && profile.LocalSkin == file)
+            {
+                profile.LocalSkin = null;
+                profile.LocalSkinSlim = false;
+                ModProfile.SaveProfile();
+                ModLocalSkin.Unregister(profile);
+                ModLocalSkin.RefreshPreview();
+            }
+
             selectedFile = null;
             Reload();
             HintService.Hint(Lang.Text("Tools.SkinLibrary.Deleted", name), HintType.Success);
@@ -469,7 +497,7 @@ public partial class PageToolsSkinLibrary
 
     private void ApplySkin(string file)
     {
-        var profile = ModProfile.selectedProfile;
+        var profile = ModProfile.SyncSelectedProfile();
         if (profile is null)
         {
             HintService.Hint(Lang.Text("Tools.SkinLibrary.Apply.NoProfile"), HintType.Error);
@@ -493,14 +521,20 @@ public partial class PageToolsSkinLibrary
         }
         else
         {
-            HintService.Hint(Lang.Text("Launch.Account.ProfileSkin.SkinUnsupported"), HintType.Error);
+            // 离线档案：由启动器内置的本地皮肤服务接管，启动游戏后即可在游戏内生效
+            profile.LocalSkin = file;
+            profile.LocalSkinSlim = IsSlimSkin(file);
+            ModProfile.SaveProfile();
+            ModLocalSkin.Register(profile);
+            ModLocalSkin.RefreshPreview();
+            HintService.Hint(Lang.Text("Tools.SkinLibrary.Apply.OfflineApplied"), HintType.Success);
         }
     }
 
     /// <summary>更换当前账号的披风。</summary>
     private void BtnChangeCape_Click(object sender, EventArgs e)
     {
-        var profile = ModProfile.selectedProfile;
+        var profile = ModProfile.SyncSelectedProfile();
         if (profile is null)
         {
             HintService.Hint(Lang.Text("Tools.SkinLibrary.Apply.NoProfile"), HintType.Error);
@@ -518,7 +552,80 @@ public partial class PageToolsSkinLibrary
         }
         else
         {
-            HintService.Hint(Lang.Text("Launch.Account.ProfileSkin.CapeUnsupported"), HintType.Error);
+            ChangeLocalCape(profile);
+        }
+    }
+
+    /// <summary>离线档案的本地披风：选择文件，或在已应用时提供移除入口。</summary>
+    private void ChangeLocalCape(ModProfile.McProfile profile)
+    {
+        if (string.IsNullOrWhiteSpace(profile.LocalCape) || !File.Exists(profile.LocalCape))
+        {
+            PickCapeFile(profile);
+            return;
+        }
+
+        var options = new List<IMyRadio>
+        {
+            new MyRadioBox { Text = Lang.Text("Tools.SkinLibrary.Cape.Pick") },
+            new MyRadioBox { Text = Lang.Text("Tools.SkinLibrary.Cape.Remove") }
+        };
+        var choice = ModMain.MyMsgBoxSelect(options, Lang.Text("Tools.SkinLibrary.Cape.Title"),
+            Lang.Text("Common.Action.Continue"), Lang.Text("Common.Action.Cancel"));
+        if (choice is null) return;
+
+        if (choice == 1)
+        {
+            profile.LocalCape = null;
+            ModProfile.SaveProfile();
+            ModLocalSkin.Register(profile);
+            HintService.Hint(Lang.Text("Tools.SkinLibrary.Cape.Removed"), HintType.Success);
+            return;
+        }
+
+        PickCapeFile(profile);
+    }
+
+    /// <summary>选择披风文件并应用；文件会复制进皮肤库的 Capes 目录，避免原文件被挪走后失效。</summary>
+    private void PickCapeFile(ModProfile.McProfile profile)
+    {
+        var folder = Path.Combine(LibraryFolder, "Capes");
+        try
+        {
+            Directory.CreateDirectory(folder);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[SkinLibrary] 创建披风目录失败", ModBase.LogLevel.Developer);
+        }
+
+        var files = SystemDialogs.SelectFiles(Lang.Text("Tools.SkinLibrary.ImportFilter"),
+            Lang.Text("Tools.SkinLibrary.Cape.PickTitle"), folder, false);
+        if (files.Length == 0) return;
+
+        try
+        {
+            var file = files[0];
+            var size = ReadSkinSize(file);
+            if (size.Width < 64 || size.Height < 32 || size.Width % 64 != 0 || size.Height % 32 != 0)
+            {
+                HintService.Hint(Lang.Text("Tools.SkinLibrary.Cape.Invalid", $"{size.Width}×{size.Height}"),
+                    HintType.Error);
+                return;
+            }
+
+            var target = GetUniquePath(Path.Combine(folder, Path.GetFileName(file)));
+            File.Copy(file, target);
+            profile.LocalCape = target;
+            ModProfile.SaveProfile();
+            ModLocalSkin.Register(profile);
+            HintService.Hint(Lang.Text("Tools.SkinLibrary.Cape.Applied", Path.GetFileNameWithoutExtension(target)),
+                HintType.Success);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[SkinLibrary] 导入披风失败", ModBase.LogLevel.Hint,
+                userSummary: Lang.Text("Tools.SkinLibrary.Cape.ImportFailed", ex.Message));
         }
     }
 
@@ -526,6 +633,10 @@ public partial class PageToolsSkinLibrary
     private static string GetAccountSkinSource()
     {
         var profile = ModProfile.selectedProfile;
+        // 离线档案优先显示已启用的本地皮肤，避免预览与实际进游戏后的效果不一致
+        if (profile is { Type: ModLaunch.McLoginType.Legacy } && !string.IsNullOrWhiteSpace(profile.LocalSkin) &&
+            File.Exists(profile.LocalSkin))
+            return profile.LocalSkin;
         var loader = profile?.Type switch
         {
             ModLaunch.McLoginType.Auth => PageLaunchLeft.skinAuth,

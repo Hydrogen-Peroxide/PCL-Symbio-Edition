@@ -1,0 +1,62 @@
+<!-- ============================================================
+     蔚蓝中文资料库 · 首页（样式表版）
+     需要先把 celeste-home.css 的内容放进 MediaWiki:Common.css
+     ============================================================ -->
+<div class="cz-home">
+<div class="cz-rule"></div>
+<div class="cz-meta"><span>蔚蓝 WIKI · CELESTE ARCHIVE</span><span>首页 / MAIN PAGE</span></div>
+<div class="cz-hero">
+<p class="cz-kicker">欢迎来到</p>
+<h1 class="cz-title">蔚蓝中文资料库</h1>
+<p class="cz-deck">Celeste 中文资料库 · 地图 · 音乐 · 角色 · Mod</p>
+<div class="cz-intro">
+<div class="cz-lead">
+<p>本网站致力于收录蔚蓝相关地图、音乐、角色、Mod<br>（不包括同人作品）等相关要素。</p>
+<p class="cz-lead-note">该网站刚成立不久，欢迎各位朋友协助我们一起编写。</p>
+</div>
+<div class="cz-mark">
+<div class="cz-mark-plate">[[文件:Celeste-text.webp|无框|180px]]</div>
+<div class="cz-cap">Celeste · 官方标识</div>
+</div>
+</div>
+</div>
+<div class="cz-sec">
+<div class="cz-cta"><span class="cz-cta-k">01</span><span class="cz-cta-t">游戏总体介绍</span>[[蔚蓝|进入 →]]</div>
+</div>
+<div class="cz-sec">
+<div class="cz-head"><span class="cz-no">02</span><h2>原版游戏章节介绍</h2><span class="cz-head-m">12 Chapters</span></div>
+<p class="cz-label">主线章节</p>
+<div class="cz-grid">
+<div class="cz-tile"><span class="cz-tile-k">Prologue</span><span class="cz-tile-t">[[序章]]</span></div>
+<div class="cz-tile"><span class="cz-tile-k">01</span><span class="cz-tile-t">[[被遗弃的城市]]</span></div>
+<div class="cz-tile"><span class="cz-tile-k">02</span><span class="cz-tile-t">[[旧址]]</span></div>
+<div class="cz-tile"><span class="cz-tile-k">03</span><span class="cz-tile-t">[[天空度假山庄]]</span></div>
+<div class="cz-tile"><span class="cz-tile-k">04</span><span class="cz-tile-t">[[黄金山脊]]</span></div>
+<div class="cz-tile"><span class="cz-tile-k">05</span><span class="cz-tile-t">[[镜之寺庙]]</span></div>
+<div class="cz-tile"><span class="cz-tile-k">06</span><span class="cz-tile-t">[[沉思]]</span></div>
+<div class="cz-tile"><span class="cz-tile-k">07</span><span class="cz-tile-t">[[山顶]]</span></div>
+<div class="cz-tile"><span class="cz-tile-k">Epilogue</span><span class="cz-tile-t">[[尾声]]</span></div>
+</div>
+<p class="cz-label">后续与附加内容</p>
+<div class="cz-grid">
+<div class="cz-tile"><span class="cz-tile-k">08</span><span class="cz-tile-t">[[核心]]</span></div>
+<div class="cz-tile"><span class="cz-tile-k">09</span><span class="cz-tile-t">[[再见]]</span></div>
+<div class="cz-tile"><span class="cz-tile-k">Extra</span><span class="cz-tile-t">[[附加面]]</span></div>
+</div>
+</div>
+<div class="cz-sec cz-pair">
+<div class="cz-panel">
+<div class="cz-panel-head"><span class="cz-no-sm">03</span><h2>游戏机制介绍</h2></div>
+<div class="cz-row">[[实体]]<span class="cz-row-a">→</span></div>
+<div class="cz-row">[[技巧]]<span class="cz-row-a">→</span></div>
+<div class="cz-row">[[收集品]]<span class="cz-row-a">→</span></div>
+<div class="cz-row">[[角色]]<span class="cz-row-a">→</span></div>
+</div>
+<div class="cz-panel">
+<div class="cz-panel-head"><span class="cz-no-sm">04</span><h2>Mod</h2></div>
+<div class="cz-row">[[Mod|Mod 总体介绍]]<span class="cz-row-a">→</span></div>
+<div class="cz-row">[[草莓酱]]<span class="cz-row-a">→</span></div>
+</div>
+</div>
+<div class="cz-foot"><span>蔚蓝中文资料库</span><span>欢迎参与编写</span></div>
+</div>

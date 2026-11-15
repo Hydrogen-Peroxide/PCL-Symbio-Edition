@@ -83,10 +83,76 @@ public static class Paths
         EnvironmentInterop.ReadVariable("PCL_PATH_LOCAL", ref _sharedLocalData);
         EnvironmentInterop.ReadVariable("PCL_PATH_TEMP", ref _temp);
 #endif
+        // 受限目录（只读 ACL、沙箱、只读同步盘）下 AppData 无法写入时，
+        // 把共享配置与临时文件挪到 exe 旁边，避免每次保存配置都弹错误。
+        if (!CanWriteDirectory(_sharedData))
+        {
+            var oldShared = _sharedData;
+            _sharedData = Path.Combine(_data, "portable", "shared");
+            _sharedLocalData = Path.Combine(_data, "portable", "local");
+            Directory.CreateDirectory(_sharedData);
+
+            // 加密密钥必须沿用旧位置的那一份，否则已有档案 / 配置会解密失败
+            try
+            {
+                var oldKey = Path.Combine(oldShared, "UserKey.bin");
+                if (File.Exists(oldKey))
+                    File.Copy(oldKey, Path.Combine(_sharedData, "UserKey.bin"), true);
+            }
+            catch (Exception)
+            {
+                // 读取不到旧密钥时只能使用新密钥，后续档案读取失败会由上层提示
+            }
+
+            // 尽量保留旧配置，避免回退后丢失设置
+            try
+            {
+                var oldConfig = Path.Combine(oldShared, "config.v1.json");
+                var newConfig = Path.Combine(_sharedData, "config.v1.json");
+                if (File.Exists(oldConfig) && !File.Exists(newConfig))
+                    File.Copy(oldConfig, newConfig);
+            }
+            catch (Exception)
+            {
+                // 忽略
+            }
+        }
+
+        if (!CanWriteDirectory(_temp))
+            _temp = Path.Combine(_data, "temp");
+
         // create directories
         Directory.CreateDirectory(_data);
         Directory.CreateDirectory(_sharedData);
         Directory.CreateDirectory(_sharedLocalData);
         Directory.CreateDirectory(_temp);
+    }
+
+    /// <summary>
+    ///     检查目录是否可写（能创建并写入一个探测文件）。
+    /// </summary>
+    private static bool CanWriteDirectory(string dir)
+    {
+        try
+        {
+            Directory.CreateDirectory(dir);
+            var probe = Path.Combine(dir, ".pcl_write_probe");
+            using (var stream = new FileStream(probe, FileMode.Create, FileAccess.Write, FileShare.Read))
+                stream.WriteByte(0);
+            try
+            {
+                File.Delete(probe);
+            }
+            catch (Exception)
+            {
+                // 无法删除探测文件时忽略，不影响配置保存
+            }
+
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }

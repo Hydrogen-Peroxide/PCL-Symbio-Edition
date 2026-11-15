@@ -23,6 +23,9 @@
                                     Click="BtnCreateShortcut_Click" />
                     <local:MyButton MinWidth="120" Text="{DynamicResource Tools.Test.LaunchCount.Title}"
                                     Margin="0,0,15,15" Click="BtnLaunchCount_Click" />
+                    <local:MyButton x:Name="BtnSurprise" MinWidth="120"
+                                    Text="{DynamicResource Tools.Test.Surprise.Title}" ColorType="Red"
+                                    Margin="0,0,15,15" Click="BtnSurprise_Click" />
                 </WrapPanel>
             </local:MyCard>
             <local:MyCard Margin="0,0,0,15" Title="{DynamicResource Tools.Test.Unlock.Title}">

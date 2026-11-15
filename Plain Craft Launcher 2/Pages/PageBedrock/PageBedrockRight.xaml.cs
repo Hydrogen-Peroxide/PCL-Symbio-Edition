@@ -614,9 +614,6 @@ public partial class PageBedrockRight
                 return;
             }
 
-            // 启动成功计入总启动次数，百宝箱的启动计数同时统计 Java 版与基岩版
-            States.System.LaunchCount += 1;
-
             _launchActualProgress = 1d;
             var generation = ++_launchGeneration;
             _ = Task.Run(async () =>
@@ -636,6 +633,15 @@ public partial class PageBedrockRight
 
         if (Dispatcher.CheckAccess()) Apply();
         else ModBase.RunInUi(Apply);
+    }
+
+    /// <summary>
+    ///     把本次启动计入总启动次数：每次启动都计一次，
+    ///     在游戏进程 / 包真正拉起后调用，不依赖窗口检测是否成功（与 Java 版一致）。
+    /// </summary>
+    private static void CountLaunch()
+    {
+        States.System.LaunchCount += 1;
     }
 
     private void LaunchProgressTimer_Tick(object? sender, EventArgs e)
@@ -789,6 +795,8 @@ public partial class PageBedrockRight
                         SetLaunchStage(0.55, Lang.Text("Bedrock.Launch.Stage.WaitingWindow"));
                     }
 
+                    CountLaunch();
+
                     // 版本隔离的还原交给后端：登记本次启动，等游戏进程退出后再恢复共享目录；
                     // 注册式启动拿不到进程句柄时，后端会先等待进程出现，避免游戏还没启动就还原
                     if (isolationSession is not null)
@@ -830,6 +838,8 @@ public partial class PageBedrockRight
                     });
                     ModBase.Log("[Bedrock] 正在通过 minecraft:// 启动 Minecraft Bedrock Edition...");
                 }
+
+                CountLaunch();
 
                 SetLaunchStage(0.6, Lang.Text("Bedrock.Launch.Stage.WaitingWindow"));
                 if (!WaitForGameWindow(null, TimeSpan.FromSeconds(60)))

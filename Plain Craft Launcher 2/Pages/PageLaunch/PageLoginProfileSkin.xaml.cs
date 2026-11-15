@@ -24,6 +24,7 @@ public partial class PageLoginProfileSkin
     public void Reload()
     {
         ModBase.Log("[Profile] 刷新档案界面");
+        ModProfile.SyncSelectedProfile();
         Skin.Clear();
         if (ModProfile.selectedProfile.Type == ModLaunch.McLoginType.Ms)
         {

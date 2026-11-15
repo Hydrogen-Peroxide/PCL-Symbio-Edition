@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using PCL.Core.App;
 using PCL.Core.App.Configuration;
 using PCL.Core.App.IoC;
@@ -47,6 +48,7 @@ public sealed partial class ThemeService
             {
                 Lifecycle.CurrentApplication.Dispatcher.BeginInvoke(() =>
                 {
+                    ApplyGrayResources();
                     ApplyColorResources();
                     ColorThemeChanged?.Invoke(CurrentTheme);
                     _AprilFoolLogic();
@@ -123,9 +125,22 @@ public sealed partial class ThemeService
     }
 
     /// <summary>
-    /// 当前使用的色彩属性。
+    /// 当前使用的主题预设。
     /// </summary>
-    public static ToneProfile CurrentTone => IsDarkMode ? ToneProfiles.Dark : ToneProfiles.Light;
+    public static ThemePreset CurrentPreset => ThemePresets.Get(CurrentTheme);
+
+    /// <summary>
+    /// 当前使用的色彩属性，主题未覆盖时回退到全局色调配置。
+    /// </summary>
+    public static ToneProfile CurrentTone
+    {
+        get
+        {
+            var preset = CurrentPreset;
+            var presetTone = IsDarkMode ? preset.DarkTone : preset.LightTone;
+            return presetTone ?? (IsDarkMode ? ToneProfiles.Dark : ToneProfiles.Light);
+        }
+    }
 
     /// <summary>
     /// 当前使用的主题色。
@@ -150,19 +165,8 @@ public sealed partial class ThemeService
     /// </summary>
     public static (int Hue, double LightAdjust, double ChromaAdjust) GetCurrentThemeArgs()
     {
-        var theme = CurrentTheme;
-        return theme switch
-        {
-            ColorTheme.SkyBlue => (235, 0.36, 0.2),
-            ColorTheme.CatBlue => (255, 0, -0.2),
-            ColorTheme.DeathBlue => (268, -0.05, -0.1),
-            ColorTheme.HmclBlue => (275, -0.03, -0.35),
-#if DEBUG
-            _ => ((int)theme, 0, 0)
-#else
-            _ => throw new IndexOutOfRangeException($"Invalid theme index: {(int)theme}")
-#endif
-        };
+        var preset = CurrentPreset;
+        return (preset.Hue, preset.LightAdjust, preset.ChromaAdjust);
     }
 
     private static double _AdjustLinear(double value, double adjustment)
@@ -179,51 +183,95 @@ public sealed partial class ThemeService
         };
     }
 
-    private static CatColorResource[] _CalculateGrays(ToneProfile tone) => [
-        LabColor.FromLch(tone.L1).ToCatColor("Gray1"),
-        LabColor.FromLch(tone.L2).ToCatColor("Gray2"),
-        LabColor.FromLch(tone.L3).ToCatColor("Gray3"),
-        LabColor.FromLch(tone.L4).ToCatColor("Gray4"),
-        LabColor.FromLch(tone.L5).ToCatColor("Gray5"),
-        LabColor.FromLch(tone.L6).ToCatColor("Gray6"),
-        LabColor.FromLch(tone.L7).ToCatColor("Gray7"),
-        LabColor.FromLch(tone.L8).ToCatColor("Gray8"),
-        LabColor.FromLch(tone.LWhite, alpha:tone.AHalfWhite).ToCatColor("HalfWhite", false),
-        LabColor.FromLch(tone.LWhite, alpha:tone.ASemiWhite).ToCatColor("SemiWhite", false),
-        LabColor.FromLch(tone.LWhite).ToCatColor("White", false),
-        LabColor.FromLch(tone.LWhite, alpha:tone.ATransparent).ToCatColor("Transparent", false),
-        LabColor.FromLch(tone.LBackground, alpha:tone.ABackground).ToCatColor("TransparentBackground", false),
-        LabColor.FromLch(tone.LBackground).ToCatColor("Background", false),
-        LabColor.FromLch(tone.LBackground, alpha:tone.AToolTip).ToCatColor("ToolTip", false),
+    private static CatColorResource[] _CalculateGrays(ToneProfile tone, GrayTint? tint) => [
+        _Gray(tone.L1, tint).ToCatColor("Gray1"),
+        _Gray(tone.L2, tint).ToCatColor("Gray2"),
+        _Gray(tone.L3, tint).ToCatColor("Gray3"),
+        _Gray(tone.L4, tint).ToCatColor("Gray4"),
+        _Gray(tone.L5, tint).ToCatColor("Gray5"),
+        _Gray(tone.L6, tint).ToCatColor("Gray6"),
+        _Gray(tone.L7, tint).ToCatColor("Gray7"),
+        _Gray(tone.L8, tint).ToCatColor("Gray8"),
+        _Gray(tone.LWhite, tint, tone.AHalfWhite).ToCatColor("HalfWhite", false),
+        _Gray(tone.LWhite, tint, tone.ASemiWhite).ToCatColor("SemiWhite", false),
+        _Gray(tone.LWhite, tint).ToCatColor("White", false),
+        _Gray(tone.LWhite, tint, tone.ATransparent).ToCatColor("Transparent", false),
+        _Gray(tone.LBackground, tint, tone.ABackground).ToCatColor("TransparentBackground", false),
+        _Gray(tone.LBackground, tint).ToCatColor("Background", false),
+        _Gray(tone.LBackground, tint, tone.AToolTip).ToCatColor("ToolTip", false),
         LabColor.FromLch(tone.L7, 0.25, 30, tone.AHalfTransparent).ToCatColor("RedBack", false),
-        LabColor.FromLch(tone.LForeground).ToCatColor("Memory", false),
+        _Gray(tone.LForeground, tint).ToCatColor("Memory", false),
     ];
 
-    private static CatColorResource[] _CalculateColors(ToneProfile tone, (int hue, double lightAdj, double chromaAdj) args) => [
-        LabColor.FromLch(_AdjustLinear(tone.L1, args.lightAdj * 0.1), _AdjustLinear(tone.C1, args.chromaAdj * 0.25), args.hue).ToCatColor("1"),
-        LabColor.FromLch(_AdjustLinear(tone.L2, args.lightAdj), _AdjustLinear(tone.C2, args.chromaAdj), args.hue).ToCatColor("2"),
-        LabColor.FromLch(_AdjustLinear(tone.L3, args.lightAdj), _AdjustLinear(tone.C3, args.chromaAdj), args.hue).ToCatColor("3"),
-        LabColor.FromLch(_AdjustLinear(tone.L4, args.lightAdj), _AdjustLinear(tone.C4, args.chromaAdj), args.hue).ToCatColor("4"),
-        LabColor.FromLch(_AdjustLinear(tone.L5, args.lightAdj), _AdjustLinear(tone.C5, args.chromaAdj), args.hue).ToCatColor("5"),
-        LabColor.FromLch(_AdjustLinear(tone.L6, args.lightAdj), _AdjustLinear(tone.C6, args.chromaAdj), args.hue).ToCatColor("6"),
-        LabColor.FromLch(_AdjustLinear(tone.L7, args.lightAdj), _AdjustLinear(tone.C7, args.chromaAdj), args.hue).ToCatColor("7"),
-        LabColor.FromLch(_AdjustLinear(tone.L8, args.lightAdj), _AdjustLinear(tone.C8, args.chromaAdj), args.hue).ToCatColor("8"),
-        LabColor.FromLch(_AdjustLinear(tone.L8, args.lightAdj), _AdjustLinear(tone.C8, args.chromaAdj), args.hue, tone.ASemiTransparent).ToCatColor("SemiTransparent", false),
-        LabColor.FromLch(_AdjustLinear(tone.L5, args.lightAdj), _AdjustLinear(tone.C5, args.chromaAdj), args.hue).ToCatColor("Bg0"),
-        LabColor.FromLch(_AdjustLinear(tone.L7, args.lightAdj), _AdjustLinear(tone.C7, args.chromaAdj), args.hue, tone.ASemiWhite).ToCatColor("Bg1"),
-    ];
+    /// <summary>
+    /// 按灰度基调生成灰度色，必要时带上主题的轻微色偏。
+    /// </summary>
+    private static LabColor _Gray(double light, GrayTint? tint, double alpha = 1.0)
+    {
+        var tintValue = tint.GetValueOrDefault();
+        return tintValue.Chroma > 0
+            ? LabColor.FromLch(light, tintValue.Chroma, tintValue.Hue, alpha)
+            : LabColor.FromLch(light, alpha: alpha);
+    }
 
-    private static CatColorResource[] LightGrayCache { get => field ??= _CalculateGrays(ToneProfiles.Light); set; } = null!;
+    private static CatColorResource[] _CalculateColors(ToneProfile tone, ThemePreset preset, bool dark)
+    {
+        var ramp = dark ? preset.DarkRamp : preset.LightRamp;
+        if (ramp is { Count: >= 8 }) return _CalculateColorsFromRamp(tone, ramp);
 
-    private static CatColorResource[] DarkGrayCache { get => field ??= _CalculateGrays(ToneProfiles.Dark); set; } = null!;
+        var (hue, lightAdj, chromaAdj) = (preset.Hue, preset.LightAdjust, preset.ChromaAdjust);
+        return [
+            LabColor.FromLch(_AdjustLinear(tone.L1, lightAdj * 0.1), _AdjustLinear(tone.C1, chromaAdj * 0.25), hue).ToCatColor("1"),
+            LabColor.FromLch(_AdjustLinear(tone.L2, lightAdj), _AdjustLinear(tone.C2, chromaAdj), hue).ToCatColor("2"),
+            LabColor.FromLch(_AdjustLinear(tone.L3, lightAdj), _AdjustLinear(tone.C3, chromaAdj), hue).ToCatColor("3"),
+            LabColor.FromLch(_AdjustLinear(tone.L4, lightAdj), _AdjustLinear(tone.C4, chromaAdj), hue).ToCatColor("4"),
+            LabColor.FromLch(_AdjustLinear(tone.L5, lightAdj), _AdjustLinear(tone.C5, chromaAdj), hue).ToCatColor("5"),
+            LabColor.FromLch(_AdjustLinear(tone.L6, lightAdj), _AdjustLinear(tone.C6, chromaAdj), hue).ToCatColor("6"),
+            LabColor.FromLch(_AdjustLinear(tone.L7, lightAdj), _AdjustLinear(tone.C7, chromaAdj), hue).ToCatColor("7"),
+            LabColor.FromLch(_AdjustLinear(tone.L8, lightAdj), _AdjustLinear(tone.C8, chromaAdj), hue).ToCatColor("8"),
+            LabColor.FromLch(_AdjustLinear(tone.L8, lightAdj), _AdjustLinear(tone.C8, chromaAdj), hue, tone.ASemiTransparent).ToCatColor("SemiTransparent", false),
+            LabColor.FromLch(_AdjustLinear(tone.L5, lightAdj), _AdjustLinear(tone.C5, chromaAdj), hue).ToCatColor("Bg0"),
+            LabColor.FromLch(_AdjustLinear(tone.L7, lightAdj), _AdjustLinear(tone.C7, chromaAdj), hue, tone.ASemiWhite).ToCatColor("Bg1"),
+        ];
+    }
+
+    /// <summary>
+    /// 按主题预设直接给定的色阶生成强调色，用于需要精确控制每一个色阶的主题。
+    /// </summary>
+    private static CatColorResource[] _CalculateColorsFromRamp(ToneProfile tone, IReadOnlyList<LchColor> ramp)
+    {
+        LabColor accent(int index, double alpha = 1.0)
+        {
+            var color = ramp[index];
+            return LabColor.FromLch(color.L, color.C, color.H, alpha);
+        }
+
+        return [
+            accent(0).ToCatColor("1"),
+            accent(1).ToCatColor("2"),
+            accent(2).ToCatColor("3"),
+            accent(3).ToCatColor("4"),
+            accent(4).ToCatColor("5"),
+            accent(5).ToCatColor("6"),
+            accent(6).ToCatColor("7"),
+            accent(7).ToCatColor("8"),
+            accent(7, tone.ASemiTransparent).ToCatColor("SemiTransparent", false),
+            accent(4).ToCatColor("Bg0"),
+            accent(6, tone.ASemiWhite).ToCatColor("Bg1"),
+        ];
+    }
+
+    private static readonly Dictionary<(ColorTheme Theme, ToneProfile Tone), CatColorResource[]> LightGrayCache = [];
+
+    private static readonly Dictionary<(ColorTheme Theme, ToneProfile Tone), CatColorResource[]> DarkGrayCache = [];
 
     /// <summary>
     /// 清除灰度配色的计算缓存。
     /// </summary>
     public static void InvalidateGrayCache()
     {
-        LightGrayCache = null!;
-        DarkGrayCache = null!;
+        LightGrayCache.Clear();
+        DarkGrayCache.Clear();
     }
 
     /// <summary>
@@ -232,7 +280,16 @@ public sealed partial class ThemeService
     public static void ApplyGrayResources()
     {
         var cache = IsDarkMode ? DarkGrayCache : LightGrayCache;
-        foreach (var c in cache) c.Apply();
+        var preset = CurrentPreset;
+        var tone = CurrentTone;
+        var key = (preset.Theme, tone);
+        if (!cache.TryGetValue(key, out var resources))
+        {
+            cache[key] = resources = _CalculateGrays(
+                tone, IsDarkMode ? preset.DarkGrayTint : preset.LightGrayTint);
+        }
+
+        foreach (var c in resources) c.Apply();
     }
 
     /// <summary>
@@ -240,7 +297,7 @@ public sealed partial class ThemeService
     /// </summary>
     public static void ApplyColorResources()
     {
-        var colors = _CalculateColors(CurrentTone, GetCurrentThemeArgs());
+        var colors = _CalculateColors(CurrentTone, CurrentPreset, IsDarkMode);
         foreach (var c in colors) c.Apply();
     }
 }

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="skin-theme-clientpref-night">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>蔚蓝中文资料库 · 首页预览（深色）</title>
+<style>
+html{background:#101010;}
+body{margin:0;background:#101010;color:#d5d5cf;}
+/* ============================================================
+   蔚蓝中文资料库 · 首页
+   归藏 Swiss 版式：克制、单一强调色、直角、零边框
+   浅色 / 深色两套取值，跟随站点皮肤（MediaWiki 1.43+ 主题类）
+   用法：整段放进 MediaWiki:Common.css
+   ============================================================ */
+
+.cz-home{
+  /* 浅色（默认） */
+  --cz-ink:#0b0b0a;
+  --cz-body:#2d2d2a;
+  --cz-muted:#74746e;
+  --cz-faint:#9a9a93;
+  --cz-line:#e4e4dd;
+  --cz-card:#f2f3f1;
+  --cz-ghost:#e7e7e0;
+  --cz-accent:#16688f;
+  --cz-accent-deep:#0f4d6b;
+  --cz-accent-text:#16688f;
+  --cz-row-hover:#ffffff;
+  --cz-sans:'Inter','Noto Sans SC','PingFang SC','Hiragino Sans GB','Microsoft YaHei',system-ui,sans-serif;
+  --cz-mono:'JetBrains Mono',ui-monospace,'SF Mono','Cascadia Mono',Consolas,monospace;
+
+  max-width:1000px;
+  margin:0 auto;
+  padding:36px 8px 40px;
+  font-family:var(--cz-sans);
+  font-size:15.5px;
+  line-height:1.85;
+  color:var(--cz-body);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* 深色：站点显式切到深色 */
+html.skin-theme-clientpref-night .cz-home{
+  --cz-ink:#f2f2ed;
+  --cz-body:#d5d5cf;
+  --cz-muted:#a6a69f;
+  --cz-faint:#7e7e77;
+  --cz-line:rgba(255,255,255,.16);
+  --cz-card:rgba(255,255,255,.065);
+  --cz-ghost:rgba(255,255,255,.11);
+  --cz-accent:#16688f;
+  --cz-accent-deep:#1d7ba6;
+  --cz-accent-text:#6fb7d8;
+  --cz-row-hover:rgba(255,255,255,.07);
+}
+/* 深色：跟随系统偏好（Citizen 皮肤本身就是这样切换的） */
+@media (prefers-color-scheme:dark){
+  .cz-home{
+    --cz-ink:#f2f2ed;
+    --cz-body:#d5d5cf;
+    --cz-muted:#a6a69f;
+    --cz-faint:#7e7e77;
+    --cz-line:rgba(255,255,255,.16);
+    --cz-card:rgba(255,255,255,.065);
+    --cz-ghost:rgba(255,255,255,.11);
+    --cz-accent:#16688f;
+    --cz-accent-deep:#1d7ba6;
+    --cz-accent-text:#6fb7d8;
+    --cz-row-hover:rgba(255,255,255,.07);
+  }
+}
+
+.cz-home *,
+.cz-home *::before,
+.cz-home *::after{box-sizing:border-box;}
+.cz-home p{margin:0;}
+.cz-home a{color:inherit;text-decoration:none;}
+.cz-home img{max-width:100%;height:auto;border:0;}
+
+/* MediaWiki 会把成段的行内内容自动包进 <p>，这里把它拆掉 */
+.cz-home .cz-meta > p,
+.cz-home .cz-head > p,
+.cz-home .cz-cta > p,
+.cz-home .cz-panel-head > p,
+.cz-home .cz-foot > p{display:contents;margin:0;}
+
+/* 想让「页面不存在」保持红链提示，取消下面这行注释 */
+/* .cz-home a.new{color:#b3261e !important;} */
+
+/* ---------- 刊头 ---------- */
+.cz-home .cz-rule{height:2px;background:var(--cz-ink);}
+.cz-home .cz-meta{
+  display:flex;justify-content:space-between;gap:16px;
+  padding-top:12px;
+  font-family:var(--cz-mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--cz-muted);
+}
+.cz-home .cz-meta span:last-child{color:var(--cz-faint);}
+
+.cz-home .cz-hero{padding-top:62px;}
+.cz-home .cz-kicker{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:18px;
+  font-size:13px;font-weight:600;color:var(--cz-accent-text);
+}
+.cz-home .cz-kicker::before{content:"";width:18px;height:2px;background:var(--cz-accent-text);}
+.cz-home .cz-title{
+  margin:0;
+  font-size:clamp(38px,5.4vw,66px);
+  line-height:1.14;font-weight:300;letter-spacing:0;
+  color:var(--cz-ink);
+}
+.cz-home .cz-deck{
+  margin-top:22px;
+  font-size:16px;color:var(--cz-muted);
+}
+
+/* 简介 + 标识 */
+.cz-home .cz-intro{
+  display:grid;grid-template-columns:minmax(0,1fr) 224px;gap:64px;
+  margin-top:46px;padding-top:30px;
+  border-top:1px solid var(--cz-line);
+  align-items:start;
+}
+.cz-home .cz-lead{max-width:38em;}
+.cz-home .cz-lead p{
+  font-size:15.5px;line-height:1.95;
+  text-align:start;
+  overflow-wrap:break-word;
+}
+.cz-home .cz-lead .cz-lead-note{margin-top:10px;font-size:14px;color:var(--cz-muted);}
+.cz-home .cz-mark{margin:0;justify-self:end;}
+.cz-home .cz-mark-plate{
+  display:flex;align-items:center;justify-content:center;
+  min-height:136px;padding:22px;
+  background:var(--cz-accent);
+}
+.cz-home .cz-mark-plate img{width:180px;}
+.cz-home .cz-cap{
+  margin-top:12px;
+  font-family:var(--cz-mono);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--cz-faint);
+}
+
+/* ---------- 章节编号头 ---------- */
+.cz-home .cz-sec{margin-top:82px;}
+.cz-home .cz-head{display:flex;align-items:baseline;gap:16px;margin-bottom:26px;}
+.cz-home .cz-head .cz-no{
+  font-family:var(--cz-mono);font-size:44px;line-height:1;font-weight:700;
+  letter-spacing:-.02em;color:var(--cz-ghost);font-variant-numeric:tabular-nums;
+}
+.cz-home .cz-head h2{margin:0;font-size:21px;font-weight:600;letter-spacing:0;color:var(--cz-ink);}
+.cz-home .cz-head .cz-head-m{
+  margin-left:auto;font-family:var(--cz-mono);font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--cz-faint);
+}
+
+/* ---------- 01 总体介绍：整条强调色横幅 ---------- */
+.cz-home .cz-cta{
+  position:relative;
+  display:flex;align-items:center;gap:26px;
+  padding:26px 30px;
+  background:var(--cz-accent);color:#fff;
+  transition:background .2s ease;
+}
+.cz-home .cz-cta:hover{background:var(--cz-accent-deep);}
+.cz-home .cz-cta-k{
+  font-family:var(--cz-mono);font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:rgba(255,255,255,.62);
+}
+.cz-home .cz-cta-t{font-size:24px;font-weight:500;line-height:1.3;}
+.cz-home .cz-cta a{
+  margin-left:auto;padding-bottom:2px;
+  font-size:14px;color:#fff;
+  border-bottom:1px solid rgba(255,255,255,.45);
+}
+.cz-home .cz-cta a::after{content:"";position:absolute;inset:0;}
+.cz-home .cz-cta a:focus-visible::after{outline:2px solid #fff;outline-offset:-5px;}
+
+/* ---------- 章节卡片 ---------- */
+.cz-home .cz-label{
+  margin:0 0 13px;
+  font-size:12px;font-weight:600;color:var(--cz-accent-text);
+}
+.cz-home .cz-label+.cz-grid{margin-bottom:30px;}
+.cz-home .cz-label+.cz-grid+.cz-label{margin-top:30px;}
+.cz-home .cz-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(272px,1fr));gap:10px;
+}
+.cz-home .cz-tile{
+  position:relative;min-height:92px;
+  display:flex;flex-direction:column;justify-content:space-between;gap:12px;
+  padding:16px 18px 18px;
+  background:var(--cz-card);
+  transition:background .18s ease,color .18s ease;
+}
+.cz-home .cz-tile:hover{background:var(--cz-accent);color:#fff;}
+.cz-home .cz-tile-k{
+  font-family:var(--cz-mono);font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--cz-faint);
+  transition:color .18s ease;
+}
+.cz-home .cz-tile:hover .cz-tile-k{color:rgba(255,255,255,.66);}
+.cz-home .cz-tile-t{
+  font-size:15.5px;font-weight:500;line-height:1.4;color:var(--cz-ink);
+  transition:color .18s ease;
+}
+.cz-home .cz-tile:hover .cz-tile-t{color:#fff;}
+.cz-home .cz-tile a::after{content:"";position:absolute;inset:0;}
+.cz-home .cz-tile a:focus-visible::after{outline:2px solid var(--cz-accent-text);outline-offset:-2px;}
+
+/* ---------- 03 / 04 双栏 ---------- */
+.cz-home .cz-pair{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  align-items:start;
+}
+.cz-home .cz-panel{padding:26px 26px 18px;background:var(--cz-card);}
+.cz-home .cz-panel-head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;}
+.cz-home .cz-panel-head .cz-no-sm{
+  font-family:var(--cz-mono);font-size:11px;letter-spacing:.12em;color:var(--cz-faint);
+}
+.cz-home .cz-panel-head h2{margin:0;font-size:17px;font-weight:600;color:var(--cz-ink);}
+
+.cz-home .cz-row{
+  position:relative;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  margin:0 -12px;padding:12px;
+  font-size:15px;color:var(--cz-ink);
+  transition:background .16s ease;
+}
+.cz-home .cz-row:hover{background:var(--cz-row-hover);}
+.cz-home .cz-row-a{
+  color:var(--cz-faint);font-size:14px;
+  transition:color .16s ease,transform .16s ease;
+}
+.cz-home .cz-row:hover .cz-row-a{color:var(--cz-accent-text);transform:translateX(3px);}
+.cz-home .cz-row a::after{content:"";position:absolute;inset:0;}
+.cz-home .cz-row a:focus-visible::after{outline:2px solid var(--cz-accent-text);outline-offset:-2px;}
+
+/* ---------- 页脚 ---------- */
+.cz-home .cz-foot{
+  display:flex;justify-content:space-between;gap:16px;
+  margin-top:92px;padding-top:18px;
+  border-top:1px solid var(--cz-line);
+  font-family:var(--cz-mono);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--cz-faint);
+}
+
+/* ---------- 窄屏 ---------- */
+@media (max-width:820px){
+  .cz-home{padding:24px 14px 32px;font-size:15px;}
+  .cz-home .cz-hero{padding-top:40px;}
+  .cz-home .cz-intro{grid-template-columns:minmax(0,1fr);gap:30px;margin-top:32px;}
+  .cz-home .cz-mark{justify-self:start;}
+  .cz-home .cz-sec{margin-top:58px;}
+  .cz-home .cz-head{gap:12px;flex-wrap:wrap;}
+  .cz-home .cz-head .cz-no{font-size:36px;}
+  .cz-home .cz-head .cz-head-m{display:none;}
+  .cz-home .cz-cta{flex-wrap:wrap;gap:10px 20px;padding:22px 20px;}
+  .cz-home .cz-cta a{margin-left:0;}
+  .cz-home .cz-grid{grid-template-columns:repeat(auto-fit,minmax(160px,1fr));}
+  .cz-home .cz-tile{min-height:82px;padding:14px 15px 16px;}
+  .cz-home .cz-lead br{display:none;}
+  .cz-home .cz-pair{grid-template-columns:minmax(0,1fr);}
+  .cz-home .cz-foot{margin-top:64px;flex-direction:column;gap:6px;}
+}
+
+.cz-wordmark{
+  font-family:'Inter','Segoe UI',system-ui,sans-serif;
+  font-size:24px;font-weight:200;letter-spacing:.22em;
+  color:#fff;text-indent:.22em;
+}
+</style>
+</head>
+<body>
+<main class="cz-home">
+  <div class="cz-rule"></div>
+  <div class="cz-meta"><span>蔚蓝 WIKI · CELESTE ARCHIVE</span><span>首页 / MAIN PAGE</span></div>
+
+  <header class="cz-hero">
+    <p class="cz-kicker">欢迎来到</p>
+    <h1 class="cz-title">蔚蓝中文资料库</h1>
+    <p class="cz-deck">Celeste 中文资料库 · 地图 · 音乐 · 角色 · Mod</p>
+
+    <div class="cz-intro">
+      <div class="cz-lead">
+        <p>本网站致力于收录蔚蓝相关地图、音乐、角色、Mod<br>（不包括同人作品）等相关要素。</p>
+        <p class="cz-lead-note">该网站刚成立不久，欢迎各位朋友协助我们一起编写。</p>
+      </div>
+      <figure class="cz-mark">
+        <div class="cz-mark-plate"><span class="cz-wordmark">CELESTE</span></div>
+        <figcaption class="cz-cap">Celeste · 官方标识</figcaption>
+      </figure>
+    </div>
+  </header>
+
+  <section class="cz-sec">
+    <div class="cz-cta">
+      <span class="cz-cta-k">01</span>
+      <span class="cz-cta-t">游戏总体介绍</span>
+      <a href="https://wiki.biligame.com/celeste/%E8%94%9A%E8%93%9D">进入 →</a>
+    </div>
+  </section>
+
+  <section class="cz-sec">
+    <div class="cz-head">
+      <span class="cz-no">02</span>
+      <h2>原版游戏章节介绍</h2>
+      <span class="cz-head-m">12 Chapters</span>
+    </div>
+
+    <p class="cz-label">主线章节</p>
+    <div class="cz-grid">
+      <div class="cz-tile"><span class="cz-tile-k">Prologue</span><span class="cz-tile-t"><a href="https://wiki.biligame.com/celeste/%E5%BA%8F%E7%AB%A0">序章</a></span></div>
+      <div class="cz-tile"><span class="cz-tile-k">01</span><span class="cz-tile-t"><a href="https://wiki.biligame.com/celeste/%E8%A2%AB%E9%81%97%E5%BC%83%E7%9A%84%E5%9F%8E%E5%B8%82">被遗弃的城市</a></span></div>
+      <div class="cz-tile"><span class="cz-tile-k">02</span><span class="cz-tile-t"><a href="https://wiki.biligame.com/celeste/%E6%97%A7%E5%9D%80">旧址</a></span></div>
+      <div class="cz-tile"><span class="cz-tile-k">03</span><span class="cz-tile-t"><a href="https://wiki.biligame.com/celeste/%E5%A4%A9%E7%A9%BA%E5%BA%A6%E5%81%87%E5%B1%B1%E5%BA%84">天空度假山庄</a></span></div>
+      <div class="cz-tile"><span class="cz-tile-k">04</span><span class="cz-tile-t"><a href="https://wiki.biligame.com/celeste/%E9%BB%84%E9%87%91%E5%B1%B1%E8%84%8A">黄金山脊</a></span></div>
+      <div class="cz-tile"><span class="cz-tile-k">05</span><span class="cz-tile-t"><a href="https://wiki.biligame.com/celeste/%E9%95%9C%E4%B9%8B%E5%AF%BA%E5%BA%99">镜之寺庙</a></span></div>
+      <div class="cz-tile"><span class="cz-tile-k">06</span><span class="cz-tile-t"><a href="https://wiki.biligame.com/celeste/%E6%B2%89%E6%80%9D">沉思</a></span></div>
+      <div class="cz-tile"><span class="cz-tile-k">07</span><span class="cz-tile-t"><a href="https://wiki.biligame.com/celeste/%E5%B1%B1%E9%A1%B6">山顶</a></span></div>
+      <div class="cz-tile"><span class="cz-tile-k">Epilogue</span><span class="cz-tile-t"><a href="https://wiki.biligame.com/celeste/%E5%B0%BE%E5%A3%B0">尾声</a></span></div>
+    </div>
+
+    <p class="cz-label">后续与附加内容</p>
+    <div class="cz-grid">
+      <div class="cz-tile"><span class="cz-tile-k">08</span><span class="cz-tile-t"><a href="https://wiki.biligame.com/celeste/%E6%A0%B8%E5%BF%83">核心</a></span></div>
+      <div class="cz-tile"><span class="cz-tile-k">09</span><span class="cz-tile-t"><a href="https://wiki.biligame.com/celeste/%E5%86%8D%E8%A7%81">再见</a></span></div>
+      <div class="cz-tile"><span class="cz-tile-k">Extra</span><span class="cz-tile-t"><a href="https://wiki.biligame.com/celeste/%E9%99%84%E5%8A%A0%E9%9D%A2">附加面</a></span></div>
+    </div>
+  </section>
+
+  <section class="cz-sec cz-pair">
+    <div class="cz-panel">
+      <div class="cz-panel-head"><span class="cz-no-sm">03</span><h2>游戏机制介绍</h2></div>
+      <div class="cz-row"><a href="https://wiki.biligame.com/celeste/%E5%AE%9E%E4%BD%93">实体</a><span class="cz-row-a">→</span></div>
+      <div class="cz-row"><a href="https://wiki.biligame.com/celeste/%E6%8A%80%E5%B7%A7">技巧</a><span class="cz-row-a">→</span></div>
+      <div class="cz-row"><a href="https://wiki.biligame.com/celeste/%E6%94%B6%E9%9B%86%E5%93%81">收集品</a><span class="cz-row-a">→</span></div>
+      <div class="cz-row"><a href="https://wiki.biligame.com/celeste/%E8%A7%92%E8%89%B2">角色</a><span class="cz-row-a">→</span></div>
+    </div>
+    <div class="cz-panel">
+      <div class="cz-panel-head"><span class="cz-no-sm">04</span><h2>Mod</h2></div>
+      <div class="cz-row"><a href="https://wiki.biligame.com/celeste/Mod">Mod 总体介绍</a><span class="cz-row-a">→</span></div>
+      <div class="cz-row"><a href="https://wiki.biligame.com/celeste/%E8%8D%89%E8%8E%93%E9%85%B1">草莓酱</a><span class="cz-row-a">→</span></div>
+    </div>
+  </section>
+
+  <div class="cz-foot"><span>蔚蓝中文资料库</span><span>欢迎参与编写</span></div>
+</main>
+</body>
+</html>

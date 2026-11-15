@@ -238,6 +238,11 @@ public static partial class States
         [ConfigItem<int>("SystemLaunchCount", 0, ConfigSource.SharedEncrypt)] public partial int LaunchCount { get; set; }
 
         /// <summary>
+        /// 下次显示「购买正版提示」的启动次数；0 表示尚未安排。
+        /// </summary>
+        [ConfigItem<int>("PurchaseHintNextLaunch", 0)] public partial int PurchaseHintNextLaunch { get; set; }
+
+        /// <summary>
         /// 上个版本。
         /// </summary>
         [ConfigItem<int>("SystemLastVersionReg", 0, ConfigSource.SharedEncrypt)] public partial int LastVersion { get; set; }

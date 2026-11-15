@@ -2212,6 +2212,10 @@
     <sys:String x:Key="Main.SpecialVersion.Title">Special build notice</sys:String>
     <sys:String x:Key="Main.Tab.Bedrock">Bedrock</sys:String>
     <sys:String x:Key="Main.Tab.Download">Download</sys:String>
+    <sys:String x:Key="Main.Tab.Game">Launch</sys:String>
+    <sys:String x:Key="Game.Edition.Bedrock">Bedrock</sys:String>
+    <sys:String x:Key="Game.Edition.Java">Java</sys:String>
+    <sys:String x:Key="Game.Edition.Switch.ToolTip">Java and Bedrock share the same launch page; switch at any time</sys:String>
     <sys:String x:Key="Main.Tab.Launch">Launch</sys:String>
     <sys:String x:Key="Main.Tab.Settings">Settings</sys:String>
     <sys:String x:Key="Main.Tab.Tools">Tools</sys:String>
@@ -2516,6 +2520,7 @@
     <sys:String x:Key="Minecraft.Launch.Error.CancelProcess">Failed to cancel launch and terminate process</sys:String>
     <sys:String x:Key="Minecraft.Launch.Error.CannotConnectAuthServer">Unable to connect to third-party login server. ({0})</sys:String>
     <sys:String x:Key="Minecraft.Launch.Error.CannotConnectAuthServerWithDetail">Unable to connect to third-party login server ({0}).&#xA;Details:</sys:String>
+    <sys:String x:Key="Minecraft.Launch.Error.AuthlibInjectorMissing">Failed to extract authlib-injector for local skins. Check write permission on the launcher directory</sys:String>
     <sys:String x:Key="Minecraft.Launch.Error.CannotLaunch">Cannot launch Minecraft: {0}</sys:String>
     <sys:String x:Key="Minecraft.Launch.Error.CustomCommand">Failed to execute custom command</sys:String>
     <sys:String x:Key="Minecraft.Launch.Error.DispatcherUnavailable">The launcher interface is unavailable and cannot run this action.</sys:String>
@@ -3620,6 +3625,15 @@
     <sys:String x:Key="Tools.SkinLibrary.Apply.NoProfile">Sign in to an account on the launch page before applying a skin</sys:String>
     <sys:String x:Key="Tools.SkinLibrary.Apply.AuthHint">Skins for third-party login must be uploaded on the skin site. Your skin closet has been opened.</sys:String>
     <sys:String x:Key="Tools.SkinLibrary.Apply.FileMissing">The skin file no longer exists. Refresh the skin library and try again</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Apply.OfflineApplied">Applied to the offline profile. It will take effect after the game starts</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.Title">Local cape</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.Pick">Choose a new cape image</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.Remove">Remove the current cape</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.PickTitle">Choose a cape image</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.Invalid">Invalid cape size ({0}). It must be a multiple of 64×32</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.Applied">Cape "{0}" applied. It will take effect after the game starts</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.Removed">Local cape removed</sys:String>
+    <sys:String x:Key="Tools.SkinLibrary.Cape.ImportFailed">Failed to import cape: {0}</sys:String>
     <sys:String x:Key="Tools.SkinLibrary.DeleteConfirmTitle">Delete skin</sys:String>
     <sys:String x:Key="Tools.SkinLibrary.DeleteConfirmMessage">Delete "{0}" from the skin library? The skin already applied to your account will not be affected.</sys:String>
     <sys:String x:Key="Tools.SkinLibrary.Deleted">Deleted skin "{0}"</sys:String>

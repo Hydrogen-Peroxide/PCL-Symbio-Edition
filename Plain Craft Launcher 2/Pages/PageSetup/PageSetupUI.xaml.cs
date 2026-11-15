@@ -1,4 +1,6 @@
+using System;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,10 +14,34 @@ namespace PCL;
 
 public partial class PageSetupUI
 {
-    public string[] ThemeColors => Basics.IsAprilFool 
-        ? [Lang.Text("Setup.Ui.Theme.Color.SkyBlue"), Lang.Text("Setup.Ui.Theme.Color.CatBlue"), Lang.Text("Setup.Ui.Theme.Color.CrashBlue"), Lang.Text("Setup.Ui.Theme.Color.Hmcl")]
-        : [Lang.Text("Setup.Ui.Theme.Color.SkyBlue"), Lang.Text("Setup.Ui.Theme.Color.CatBlue"), Lang.Text("Setup.Ui.Theme.Color.CrashBlue")];
-    
+    // 配色下拉框的显示顺序；列表里的下标与枚举值并不总是一致（HMCL 仅在愚人节出现）
+    private static readonly ColorTheme[] ThemeValues =
+    [
+        ColorTheme.SkyBlue, ColorTheme.CatBlue, ColorTheme.DeathBlue, ColorTheme.KleinBlue
+    ];
+
+    private static readonly ColorTheme[] AprilFoolThemeValues =
+    [
+        ColorTheme.SkyBlue, ColorTheme.CatBlue, ColorTheme.DeathBlue, ColorTheme.KleinBlue, ColorTheme.HmclBlue
+    ];
+
+    private static ColorTheme[] CurrentThemeValues => Basics.IsAprilFool ? AprilFoolThemeValues : ThemeValues;
+
+    public string[] ThemeColors => CurrentThemeValues.Select(ThemeDisplayName).ToArray();
+
+    /// <summary>
+    /// 取得配色主题的显示名称。
+    /// </summary>
+    public static string ThemeDisplayName(ColorTheme theme) => Lang.Text(theme switch
+    {
+        ColorTheme.SkyBlue => "Setup.Ui.Theme.Color.SkyBlue",
+        ColorTheme.CatBlue => "Setup.Ui.Theme.Color.CatBlue",
+        ColorTheme.DeathBlue => "Setup.Ui.Theme.Color.CrashBlue",
+        ColorTheme.HmclBlue => "Setup.Ui.Theme.Color.Hmcl",
+        ColorTheme.KleinBlue => "Setup.Ui.Theme.Color.Klein",
+        _ => "Setup.Ui.Theme.Color.CatBlue"
+    });
+
     public new bool isLoaded;
 
     public PageSetupUI()
@@ -52,8 +78,8 @@ public partial class PageSetupUI
             SliderLauncherOpacity.Value = Config.Preference.Theme.WindowOpacity;
             CheckLauncherLogo.Checked = Config.Preference.ShowStartupLogo;
             ComboDarkMode.SelectedIndex = (int)Config.Preference.Theme.ColorMode;
-            ComboDarkColor.SelectedIndex = (int)Config.Preference.Theme.DarkColor;
-            ComboLightColor.SelectedIndex = (int)Config.Preference.Theme.LightColor;
+            ComboDarkColor.SelectedIndex = Array.IndexOf(CurrentThemeValues, Config.Preference.Theme.DarkColor);
+            ComboLightColor.SelectedIndex = Array.IndexOf(CurrentThemeValues, Config.Preference.Theme.LightColor);
             CheckShowLaunchingHint.Checked = Config.Preference.ShowLaunchingHint;
 
             // 字体设置
@@ -660,7 +686,9 @@ public partial class PageSetupUI
     private void ThemeColor_Change(object senderRaw, SelectionChangedEventArgs e)
     {
         var sender = (MyComboBox)senderRaw;
-        SetByTag(sender.Tag?.ToString(), sender.SelectedIndex);
+        var values = CurrentThemeValues;
+        if (sender.SelectedIndex >= 0 && sender.SelectedIndex < values.Length)
+            SetByTag(sender.Tag?.ToString(), (int)values[sender.SelectedIndex]);
         ThemeManager.ThemeRefresh();
     }
 

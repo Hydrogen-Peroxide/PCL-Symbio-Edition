@@ -39,7 +39,7 @@ public sealed partial class SingleInstanceService
             sw.Flush();
             _lockStream = stream;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             try
             {
@@ -52,10 +52,16 @@ public sealed partial class SingleInstanceService
                     _TryRpc(pid, "REQ cli\n" + JsonSerializer.Serialize(StartupService.UnhandledCommands, JsonCompat.SerializerOptions));
                     _TryRpc(pid, "REQ activate");
                 }
-                catch (Exception ex) { Context.Warn("RPC 通信失败", ex); }
+                catch (Exception rpcEx) { Context.Warn("RPC 通信失败", rpcEx); }
+                Context.RequestExit(1);
             }
-            catch (Exception ex) { Context.Error("读取单例锁出错", ex); }
-            finally { Context.RequestExit(1); }
+            catch (Exception readEx)
+            {
+                // 文件夹只读、同步盘或沙箱会拒绝创建锁文件；此时没有可用的现有实例，
+                // 以多实例模式继续运行，而不是直接退出。
+                Context.Warn("无法创建或读取单例锁，将以多实例模式继续", readEx);
+                Context.Debug($"单例锁创建失败：{ex.Message}");
+            }
         }
     }
 

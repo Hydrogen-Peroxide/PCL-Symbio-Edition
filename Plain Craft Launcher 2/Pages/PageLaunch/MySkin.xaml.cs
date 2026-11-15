@@ -149,8 +149,7 @@ public partial class MySkin
             // 脸层
             ImgBack.Source = image.Clip(scale * 8, scale * 8, scale * 8, scale * 8);
             // 用于显示档案列表头像的图片
-            var skinHeadId = Address.Between(new[] { Address.Contains("Images/Skins/") ? "Skins/" : @"Skin\" }[0],
-                ".png");
+            var skinHeadId = GetSkinHeadId(Address);
             var cachePath = ModBase.pathTemp + $@"Cache\Skin\Head\{skinHeadId}.png";
             ModProfile.selectedProfile.SkinHeadId = skinHeadId;
             ModProfile.SaveProfile();
@@ -184,6 +183,19 @@ public partial class MySkin
                 ModBase.LogLevel.Hint,
                 userSummary: Lang.Text("Launch.Skin.Load.Error.Avatar", $"{(Address ?? "null")},{loader.name}"));
         }
+    }
+
+    /// <summary>
+    ///     根据皮肤地址生成头像缓存 ID。<br/>
+    ///     内置皮肤与下载缓存沿用文件名（保持旧档案的头像不变），皮肤库等自定义路径改用路径哈希，避免互相覆盖。
+    /// </summary>
+    private static string GetSkinHeadId(string address)
+    {
+        if (address.StartsWith(ModBase.pathImage, StringComparison.OrdinalIgnoreCase) ||
+            address.Contains(@"Cache\Skin\", StringComparison.OrdinalIgnoreCase))
+            return Path.GetFileNameWithoutExtension(address);
+
+        return "local_" + ModBase.GetStringMD5(address);
     }
 
     private object ScaleToSize(Bitmap bitmap, int width, int height)

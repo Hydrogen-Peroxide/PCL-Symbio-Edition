@@ -38,6 +38,14 @@ public sealed class SchematicViewer3D : UserControl
     private double _halfHeight = 1d;
     private double _halfHorizontal = 1d;
     private double _zoom = 1d;
+    private TranslateTransform3D? _panTransform;
+    private readonly HashSet<System.Windows.Input.Key> _pressedKeys = [];
+    private readonly DispatcherTimer _moveTimer;
+    private Vector3D _pan;
+    private Window? _hookedWindow;
+    private bool _inputHooked;
+    private IntPtr _keyboardHook;
+    private LowLevelKeyboardProc? _keyboardProc;
 
     public SchematicViewer3D(ModSchematicPreview.Data data, ModSchematicTextures textures)
     {
@@ -55,10 +63,50 @@ public sealed class SchematicViewer3D : UserControl
         // 自动缓慢旋转，用户开始拖动后停止，避免与手动操作抢夺视角
         _spinTimer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(16d) };
         _spinTimer.Tick += (_, _) => _yaw.Angle -= 0.12d;
+        // WASD 平移：按住时按帧移动，松开即停
+        _moveTimer = new DispatcherTimer(DispatcherPriority.Render) { Interval = TimeSpan.FromMilliseconds(16d) };
+        _moveTimer.Tick += (_, _) => ApplyMove();
+        Focusable = true;
+        KeyDown += OnViewerKeyDown;
+        KeyUp += OnViewerKeyUp;
+        LostKeyboardFocus += (_, _) =>
+        {
+            _pressedKeys.Clear();
+            _moveTimer.Stop();
+        };
+
+        Loaded += (_, _) =>
+        {
+            _spinTimer.Start();
+            Focus();
+            // 预览可能挂在页面覆盖层或弹窗里，焦点不一定在查看器上：
+            // 除了应用输入层，再挂一个低级键盘钩子，保证一定收得到 WASD
+            if (!_inputHooked)
+            {
+                InputManager.Current.PreProcessInput += OnPreProcessInput;
+                _inputHooked = true;
+            }
+
+            InstallKeyboardHook();
+        };
+        Unloaded += (_, _) =>
+        {
+            _spinTimer.Stop();
+            _moveTimer.Stop();
+            if (_inputHooked)
+            {
+                InputManager.Current.PreProcessInput -= OnPreProcessInput;
+                _inputHooked = false;
+            }
+
+            UninstallKeyboardHook();
+            if (_hookedWindow is null) return;
+            _hookedWindow.PreviewKeyDown -= OnViewerKeyDown;
+            _hookedWindow.PreviewKeyUp -= OnViewerKeyUp;
+            _hookedWindow = null;
+        };
 
         SizeChanged += (_, _) => UpdateCamera();
-        Loaded += (_, _) => _spinTimer.Start();
-        Unloaded += (_, _) => _spinTimer.Stop();
         UpdateCamera();
     }
 
@@ -136,7 +184,10 @@ public sealed class SchematicViewer3D : UserControl
         var transform = new Transform3DGroup();
         transform.Children.Add(new TranslateTransform3D(-centerX, -centerY, -centerZ));
         transform.Children.Add(new RotateTransform3D(_pitch));
+        // 平移放在旋转之后，等价于「屏幕空间」移动，WASD 方向与视角一致
+        _panTransform = new TranslateTransform3D(_pan.X, _pan.Y, _pan.Z);
         transform.Children.Add(new RotateTransform3D(_yaw));
+        transform.Children.Add(_panTransform);
 
         var scene = new Model3DGroup { Transform = transform };
         var mesh = BuildMesh();
@@ -775,8 +826,9 @@ public sealed class SchematicViewer3D : UserControl
         _camera.Position = new Point3D(0d, 0d, distance);
         _camera.LookDirection = new Vector3D(0d, 0d, -distance);
         _camera.UpDirection = new Vector3D(0d, 1d, 0d);
-        _camera.NearPlaneDistance = Math.Max(0.01d, distance - _radius * 2d);
-        _camera.FarPlaneDistance = distance + _radius * 3d;
+        // 近裁剪面跟着模型大小走：原来 distance - radius*2 在靠近/穿模时会把模型切出一个平面
+        _camera.NearPlaneDistance = Math.Max(0.05d, Math.Min(1d, _radius * 0.005d));
+        _camera.FarPlaneDistance = Math.Max(200d, distance + _radius * 6d + _pan.Length * 2d);
     }
 
     protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
@@ -805,6 +857,172 @@ public sealed class SchematicViewer3D : UserControl
         if (!_dragging) return;
         _dragging = false;
         ReleaseMouseCapture();
+    }
+
+    private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern IntPtr GetForegroundWindow();
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+
+    [System.Runtime.InteropServices.DllImport("kernel32.dll")]
+    private static extern uint GetCurrentProcessId();
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vKey);
+
+    private void InstallKeyboardHook()
+    {
+        if (_keyboardHook != IntPtr.Zero) return;
+        _keyboardProc = OnLowLevelKeyboard;
+        _keyboardHook = SetWindowsHookEx(13, _keyboardProc, IntPtr.Zero, 0);
+    }
+
+    private void UninstallKeyboardHook()
+    {
+        if (_keyboardHook == IntPtr.Zero) return;
+        UnhookWindowsHookEx(_keyboardHook);
+        _keyboardHook = IntPtr.Zero;
+        _keyboardProc = null;
+    }
+
+    private IntPtr OnLowLevelKeyboard(int nCode, IntPtr wParam, IntPtr lParam)
+    {
+        if (nCode >= 0 && IsLoaded && IsVisible)
+        {
+            // 只有本进程的窗口在前台时才处理，避免影响其它程序输入
+            var foreground = GetForegroundWindow();
+            GetWindowThreadProcessId(foreground, out var processId);
+            if (processId == GetCurrentProcessId())
+            {
+                var message = wParam.ToInt32();
+                var virtualKey = System.Runtime.InteropServices.Marshal.ReadInt32(lParam);
+                var key = virtualKey switch
+                {
+                    0x57 => System.Windows.Input.Key.W,
+                    0x41 => System.Windows.Input.Key.A,
+                    0x53 => System.Windows.Input.Key.S,
+                    0x44 => System.Windows.Input.Key.D,
+                    0x51 => System.Windows.Input.Key.Q,
+                    0x45 => System.Windows.Input.Key.E,
+                    0x52 => System.Windows.Input.Key.R,
+                    _ => System.Windows.Input.Key.None
+                };
+                if (key != System.Windows.Input.Key.None)
+                {
+                    if (message is 0x0100 or 0x0104)
+                    {
+                        _pressedKeys.Add(key);
+                        _moveTimer.Start();
+                        return (IntPtr)1;
+                    }
+
+                    if (message is 0x0101 or 0x0105)
+                    {
+                        _pressedKeys.Remove(key);
+                        if (_pressedKeys.Count == 0) _moveTimer.Stop();
+                        return (IntPtr)1;
+                    }
+                }
+            }
+        }
+
+        return CallNextHookEx(_keyboardHook, nCode, wParam, lParam);
+    }
+
+    private void OnPreProcessInput(object sender, PreProcessInputEventArgs e)
+    {
+        if (!IsLoaded || !IsVisible) return;
+        if (e.StagingItem.Input is not KeyEventArgs key) return;
+        if (key.RoutedEvent == Keyboard.KeyDownEvent) HandleKeyDown(key.Key, key);
+        else if (key.RoutedEvent == Keyboard.KeyUpEvent) HandleKeyUp(key.Key, key);
+    }
+
+    private void OnViewerKeyDown(object sender, KeyEventArgs e) => HandleKeyDown(e.Key, e);
+
+    private void OnViewerKeyUp(object sender, KeyEventArgs e) => HandleKeyUp(e.Key, e);
+
+    private void HandleKeyDown(System.Windows.Input.Key rawKey, KeyEventArgs e)
+    {
+        // 中文输入法开启时按键会变成 ImeProcessed，真正按下的键在 ImeProcessedKey 里
+        var key = rawKey switch
+        {
+            System.Windows.Input.Key.ImeProcessed => e.ImeProcessedKey,
+            System.Windows.Input.Key.System => e.SystemKey,
+            _ => rawKey
+        };
+        if (!TryMapKey(key, out _)) return;
+        _pressedKeys.Add(key);
+        _moveTimer.Start();
+        e.Handled = true;
+    }
+
+    private void HandleKeyUp(System.Windows.Input.Key rawKey, KeyEventArgs e)
+    {
+        var key = rawKey switch
+        {
+            System.Windows.Input.Key.ImeProcessed => e.ImeProcessedKey,
+            System.Windows.Input.Key.System => e.SystemKey,
+            _ => rawKey
+        };
+        if (!_pressedKeys.Remove(key)) return;
+        if (_pressedKeys.Count == 0) _moveTimer.Stop();
+        e.Handled = true;
+    }
+
+    /// <summary>WASD 平移，Q/E 升降，Shift 加速，R 复位。</summary>
+    private static bool TryMapKey(System.Windows.Input.Key key, out Vector3D direction)
+    {
+        direction = key switch
+        {
+            System.Windows.Input.Key.W => new Vector3D(0d, 0d, 1d),
+            System.Windows.Input.Key.S => new Vector3D(0d, 0d, -1d),
+            System.Windows.Input.Key.A => new Vector3D(1d, 0d, 0d),
+            System.Windows.Input.Key.D => new Vector3D(-1d, 0d, 0d),
+            System.Windows.Input.Key.Q => new Vector3D(0d, 1d, 0d),
+            System.Windows.Input.Key.E => new Vector3D(0d, -1d, 0d),
+            _ => default
+        };
+        return direction != default;
+    }
+
+    private void ApplyMove()
+    {
+        if (_panTransform is null) return;
+        if (_pressedKeys.Contains(System.Windows.Input.Key.R))
+        {
+            _pan = default;
+            _pressedKeys.Remove(System.Windows.Input.Key.R);
+            _panTransform.OffsetX = 0d;
+            _panTransform.OffsetY = 0d;
+            _panTransform.OffsetZ = 0d;
+            return;
+        }
+
+        var move = new Vector3D();
+        foreach (var key in _pressedKeys)
+            if (TryMapKey(key, out var direction))
+                move += direction;
+        if (move == default) return;
+
+        var speed = Math.Max(0.05d, _radius * 0.02d);
+        if (Keyboard.Modifiers.HasFlag(ModifierKeys.Shift) || (GetAsyncKeyState(0x10) & 0x8000) != 0) speed *= 3d;
+        _pan += move * speed;
+        _panTransform.OffsetX = _pan.X;
+        _panTransform.OffsetY = _pan.Y;
+        _panTransform.OffsetZ = _pan.Z;
+        UpdateCamera();
     }
 
     protected override void OnMouseWheel(MouseWheelEventArgs e)
