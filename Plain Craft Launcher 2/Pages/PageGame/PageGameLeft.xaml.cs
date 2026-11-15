@@ -108,42 +108,17 @@ public partial class PageGameLeft
             return;
         }
 
-        // 恢复切换时的滑入 + 淡入动效；动画期间缓存位图，降低复杂面板逐帧重绘的卡顿
+        // 把即将隐藏的页面拍成快照，真正的页面瞬间切换，动画只作用在快照上，
+        // 避免整页内容（滚动列表、SVG 图标、大量文本）在动效期间逐帧重绘
         ModAnimation.AniStop("Game Edition Left");
-        show.Visibility = Visibility.Visible;
-        show.Opacity = 0d;
-        show.RenderTransform = new TranslateTransform(bedrock ? 18d : -18d, 0d);
-        show.CacheMode = new BitmapCache(1d);
-        if (hide is not null)
+        if (!GameEditionTransition.CrossFade(PanHost, hide, show, bedrock ? -12d : 12d, 220, "Game Edition Left"))
         {
-            hide.RenderTransform = null;
-            hide.CacheMode = new BitmapCache(1d);
+            if (hide is not null) hide.Visibility = Visibility.Collapsed;
+            show.Visibility = Visibility.Visible;
+            show.Opacity = 1d;
+            show.RenderTransform = null;
+            show.CacheMode = null;
         }
-
-        var ani = new List<ModAnimation.AniData>
-        {
-            ModAnimation.AaOpacity(show, 1d, 170, 40),
-            ModAnimation.AaTranslateX(show, bedrock ? -18d : 18d, 240, 40,
-                new ModAnimation.AniEaseOutFluent()),
-            ModAnimation.AaCode(() =>
-            {
-                if (hide is not null)
-                {
-                    hide.Visibility = Visibility.Collapsed;
-                    hide.Opacity = 1d;
-                    hide.RenderTransform = null;
-                    hide.CacheMode = null;
-                }
-
-                show.Opacity = 1d;
-                show.RenderTransform = null;
-                show.CacheMode = null;
-            }, after: true)
-        };
-        if (hide is not null && hide.Visibility == Visibility.Visible)
-            ani.Insert(0, ModAnimation.AaOpacity(hide, -hide.Opacity, 90));
-
-        ModAnimation.AniStart(ani, "Game Edition Left");
     }
 
     /// <summary>

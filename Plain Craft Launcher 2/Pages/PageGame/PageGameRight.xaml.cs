@@ -82,41 +82,22 @@ public partial class PageGameRight
             return;
         }
 
-        // 与左侧一致：滑入 + 淡入，动画期间缓存位图
+        // 与左侧一致：快照交叉淡化，动画只作用在一张位图上
         ModAnimation.AniStop("Game Edition Right");
-        show.Visibility = Visibility.Visible;
-        show.Opacity = 0d;
-        show.RenderTransform = new TranslateTransform(bedrock ? 20d : -20d, 0d);
-        show.CacheMode = new BitmapCache(1d);
-        if (hide is not null)
+        if (!GameEditionTransition.CrossFade(PanHost, hide, show, bedrock ? -14d : 14d, 240, "Game Edition Right"))
         {
-            hide.RenderTransform = null;
-            hide.CacheMode = new BitmapCache(1d);
-        }
-
-        var ani = new List<ModAnimation.AniData>
-        {
-            ModAnimation.AaOpacity(show, 1d, 180, 40),
-            ModAnimation.AaTranslateX(show, bedrock ? -20d : 20d, 260, 40,
-                new ModAnimation.AniEaseOutFluent()),
-            ModAnimation.AaCode(() =>
+            if (hide is not null)
             {
-                if (hide is not null)
-                {
-                    hide.Visibility = Visibility.Collapsed;
-                    hide.Opacity = 1d;
-                    hide.RenderTransform = null;
-                    hide.CacheMode = null;
-                }
+                hide.Visibility = Visibility.Collapsed;
+                hide.Opacity = 1d;
+                hide.RenderTransform = null;
+                hide.CacheMode = null;
+            }
 
-                show.Opacity = 1d;
-                show.RenderTransform = null;
-                show.CacheMode = null;
-            }, after: true)
-        };
-        if (hide is not null && hide.Visibility == Visibility.Visible)
-            ani.Insert(0, ModAnimation.AaOpacity(hide, -hide.Opacity, 90));
-
-        ModAnimation.AniStart(ani, "Game Edition Right");
+            show.Visibility = Visibility.Visible;
+            show.Opacity = 1d;
+            show.RenderTransform = null;
+            show.CacheMode = null;
+        }
     }
 }
