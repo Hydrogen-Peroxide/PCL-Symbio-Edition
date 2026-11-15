@@ -17,7 +17,6 @@
         <Border x:Name="PanSwitch" Grid.Row="0" Height="32" Margin="20,12,20,4"
                 CornerRadius="16" ClipToBounds="True"
                 Background="{DynamicResource ColorBrushTransparentBackground}"
-                ToolTip="{DynamicResource Game.Edition.Switch.ToolTip}"
                 MouseEnter="PanSwitch_MouseEnter">
             <Grid>
                 <!-- 滑动的选中块 -->

@@ -2221,7 +2221,6 @@
     <sys:String x:Key="Main.Tab.Game">启动</sys:String>
     <sys:String x:Key="Game.Edition.Bedrock">基岩版</sys:String>
     <sys:String x:Key="Game.Edition.Java">Java 版</sys:String>
-    <sys:String x:Key="Game.Edition.Switch.ToolTip">Java 版与基岩版共用同一个启动入口，可随时切换</sys:String>
     <sys:String x:Key="Main.Tab.Launch">Java版</sys:String>
     <sys:String x:Key="Main.Tab.Settings">设置</sys:String>
     <sys:String x:Key="Main.Tab.Tools">工具</sys:String>

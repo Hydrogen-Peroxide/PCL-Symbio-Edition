@@ -2221,7 +2221,6 @@
     <sys:String x:Key="Main.Tab.Game">Launch</sys:String>
     <sys:String x:Key="Game.Edition.Bedrock">Bedrock</sys:String>
     <sys:String x:Key="Game.Edition.Java">Java</sys:String>
-    <sys:String x:Key="Game.Edition.Switch.ToolTip">Java and Bedrock share the same launch page; switch at any time</sys:String>
     <sys:String x:Key="Main.Tab.Launch">Launch</sys:String>
     <sys:String x:Key="Main.Tab.Settings">Settings</sys:String>
     <sys:String x:Key="Main.Tab.Tools">Tools</sys:String>
