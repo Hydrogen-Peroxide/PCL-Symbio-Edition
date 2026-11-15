@@ -167,7 +167,7 @@
 <rect x="218.0" y="168.0" width="32" height="22" rx="3.5" fill="#2b313d" stroke="#343d4c" stroke-width="0.8"/>
 <text x="234.0" y="183.0" class="mono" font-size="11.5" font-weight="400" fill="#a1acbd" text-anchor="middle">14</text>
 </g>
-<g opacity="1"><title>2026-11-15 · 18 次提交</title>
+<g opacity="1"><title>2026-11-15 · 19 次提交</title>
 <rect x="255.0" y="168.0" width="32" height="22" rx="3.5" fill="#5472ae" stroke="#91aaff" stroke-width="1.6"/>
 <text x="271.0" y="183.0" class="mono" font-size="11.5" font-weight="700" fill="#dce2eb" text-anchor="middle">15</text>
 <circle cx="282.5" cy="172.5" r="2.6" fill="#3e9b67" stroke="#252932" stroke-width="0.9"/>
@@ -186,19 +186,19 @@
 <text x="268.0" y="219.0" class="sans" font-size="10.5" font-weight="400" fill="#a1acbd" text-anchor="start">多</text>
 <rect x="316.0" y="16.0" width="586.0" height="216.0" rx="5" fill="#252932" stroke="#303846" stroke-width="1" filter="url(#myCardShadow)"/>
 <text x="331.0" y="39.0" class="sans" font-size="13" font-weight="700" fill="#dce2eb" text-anchor="start">每日提交脉冲与版本节点</text>
-<text x="887.0" y="39.0" class="sans" font-size="11" font-weight="400" fill="#a1acbd" text-anchor="end">近 30 日 86 次提交 · 累计 4907 次 · 峰值 18/日</text>
-<line x1="358.0" y1="157.8" x2="882.0" y2="157.8" stroke="#3c4656" stroke-width="1" stroke-dasharray="3 3"/>
-<text x="350.0" y="161.3" class="mono" font-size="10" font-weight="400" fill="#a1acbd" text-anchor="end">10</text>
+<text x="887.0" y="39.0" class="sans" font-size="11" font-weight="400" fill="#a1acbd" text-anchor="end">近 30 日 87 次提交 · 累计 4908 次 · 峰值 19/日</text>
+<line x1="358.0" y1="158.8" x2="882.0" y2="158.8" stroke="#3c4656" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="350.0" y="162.3" class="mono" font-size="10" font-weight="400" fill="#a1acbd" text-anchor="end">10</text>
 <line x1="358.0" y1="198.0" x2="882.0" y2="198.0" stroke="#586275" stroke-width="1"/>
-<path d="M 365.5,198.0 L 365.5,198.0 L 380.5,198.0 L 395.4,198.0 L 410.4,198.0 L 425.4,198.0 L 440.3,198.0 L 455.3,198.0 L 470.3,198.0 L 485.3,185.3 L 500.2,180.0 L 515.2,164.3 L 530.2,172.5 L 545.1,148.7 L 560.1,166.8 L 575.1,198.0 L 590.1,169.5 L 605.0,198.0 L 620.0,162.0 L 635.0,198.0 L 649.9,198.0 L 664.9,198.0 L 679.9,185.3 L 694.9,164.3 L 709.8,198.0 L 724.8,198.0 L 739.8,198.0 L 754.7,169.5 L 769.7,176.0 L 784.7,198.0 L 799.7,198.0 L 814.6,172.5 L 829.6,198.0 L 844.6,198.0 L 859.5,198.0 L 874.5,144.0 L 874.5,198.0 Z" fill="url(#pulseAreaGrad)"/>
-<path d="M 365.5,198.0 L 380.5,198.0 L 395.4,198.0 L 410.4,198.0 L 425.4,198.0 L 440.3,198.0 L 455.3,198.0 L 470.3,198.0 L 485.3,185.3 L 500.2,180.0 L 515.2,164.3 L 530.2,172.5 L 545.1,148.7 L 560.1,166.8 L 575.1,198.0 L 590.1,169.5 L 605.0,198.0 L 620.0,162.0 L 635.0,198.0 L 649.9,198.0 L 664.9,198.0 L 679.9,185.3 L 694.9,164.3 L 709.8,198.0 L 724.8,198.0 L 739.8,198.0 L 754.7,169.5 L 769.7,176.0 L 784.7,198.0 L 799.7,198.0 L 814.6,172.5 L 829.6,198.0 L 844.6,198.0 L 859.5,198.0 L 874.5,144.0" fill="none" stroke="#adc2ff" stroke-width="1.3" stroke-opacity="0.65"/>
-<line x1="515.2" y1="66.0" x2="515.2" y2="161.3" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
-<line x1="530.2" y1="86.0" x2="530.2" y2="169.5" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
-<line x1="545.1" y1="106.0" x2="545.1" y2="145.7" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
-<line x1="560.1" y1="126.0" x2="560.1" y2="163.8" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
-<line x1="590.1" y1="66.0" x2="590.1" y2="166.5" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
+<path d="M 365.5,198.0 L 365.5,198.0 L 380.5,198.0 L 395.4,198.0 L 410.4,198.0 L 425.4,198.0 L 440.3,198.0 L 455.3,198.0 L 470.3,198.0 L 485.3,185.6 L 500.2,180.5 L 515.2,165.2 L 530.2,173.2 L 545.1,150.0 L 560.1,167.7 L 575.1,198.0 L 590.1,170.3 L 605.0,198.0 L 620.0,163.0 L 635.0,198.0 L 649.9,198.0 L 664.9,198.0 L 679.9,185.6 L 694.9,165.2 L 709.8,198.0 L 724.8,198.0 L 739.8,198.0 L 754.7,170.3 L 769.7,176.5 L 784.7,198.0 L 799.7,198.0 L 814.6,173.2 L 829.6,198.0 L 844.6,198.0 L 859.5,198.0 L 874.5,144.0 L 874.5,198.0 Z" fill="url(#pulseAreaGrad)"/>
+<path d="M 365.5,198.0 L 380.5,198.0 L 395.4,198.0 L 410.4,198.0 L 425.4,198.0 L 440.3,198.0 L 455.3,198.0 L 470.3,198.0 L 485.3,185.6 L 500.2,180.5 L 515.2,165.2 L 530.2,173.2 L 545.1,150.0 L 560.1,167.7 L 575.1,198.0 L 590.1,170.3 L 605.0,198.0 L 620.0,163.0 L 635.0,198.0 L 649.9,198.0 L 664.9,198.0 L 679.9,185.6 L 694.9,165.2 L 709.8,198.0 L 724.8,198.0 L 739.8,198.0 L 754.7,170.3 L 769.7,176.5 L 784.7,198.0 L 799.7,198.0 L 814.6,173.2 L 829.6,198.0 L 844.6,198.0 L 859.5,198.0 L 874.5,144.0" fill="none" stroke="#adc2ff" stroke-width="1.3" stroke-opacity="0.65"/>
+<line x1="515.2" y1="66.0" x2="515.2" y2="162.2" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
+<line x1="530.2" y1="86.0" x2="530.2" y2="170.2" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
+<line x1="545.1" y1="106.0" x2="545.1" y2="147.0" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
+<line x1="560.1" y1="126.0" x2="560.1" y2="164.7" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
+<line x1="590.1" y1="66.0" x2="590.1" y2="167.3" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
 <line x1="724.8" y1="66.0" x2="724.8" y2="195.0" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
-<line x1="754.7" y1="86.0" x2="754.7" y2="166.5" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
+<line x1="754.7" y1="86.0" x2="754.7" y2="167.3" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
 <line x1="874.5" y1="66.0" x2="874.5" y2="141.0" stroke="#91aaff" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
 <g><title>2026-10-12 · 0 次提交</title>
 <rect x="362.4" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#3c4656"/>
@@ -225,34 +225,34 @@
 <rect x="467.2" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#3c4656"/>
 </g>
 <g><title>2026-10-20 · 1 次提交</title>
-<rect x="482.2" y="185.3" width="6.2" height="12.7" rx="2.2" fill="#a6bcff"/>
+<rect x="482.2" y="185.6" width="6.2" height="12.4" rx="2.2" fill="#a7bcff"/>
 </g>
 <g><title>2026-10-21 · 2 次提交</title>
-<rect x="497.1" y="180.0" width="6.2" height="18.0" rx="2.2" fill="#a4baff"/>
+<rect x="497.1" y="180.5" width="6.2" height="17.5" rx="2.2" fill="#a4baff"/>
 </g>
 <g><title>2026-10-22 · 7 次提交</title>
-<rect x="512.1" y="164.3" width="6.2" height="33.7" rx="2.2" fill="#9cb3ff"/>
+<rect x="512.1" y="165.2" width="6.2" height="32.8" rx="2.2" fill="#9cb3ff"/>
 </g>
 <g><title>2026-10-23 · 4 次提交</title>
-<rect x="527.1" y="172.5" width="6.2" height="25.5" rx="2.2" fill="#a0b7ff"/>
+<rect x="527.1" y="173.2" width="6.2" height="24.8" rx="2.2" fill="#a0b7ff"/>
 </g>
 <g><title>2026-10-24 · 15 次提交</title>
-<rect x="542.0" y="148.7" width="6.2" height="49.3" rx="2.2" fill="#93acff"/>
+<rect x="542.0" y="150.0" width="6.2" height="48.0" rx="2.2" fill="#94adff"/>
 </g>
 <g><title>2026-10-25 · 6 次提交</title>
-<rect x="557.0" y="166.8" width="6.2" height="31.2" rx="2.2" fill="#9db4ff"/>
+<rect x="557.0" y="167.7" width="6.2" height="30.3" rx="2.2" fill="#9db5ff"/>
 </g>
 <g><title>2026-10-26 · 0 次提交</title>
 <rect x="572.0" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#3c4656"/>
 </g>
 <g><title>2026-10-27 · 5 次提交</title>
-<rect x="587.0" y="169.5" width="6.2" height="28.5" rx="2.2" fill="#9eb5ff"/>
+<rect x="587.0" y="170.3" width="6.2" height="27.7" rx="2.2" fill="#9fb6ff"/>
 </g>
 <g><title>2026-10-28 · 0 次提交</title>
 <rect x="601.9" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#3c4656"/>
 </g>
 <g><title>2026-10-29 · 8 次提交</title>
-<rect x="616.9" y="162.0" width="6.2" height="36.0" rx="2.2" fill="#9ab2ff"/>
+<rect x="616.9" y="163.0" width="6.2" height="35.0" rx="2.2" fill="#9bb2ff"/>
 </g>
 <g><title>2026-10-30 · 0 次提交</title>
 <rect x="631.9" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#3c4656"/>
@@ -264,10 +264,10 @@
 <rect x="661.8" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#3c4656"/>
 </g>
 <g><title>2026-11-02 · 1 次提交</title>
-<rect x="676.8" y="185.3" width="6.2" height="12.7" rx="2.2" fill="#a6bcff"/>
+<rect x="676.8" y="185.6" width="6.2" height="12.4" rx="2.2" fill="#a7bcff"/>
 </g>
 <g><title>2026-11-03 · 7 次提交</title>
-<rect x="691.8" y="164.3" width="6.2" height="33.7" rx="2.2" fill="#9cb3ff"/>
+<rect x="691.8" y="165.2" width="6.2" height="32.8" rx="2.2" fill="#9cb3ff"/>
 </g>
 <g><title>2026-11-04 · 0 次提交</title>
 <rect x="706.7" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#3c4656"/>
@@ -279,10 +279,10 @@
 <rect x="736.7" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#3c4656"/>
 </g>
 <g><title>2026-11-07 · 5 次提交</title>
-<rect x="751.6" y="169.5" width="6.2" height="28.5" rx="2.2" fill="#9eb5ff"/>
+<rect x="751.6" y="170.3" width="6.2" height="27.7" rx="2.2" fill="#9fb6ff"/>
 </g>
 <g><title>2026-11-08 · 3 次提交</title>
-<rect x="766.6" y="176.0" width="6.2" height="22.0" rx="2.2" fill="#a2b8ff"/>
+<rect x="766.6" y="176.5" width="6.2" height="21.5" rx="2.2" fill="#a2b8ff"/>
 </g>
 <g><title>2026-11-09 · 0 次提交</title>
 <rect x="781.6" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#3c4656"/>
@@ -291,7 +291,7 @@
 <rect x="796.6" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#3c4656"/>
 </g>
 <g><title>2026-11-11 · 4 次提交</title>
-<rect x="811.5" y="172.5" width="6.2" height="25.5" rx="2.2" fill="#a0b7ff"/>
+<rect x="811.5" y="173.2" width="6.2" height="24.8" rx="2.2" fill="#a0b7ff"/>
 </g>
 <g><title>2026-11-12 · 0 次提交</title>
 <rect x="826.5" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#3c4656"/>
@@ -302,7 +302,7 @@
 <g><title>2026-11-14 · 0 次提交</title>
 <rect x="856.4" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#3c4656"/>
 </g>
-<g><title>2026-11-15 · 18 次提交</title>
+<g><title>2026-11-15 · 19 次提交</title>
 <rect x="871.4" y="144.0" width="6.2" height="54.0" rx="2.2" fill="#91aaff"/>
 </g>
 <rect x="488.9" y="50.0" width="52.6" height="16" rx="3" fill="#252f44" stroke="#6583b7" stroke-width="1"/>
