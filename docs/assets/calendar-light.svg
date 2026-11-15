@@ -167,7 +167,7 @@
 <rect x="218.0" y="168.0" width="32" height="22" rx="3.5" fill="#f2f5fa" stroke="#e6ecf5" stroke-width="0.8"/>
 <text x="234.0" y="183.0" class="mono" font-size="11.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">14</text>
 </g>
-<g opacity="1"><title>2026-11-15 · 11 次提交</title>
+<g opacity="1"><title>2026-11-15 · 13 次提交</title>
 <rect x="255.0" y="168.0" width="32" height="22" rx="3.5" fill="#5b9cf6" stroke="#1370f3" stroke-width="1.6"/>
 <text x="271.0" y="183.0" class="mono" font-size="11.5" font-weight="700" fill="#343d4a" text-anchor="middle">15</text>
 <circle cx="282.5" cy="172.5" r="2.6" fill="#278b54" stroke="#ffffff" stroke-width="0.9"/>
@@ -186,12 +186,12 @@
 <text x="268.0" y="219.0" class="sans" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="start">多</text>
 <rect x="316.0" y="16.0" width="586.0" height="216.0" rx="5" fill="#ffffff" stroke="#e3eaf6" stroke-width="1" filter="url(#myCardShadow)"/>
 <text x="331.0" y="39.0" class="sans" font-size="13" font-weight="700" fill="#343d4a" text-anchor="start">每日提交脉冲与版本节点</text>
-<text x="887.0" y="39.0" class="sans" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="end">近 30 日 79 次提交 · 累计 4900 次 · 峰值 15/日</text>
+<text x="887.0" y="39.0" class="sans" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="end">近 30 日 81 次提交 · 累计 4902 次 · 峰值 15/日</text>
 <line x1="358.0" y1="153.9" x2="882.0" y2="153.9" stroke="#ebebeb" stroke-width="1" stroke-dasharray="3 3"/>
 <text x="350.0" y="157.4" class="mono" font-size="10" font-weight="400" fill="#8c8c8c" text-anchor="end">10</text>
 <line x1="358.0" y1="198.0" x2="882.0" y2="198.0" stroke="#cccccc" stroke-width="1"/>
-<path d="M 365.5,198.0 L 365.5,198.0 L 380.5,198.0 L 395.4,198.0 L 410.4,198.0 L 425.4,198.0 L 440.3,198.0 L 455.3,198.0 L 470.3,198.0 L 485.3,184.1 L 500.2,178.3 L 515.2,161.1 L 530.2,170.1 L 545.1,144.0 L 560.1,163.8 L 575.1,198.0 L 590.1,166.8 L 605.0,198.0 L 620.0,158.6 L 635.0,198.0 L 649.9,198.0 L 664.9,198.0 L 679.9,184.1 L 694.9,161.1 L 709.8,198.0 L 724.8,198.0 L 739.8,198.0 L 754.7,166.8 L 769.7,173.9 L 784.7,198.0 L 799.7,198.0 L 814.6,170.1 L 829.6,198.0 L 844.6,198.0 L 859.5,198.0 L 874.5,151.8 L 874.5,198.0 Z" fill="url(#pulseAreaGrad)"/>
-<path d="M 365.5,198.0 L 380.5,198.0 L 395.4,198.0 L 410.4,198.0 L 425.4,198.0 L 440.3,198.0 L 455.3,198.0 L 470.3,198.0 L 485.3,184.1 L 500.2,178.3 L 515.2,161.1 L 530.2,170.1 L 545.1,144.0 L 560.1,163.8 L 575.1,198.0 L 590.1,166.8 L 605.0,198.0 L 620.0,158.6 L 635.0,198.0 L 649.9,198.0 L 664.9,198.0 L 679.9,184.1 L 694.9,161.1 L 709.8,198.0 L 724.8,198.0 L 739.8,198.0 L 754.7,166.8 L 769.7,173.9 L 784.7,198.0 L 799.7,198.0 L 814.6,170.1 L 829.6,198.0 L 844.6,198.0 L 859.5,198.0 L 874.5,151.8" fill="none" stroke="#4890f5" stroke-width="1.3" stroke-opacity="0.65"/>
+<path d="M 365.5,198.0 L 365.5,198.0 L 380.5,198.0 L 395.4,198.0 L 410.4,198.0 L 425.4,198.0 L 440.3,198.0 L 455.3,198.0 L 470.3,198.0 L 485.3,184.1 L 500.2,178.3 L 515.2,161.1 L 530.2,170.1 L 545.1,144.0 L 560.1,163.8 L 575.1,198.0 L 590.1,166.8 L 605.0,198.0 L 620.0,158.6 L 635.0,198.0 L 649.9,198.0 L 664.9,198.0 L 679.9,184.1 L 694.9,161.1 L 709.8,198.0 L 724.8,198.0 L 739.8,198.0 L 754.7,166.8 L 769.7,173.9 L 784.7,198.0 L 799.7,198.0 L 814.6,170.1 L 829.6,198.0 L 844.6,198.0 L 859.5,198.0 L 874.5,147.7 L 874.5,198.0 Z" fill="url(#pulseAreaGrad)"/>
+<path d="M 365.5,198.0 L 380.5,198.0 L 395.4,198.0 L 410.4,198.0 L 425.4,198.0 L 440.3,198.0 L 455.3,198.0 L 470.3,198.0 L 485.3,184.1 L 500.2,178.3 L 515.2,161.1 L 530.2,170.1 L 545.1,144.0 L 560.1,163.8 L 575.1,198.0 L 590.1,166.8 L 605.0,198.0 L 620.0,158.6 L 635.0,198.0 L 649.9,198.0 L 664.9,198.0 L 679.9,184.1 L 694.9,161.1 L 709.8,198.0 L 724.8,198.0 L 739.8,198.0 L 754.7,166.8 L 769.7,173.9 L 784.7,198.0 L 799.7,198.0 L 814.6,170.1 L 829.6,198.0 L 844.6,198.0 L 859.5,198.0 L 874.5,147.7" fill="none" stroke="#4890f5" stroke-width="1.3" stroke-opacity="0.65"/>
 <line x1="515.2" y1="66.0" x2="515.2" y2="158.1" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
 <line x1="530.2" y1="86.0" x2="530.2" y2="167.1" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
 <line x1="545.1" y1="106.0" x2="545.1" y2="141.0" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
@@ -199,7 +199,7 @@
 <line x1="590.1" y1="66.0" x2="590.1" y2="163.8" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
 <line x1="724.8" y1="66.0" x2="724.8" y2="195.0" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
 <line x1="754.7" y1="86.0" x2="754.7" y2="163.8" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
-<line x1="874.5" y1="66.0" x2="874.5" y2="148.8" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
+<line x1="874.5" y1="66.0" x2="874.5" y2="144.7" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
 <g><title>2026-10-12 · 0 次提交</title>
 <rect x="362.4" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
@@ -302,8 +302,8 @@
 <g><title>2026-11-14 · 0 次提交</title>
 <rect x="856.4" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
-<g><title>2026-11-15 · 11 次提交</title>
-<rect x="871.4" y="151.8" width="6.2" height="46.2" rx="2.2" fill="#1463d1"/>
+<g><title>2026-11-15 · 13 次提交</title>
+<rect x="871.4" y="147.7" width="6.2" height="50.3" rx="2.2" fill="#0f5fce"/>
 </g>
 <rect x="488.9" y="50.0" width="52.6" height="16" rx="3" fill="#eaf2fe" stroke="#96c0f9" stroke-width="1"/>
 <text x="515.2" y="61.5" class="mono" font-size="10" font-weight="700" fill="#1370f3" text-anchor="middle">v2.17.3</text>
@@ -329,35 +329,35 @@
 <text x="874.5" y="215.0" class="sans" font-size="10.5" font-weight="700" fill="#1370f3" text-anchor="middle">今天</text>
 <rect x="18.0" y="244.0" width="884.0" height="144.0" rx="5" fill="#ffffff" stroke="#e3eaf6" stroke-width="1" filter="url(#myCardShadow)"/>
 <text x="33.0" y="267.0" class="sans" font-size="13" font-weight="700" fill="#343d4a" text-anchor="start">最近发布动态</text>
-<text x="887.0" y="267.0" class="sans" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="end">最新正式版 v2.17.15 · 共发布 15 个版本 · 自动提取 GitHub Releases 摘要</text>
-<g><title>v2.17.16-beta.1 · &gt; 这是测试版（Pre-release），先尝鲜用；遇到问题请到 Issues 反馈</title>
+<text x="887.0" y="267.0" class="sans" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="end">最新正式版 v2.17.15 · 共发布 16 个版本 · 自动提取 GitHub Releases 摘要</text>
+<g><title>v2.17.16-beta.2 · &gt; 测试版（Pre-release）</title>
 <rect x="33.0" y="282.0" width="276.7" height="92.0" rx="4" fill="#f8fcfa" stroke="#278b54" stroke-width="1"/>
 <rect x="33.5" y="292.0" width="3" height="72.0" rx="1.5" fill="#278b54"/>
-<text x="47.0" y="304.0" class="mono" font-size="14" font-weight="700" fill="#343d4a" text-anchor="start">v2.17.16-beta.1</text>
+<text x="47.0" y="304.0" class="mono" font-size="14" font-weight="700" fill="#343d4a" text-anchor="start">v2.17.16-beta.2</text>
 <rect x="243.7" y="291.0" width="54.0" height="17" rx="3" fill="#fff1d8"/>
 <text x="270.7" y="303.2" class="sans" font-size="10.5" font-weight="600" fill="#975908" text-anchor="middle">预发布版</text>
 <text x="47.0" y="322.0" class="mono" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="start">2026-11-15</text>
-<text x="47.0" y="342.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">&gt; 这是测试版（Pre-release），先尝鲜用；</text>
-<text x="47.0" y="359.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">遇到问题请到 Issues 反馈</text>
+<text x="47.0" y="342.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">&gt; 测试版（Pre-release）</text>
+</g>
+<g><title>v2.17.16-beta.1 · &gt; 这是测试版（Pre-release），先尝鲜用；遇到问题请到 Issues 反馈</title>
+<rect x="321.7" y="282.0" width="276.7" height="92.0" rx="4" fill="#f7f9fc" stroke="#e6ecf5" stroke-width="1"/>
+<rect x="322.2" y="292.0" width="3" height="72.0" rx="1.5" fill="#f57a00"/>
+<text x="335.7" y="304.0" class="mono" font-size="14" font-weight="700" fill="#343d4a" text-anchor="start">v2.17.16-beta.1</text>
+<rect x="532.3" y="291.0" width="54.0" height="17" rx="3" fill="#fff1d8"/>
+<text x="559.3" y="303.2" class="sans" font-size="10.5" font-weight="600" fill="#975908" text-anchor="middle">预发布版</text>
+<text x="335.7" y="322.0" class="mono" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="start">2026-11-15</text>
+<text x="335.7" y="342.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">&gt; 这是测试版（Pre-release），先尝鲜用；</text>
+<text x="335.7" y="359.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">遇到问题请到 Issues 反馈</text>
 </g>
 <g><title>v2.17.15 · 启动页合并 Java 版与基岩版 · 离线档案本地皮肤与披风 · 问题修复</title>
-<rect x="321.7" y="282.0" width="276.7" height="92.0" rx="4" fill="#f7f9fc" stroke="#e6ecf5" stroke-width="1"/>
-<rect x="322.2" y="292.0" width="3" height="72.0" rx="1.5" fill="#1370f3"/>
-<text x="335.7" y="304.0" class="mono" font-size="14" font-weight="700" fill="#343d4a" text-anchor="start">v2.17.15</text>
-<rect x="542.8" y="291.0" width="43.5" height="17" rx="3" fill="#eaf2fe"/>
-<text x="564.6" y="303.2" class="sans" font-size="10.5" font-weight="600" fill="#1370f3" text-anchor="middle">正式版</text>
-<text x="335.7" y="322.0" class="mono" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="start">2026-11-15</text>
-<text x="335.7" y="342.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">启动页合并 Java 版与基岩版 · 离线档案本地</text>
-<text x="335.7" y="359.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">皮肤与披风 · 问题修复</text>
-</g>
-<g><title>v2.17.14 · 投影预览 · 全新 Logo</title>
 <rect x="610.3" y="282.0" width="276.7" height="92.0" rx="4" fill="#f7f9fc" stroke="#e6ecf5" stroke-width="1"/>
 <rect x="610.8" y="292.0" width="3" height="72.0" rx="1.5" fill="#1370f3"/>
-<text x="624.3" y="304.0" class="mono" font-size="14" font-weight="700" fill="#343d4a" text-anchor="start">v2.17.14</text>
+<text x="624.3" y="304.0" class="mono" font-size="14" font-weight="700" fill="#343d4a" text-anchor="start">v2.17.15</text>
 <rect x="831.5" y="291.0" width="43.5" height="17" rx="3" fill="#eaf2fe"/>
 <text x="853.2" y="303.2" class="sans" font-size="10.5" font-weight="600" fill="#1370f3" text-anchor="middle">正式版</text>
-<text x="624.3" y="322.0" class="mono" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="start">2026-11-07</text>
-<text x="624.3" y="342.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">投影预览 · 全新 Logo</text>
+<text x="624.3" y="322.0" class="mono" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="start">2026-11-15</text>
+<text x="624.3" y="342.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">启动页合并 Java 版与基岩版 · 离线档案本地</text>
+<text x="624.3" y="359.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">皮肤与披风 · 问题修复</text>
 </g>
 <rect x="18.0" y="400.0" width="884.0" height="140.0" rx="5" fill="#ffffff" stroke="#e3eaf6" stroke-width="1" filter="url(#myCardShadow)"/>
 <text x="33.0" y="423.0" class="sans" font-size="13" font-weight="700" fill="#343d4a" text-anchor="start">Star 增长趋势</text>
