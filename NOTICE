@@ -116,6 +116,33 @@ LeviLamina 客户端，不随本项目分发：
 上述项目的著作权归各自作者所有，按 MIT 许可提供。
 
 ===============================================================================
+六、authlib-injector（随启动器分发的换肤组件）
+===============================================================================
+
+离线档案的本地皮肤与第三方登录通过 authlib-injector 完成：它以未经修改的 1.2.8
+原始二进制随启动器分发（嵌入为 `Resources/authlib-injector.jar`，运行时释放到
+启动器目录），仅通过 `-javaagent:` 作为 Java Agent 注入游戏 JVM：
+
+  * authlib-injector
+    https://github.com/yushijinhun/authlib-injector
+    License: GNU Affero General Public License v3.0（含上游例外条款）
+    完整说明：Plain Craft Launcher 2/THIRD-PARTY/authlib-injector/NOTICE.md
+    （发布产物中位于 THIRD-PARTY/authlib-injector/NOTICE.md）
+
+上游在 AGPL-3.0 之上附加了例外：以打包方式包含未修改的二进制、通过进程间通信
+接口（HTTP API）交互、以及将作品作为 Java Agent 加载进 JVM 这三种用法，都不会
+使调用方被 AGPL 协议涵盖。本项目的分发方式同时满足这三项，因此启动器本体不因
+打包该文件而受 AGPL 约束。相关文件：
+
+  * Plain Craft Launcher 2/Resources/authlib-injector.jar
+      随启动器内置的未修改原始 jar
+  * Plain Craft Launcher 2/Modules/Minecraft/ModLocalSkin.cs
+      离线档案的本地皮肤与披风读写、模型选择
+  * PCL.Core/Minecraft/Yggdrasil/LocalSkinServer.cs
+      内置本地 Yggdrasil 服务，按 Yggdrasil（HTTP）协议与游戏交互
+
+该 jar 的著作权归 yushijinhun 及其贡献者所有，按 AGPL-3.0 提供。
+===============================================================================
 Third-Party Notices (English Summary)
 ===============================================================================
 
@@ -156,3 +183,11 @@ on demand for local conversion, and MCA Selector is only linked as an external
 tool. The full MIT license texts ship at THIRD-PARTY/Chunker/LICENSE and
 THIRD-PARTY/MCA-Selector/LICENSE. Copyright in these tools belongs to their
 respective authors and is licensed under MIT.
+authlib-injector (AGPL-3.0 with upstream exceptions) ships with this launcher as
+the unmodified 1.2.8 binary at `Resources/authlib-injector.jar`, embedded as a
+WPF resource and extracted at runtime. It is loaded into the game JVM as a Java
+Agent via `-javaagent:` and backs the local Yggdrasil service used for offline
+profile skins. Because the binary is unmodified and not linked against, and the
+launcher only interacts with it through the Yggdrasil HTTP protocol and Java
+Agent loading, the launcher itself is not covered by the AGPL. See
+THIRD-PARTY/authlib-injector/NOTICE.md for details.

@@ -138,6 +138,12 @@
       "info": "Copyright © 2018-2026 Querz\nLicensed under the MIT License.",
       "website": "https://github.com/Querz/mcaselector",
       "license": "https://github.com/Querz/mcaselector/blob/master/LICENSE"
+    },
+    {
+      "name": "authlib-injector",
+      "info": "Copyright © yushijinhun\nLicensed under the GNU Affero General Public License v3.0, with the upstream exceptions for unmodified binaries, IPC usage and Java Agent loading.",
+      "website": "https://github.com/yushijinhun/authlib-injector",
+      "license": "https://github.com/yushijinhun/authlib-injector/blob/develop/LICENSE"
     }
   ]
 }

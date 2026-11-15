@@ -21,7 +21,7 @@
 
 PCL SE (Plain Craft Launcher Symbio Edition) is a third-party Minecraft launcher maintained by Hydrogen-Peroxide. Built on PCL's open-source code, it keeps the familiar interaction while adding Bedrock edition support, instance management and resource downloads.
 
-- Current version: `2.17.14`
+- Current version: `2.17.15`
 - Upstream baseline: PCL `2.12.1`
 - Tech stack: C# / WPF / .NET 10
 
@@ -55,9 +55,16 @@ PCL SE has no affiliation with the official PCL, so please do not report PCL SE 
 - Browse and back up saves and screenshots, and open their folders in one click
 - Keep a list of frequently used servers per instance and export the whole instance as an archive
 
+### Skins and capes
+
+- The skin library manages local skins and can apply them to offline profiles without a genuine account
+- Classic and slim models, plus importing, replacing and removing local capes
+- A built-in local Yggdrasil service and authlib-injector take over at launch, so the game reads the local skin
+- Offline profile previews, profile avatars and skin library thumbnails all show the local skin
+
 ### User experience
 
-- Complete interface resources for Simplified Chinese and English (US); Traditional Chinese, English (UK), Japanese, French and Spanish currently contain only language metadata, with interface text falling back to Simplified Chinese
+- Java and Bedrock editions share a single "Launch" page with one top-level entry and a segmented switch on the left, animated with a slide-and-fade transition- Complete interface resources for Simplified Chinese and English (US); Traditional Chinese, English (UK), Japanese, French and Spanish currently contain only language metadata, with interface text falling back to Simplified Chinese
 - Customizable color theme and background, with transition animations for page switching and list scrolling
 - Automatic Java scanning to reduce manual configuration
 - Log analysis on failed launches, with readable causes and suggestions
@@ -126,7 +133,7 @@ See the [contribution guide](CONTRIBUTING.md#本地构建与测试) for test com
 
 - Added Bedrock edition management: version detection, package import, Xbox sign-in and local filtering
 - Removed the multiplayer lobby and its modules; no lobby or multiplayer entry points are provided
-- Uses an independent version number (`2.17.14`) based on PCL `2.12.1`
+- Uses an independent version number (`2.17.15`) based on PCL `2.12.1`
 
 ## Legal notice
 
@@ -146,6 +153,7 @@ See the [contribution guide](CONTRIBUTING.md#本地构建与测试) for test com
 - This project is licensed under the [GNU General Public License v3.0 (GPLv3)](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/LICENSE)
 - The `Plain Craft Launcher 2/` (PCL CE) directory uses the [Apache License 2.0](<Plain Craft Launcher 2/LICENSE-APACHE-2.0>); new Bedrock adaptation modules, independent code and companion scripts are provided under GPLv3
 - Exception: `Plain Craft Launcher 2/Modules/Base/ModLivingForkEgg.cs` is adapted from [PCL Living Fork](https://github.com/DDZmumo/PCL-Living-Fork) and provided under the [Mozilla Public License 2.0](https://www.mozilla.org/MPL/2.0/)
+- Exception: `Plain Craft Launcher 2/Resources/authlib-injector.jar` is the unmodified [authlib-injector](https://github.com/yushijinhun/authlib-injector) v1.2.8 binary (AGPL-3.0, with the upstream exceptions for unmodified binaries, IPC usage and Java Agent loading). It is embedded as a resource and injected with `-javaagent:` only; this project does not modify its code. See [THIRD-PARTY/authlib-injector/NOTICE.md](<Plain Craft Launcher 2/THIRD-PARTY/authlib-injector/NOTICE.md>)
 - Exception: [Chunker](https://github.com/HiveGamesOSS/Chunker) and [MCA Selector](https://github.com/Querz/mcaselector), referenced by the save editor, are third-party tools not redistributed with this project and are provided under the MIT License; see [THIRD-PARTY/Chunker/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/Chunker/LICENSE>) and [THIRD-PARTY/MCA-Selector/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/MCA-Selector/LICENSE>)
 
 ## Acknowledgements
@@ -155,6 +163,7 @@ See the [contribution guide](CONTRIBUTING.md#本地构建与测试) for test com
 - [BedrockBoot](https://github.com/Round-Studio/BedrockBoot) and [BedrockLauncher.Core](https://github.com/Round-Studio/BedrockLauncher.Core) — Bedrock projects by Round Studio (GPL-3.0), porting reference for this project's Bedrock installation, decryption and launching; see [NOTICE](NOTICE) for scope
 - [BLoader](https://github.com/Chlna6666/BLoader) — Bedrock mod loader by Chlna6666 (GPL-3.0), bundled and injected with the launcher; see [THIRD-PARTY/BLoader/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/BLoader/LICENSE>)
 - [LeviLamina](https://github.com/LiteLDev/LeviLamina) and [lip](https://github.com/LiteLDev/lip) — LeviLamina client installed at runtime through the official lip for the matching game version (LGPL-3.0 / GPL-3.0), not redistributed with this project
+- [authlib-injector](https://github.com/yushijinhun/authlib-injector) — third-party authentication and skin injector by yushijinhun (AGPL-3.0 with the Java Agent exception), bundled unmodified and used for local skins on offline profiles; see [THIRD-PARTY/authlib-injector/NOTICE.md](<Plain Craft Launcher 2/THIRD-PARTY/authlib-injector/NOTICE.md>)
 - Plus open-source projects such as Dapper, Downloader, Markdig.Wpf, NAudio, Microsoft.Data.Sqlite, protobuf-net and Lucide. See [metadata.json](Plain%20Craft%20Launcher%202/metadata.json) and the launcher's "About" page for the complete list of third-party components and licenses
 
 ## Statistics

@@ -21,7 +21,7 @@
 
 PCL SE（Plain Craft Launcher Symbio Edition）是由 Hydrogen-Peroxide 維護的第三方 Minecraft 啟動器，基於 PCL 開源程式碼開發，在保留原有互動習慣的基礎上補齊了基岩版支援、實例管理與資源下載等能力。
 
-- 目前版本：`2.17.14`
+- 目前版本：`2.17.15`
 - 上游基線：PCL `2.12.1`
 - 技術棧：C# / WPF / .NET 10
 
@@ -55,9 +55,16 @@ PCL SE 與 PCL 官方版沒有隸屬關係，請不要向官方儲存庫回報 P
 - 存檔與截圖集中瀏覽、備份，並可一鍵開啟所在目錄
 - 實例內維護常用伺服器清單，支援整體打包匯出
 
+### 皮膚與披風
+
+- 皮膚庫集中管理本機皮膚，可直接套用到離線設定檔，沒有正版帳號也能換皮膚
+- 支援經典 / 纖細模型切換，可匯入、替換與移除本機披風
+- 啟動時由內建的本機 Yggdrasil 服務與 authlib-injector 接管，遊戲端讀取到的就是本機皮膚
+- 離線設定檔的皮膚預覽、設定檔頭像與皮膚庫縮圖同步顯示本機皮膚
+
 ### 使用體驗
 
-- 簡體中文與 English (US) 提供完整介面資源；繁體中文、English (UK)、日本語、Français、Español 目前僅有語言名稱等預留資源，介面文字回退為簡體中文
+- Java 版與基岩版共用一個「啟動」頁，頂欄單一入口、左側分段開關切換，切換時帶滑入淡入過渡- 簡體中文與 English (US) 提供完整介面資源；繁體中文、English (UK)、日本語、Français、Español 目前僅有語言名稱等預留資源，介面文字回退為簡體中文
 - 主題配色與背景可自訂，頁面切換與清單捲動帶有過場動畫
 - 自動掃描本機 Java，減少手動設定
 - 啟動失敗時分析日誌，給出可讀的原因與建議
@@ -126,7 +133,7 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 
 - 新增基岩版管理：版本偵測、安裝包匯入、Xbox 帳號登入與本機篩選
 - 移除多人遊戲大廳及配套模組，不再提供大廳與多人遊戲相關入口
-- 使用獨立版本號（`2.17.14`），上游基線為 PCL `2.12.1`
+- 使用獨立版本號（`2.17.15`），上游基線為 PCL `2.12.1`
 
 ## 聲明
 
@@ -146,6 +153,7 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 - 本專案整體採用 [GNU General Public License v3.0（GPLv3）](https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/blob/dev/LICENSE)
 - `Plain Craft Launcher 2/`（PCL CE 目錄）採用 [Apache License 2.0](<Plain Craft Launcher 2/LICENSE-APACHE-2.0>)；本專案新增的基岩版適配模組、獨立程式碼與配套腳本按 GPLv3 提供
 - 例外：`Plain Craft Launcher 2/Modules/Base/ModLivingForkEgg.cs` 改編自 [PCL Living Fork](https://github.com/DDZmumo/PCL-Living-Fork)，按 [Mozilla Public License 2.0](https://www.mozilla.org/MPL/2.0/) 提供
+- 例外：`Plain Craft Launcher 2/Resources/authlib-injector.jar` 為 [authlib-injector](https://github.com/yushijinhun/authlib-injector) v1.2.8 未經修改的原始二進位檔（AGPL-3.0，含上游針對未修改二進位、行程間通訊與 Java Agent 載入的例外條款），僅作為資源嵌入並以 `-javaagent:` 注入遊戲，本專案未修改其程式碼，來源與適用範圍見 [THIRD-PARTY/authlib-injector/NOTICE.md](<Plain Craft Launcher 2/THIRD-PARTY/authlib-injector/NOTICE.md>)
 - 例外：存檔編輯頁引用的 [Chunker](https://github.com/HiveGamesOSS/Chunker) 與 [MCA Selector](https://github.com/Querz/mcaselector) 為第三方工具，不隨本專案分發，按 MIT 授權提供，完整授權條款見 [THIRD-PARTY/Chunker/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/Chunker/LICENSE>) 與 [THIRD-PARTY/MCA-Selector/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/MCA-Selector/LICENSE>)
 
 ## 致謝
@@ -155,6 +163,7 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 - [BedrockBoot](https://github.com/Round-Studio/BedrockBoot) 與 [BedrockLauncher.Core](https://github.com/Round-Studio/BedrockLauncher.Core) — Round Studio 開發的基岩版專案（GPL-3.0），本專案基岩版安裝、解密與啟動方案的移植參考，來源與適用範圍見 [NOTICE](NOTICE)
 - [BLoader](https://github.com/Chlna6666/BLoader) — Chlna6666 開發的基岩版 Mod 載入器（GPL-3.0），隨啟動器分發並注入，授權條款見 [THIRD-PARTY/BLoader/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/BLoader/LICENSE>)
 - [LeviLamina](https://github.com/LiteLDev/LeviLamina) 與 [lip](https://github.com/LiteLDev/lip) — 依遊戲版本透過官方 lip 安裝的 LeviLamina 客戶端（LGPL-3.0 / GPL-3.0），不隨本專案分發
+- [authlib-injector](https://github.com/yushijinhun/authlib-injector) — yushijinhun 開發的第三方登入與換膚注入器（AGPL-3.0，含 Java Agent 例外條款），隨啟動器分發未經修改的原始 jar，用於離線設定檔的本機皮膚，說明見 [THIRD-PARTY/authlib-injector/NOTICE.md](<Plain Craft Launcher 2/THIRD-PARTY/authlib-injector/NOTICE.md>)
 - 以及 Dapper、Downloader、Markdig.Wpf、NAudio、Microsoft.Data.Sqlite、protobuf-net、Lucide 等開源專案，完整的第三方元件與授權資訊見 [metadata.json](Plain%20Craft%20Launcher%202/metadata.json) 與啟動器「關於」頁面
 
 ## 統計資料

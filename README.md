@@ -21,7 +21,7 @@
 
 PCL SE（Plain Craft Launcher Symbio Edition）是由 Hydrogen-Peroxide 维护的第三方 Minecraft 启动器，基于 PCL 开源代码开发，在保留原有交互习惯的基础上补齐了基岩版支持、实例管理与资源下载等能力。
 
-- 当前版本：`2.17.14`
+- 当前版本：`2.17.15`
 - 上游基线：PCL `2.12.1`
 - 技术栈：C# / WPF / .NET 10
 
@@ -69,8 +69,16 @@ PCL SE 与 PCL 官方版没有隶属关系，请不要向官方仓库反馈 PCL 
 - 存档与截图集中浏览、备份，并可一键打开所在目录
 - 实例内维护常用服务器列表，支持整体打包导出
 
+### 皮肤与披风
+
+- 皮肤库集中管理本地皮肤，可直接应用到离线档案，没有正版账号也能换肤
+- 支持经典 / 纤细模型切换，可导入、替换与移除本地披风
+- 启动时由内置的本地 Yggdrasil 服务与 authlib-injector 接管，游戏侧读取到的就是本地皮肤
+- 离线档案的皮肤预览、档案头像与皮肤库缩略图同步显示本地皮肤
+
 ### 使用体验
 
+- Java 版与基岩版共用一个「启动」页，顶栏单入口、左侧分段开关切换，切换时带滑入淡入过渡
 - 简体中文与 English (US) 提供完整界面资源；繁體中文、English (UK)、日本語、Français、Español 目前仅有语言名称等占位资源，界面文本回退为简体中文
 - 主题配色与背景可自定义，页面切换与列表滚动带有过渡动画
 - 自动扫描本机 Java，减少手动配置
@@ -142,7 +150,7 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 
 - 新增基岩版管理：版本检测、安装包导入、Xbox 账号登录与本地筛选
 - 移除联机大厅及配套模块，不再提供大厅与联机相关入口
-- 使用独立版本号（`2.17.14`），上游基线为 PCL `2.12.1`
+- 使用独立版本号（`2.17.15`），上游基线为 PCL `2.12.1`
 
 ## 声明
 
@@ -162,6 +170,7 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 - 本项目整体采用 **GNU General Public License v3.0（GPLv3）**，完整文本见 [LICENSE](./LICENSE)
 - `Plain Craft Launcher 2/`（PCL CE 目录）采用 [Apache License 2.0](<Plain Craft Launcher 2/LICENSE-APACHE-2.0>)；本项目新增的基岩版适配模块、独立代码与配套脚本按 GPLv3 提供
 - 例外：`Plain Craft Launcher 2/Modules/Base/ModLivingForkEgg.cs`（百宝箱彩蛋）改编自 [PCL Living Fork](https://github.com/DDZmumo/PCL-Living-Fork)，按 [Mozilla Public License 2.0](https://www.mozilla.org/MPL/2.0/) 提供，不适用 GPLv3 约定
+- 例外：`Plain Craft Launcher 2/Resources/authlib-injector.jar` 为 [authlib-injector](https://github.com/yushijinhun/authlib-injector) v1.2.8 未经修改的原始二进制（AGPL-3.0，含上游针对未修改二进制、进程间通信与 Java Agent 加载的例外条款），仅作为资源嵌入并以 `-javaagent:` 注入游戏，本项目未修改其代码，来源与适用范围见 [THIRD-PARTY/authlib-injector/NOTICE.md](<Plain Craft Launcher 2/THIRD-PARTY/authlib-injector/NOTICE.md>)
 - 例外：存档编辑页引用的 [Chunker](https://github.com/HiveGamesOSS/Chunker) 与 [MCA Selector](https://github.com/Querz/mcaselector) 为第三方工具，不随本项目分发，按 MIT 许可提供，完整许可证见 [THIRD-PARTY/Chunker/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/Chunker/LICENSE>) 与 [THIRD-PARTY/MCA-Selector/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/MCA-Selector/LICENSE>)
 
 > 重要：除上述例外与上游原有代码外，本项目新增代码均以 GPLv3 授权。
@@ -178,6 +187,7 @@ dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" `
 - [LeviLamina](https://github.com/LiteLDev/LeviLamina) 与 [lip](https://github.com/LiteLDev/lip) — 按游戏版本通过官方 lip 安装的 LeviLamina 客户端（LGPL-3.0 / GPL-3.0），不随本项目分发
 - [Chunker](https://github.com/HiveGamesOSS/Chunker) — Hive Games 开发的存档跨版本转换工具（MIT），存档编辑页按需下载其 CLI，许可证见 [THIRD-PARTY/Chunker/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/Chunker/LICENSE>)
 - [MCA Selector](https://github.com/Querz/mcaselector) — Querz 开发的 Minecraft 地图与区块编辑工具（MIT），存档编辑页的地图编辑功能参考其实现，许可证见 [THIRD-PARTY/MCA-Selector/LICENSE](<Plain Craft Launcher 2/THIRD-PARTY/MCA-Selector/LICENSE>)
+- [authlib-injector](https://github.com/yushijinhun/authlib-injector) — yushijinhun 开发的第三方登录与换肤注入器（AGPL-3.0，含 Java Agent 例外条款），随启动器分发未经修改的原始 jar，用于离线档案的本地皮肤，说明见 [THIRD-PARTY/authlib-injector/NOTICE.md](<Plain Craft Launcher 2/THIRD-PARTY/authlib-injector/NOTICE.md>)
 - 以及 Dapper、Downloader、Markdig.Wpf、NAudio、Microsoft.Data.Sqlite、protobuf-net、Lucide 等开源项目，完整的第三方组件与许可信息见 [metadata.json](Plain%20Craft%20Launcher%202/metadata.json) 与启动器「关于」页面
 
 此外，[PCL Living Fork](https://github.com/DDZmumo/PCL-Living-Fork) 提供了部分功能修复。
