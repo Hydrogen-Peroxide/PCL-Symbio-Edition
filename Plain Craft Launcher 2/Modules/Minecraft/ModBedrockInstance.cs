@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json.Nodes;
 using PCL.Core.App;
@@ -152,5 +153,32 @@ public static class ModBedrockInstance
             if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) != 0) continue;
             CopyDirectory(directory, Path.Combine(target, Path.GetFileName(directory)), ref copied, onProgress);
         }
+    }
+
+    /// <summary>当前选中的基岩版实例（版本目录名）。</summary>
+    public static string SelectedVersionId { get; set; } = "";
+
+    /// <summary>列出本地已安装的基岩版实例（排除解包缓存目录），按版本号降序。</summary>
+    public static List<string> GetLocalVersions()
+    {
+        var result = new List<string>();
+        try
+        {
+            var root = VersionsDirectory;
+            if (!Directory.Exists(root)) return result;
+            foreach (var dir in Directory.GetDirectories(root))
+            {
+                var name = Path.GetFileName(dir);
+                if (name.Equals("extracted", StringComparison.OrdinalIgnoreCase)) continue;
+                result.Add(name);
+            }
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[Bedrock] 枚举本地实例失败", ModBase.LogLevel.Debug);
+        }
+
+        result.Sort((a, b) => ModDownload.CompareBedrockVersions(b, a));
+        return result;
     }
 }
