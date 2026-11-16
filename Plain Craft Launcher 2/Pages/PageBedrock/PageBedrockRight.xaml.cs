@@ -615,21 +615,21 @@ public partial class PageBedrockRight
         ModBase.Log(
             $"[Bedrock] 启动请求：选中={Config.Launch.BedrockSelectedVersion}，已安装={IsBedrockInstalled}，本地版本={(string.Join(",", ModBedrockInstance.GetLocalVersions()))}",
             ModBase.LogLevel.Debug);
+        // 实例选择页选中的实例优先：数据目录里存在就直接启动，
+        // 不依赖系统里是否注册过基岩版（便携版/自己解包的版本本来就不在系统注册表里）
+        var selectedInstance = Config.Launch.BedrockSelectedVersion;
+        if (!string.IsNullOrEmpty(selectedInstance) &&
+            ModBedrockInstance.GetLocalVersions().Contains(selectedInstance))
+        {
+            LaunchLocalVersion(selectedInstance);
+            return;
+        }
+
         if (!IsBedrockInstalled)
         {
             // 尚未检测到安装（或检测仍在后台进行），刷新一次检测并引导到下载列表
             DetectBedrockInstallation();
             PanVersionList.BringIntoView();
-            return;
-        }
-
-        // 实例选择页选中的实例优先：只要它在当前数据目录里存在就直接启动
-        var selectedInstance = Config.Launch.BedrockSelectedVersion;
-        if (!string.IsNullOrEmpty(selectedInstance) &&
-            !string.Equals(selectedInstance, _registeredVersionId, StringComparison.OrdinalIgnoreCase) &&
-            ModBedrockInstance.GetLocalVersions().Contains(selectedInstance))
-        {
-            LaunchLocalVersion(selectedInstance);
             return;
         }
 
