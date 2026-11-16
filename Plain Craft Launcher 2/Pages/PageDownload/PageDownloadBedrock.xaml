@@ -4,27 +4,15 @@
                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                    xmlns:local="clr-namespace:PCL"
-                   mc:Ignorable="d">
-    <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
-        <StackPanel Margin="25,10" x:Name="PanMain">
-            <Grid Margin="0,10,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="{DynamicResource Download.Bedrock.Title}" FontSize="20" FontWeight="Bold" />
-                    <TextBlock x:Name="LabHint" Text="{DynamicResource Download.Bedrock.Hint}" Margin="0,4,0,0"
-                               FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrushGray4}" />
-                </StackPanel>
-                <local:MyComboBox x:Name="ComboChannel" Grid.Column="1" Width="130" Height="30"
-                                  VerticalAlignment="Center" SelectionChanged="ComboChannel_SelectionChanged">
-                    <local:MyComboBoxItem Content="{DynamicResource Download.Bedrock.Channel.Release}" />
-                    <local:MyComboBoxItem Content="{DynamicResource Download.Bedrock.Channel.Preview}" />
-                    <local:MyComboBoxItem Content="{DynamicResource Download.Bedrock.Channel.Beta}" />
-                </local:MyComboBox>
-            </Grid>
-            <StackPanel x:Name="PanList" Margin="0,12,0,0" />
-        </StackPanel>
-    </local:MyScrollViewer>
+                   mc:Ignorable="d" PanScroll="{Binding ElementName=PanBack}">
+    <Grid>
+        <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
+            <StackPanel x:Name="PanMain" Margin="20,20,20,10" />
+        </local:MyScrollViewer>
+        <local:MyCard HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40,0" x:Name="PanLoad"
+                      UseAnimation="False" Visibility="Collapsed">
+            <local:MyLoading Text="{DynamicResource Download.Bedrock.Loading}" Margin="20,20,20,17"
+                             HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </local:MyCard>
+    </Grid>
 </local:MyPageRight>

@@ -1,11 +1,12 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json.Nodes;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using PCL.Core.App.Localization;
 using PCL.Network;
 using PCL.Network.Loaders;
@@ -13,13 +14,17 @@ using PCL.Network.Loaders;
 namespace PCL;
 
 /// <summary>
-///     下载页的 Bedrock 分类：按 正式版 / 预览版 / Beta 通道列出基岩版版本，并负责下载。
-///     排版与 Java 版的 <see cref="PageDownloadClient" /> 保持一致（标题 + 通道选择 + 卡片列表）。
+///     下载页的 Bedrock 分类，排版对齐 Java 组的下载页：
+///     顶部「最新版本」卡片（最新正式版 + 最新预览版），下面按通道分组的可折叠卡片。
 /// </summary>
 public partial class PageDownloadBedrock
 {
-    /// <summary>通道顺序与下拉框下标一致。</summary>
-    private static readonly string[] Channels = ["release", "preview", "beta"];
+    private static readonly (string Channel, string TitleKey)[] Sections =
+    [
+        ("release", "Download.Bedrock.Channel.Release"),
+        ("preview", "Download.Bedrock.Channel.Preview"),
+        ("beta", "Download.Bedrock.Channel.Beta")
+    ];
 
     private readonly HashSet<string> _downloading = new(StringComparer.OrdinalIgnoreCase);
     private JsonArray? _versions;
@@ -40,130 +45,154 @@ public partial class PageDownloadBedrock
                 ModBase.RunInUiWait(() => Apply(ModDownload.dlBedrockChannelListLoader.output));
             ModDownload.dlBedrockChannelListLoader.OnStateChangedUi += (_, state, _) =>
             {
-                if (state is ModBase.LoadState.Failed or ModBase.LoadState.Aborted)
-                    ShowHint(Lang.Text("Download.Bedrock.LoadFailed"), true);
+                if (state is ModBase.LoadState.Finished)
+                    ModBase.RunInUi(() => Apply(ModDownload.dlBedrockChannelListLoader.output));
+                else if (state is ModBase.LoadState.Failed or ModBase.LoadState.Aborted)
+                    ModBase.RunInUi(() => ShowHint(Lang.Text("Download.Bedrock.LoadFailed"), true));
             };
         }
 
-        ComboChannel.SelectedIndex = 0;
-        if (_versions is null)
-        {
-            ShowHint(Lang.Text("Download.Bedrock.Loading"));
-            ModDownload.dlBedrockChannelListLoader.Start();
-        }
-        else
+        if (ModDownload.dlBedrockChannelListLoader.output is not null)
         {
             Apply(ModDownload.dlBedrockChannelListLoader.output);
+            return;
         }
-    }
 
-    private void ComboChannel_SelectionChanged(object sender, SelectionChangedEventArgs e) => Render();
+        PanLoad.Visibility = Visibility.Visible;
+        ModDownload.dlBedrockChannelListLoader.Start();
+    }
 
     private void Apply(JsonObject? data)
     {
+        PanLoad.Visibility = Visibility.Collapsed;
         _versions = data?["versions"] as JsonArray;
-        Render();
-    }
+        PanMain.Children.Clear();
 
-    private void Render()
-    {
-        if (PanList is null) return;
-        PanList.Children.Clear();
         if (_versions is null || _versions.Count == 0)
         {
             ShowHint(Lang.Text("Download.Bedrock.Empty"), true);
             return;
         }
 
-        var channel = Channels[Math.Clamp(ComboChannel.SelectedIndex, 0, Channels.Length - 1)];
-        var items = _versions.OfType<JsonObject>()
-            .Where(v => ((string?)v["channel"] ?? "release") == channel)
-            .ToList();
-
-        if (items.Count == 0)
+        var all = _versions.OfType<JsonObject>().ToList();
+        PanMain.Children.Add(BuildLatestCard(all));
+        foreach (var (channel, titleKey) in Sections)
         {
-            ShowHint(Lang.Text("Download.Bedrock.Empty"), true);
-            return;
-        }
-
-        // 按系列分组（与基岩版页面一致），系列内保持数据源的降序
-        foreach (var group in items.GroupBy(v => (string?)v["series"] ?? ""))
-        {
-            var card = new MyCard
-            {
-                Title = $"{group.Key}  ({group.Count()})",
-                Margin = new Thickness(0, 0, 0, 15)
-            };
-            var stack = new StackPanel { Margin = new Thickness(15, 36, 15, 0) };
-            foreach (var version in group)
-                stack.Children.Add(BuildRow(version));
-            card.Children.Add(stack);
-            PanList.Children.Add(card);
+            var items = all.Where(v => ((string?)v["channel"] ?? "release") == channel).ToList();
+            if (items.Count == 0) continue;
+            PanMain.Children.Add(BuildSection(Lang.Text(titleKey), items));
         }
     }
 
+    /// <summary>顶部「最新版本」卡片：沿用 Java 下载页的 MyCard + StackInstall 写法。</summary>
+    private FrameworkElement BuildLatestCard(List<JsonObject> all)
+    {
+        var card = new MyCard { Title = Lang.Text("Download.Bedrock.LatestTitle"), Margin = new Thickness(0d, 0d, 0d, 15d) };
+        var latest = new List<JsonObject>();
+        var release = all.FirstOrDefault(v => ((string?)v["channel"] ?? "") == "release");
+        if (release is not null)
+        {
+            var item = (JsonObject)release.DeepClone();
+            item["lore"] = Lang.Text("Download.Bedrock.Latest.Release") + "，" +
+                           Lang.Text("Download.Bedrock.PublishedAt", (string?)release["releaseDate"] ?? "");
+            latest.Add(item);
+        }
+
+        var preview = all.FirstOrDefault(v => ((string?)v["channel"] ?? "") == "preview");
+        if (preview is not null)
+        {
+            var item = (JsonObject)preview.DeepClone();
+            item["lore"] = Lang.Text("Download.Bedrock.Latest.Preview") + "，" +
+                           Lang.Text("Download.Bedrock.PublishedAt", (string?)preview["releaseDate"] ?? "");
+            latest.Add(item);
+        }
+
+        var panInfo = new StackPanel
+        {
+            Margin = new Thickness(20d, MyCard.SwapedHeight, 18d, 0d), VerticalAlignment = VerticalAlignment.Top,
+            RenderTransform = new TranslateTransform(0d, 0d), Tag = latest
+        };
+
+        void PutMethod(StackPanel stack)
+        {
+            foreach (var item in (IEnumerable)stack.Tag)
+                stack.Children.Add(BuildRow((JsonObject)item));
+        }
+
+        MyCard.StackInstall(ref panInfo, PutMethod);
+        card.Children.Add(panInfo);
+        return card;
+    }
+
+    /// <summary>按通道分组的折叠卡片，折叠机制与 Java 下载页一致（SwapControl + IsSwapped）。</summary>
+    private FrameworkElement BuildSection(string title, List<JsonObject> items)
+    {
+        var card = new MyCard { Title = $"{title} ({items.Count})", Margin = new Thickness(0d, 0d, 0d, 15d) };
+        var stack = new StackPanel
+        {
+            Margin = new Thickness(20d, MyCard.SwapedHeight, 18d, 0d), VerticalAlignment = VerticalAlignment.Top,
+            RenderTransform = new TranslateTransform(0d, 0d), Tag = items
+        };
+
+        void PutMethod(StackPanel target)
+        {
+            foreach (var item in (IEnumerable)target.Tag)
+                target.Children.Add(BuildRow((JsonObject)item));
+        }
+
+        card.Children.Add(stack);
+        card.SwapControl = stack;
+        card.InstallMethod = PutMethod;
+        card.IsSwapped = true;
+        return card;
+    }
     private FrameworkElement BuildRow(JsonObject version)
     {
         var id = (string?)version["id"] ?? "";
+        var channel = (string?)version["channel"] ?? "release";
         var buildType = (string?)version["buildType"] ?? "UWP";
-        var available = (bool?)version["available"] ?? true;
         var date = (string?)version["releaseDate"] ?? "";
+        var lore = (string?)version["lore"];
 
-        var grid = new Grid { Height = 36 };
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-        var info = new StackPanel { VerticalAlignment = VerticalAlignment.Center, Orientation = Orientation.Horizontal };
-        info.Children.Add(new TextBlock
+        // 与 Java 下载页一致：正式版草方块、预览版命令方块、Beta 金块
+        var logo = channel switch
         {
-            Text = id, FontSize = 13, VerticalAlignment = VerticalAlignment.Center
-        });
-        info.Children.Add(new TextBlock
-        {
-            Text = $"  {buildType}", FontSize = 11, VerticalAlignment = VerticalAlignment.Center,
-            Foreground = (System.Windows.Media.Brush)FindResource("ColorBrushGray4")
-        });
-        if (date.Length > 0)
-            info.Children.Add(new TextBlock
-            {
-                Text = $"  {date}", FontSize = 11, VerticalAlignment = VerticalAlignment.Center,
-                Foreground = (System.Windows.Media.Brush)FindResource("ColorBrushGray4")
-            });
-        Grid.SetColumn(info, 0);
-        grid.Children.Add(info);
-
-        var button = new MyButton
-        {
-            Height = 26, Width = 74, Text = Lang.Text("Download.Bedrock.Download"), Tag = id,
-            Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center
+            "preview" => ModBase.pathImage + "Blocks/CommandBlock.png",
+            "beta" => ModBase.pathImage + "Blocks/GoldBlock.png",
+            _ => ModBase.pathImage + "Blocks/Grass.png"
         };
-        button.Click += (_, _) => StartDownload(id);
-        if (_downloading.Contains(id)) button.Text = Lang.Text("Download.Bedrock.Downloading");
-        if (!available)
+
+        var info = lore is not null
+            ? lore
+            : (buildType + (date.Length > 0 ? " | " + date : ""));
+
+        var item = new MyListItem
         {
-            button.IsEnabled = false;
-            button.Text = Lang.Text("Download.Bedrock.Unavailable");
-        }
-
-        Grid.SetColumn(button, 2);
-        grid.Children.Add(button);
-        return grid;
+            Logo = logo,
+            SnapsToDevicePixels = true,
+            Title = id,
+            Info = info,
+            Height = 42d,
+            Type = MyListItem.CheckType.Clickable,
+            Tag = id
+        };
+        item.Click += (_, _) => StartDownload(id);
+        return item;
     }
-
     private void ShowHint(string text, bool isError = false)
     {
-        PanList.Children.Clear();
-        PanList.Children.Add(new TextBlock
+        PanLoad.Visibility = Visibility.Collapsed;
+        PanMain.Children.Clear();
+        PanMain.Children.Add(new TextBlock
         {
             Text = text,
             Margin = new Thickness(4, 8, 4, 0),
             TextWrapping = TextWrapping.Wrap,
-            Foreground = (System.Windows.Media.Brush)FindResource(isError ? "ColorBrushRedLight" : "ColorBrushGray4")
+            Foreground = new SolidColorBrush(isError ? Color.FromRgb(0xD9, 0x53, 0x4F) : Color.FromRgb(0x8A, 0x8A, 0x8A))
         });
     }
 
-    /// <summary>下载指定基岩版版本到本地版本目录；安装仍在「启动 → 基岩版」中完成。</summary>
+    /// <summary>下载指定版本到本地版本目录；安装仍在「启动 → 基岩版」中完成。</summary>
     private async void StartDownload(string versionId)
     {
         if (_downloading.Contains(versionId)) return;
@@ -220,5 +249,5 @@ public partial class PageDownloadBedrock
         }
     }
 
-    private void Refresh() => Render();
+    private void Refresh() => Apply(ModDownload.dlBedrockChannelListLoader.output);
 }

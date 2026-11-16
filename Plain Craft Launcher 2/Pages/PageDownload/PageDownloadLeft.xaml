@@ -6,21 +6,12 @@
                           Style="{StaticResource ScrollViewerFullMargin}">
         <StackPanel Margin="0,12,0,0" Name="PanItem">
 
-            <local:MyListItem x:Name="ItemInstall" Checked="True" IsScaleAnimationEnabled="False" Type="RadioBox"
-                              Check="PageCheck"
+            <local:MyListItem x:Name="ItemInstall" Checked="True" Type="RadioBox" Check="PageCheck"
                               Tag="1" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
-                              Title="{DynamicResource Download.Left.Minecraft}"
-                              SvgIcon="lucide/boxes">
-                <local:MyListItem.Buttons>
-                    <x:Array Type="{x:Type local:MyIconButton}">
-                        <local:MyIconButton Tag="1" ToolTip="{DynamicResource Common.Action.Refresh}"
-                                            ToolTipService.Placement="Right" Click="RefreshButton_Click"
-                                            ToolTipService.InitialShowDelay="200" ToolTipService.VerticalOffset="-1"
-                                            LogoScale="0.85"
-                                            SvgIcon="lucide/refresh-cw" />
-                    </x:Array>
-                </local:MyListItem.Buttons>
-            </local:MyListItem>
+                              Title="{DynamicResource Download.Left.Java}" LogoScale="0.98" SvgIcon="lucide/boxes" />
+            <local:MyListItem x:Name="ItemBedrock" Type="RadioBox" Check="PageCheck"
+                              Tag="24" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
+                              Title="{DynamicResource Download.Left.BedrockVersion}" LogoScale="0.98" SvgIcon="lucide/box" />
 
             <TextBlock Text="{DynamicResource Download.Left.CommunityResources}" Margin="13,10,5,4" Opacity="0.6"
                        FontSize="12" />
@@ -215,38 +206,6 @@
             </local:MyListItem>
 
             <TextBlock Text="{DynamicResource Download.Left.Installation}" Margin="13,10,5,4" Opacity="0.6" FontSize="12" />
-            <local:MyListItem x:Name="ItemClient" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="9"
-                              Check="PageCheck"
-                              MinPaddingRight="35" Height="36" VerticalAlignment="Top"
-                              Title="{DynamicResource Download.Left.Java}"
-                              LogoScale="0.98"
-                              SvgIcon="lucide/package">
-                <local:MyListItem.Buttons>
-                    <x:Array Type="{x:Type local:MyIconButton}">
-                        <local:MyIconButton Tag="9" ToolTip="{DynamicResource Common.Action.Refresh}"
-                                            ToolTipService.Placement="Right" Click="RefreshButton_Click"
-                                            ToolTipService.InitialShowDelay="200" ToolTipService.VerticalOffset="-1"
-                                            LogoScale="0.85"
-                                            SvgIcon="lucide/refresh-cw" />
-                    </x:Array>
-                </local:MyListItem.Buttons>
-            </local:MyListItem>
-            <local:MyListItem x:Name="ItemBedrock" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="24"
-                              Check="PageCheck"
-                              MinPaddingRight="35" Height="36" VerticalAlignment="Top"
-                              Title="{DynamicResource Download.Left.BedrockVersion}"
-                              LogoScale="0.98"
-                              SvgIcon="lucide/box">
-                <local:MyListItem.Buttons>
-                    <x:Array Type="{x:Type local:MyIconButton}">
-                        <local:MyIconButton Tag="24" ToolTip="{DynamicResource Common.Action.Refresh}"
-                                            ToolTipService.Placement="Right" Click="RefreshButton_Click"
-                                            ToolTipService.InitialShowDelay="200" ToolTipService.VerticalOffset="-1"
-                                            LogoScale="0.85"
-                                            SvgIcon="lucide/refresh-cw" />
-                    </x:Array>
-                </local:MyListItem.Buttons>
-            </local:MyListItem>
             <local:MyListItem x:Name="ItemOptiFine" Type="RadioBox" IsScaleAnimationEnabled="False" Tag="10"
                               Check="PageCheck"
                               MinPaddingRight="35" Height="36" VerticalAlignment="Top"

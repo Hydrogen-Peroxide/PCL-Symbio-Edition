@@ -46,6 +46,7 @@
     <sys:String x:Key="Bedrock.Account.Refresh">Refresh account info</sys:String>
     <sys:String x:Key="Bedrock.Account.SignIn">Sign in to Xbox</sys:String>
     <sys:String x:Key="Bedrock.Account.SignInHint">Please sign in to a Microsoft account first</sys:String>
+    <sys:String x:Key="Bedrock.Account.SwitchShort">Switch</sys:String>
     <sys:String x:Key="Bedrock.Account.Switch">Switch Xbox account</sys:String>
     <sys:String x:Key="Bedrock.Account.SwitchHint">Sign out and sign in with another account in the Xbox app — this page will refresh automatically; re-enter the game to switch</sys:String>
     <sys:String x:Key="Bedrock.Account.Waiting">Waiting for sign-in…</sys:String>
@@ -68,6 +69,14 @@
     <sys:String x:Key="Bedrock.Download.Title">Download Bedrock</sys:String>
     <sys:String x:Key="Bedrock.Editor.Failed">Could not open the Editor. Make sure Bedrock Retail or Preview is installed, or open it from the Creator Tools tab in the Minecraft Launcher.</sys:String>
     <sys:String x:Key="Bedrock.Editor.NotInstalled">Bedrock was not detected. Download and install it on the right before opening the Editor.</sys:String>
+    <sys:String x:Key="Bedrock.Instance.SelectButton">Select instance</sys:String>
+    <sys:String x:Key="Bedrock.Instance.Select">Select a Bedrock instance</sys:String>
+    <sys:String x:Key="Bedrock.Instance.None">No Bedrock instance installed yet</sys:String>
+    <sys:String x:Key="Bedrock.Instance.Selected">Instance selected: {0}</sys:String>
+    <sys:String x:Key="Bedrock.Instance.LoaderTitle">Loader</sys:String>
+    <sys:String x:Key="Bedrock.Instance.Settings">Instance settings</sys:String>
+    <sys:String x:Key="Bedrock.Instance.Loader">Choose the loader for "{0}"</sys:String>
+    <sys:String x:Key="Bedrock.Instance.LoaderSaved">Loader saved for "{0}"</sys:String>
     <sys:String x:Key="Bedrock.Editor.Open">Open Bedrock Editor</sys:String>
     <sys:String x:Key="Bedrock.Editor.Title">Bedrock Editor</sys:String>
     <sys:String x:Key="Bedrock.Filter.All">All</sys:String>
@@ -956,6 +965,10 @@
     <sys:String x:Key="Download.Bedrock.Channel.Release">Release</sys:String>
     <sys:String x:Key="Download.Bedrock.Channel.Preview">Preview</sys:String>
     <sys:String x:Key="Download.Bedrock.Channel.Beta">Beta</sys:String>
+    <sys:String x:Key="Download.Bedrock.LatestTitle">Latest versions</sys:String>
+    <sys:String x:Key="Download.Bedrock.Latest.Release">Latest release</sys:String>
+    <sys:String x:Key="Download.Bedrock.Latest.Preview">Latest preview</sys:String>
+    <sys:String x:Key="Download.Bedrock.PublishedAt">released {0}</sys:String>
     <sys:String x:Key="Download.Bedrock.Loading">Loading version list…</sys:String>
     <sys:String x:Key="Download.Bedrock.LoadFailed">Failed to load the Bedrock version list</sys:String>
     <sys:String x:Key="Download.Bedrock.Empty">No versions in this channel</sys:String>

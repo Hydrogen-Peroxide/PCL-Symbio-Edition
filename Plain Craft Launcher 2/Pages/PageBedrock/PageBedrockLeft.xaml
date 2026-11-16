@@ -10,81 +10,48 @@
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="20" />
         </Grid.RowDefinitions>
         <Grid.RenderTransform>
             <ScaleTransform />
         </Grid.RenderTransform>
 
-        <!-- 账号与快捷操作 -->
-        <local:MyScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Disabled"
+        <!-- 账号与状态（可滚动） -->
+        <local:MyScrollViewer Grid.Row="0" VerticalContentAlignment="Center" HorizontalScrollBarVisibility="Disabled"
                               VerticalScrollBarVisibility="Auto" Margin="20,0,10,0"
                               Style="{StaticResource ScrollViewerFullMargin}">
-            <StackPanel x:Name="PanSide" Margin="0,12,0,0">
-
-                <!-- 当前 Xbox 账号 -->
-                <Border Background="{DynamicResource ColorBrushTransparentBackground}" CornerRadius="5" Padding="12,10">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="1*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Grid Grid.Column="0" Width="40" Height="40" VerticalAlignment="Center">
+            <Grid Margin="0,52,0,0">
+                <StackPanel x:Name="PanSide" VerticalAlignment="Center">
+                <!-- 账号：大头像居中 + 名称 + 副标题，与 Java 版一致 -->
+                <Grid Margin="0,52,0,0">
+                    <StackPanel HorizontalAlignment="Center">
+                        <Grid Width="64" Height="64" HorizontalAlignment="Center">
                             <Ellipse x:Name="ShapeAvatar" Fill="{DynamicResource ColorBrush3}" />
-                            <TextBlock x:Name="LabAvatar" Text="?" FontSize="17" FontWeight="Bold"
+                            <TextBlock x:Name="LabAvatar" Text="?" FontSize="26" FontWeight="Bold"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
                                        Foreground="{DynamicResource ColorBrushWhite}" />
                         </Grid>
-                        <StackPanel Grid.Column="1" Margin="10,0,6,0" VerticalAlignment="Center">
-                            <TextBlock x:Name="LabGamertag" Text="{DynamicResource Bedrock.Account.Loading}" FontSize="14" FontWeight="Bold"
-                                       TextTrimming="CharacterEllipsis" />
-                            <TextBlock x:Name="LabAccountMail" Text="" FontSize="11" Margin="0,2,0,0"
-                                       TextTrimming="CharacterEllipsis"
-                                       Foreground="{DynamicResource ColorBrushGray3}" />
-                        </StackPanel>
-                        <local:MyIconButton Grid.Column="2" x:Name="BtnRefreshAccount"
-                                            SvgIcon="lucide/refresh-cw" LogoScale="0.85"
-                                            VerticalAlignment="Top"
-                                            ToolTip="{DynamicResource Bedrock.Account.Refresh}"
-                                            ToolTipService.Placement="Left"
-                                            Click="RefreshAccount_Click" />
-                    </Grid>
-                </Border>
-                <TextBlock x:Name="LabAccountHint" Margin="3,6,3,0" FontSize="10.5" TextWrapping="Wrap"
-                           Text="{DynamicResource Bedrock.Account.Hint}"
-                           Foreground="{DynamicResource ColorBrushGray4}" />
-                <local:MyButton x:Name="BtnSwitchAccount" Height="32" Margin="0,8,0,0"
-                                Text="{DynamicResource Bedrock.Account.Switch}" Click="BtnSwitchAccount_Click" />
-
-                <!-- 快捷操作 -->
-
-                <!-- 基岩版状态 -->
-                <TextBlock Text="{DynamicResource Bedrock.Status.Title}" Margin="13,10,5,4" Opacity="0.6" FontSize="12" />
-                <Border Background="{DynamicResource ColorBrushTransparentBackground}" CornerRadius="5" Padding="12,10">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Ellipse x:Name="ShapeStatusDot" Width="8" Height="8" Margin="0,0,7,0"
-                                     VerticalAlignment="Center" Fill="{DynamicResource ColorBrushGray4}" />
-                            <TextBlock x:Name="LabStatus" Text="{DynamicResource Bedrock.Status.Detecting}" FontSize="13" FontWeight="Bold" />
-                        </StackPanel>
-                        <TextBlock x:Name="LabDetail" Text="" FontSize="10.5" Margin="15,4,0,0"
-                                   TextWrapping="Wrap" MouseLeftButtonUp="LabDetail_Click"
+                        <TextBlock x:Name="LabGamertag" Margin="0,10,0,0" HorizontalAlignment="Center"
+                                   Text="{DynamicResource Bedrock.Account.Loading}" FontSize="18" FontWeight="Bold"
+                                   TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="LabAccountMail" Margin="0,3,0,0" HorizontalAlignment="Center"
+                                   Text="" FontSize="12.5" TextTrimming="CharacterEllipsis"
                                    Foreground="{DynamicResource ColorBrushGray4}" />
                     </StackPanel>
-                </Border>
-                <!-- 实例选择 / 实例设置 -->
-                <Grid Margin="0,10,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="1*" />
-                        <ColumnDefinition Width="10" />
-                        <ColumnDefinition Width="1*" />
-                    </Grid.ColumnDefinitions>
-                    <local:MyButton x:Name="BtnInstance" Grid.Column="0" Height="32"
-                                    Text="{DynamicResource Bedrock.Instance.Select}" Click="BtnInstance_Click" />
-                    <local:MyButton x:Name="BtnInstanceSettings" Grid.Column="2" Height="32"
-                                    Text="{DynamicResource Bedrock.Instance.Settings}" Click="BtnInstanceSettings_Click" />
-                </Grid>            </StackPanel>
+                </Grid>
+
+                <local:MyIconButton x:Name="BtnSwitchAccount" Height="24" Margin="0,10,0,0" HorizontalAlignment="Center" SvgIcon="lucide/arrow-left-right" ToolTip="{DynamicResource Bedrock.Account.SwitchShort}" ToolTipService.Placement="Center" ToolTipService.VerticalOffset="35" ToolTipService.InitialShowDelay="50" Click="BtnSwitchAccount_Click" />
+
+
+                <TextBlock Visibility="Collapsed" x:Name="LabAccountHint" Margin="3,8,3,0" FontSize="10.5" TextWrapping="Wrap"
+                           Text="{DynamicResource Bedrock.Account.Hint}"
+                           Foreground="{DynamicResource ColorBrushGray4}" />
+                <local:MyIconButton x:Name="BtnRefreshAccount" Height="26" Margin="0,8,0,0" HorizontalAlignment="Center"
+                                    SvgIcon="lucide/refresh-cw" LogoScale="0.85"
+                                    ToolTip="{DynamicResource Bedrock.Account.Refresh}" Click="RefreshAccount_Click" />
+            </StackPanel>
+            </Grid>
         </local:MyScrollViewer>
 
         <!-- 启动按钮 -->
@@ -96,7 +63,7 @@
                 </TransformGroup>
             </Grid.RenderTransform>
             <local:MyButton x:Name="BtnLaunch" Height="54" Margin="20,0"
-                            Text="{DynamicResource Bedrock.Action.Launch}" ColorType="Highlight"
+                            Text="{DynamicResource Bedrock.Action.Launch}"
                             Click="BtnLaunch_Click"
                             Padding="30,0,30,15" />
             <TextBlock x:Name="LabVersionText" Text="{DynamicResource Bedrock.Status.NotSelected}" Margin="35,0,35,10"
@@ -105,15 +72,43 @@
                        TextTrimming="CharacterEllipsis"
                        FontSize="11" Foreground="{DynamicResource ColorBrushGray3}" />
         </Grid>
-    </Grid>
+
+        <!-- 实例选择 / 实例设置：与 Java 版底部同款并排两个按钮 -->
+        <Grid Grid.Row="2" Margin="20,12,20,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <local:MyButton x:Name="BtnInstance" Grid.Column="0" Height="32"
+                            Text="{DynamicResource Bedrock.Instance.SelectButton}" Click="BtnInstance_Click" />
+            <local:MyButton x:Name="BtnInstanceSettings" Grid.Column="2" Height="32"
+                            Text="{DynamicResource Bedrock.Instance.Settings}" Click="BtnInstanceSettings_Click" />
+        </Grid>
+
         <!-- 实例设置浮层：加载器切换 + 原有快捷操作 -->
-        <Border x:Name="PanInstanceSettings" Grid.RowSpan="3" Background="#AA000000" Visibility="Collapsed" Margin="-1">
+        <Border x:Name="PanInstanceSettings" Grid.RowSpan="4" Background="#AA000000" Visibility="Collapsed" Margin="-1">
             <Border Background="{DynamicResource ColorBrushBackground}" CornerRadius="6" Margin="14" Padding="14">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel>
                         <TextBlock Text="{DynamicResource Bedrock.Instance.Settings}" FontSize="16" FontWeight="Bold" />
                         <TextBlock x:Name="LabSettingsTarget" Margin="0,4,0,10" FontSize="11"
                                    Foreground="{DynamicResource ColorBrushGray4}" TextWrapping="Wrap" />
+                    <!-- 基岩版状态 -->
+                <TextBlock Text="{DynamicResource Bedrock.Status.Title}" Margin="13,12,5,4" Opacity="0.6" FontSize="12" />
+                <Border Background="{DynamicResource ColorBrushTransparentBackground}" CornerRadius="5" Padding="12,10">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse x:Name="ShapeStatusDot" Width="8" Height="8" Margin="0,0,7,0"
+                                     VerticalAlignment="Center" Fill="{DynamicResource ColorBrushGray4}" />
+                            <TextBlock x:Name="LabStatus" Text="{DynamicResource Bedrock.Status.Detecting}"
+                                       FontSize="13" FontWeight="Bold" />
+                        </StackPanel>
+                        <TextBlock x:Name="LabDetail" Text="" FontSize="10.5" Margin="15,4,0,0"
+                                   TextWrapping="Wrap" MouseLeftButtonUp="LabDetail_Click"
+                                   Foreground="{DynamicResource ColorBrushGray4}" />
+                    </StackPanel>
+                </Border>
                         <TextBlock Text="{DynamicResource Bedrock.Instance.LoaderTitle}" FontSize="12" Opacity="0.6" Margin="0,0,0,6" />
                         <local:MyRadioBox x:Name="RadioVanilla" Text="{DynamicResource Bedrock.Loader.Vanilla}" Margin="0,0,0,6" />
                         <local:MyRadioBox x:Name="RadioLeviLamina" Text="{DynamicResource Bedrock.Loader.LeviLamina}" Margin="0,0,0,6" />
@@ -137,4 +132,5 @@
                 </ScrollViewer>
             </Border>
         </Border>
+    </Grid>
 </local:MyPageLeft>

@@ -88,7 +88,7 @@ public partial class PageBedrockLeft
 
         // 仍在等待登录时保留等待提示，账号变化后由轮询收尾
         if (_signInWatch is null) return;
-        BtnSwitchAccount.Text = Lang.Text("Bedrock.Account.Waiting");
+        BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.Waiting");
         LabAccountHint.Text = Lang.Text("Bedrock.Account.WaitingSignIn");
     }
 
@@ -121,6 +121,7 @@ public partial class PageBedrockLeft
     /// </summary>
     private void RefreshAccount()
     {
+        LabAccountHint.Visibility = Visibility.Collapsed;
         var account = DetectXboxAccount();
         ApplyAvatar(account?.Gamertag ?? account?.Xuid);
         if (account is null)
@@ -132,7 +133,7 @@ public partial class PageBedrockLeft
                 LabAvatar.Text = GetAvatarText(msa);
                 LabGamertag.Text = Lang.Text("Bedrock.Account.MsaOnly");
                 LabAccountMail.Text = msa;
-                BtnSwitchAccount.Text = Lang.Text("Bedrock.Account.SignIn");
+                BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.SignIn");
                 LabAccountHint.Text = Lang.Text("Bedrock.Account.MsaOnlyHint", msa);
                 return;
             }
@@ -140,7 +141,7 @@ public partial class PageBedrockLeft
             LabAvatar.Text = "?";
             LabGamertag.Text = Lang.Text("Bedrock.Account.NotLoggedIn");
             LabAccountMail.Text = Lang.Text("Bedrock.Account.SignInHint");
-            BtnSwitchAccount.Text = Lang.Text("Bedrock.Account.SignIn");
+            BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.SignIn");
             LabAccountHint.Text = GetInstalledXboxAppAumid() is null
                 ? Lang.Text("Bedrock.Account.XboxNotInstalledHint")
                 : Lang.Text("Bedrock.Account.Hint");
@@ -156,7 +157,7 @@ public partial class PageBedrockLeft
             LabAccountMail.Text = account.Xuid is null
                 ? Lang.Text("Bedrock.Account.MicrosoftAccount")
                 : $"XUID {account.Xuid}";
-            BtnSwitchAccount.Text = Lang.Text("Bedrock.Account.Switch");
+            BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.Switch");
             LabAccountHint.Text = Lang.Text("Bedrock.Account.XboxOnlyHint");
             return;
         }
@@ -166,7 +167,7 @@ public partial class PageBedrockLeft
         LabAccountMail.Text = string.IsNullOrWhiteSpace(account.Mail)
             ? Lang.Text("Bedrock.Account.MicrosoftAccount")
             : account.Mail;
-        BtnSwitchAccount.Text = Lang.Text("Bedrock.Account.Switch");
+        BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.Switch");
         LabAccountHint.Text = Lang.Text("Bedrock.Account.SwitchHint");
     }
 
@@ -180,6 +181,7 @@ public partial class PageBedrockLeft
         if (path is null)
         {
             ShapeAvatar.Fill = (System.Windows.Media.Brush)FindResource("ColorBrush3");
+            LabAvatar.Visibility = Visibility.Visible;
             return;
         }
 
@@ -196,12 +198,15 @@ public partial class PageBedrockLeft
             {
                 Stretch = System.Windows.Media.Stretch.UniformToFill
             };
-            ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug);
+            
+            LabAvatar.Visibility = Visibility.Collapsed;
+ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug);
         }
         catch (Exception ex)
         {
             ModBase.Log(ex, "[Bedrock] 载入系统头像失败，回退为首字母", ModBase.LogLevel.Debug);
             ShapeAvatar.Fill = (System.Windows.Media.Brush)FindResource("ColorBrush3");
+            LabAvatar.Visibility = Visibility.Visible;
         }
     }
 
@@ -416,8 +421,9 @@ public partial class PageBedrockLeft
         RefreshStatus();
     }
 
-    private void BtnSwitchAccount_Click(object sender, MouseButtonEventArgs e)
+    private void BtnSwitchAccount_Click(object sender, EventArgs e)
     {
+        LabAccountHint.Visibility = Visibility.Visible;
         // 打开应用前先记下当前账号，避免 Xbox 应用瞬间完成登录时被当成“没有变化”
         var baseline = AccountSignature(DetectXboxAccount());
 
@@ -473,7 +479,7 @@ public partial class PageBedrockLeft
         var cts = new CancellationTokenSource();
         _signInWatch = cts;
 
-        BtnSwitchAccount.Text = Lang.Text("Bedrock.Account.Waiting");
+        BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.Waiting");
         LabAccountHint.Text = Lang.Text("Bedrock.Account.WaitingSignIn");
         ModBase.Log("[Bedrock] 已打开 Xbox 应用，开始等待账号变化");
 

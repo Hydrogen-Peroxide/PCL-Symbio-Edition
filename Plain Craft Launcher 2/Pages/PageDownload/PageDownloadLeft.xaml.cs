@@ -131,7 +131,7 @@ public partial class PageDownloadLeft : IRefreshable
             case FormMain.PageSubType.DownloadClient:
             {
                 ModDownload.dlClientListLoader.Start(isForceRestart: true);
-                ItemClient.Checked = true;
+                ItemInstall.Checked = true;
                 break;
             }
             case FormMain.PageSubType.DownloadOptiFine:
@@ -291,7 +291,7 @@ public partial class PageDownloadLeft : IRefreshable
         ItemShader.Check += PageCheck;
         ItemWorld.Check += PageCheck;
         ItemFavorites.Check += PageCheck;
-        ItemClient.Check += PageCheck;
+        ItemInstall.Check += PageCheck;
         ItemOptiFine.Check += PageCheck;
         ItemForge.Check += PageCheck;
         ItemNeoForge.Check += PageCheck;

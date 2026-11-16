@@ -46,6 +46,7 @@
     <sys:String x:Key="Bedrock.Account.Refresh">刷新账号信息</sys:String>
     <sys:String x:Key="Bedrock.Account.SignIn">登录 Xbox 账号</sys:String>
     <sys:String x:Key="Bedrock.Account.SignInHint">请先登录 Microsoft 账号</sys:String>
+    <sys:String x:Key="Bedrock.Account.SwitchShort">切换账号</sys:String>
     <sys:String x:Key="Bedrock.Account.Switch">切换 Xbox 账号</sys:String>
     <sys:String x:Key="Bedrock.Account.SwitchHint">在 Xbox 应用中退出并登录其他账号，完成后会自动刷新；重新进入游戏即可切换</sys:String>
     <sys:String x:Key="Bedrock.Account.Waiting">等待登录…</sys:String>
@@ -68,6 +69,14 @@
     <sys:String x:Key="Bedrock.Download.Title">下载基岩版</sys:String>
     <sys:String x:Key="Bedrock.Editor.Failed">打开编辑器失败，请确认已安装基岩版正式版或预览版，也可以从 Minecraft 启动器的 Creator Tools 中打开。</sys:String>
     <sys:String x:Key="Bedrock.Editor.NotInstalled">未检测到基岩版，请先在右侧下载并安装后再打开编辑器。</sys:String>
+    <sys:String x:Key="Bedrock.Instance.SelectButton">实例选择</sys:String>
+    <sys:String x:Key="Bedrock.Instance.Select">选择要操作的基岩版实例</sys:String>
+    <sys:String x:Key="Bedrock.Instance.None">还没有安装任何基岩版实例</sys:String>
+    <sys:String x:Key="Bedrock.Instance.Selected">已选择实例：{0}</sys:String>
+    <sys:String x:Key="Bedrock.Instance.LoaderTitle">加载器</sys:String>
+    <sys:String x:Key="Bedrock.Instance.Settings">实例设置</sys:String>
+    <sys:String x:Key="Bedrock.Instance.Loader">选择「{0}」的加载器</sys:String>
+    <sys:String x:Key="Bedrock.Instance.LoaderSaved">「{0}」的加载器设置已保存</sys:String>
     <sys:String x:Key="Bedrock.Editor.Open">打开基岩版编辑器</sys:String>
     <sys:String x:Key="Bedrock.Editor.Title">基岩版编辑器</sys:String>
     <sys:String x:Key="Bedrock.Filter.All">全部</sys:String>
@@ -956,6 +965,10 @@
     <sys:String x:Key="Download.Bedrock.Channel.Release">正式版</sys:String>
     <sys:String x:Key="Download.Bedrock.Channel.Preview">预览版</sys:String>
     <sys:String x:Key="Download.Bedrock.Channel.Beta">Beta 版</sys:String>
+    <sys:String x:Key="Download.Bedrock.LatestTitle">最新版本</sys:String>
+    <sys:String x:Key="Download.Bedrock.Latest.Release">最新正式版</sys:String>
+    <sys:String x:Key="Download.Bedrock.Latest.Preview">最新预览版</sys:String>
+    <sys:String x:Key="Download.Bedrock.PublishedAt">发布于 {0}</sys:String>
     <sys:String x:Key="Download.Bedrock.Loading">正在获取版本列表……</sys:String>
     <sys:String x:Key="Download.Bedrock.LoadFailed">获取基岩版版本列表失败</sys:String>
     <sys:String x:Key="Download.Bedrock.Empty">该通道暂时没有版本</sys:String>
