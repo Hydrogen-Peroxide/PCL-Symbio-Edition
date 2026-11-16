@@ -408,65 +408,23 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
     private static string GetAvatarText(string name) =>
         name.Length > 1 && char.IsHighSurrogate(name[0]) ? name[..2] : name[..1].ToUpperInvariant();
 
-    #region 启动中浮层
+    #region 启动中面板
 
-    /// <summary>显示启动中浮层（与 Java 版启动页同款）。</summary>
+    // 直接复用 Java 版同款启动面板 CompLaunchingStatus，这里只做线程与文案转接
     public void ShowLaunchOverlay(string? name, bool portable)
     {
-        RunOnUi(() =>
-        {
-            LabLaunchingTitle.Text = Lang.Text("Bedrock.Launching.Title");
-            LabLaunchingName.Text = name ?? "";
-            LabLaunchingStage.Text = "—";
-            LabLaunchingMethod.Text = Lang.Text(portable
-                ? "Bedrock.Launching.Method.Portable"
-                : "Bedrock.Launching.Method.Store");
-            SetLaunchOverlayProgress(0.02d);
-            PanLaunching.Visibility = Visibility.Visible;
-        });
+        RunOnUi(() => PanLaunching.Show(Lang.Text("Bedrock.Launching.Title"), name,
+            Lang.Text(portable ? "Bedrock.Launching.Method.Portable" : "Bedrock.Launching.Method.Store")));
     }
 
-    /// <summary>推进进度条与「当前步骤」。</summary>
     public void SetLaunchOverlayProgress(double progress, string? stage = null)
     {
-        RunOnUi(() =>
-        {
-            var value = Math.Clamp(progress, 0d, 1d);
-            ColumnLaunchingDone.Width = new GridLength(value, GridUnitType.Star);
-            ColumnLaunchingRest.Width = new GridLength(Math.Max(0.0001d, 1d - value), GridUnitType.Star);
-            if (!string.IsNullOrWhiteSpace(stage)) LabLaunchingStage.Text = stage;
-        });
+        RunOnUi(() => PanLaunching.SetProgress(progress, stage));
     }
 
-    /// <summary>结束启动：成功时先显示「已启动游戏」再自动收起，失败时立即收起。</summary>
     public void EndLaunchOverlay(bool success, string? stage = null)
     {
-        RunOnUi(() =>
-        {
-            if (!string.IsNullOrWhiteSpace(stage)) LabLaunchingStage.Text = stage;
-
-            if (!success)
-            {
-                PanLaunching.Visibility = Visibility.Collapsed;
-                return;
-            }
-
-            LabLaunchingTitle.Text = Lang.Text("Bedrock.Launching.Started");
-            SetLaunchOverlayProgress(1d);
-            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4d) };
-            timer.Tick += (_, _) =>
-            {
-                timer.Stop();
-                PanLaunching.Visibility = Visibility.Collapsed;
-            };
-            timer.Start();
-        });
-    }
-
-    private void BtnLaunchingCancel_Click(object sender, MouseButtonEventArgs e)
-    {
-        // 只收起浮层，游戏进程仍会继续启动
-        PanLaunching.Visibility = Visibility.Collapsed;
+        RunOnUi(() => PanLaunching.Finish(success, Lang.Text("Bedrock.Launching.Started"), stage));
     }
 
     private void RunOnUi(Action action)
