@@ -3,6 +3,9 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:local="clr-namespace:PCL"
       RenderTransformOrigin="0.5,0.5" Visibility="Collapsed" Opacity="0">
+    <Grid.RenderTransform>
+        <ScaleTransform x:Name="TransformScale" ScaleX="0.8" ScaleY="0.8" />
+    </Grid.RenderTransform>
     <Grid.RowDefinitions>
         <RowDefinition />
         <RowDefinition Height="Auto" />
