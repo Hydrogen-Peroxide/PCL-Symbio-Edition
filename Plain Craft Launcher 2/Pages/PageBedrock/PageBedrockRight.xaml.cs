@@ -1535,6 +1535,10 @@ public partial class PageBedrockRight
         if (_switchingVersion)
             return;
 
+        // 切版本 / 重新注册可能要十几秒，先立刻把启动浮层顶上来，别让按钮看着没反应
+        if (!_launching)
+            BeginLaunchProgress(Lang.Text("Bedrock.Launching.Switch", versionId));
+
         // GDK 便携版：解包目录里有主程序就能直接启动，不需要改动系统包注册
         if (IsGdkVersion(versionId))
         {
