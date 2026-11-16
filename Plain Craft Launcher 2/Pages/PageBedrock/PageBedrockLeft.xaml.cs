@@ -377,6 +377,9 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         LabSettingsTarget.Text = ModBedrockInstance.GetDisplayName(ModBedrockInstance.VersionsDirectory, version);
         LabSettingsVersion.Text = Lang.Text("Bedrock.Status.Version", version) + " · " + ChannelText(version);
         LabSettingsPath.Text = ModBedrockInstance.GetInstanceFolder(ModBedrockInstance.VersionsDirectory, version);
+        // 与 Java 版实例页一致：左上角显示名称与版本范围
+        LabSettingsTabTitle.Text = LabSettingsTarget.Text;
+        LabSettingsTabSub.Text = Lang.Text("Bedrock.Status.Version", version) + " · " + ChannelText(version);
         var loader = ModBedrockLoader.GetLoader(version);
         RadioVanilla.Checked = loader == ModBedrockLoader.Vanilla;
         RadioLeviLamina.Checked = loader == ModBedrockLoader.LeviLamina;
@@ -437,6 +440,16 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         PanSettingsLoader.Visibility = tab == 1 ? Visibility.Visible : Visibility.Collapsed;
         PanSettingsData.Visibility = tab == 2 ? Visibility.Visible : Visibility.Collapsed;
         PanSettingsShortcuts.Visibility = tab == 3 ? Visibility.Visible : Visibility.Collapsed;
+
+        // 导航项本身也保持选中态，视觉上与 Java 版一致
+        var nav = tab switch
+        {
+            1 => NavLoader,
+            2 => NavData,
+            3 => NavShortcuts,
+            _ => NavDetail
+        };
+        nav.SetChecked(true, false, false);
     }
 
     /// <summary>关闭浮层时保存加载器选择。</summary>

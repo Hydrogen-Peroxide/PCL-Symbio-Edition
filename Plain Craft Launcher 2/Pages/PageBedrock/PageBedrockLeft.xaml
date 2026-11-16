@@ -98,18 +98,21 @@
 
                     <!-- 左导航 -->
                     <StackPanel Grid.Column="0" Margin="10,14,6,14">
-                        <TextBlock Text="{DynamicResource Bedrock.Instance.Settings}" FontSize="15" FontWeight="Bold"
-                                   Margin="6,0,0,10" />
-                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                        <TextBlock x:Name="LabSettingsTabTitle" FontSize="15" FontWeight="Bold"
+                                   Margin="6,0,0,2" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="LabSettingsTabSub" FontSize="11" Margin="6,0,0,10"
+                                   TextTrimming="CharacterEllipsis"
+                                   Foreground="{DynamicResource ColorBrushGray4}" />
+                        <local:MyListItem x:Name="NavDetail" Height="34" Type="RadioBox"
                                           Title="{DynamicResource Bedrock.Instance.Tab.Detail}" SvgIcon="lucide/info"
                                           Click="SettingsTab_Click" />
-                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                        <local:MyListItem x:Name="NavLoader" Height="34" Type="RadioBox"
                                           Title="{DynamicResource Bedrock.Instance.LoaderTitle}" SvgIcon="lucide/package"
                                           Click="SettingsTab_Click" />
-                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                        <local:MyListItem x:Name="NavData" Height="34" Type="RadioBox"
                                           Title="{DynamicResource Bedrock.Instance.Tab.Data}" SvgIcon="lucide/folder-open"
                                           Click="SettingsTab_Click" />
-                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                        <local:MyListItem x:Name="NavShortcuts" Height="34" Type="RadioBox"
                                           Title="{DynamicResource Bedrock.Shortcuts.Title}" SvgIcon="lucide/wrench"
                                           Click="SettingsTab_Click" />
                     </StackPanel>
