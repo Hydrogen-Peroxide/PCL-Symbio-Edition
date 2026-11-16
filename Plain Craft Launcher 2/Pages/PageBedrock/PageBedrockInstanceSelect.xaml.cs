@@ -130,6 +130,8 @@ public partial class PageBedrockInstanceSelect : IRefreshable
         // 点一下就让左侧状态和右侧「当前实例」跟着变，不用等确定
         ModMain.frmBedrockLeft?.RefreshStatus();
         ModMain.frmBedrockRight?.RefreshInstanceCard();
+        // 与 Java 版一致：选完实例直接回主页，不用再手动返回
+        ModMain.frmMain.PageBack();
     }
 
     private static string ChannelLabel(string channel) => channel switch
