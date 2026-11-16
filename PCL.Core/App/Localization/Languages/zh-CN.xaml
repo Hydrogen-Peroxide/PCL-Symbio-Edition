@@ -3976,4 +3976,5 @@
 <sys:String x:Key="Bedrock.Instance.Stats.Created">创建时间</sys:String>
 <sys:String x:Key="Bedrock.Launching.Switch">正在切换版本 {0}</sys:String>
 <sys:String x:Key="Bedrock.Launching.Busy">正在切换版本，请等当前这次启动准备完成</sys:String>
+<sys:String x:Key="Bedrock.Launching.Downgrade">系统中已安装更高版本的基岩版，正在保留存档卸载后重新注册 {0}</sys:String>
 </ResourceDictionary>

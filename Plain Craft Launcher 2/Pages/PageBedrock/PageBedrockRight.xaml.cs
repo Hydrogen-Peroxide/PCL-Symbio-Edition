@@ -496,9 +496,14 @@ public partial class PageBedrockRight
                 timeout: 10000);
             if (!string.IsNullOrEmpty(output) && !output.Contains("Exception"))
             {
-                var trimmed = output.Trim();
-                if (Directory.Exists(trimmed))
-                    return trimmed;
+                // UWP 版与 GDK 版同时安装时会返回多行，整段 Trim 后不是一个有效路径，
+                // 会被误判成「未安装」，所以逐行取第一个真实存在的目录
+                foreach (var line in output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var trimmed = line.Trim();
+                    if (Directory.Exists(trimmed))
+                        return trimmed;
+                }
             }
         }
         catch { }
@@ -735,6 +740,17 @@ public partial class PageBedrockRight
     private static void CountLaunch()
     {
         States.System.LaunchCount += 1;
+    }
+
+    /// <summary>
+    ///     切换版本时已用 BeginLaunchProgress 占住了启动状态，切换成功后紧接着调用 LaunchBedrock
+    ///     会被开头的防重入检查直接挡回去，游戏根本不会启动。这里先解除占用，让启动流程重新走一遍。
+    /// </summary>
+    private void ReleaseLaunchGate()
+    {
+        _launching = false;
+        _launchProgressTimer.Stop();
+        LoadLaunching.State.LoadingState = MyLoading.MyLoadingState.Stop;
     }
 
     private void LaunchProgressTimer_Tick(object? sender, EventArgs e)
@@ -1634,11 +1650,21 @@ public partial class PageBedrockRight
 
                 if (manifestPath is not null)
                 {
-                    var result = ModBase.ShellAndGetOutput("powershell.exe",
-                        ModBedrockUwp.GetAppxInstallArguments(manifestPath, register: true),
-                        timeout: 300000);
+                    var result = RegisterExtractedVersion(manifestPath);
 
-                    if (result.Contains("Exception") || result.Contains("错误"))
+                    // 系统里已经装了更高版本的基岩版时，Windows 会拒绝降级注册（0x80073D06）。
+                    // 解包目录本身是完好的，保留存档卸载掉那个更高版本再注册，才能真正切到目标版本；
+                    // 否则会一路掉到「重新安装」，而安装包多半早已被清理，最后报成安装包缺失。
+                    if (IsRegisterFailed(result) && result.Contains("0x80073D06", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ModBase.Log($"[Bedrock] 已安装更高版本的基岩版，保留数据卸载后重新注册 {versionId}",
+                            ModBase.LogLevel.Normal,
+                            userSummary: Lang.Text("Bedrock.Launching.Downgrade", versionId));
+                        ModBedrockUwp.UninstallPreservingData();
+                        result = RegisterExtractedVersion(manifestPath);
+                    }
+
+                    if (IsRegisterFailed(result))
                     {
                         ModBase.Log($"[Bedrock] 重新注册 {versionId} 失败，改为重新安装: {result.Trim()}",
                             ModBase.LogLevel.Normal);
@@ -1689,9 +1715,24 @@ public partial class PageBedrockRight
                 RefreshLocalVersions();
                 // 左侧状态栏也同步显示切换后的版本
                 ModMain.frmBedrockLeft?.RefreshStatus();
+                ReleaseLaunchGate();
                 LaunchBedrock();
             });
         });
+    }
+
+    /// <summary>以开发模式注册解包目录，返回 PowerShell 的完整输出。</summary>
+    private static string RegisterExtractedVersion(string manifestPath)
+    {
+        return ModBase.ShellAndGetOutput("powershell.exe",
+            ModBedrockUwp.GetAppxInstallArguments(manifestPath, register: true),
+            timeout: 300000);
+    }
+
+    /// <summary>PowerShell 命令出错时会输出 Exception 或「错误」，以此判断注册是否失败。</summary>
+    private static bool IsRegisterFailed(string output)
+    {
+        return output.Contains("Exception", StringComparison.OrdinalIgnoreCase) || output.Contains("错误");
     }
 
     /// <summary>
@@ -1710,6 +1751,7 @@ public partial class PageBedrockRight
         SelectVersion(versionId);
         RefreshLocalVersions();
         ModMain.frmBedrockLeft?.RefreshStatus();
+        ReleaseLaunchGate();
         LaunchBedrock();
     }
 

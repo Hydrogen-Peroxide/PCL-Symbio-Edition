@@ -3976,4 +3976,5 @@
 <sys:String x:Key="Bedrock.Instance.Stats.Created">Created</sys:String>
 <sys:String x:Key="Bedrock.Launching.Switch">Switching to version {0}</sys:String>
 <sys:String x:Key="Bedrock.Launching.Busy">Still switching versions, please wait for the current launch to be prepared.</sys:String>
+<sys:String x:Key="Bedrock.Launching.Downgrade">A newer Bedrock build is installed; removing it (save data kept) and registering {0} again</sys:String>
 </ResourceDictionary>
