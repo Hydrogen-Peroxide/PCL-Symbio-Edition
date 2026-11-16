@@ -3904,7 +3904,7 @@
     <sys:String x:Key="Bedrock.Select.Applied">已切换到「{0}」</sys:String>
     <sys:String x:Key="Bedrock.Select.FolderAdded">已添加数据目录：{0}</sys:String>
     <sys:String x:Key="Bedrock.Select.FolderExists">该目录已经在列表里了</sys:String>
-    <sys:String x:Key="Bedrock.Select.FolderInvalid">这个文件夹不可用，请选择已存在的目录</sys:String>
+    <sys:String x:Key="Bedrock.Select.FolderInvalid">这个文件夹既没有 versions 子目录，里面也没有版本文件夹。可以选 .minecraft\bedrock，或者直接选存放各版本的那个目录（例如 D:\PCL2CE\bedrock_versions）。</sys:String>
     <sys:String x:Key="Bedrock.Select.Folders">数据目录</sys:String>
     <sys:String x:Key="Bedrock.Select.Instances">版本实例</sys:String>
     <sys:String x:Key="Bedrock.Select.NoInstances">这个目录下还没有实例，可以先去下载页安装一个版本。</sys:String>
@@ -3927,4 +3927,5 @@
     <sys:String x:Key="Bedrock.Instance.Tab.Data">数据与存档</sys:String>
     <sys:String x:Key="Bedrock.Instance.Tab.Detail">实例详情</sys:String>
     <sys:String x:Key="Bedrock.Instance.LoaderHint">加载器决定这个实例启动时加载哪些扩展；修改在启动时生效。</sys:String>
+    <sys:String x:Key="Bedrock.Select.FolderMissing">这个文件夹不存在，请重新选择。</sys:String>
 </ResourceDictionary>

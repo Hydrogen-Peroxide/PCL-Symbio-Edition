@@ -124,7 +124,13 @@ public partial class PageBedrockInstanceSelect
         if (dialog.ShowDialog() != true) return;
 
         var path = dialog.FolderName;
-        if (string.IsNullOrWhiteSpace(path) || !ModBedrockFolders.LooksValid(path))
+        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
+        {
+            HintService.Hint(Lang.Text("Bedrock.Select.FolderMissing"), HintType.Error);
+            return;
+        }
+
+        if (!ModBedrockFolders.LooksValid(path))
         {
             HintService.Hint(Lang.Text("Bedrock.Select.FolderInvalid"), HintType.Error);
             return;

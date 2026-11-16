@@ -117,8 +117,10 @@ public static class ModBedrockFolders
     {
         try
         {
-            var versions = System.IO.Path.Combine(root, "versions");
-            if (!Directory.Exists(versions)) return 0;
+            if (!Directory.Exists(root)) return 0;
+            // 既支持 <root>\versions 布局，也支持用户直接选中版本目录本身
+            var nested = System.IO.Path.Combine(root, "versions");
+            var versions = Directory.Exists(nested) ? nested : root;
             return Directory.GetDirectories(versions)
                 .Count(dir => !System.IO.Path.GetFileName(dir).Equals("extracted", StringComparison.OrdinalIgnoreCase));
         }
@@ -251,10 +253,13 @@ public static class ModBedrockFolders
         try
         {
             if (!Directory.Exists(path)) return false;
-            var versions = System.IO.Path.Combine(path, "versions");
-            if (Directory.Exists(versions)) return true;
-            // 空目录也允许，用户可能想先把目录挂上再装版本
-            return !Directory.EnumerateFileSystemEntries(path).Any();
+            // 标准布局：<path>\versions
+            if (Directory.Exists(System.IO.Path.Combine(path, "versions"))) return true;
+            // 空目录允许，用户可能想先把目录挂上再装版本
+            if (!Directory.EnumerateFileSystemEntries(path).Any()) return true;
+            // 直接选中版本目录本身：里面就是各个版本文件夹
+            return Directory.EnumerateDirectories(path)
+                .Any(dir => !System.IO.Path.GetFileName(dir).Equals("extracted", StringComparison.OrdinalIgnoreCase));
         }
         catch
         {

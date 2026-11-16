@@ -3904,7 +3904,7 @@
     <sys:String x:Key="Bedrock.Select.Applied">Switched to {0}</sys:String>
     <sys:String x:Key="Bedrock.Select.FolderAdded">Data folder added: {0}</sys:String>
     <sys:String x:Key="Bedrock.Select.FolderExists">That folder is already in the list</sys:String>
-    <sys:String x:Key="Bedrock.Select.FolderInvalid">That folder is not usable. Pick an existing folder.</sys:String>
+    <sys:String x:Key="Bedrock.Select.FolderInvalid">This folder has neither a versions subfolder nor any version folders inside. Pick .minecraft\bedrock, or the folder that directly contains the version folders (for example D:\PCL2CE\bedrock_versions).</sys:String>
     <sys:String x:Key="Bedrock.Select.Folders">Data folders</sys:String>
     <sys:String x:Key="Bedrock.Select.Instances">Version instances</sys:String>
     <sys:String x:Key="Bedrock.Select.NoInstances">No instances in this folder yet. Install a version from the download page first.</sys:String>
@@ -3927,4 +3927,5 @@
     <sys:String x:Key="Bedrock.Instance.Tab.Data">Data and saves</sys:String>
     <sys:String x:Key="Bedrock.Instance.Tab.Detail">Instance details</sys:String>
     <sys:String x:Key="Bedrock.Instance.LoaderHint">The loader decides which extensions are enabled when this instance starts; changes apply on next launch.</sys:String>
+    <sys:String x:Key="Bedrock.Select.FolderMissing">That folder does not exist. Please pick another one.</sys:String>
 </ResourceDictionary>

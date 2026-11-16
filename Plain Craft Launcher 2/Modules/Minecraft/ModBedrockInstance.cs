@@ -40,8 +40,31 @@ public static class ModBedrockInstance
         }
     }
 
-    /// <summary>下载、导入的安装包与解包产物所在的 versions 目录。</summary>
-    public static string VersionsDirectory => Path.Combine(DataRoot, "versions");
+    /// <summary>
+    ///     下载、导入的安装包与解包产物所在的 versions 目录。
+    ///     通常为 &lt;DataRoot&gt;\versions；如果用户直接把版本目录（例如 D:\PCL2CE\bedrock_versions）设为数据目录，
+    ///     里面没有 versions 子目录却有版本文件夹，就把该目录本身当作 versions 目录。
+    /// </summary>
+    public static string VersionsDirectory
+    {
+        get
+        {
+            var root = DataRoot;
+            var nested = Path.Combine(root, "versions");
+            if (Directory.Exists(nested)) return nested;
+
+            try
+            {
+                if (Directory.Exists(root) && Directory.EnumerateDirectories(root).Any()) return root;
+            }
+            catch (Exception ex)
+            {
+                ModBase.Log($"[Bedrock] 判断 versions 目录失败（{root}）：{ex.Message}", ModBase.LogLevel.Debug);
+            }
+
+            return nested;
+        }
+    }
 
     private static string GetMetadataPath(string versionsDirectory, string versionId) =>
         Path.Combine(versionsDirectory, versionId, MetadataFileName);
