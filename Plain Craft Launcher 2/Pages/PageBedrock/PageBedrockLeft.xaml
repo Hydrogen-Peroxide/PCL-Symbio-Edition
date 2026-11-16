@@ -58,25 +58,6 @@
                                 Text="{DynamicResource Bedrock.Account.Switch}" Click="BtnSwitchAccount_Click" />
 
                 <!-- 快捷操作 -->
-                <TextBlock Text="{DynamicResource Bedrock.Shortcuts.Title}" Margin="13,10,5,4" Opacity="0.6" FontSize="12" />
-                <local:MyListItem Height="36" VerticalAlignment="Top" IsScaleAnimationEnabled="False"
-                                  Type="Clickable" Title="{DynamicResource Bedrock.Editor.Open}"
-                                  SvgIcon="lucide/pencil" Click="OpenEditor_Click" />
-                <local:MyListItem Height="36" VerticalAlignment="Top" IsScaleAnimationEnabled="False"
-                                  Type="Clickable" Title="{DynamicResource Bedrock.Shortcuts.OpenSaves}"
-                                  SvgIcon="lucide/folder-open" Click="OpenSavesFolder_Click" />
-                <local:MyListItem Height="36" VerticalAlignment="Top" IsScaleAnimationEnabled="False"
-                                  Type="Clickable" Title="{DynamicResource Bedrock.Shortcuts.OpenPackages}"
-                                  SvgIcon="lucide/box" Click="OpenPackageFolder_Click" />
-                <local:MyListItem Height="36" VerticalAlignment="Top" IsScaleAnimationEnabled="False"
-                                  Type="Clickable" Title="{DynamicResource Bedrock.Shortcuts.OpenScreenshots}"
-                                  SvgIcon="lucide/image" Click="OpenScreenshotFolder_Click" />
-                <local:MyListItem Height="36" VerticalAlignment="Top" IsScaleAnimationEnabled="False"
-                                  Type="Clickable" Title="{DynamicResource Bedrock.Shortcuts.OpenXbox}"
-                                  SvgIcon="lucide/play" Click="OpenXboxApp_Click" />
-                <local:MyListItem Height="36" VerticalAlignment="Top" IsScaleAnimationEnabled="False"
-                                  Type="Clickable" Title="{DynamicResource Bedrock.Shortcuts.BackupWorlds}"
-                                  SvgIcon="lucide/download" Click="BackupWorlds_Click" />
 
                 <!-- 基岩版状态 -->
                 <TextBlock Text="{DynamicResource Bedrock.Status.Title}" Margin="13,10,5,4" Opacity="0.6" FontSize="12" />
@@ -125,4 +106,35 @@
                        FontSize="11" Foreground="{DynamicResource ColorBrushGray3}" />
         </Grid>
     </Grid>
+        <!-- 实例设置浮层：加载器切换 + 原有快捷操作 -->
+        <Border x:Name="PanInstanceSettings" Grid.RowSpan="3" Background="#AA000000" Visibility="Collapsed" Margin="-1">
+            <Border Background="{DynamicResource ColorBrushBackground}" CornerRadius="6" Margin="14" Padding="14">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="{DynamicResource Bedrock.Instance.Settings}" FontSize="16" FontWeight="Bold" />
+                        <TextBlock x:Name="LabSettingsTarget" Margin="0,4,0,10" FontSize="11"
+                                   Foreground="{DynamicResource ColorBrushGray4}" TextWrapping="Wrap" />
+                        <TextBlock Text="{DynamicResource Bedrock.Instance.LoaderTitle}" FontSize="12" Opacity="0.6" Margin="0,0,0,6" />
+                        <local:MyRadioBox x:Name="RadioVanilla" Text="{DynamicResource Bedrock.Loader.Vanilla}" Margin="0,0,0,6" />
+                        <local:MyRadioBox x:Name="RadioLeviLamina" Text="{DynamicResource Bedrock.Loader.LeviLamina}" Margin="0,0,0,6" />
+                        <local:MyRadioBox x:Name="RadioBLoader" Text="{DynamicResource Bedrock.Loader.BLoader}" Margin="0,0,0,10" />
+                        <TextBlock Text="{DynamicResource Bedrock.Shortcuts.Title}" FontSize="12" Opacity="0.6" Margin="0,4,0,6" />
+                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                                          Title="{DynamicResource Bedrock.Editor.Open}" SvgIcon="lucide/pencil" Click="OpenEditor_Click" />
+                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                                          Title="{DynamicResource Bedrock.Shortcuts.OpenSaves}" SvgIcon="lucide/folder-open" Click="OpenSavesFolder_Click" />
+                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                                          Title="{DynamicResource Bedrock.Shortcuts.OpenPackages}" SvgIcon="lucide/box" Click="OpenPackageFolder_Click" />
+                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                                          Title="{DynamicResource Bedrock.Shortcuts.OpenScreenshots}" SvgIcon="lucide/image" Click="OpenScreenshotFolder_Click" />
+                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                                          Title="{DynamicResource Bedrock.Shortcuts.OpenXbox}" SvgIcon="lucide/play" Click="OpenXboxApp_Click" />
+                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                                          Title="{DynamicResource Bedrock.Shortcuts.BackupWorlds}" SvgIcon="lucide/download" Click="BackupWorlds_Click" />
+                        <local:MyButton Height="30" Margin="0,12,0,0" Text="{DynamicResource Common.Action.Confirm}"
+                                        Click="BtnInstanceSettingsClose_Click" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Border>
 </local:MyPageLeft>

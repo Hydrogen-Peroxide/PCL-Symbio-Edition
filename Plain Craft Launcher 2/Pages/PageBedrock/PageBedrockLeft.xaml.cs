@@ -343,9 +343,69 @@ public partial class PageBedrockLeft
         return null;
     }
 
-    private void BtnInstance_Click(object sender, MouseButtonEventArgs e) { }
+    /// <summary>选择当前要操作的基岩版实例（本地已安装的版本）。</summary>
+    private void BtnInstance_Click(object sender, MouseButtonEventArgs e)
+    {
+        var versions = ModBedrockInstance.GetLocalVersions();
+        if (versions.Count == 0)
+        {
+            HintService.Hint(Lang.Text("Bedrock.Instance.None"), HintType.Error);
+            return;
+        }
 
-    private void BtnInstanceSettings_Click(object sender, MouseButtonEventArgs e) { }
+        var radios = new List<IMyRadio>();
+        foreach (var version in versions) radios.Add(new MyRadioBox { Text = version });
+        var selected = (int)ModMain.MyMsgBoxSelect(radios, Lang.Text("Bedrock.Instance.Select"));
+        if (selected < 0 || selected >= versions.Count) return;
+        ModBedrockInstance.SelectedVersionId = versions[selected];
+        HintService.Hint(Lang.Text("Bedrock.Instance.Selected", versions[selected]), HintType.Success);
+    }
+
+    /// <summary>打开实例设置浮层：加载器切换 + 原有的快捷操作。</summary>
+    private void BtnInstanceSettings_Click(object sender, MouseButtonEventArgs e)
+    {
+        var version = EnsureSelectedVersion();
+        if (version is null)
+        {
+            HintService.Hint(Lang.Text("Bedrock.Instance.None"), HintType.Error);
+            return;
+        }
+
+        LabSettingsTarget.Text = Lang.Text("Bedrock.Instance.Selected", version);
+        var loader = ModBedrockLoader.GetLoader(version);
+        RadioVanilla.Checked = loader == ModBedrockLoader.Vanilla;
+        RadioLeviLamina.Checked = loader == ModBedrockLoader.LeviLamina;
+        RadioBLoader.Checked = loader == ModBedrockLoader.BLoader;
+        PanInstanceSettings.Visibility = Visibility.Visible;
+    }
+
+    /// <summary>关闭浮层时保存加载器选择。</summary>
+    private void BtnInstanceSettingsClose_Click(object sender, MouseButtonEventArgs e)
+    {
+        var version = EnsureSelectedVersion();
+        if (version is not null)
+        {
+            var loader = RadioLeviLamina.Checked == true
+                ? ModBedrockLoader.LeviLamina
+                : RadioBLoader.Checked == true
+                    ? ModBedrockLoader.BLoader
+                    : ModBedrockLoader.Vanilla;
+            ModBedrockLoader.SetLoader(version, loader);
+            HintService.Hint(Lang.Text("Bedrock.Instance.LoaderSaved", version), HintType.Success);
+        }
+
+        PanInstanceSettings.Visibility = Visibility.Collapsed;
+    }
+
+    /// <summary>当前选中的实例；没有选中时退回本地列表里的第一个。</summary>
+    private static string? EnsureSelectedVersion()
+    {
+        if (!string.IsNullOrWhiteSpace(ModBedrockInstance.SelectedVersionId)) return ModBedrockInstance.SelectedVersionId;
+        var versions = ModBedrockInstance.GetLocalVersions();
+        if (versions.Count == 0) return null;
+        ModBedrockInstance.SelectedVersionId = versions[0];
+        return versions[0];
+    }
     private static string GetAvatarText(string name) =>
         name.Length > 1 && char.IsHighSurrogate(name[0]) ? name[..2] : name[..1].ToUpperInvariant();
 
