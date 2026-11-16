@@ -949,6 +949,24 @@
     <sys:String x:Key="Download.Left.Optifine">OptiFine</sys:String>
     <sys:String x:Key="Download.Left.ResourcePack">Resource packs</sys:String>
     <sys:String x:Key="Download.Left.Shader">Shaders</sys:String>
+    <sys:String x:Key="Download.Left.Java">Java</sys:String>
+    <sys:String x:Key="Download.Left.BedrockVersion">Bedrock</sys:String>
+    <sys:String x:Key="Download.Bedrock.Title">Bedrock</sys:String>
+    <sys:String x:Key="Download.Bedrock.Hint">Release is for daily play; Preview and Beta are for testing only and may be unstable. Each channel is stored separately and never overwrites the release build.</sys:String>
+    <sys:String x:Key="Download.Bedrock.Channel.Release">Release</sys:String>
+    <sys:String x:Key="Download.Bedrock.Channel.Preview">Preview</sys:String>
+    <sys:String x:Key="Download.Bedrock.Channel.Beta">Beta</sys:String>
+    <sys:String x:Key="Download.Bedrock.Loading">Loading version list…</sys:String>
+    <sys:String x:Key="Download.Bedrock.LoadFailed">Failed to load the Bedrock version list</sys:String>
+    <sys:String x:Key="Download.Bedrock.Empty">No versions in this channel</sys:String>
+    <sys:String x:Key="Download.Bedrock.Download">Download</sys:String>
+    <sys:String x:Key="Download.Bedrock.Downloading">Downloading</sys:String>
+    <sys:String x:Key="Download.Bedrock.Unavailable">No source</sys:String>
+    <sys:String x:Key="Download.Bedrock.TaskName">Bedrock download</sys:String>
+    <sys:String x:Key="Download.Bedrock.Started">Download started: {0}</sys:String>
+    <sys:String x:Key="Download.Bedrock.Finished">{0} downloaded; install it from Launch → Bedrock</sys:String>
+    <sys:String x:Key="Download.Bedrock.ResolveFailed">Unable to resolve the download URL for {0}</sys:String>
+    <sys:String x:Key="Download.Bedrock.Failed">Bedrock download failed: {0}</sys:String>
     <sys:String x:Key="Download.Left.World">Worlds</sys:String>
 
     <!-- Download.Source -->

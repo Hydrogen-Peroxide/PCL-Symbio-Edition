@@ -1,0 +1,30 @@
+<local:MyPageRight x:Class="PCL.PageDownloadBedrock"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                   xmlns:local="clr-namespace:PCL"
+                   mc:Ignorable="d">
+    <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
+        <StackPanel Margin="25,10" x:Name="PanMain">
+            <Grid Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="{DynamicResource Download.Bedrock.Title}" FontSize="20" FontWeight="Bold" />
+                    <TextBlock x:Name="LabHint" Text="{DynamicResource Download.Bedrock.Hint}" Margin="0,4,0,0"
+                               FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource ColorBrushGray4}" />
+                </StackPanel>
+                <local:MyComboBox x:Name="ComboChannel" Grid.Column="1" Width="130" Height="30"
+                                  VerticalAlignment="Center" SelectionChanged="ComboChannel_SelectionChanged">
+                    <local:MyComboBoxItem Content="{DynamicResource Download.Bedrock.Channel.Release}" />
+                    <local:MyComboBoxItem Content="{DynamicResource Download.Bedrock.Channel.Preview}" />
+                    <local:MyComboBoxItem Content="{DynamicResource Download.Bedrock.Channel.Beta}" />
+                </local:MyComboBox>
+            </Grid>
+            <StackPanel x:Name="PanList" Margin="0,12,0,0" />
+        </StackPanel>
+    </local:MyScrollViewer>
+</local:MyPageRight>

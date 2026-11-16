@@ -60,6 +60,7 @@ public static class ModMain
     public static PageDownloadBedrockMaterial? frmDownloadBedrockMaterial;
     public static PageDownloadBedrockScript? frmDownloadBedrockScript;
     public static PageDownloadBedrockSkin? frmDownloadBedrockSkin;
+    public static PageDownloadBedrock? frmDownloadBedrock;
     public static PageSetupLeft? frmSetupLeft;
     public static PageSetupLaunch? frmSetupLaunch;
     public static PageSetupUI? frmSetupUI;

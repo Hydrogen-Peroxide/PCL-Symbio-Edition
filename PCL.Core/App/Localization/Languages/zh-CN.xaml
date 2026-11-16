@@ -949,6 +949,24 @@
     <sys:String x:Key="Download.Left.Optifine">OptiFine</sys:String>
     <sys:String x:Key="Download.Left.ResourcePack">资源包</sys:String>
     <sys:String x:Key="Download.Left.Shader">光影包</sys:String>
+    <sys:String x:Key="Download.Left.Java">Java</sys:String>
+    <sys:String x:Key="Download.Left.BedrockVersion">Bedrock</sys:String>
+    <sys:String x:Key="Download.Bedrock.Title">基岩版</sys:String>
+    <sys:String x:Key="Download.Bedrock.Hint">正式版用于日常游戏；预览版与 Beta 版仅用于尝鲜，可能不稳定。三个通道分别存放，不会覆盖正式版。</sys:String>
+    <sys:String x:Key="Download.Bedrock.Channel.Release">正式版</sys:String>
+    <sys:String x:Key="Download.Bedrock.Channel.Preview">预览版</sys:String>
+    <sys:String x:Key="Download.Bedrock.Channel.Beta">Beta 版</sys:String>
+    <sys:String x:Key="Download.Bedrock.Loading">正在获取版本列表……</sys:String>
+    <sys:String x:Key="Download.Bedrock.LoadFailed">获取基岩版版本列表失败</sys:String>
+    <sys:String x:Key="Download.Bedrock.Empty">该通道暂时没有版本</sys:String>
+    <sys:String x:Key="Download.Bedrock.Download">下载</sys:String>
+    <sys:String x:Key="Download.Bedrock.Downloading">下载中</sys:String>
+    <sys:String x:Key="Download.Bedrock.Unavailable">无下载源</sys:String>
+    <sys:String x:Key="Download.Bedrock.TaskName">基岩版下载</sys:String>
+    <sys:String x:Key="Download.Bedrock.Started">已开始下载 {0}</sys:String>
+    <sys:String x:Key="Download.Bedrock.Finished">{0} 下载完成，可在「启动 → 基岩版」中安装</sys:String>
+    <sys:String x:Key="Download.Bedrock.ResolveFailed">无法解析 {0} 的下载地址</sys:String>
+    <sys:String x:Key="Download.Bedrock.Failed">基岩版下载失败：{0}</sys:String>
     <sys:String x:Key="Download.Left.World">世界</sys:String>
 
     <!-- Download.Source -->

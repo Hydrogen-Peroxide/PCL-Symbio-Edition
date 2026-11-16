@@ -1463,6 +1463,7 @@ public partial class FormMain
         DownloadBedrockMaterial = 21,
         DownloadBedrockScript = 22,
         DownloadBedrockSkin = 23,
+        DownloadBedrock = 24,
 
         SetupLaunch = 0,
         SetupUI = 1,

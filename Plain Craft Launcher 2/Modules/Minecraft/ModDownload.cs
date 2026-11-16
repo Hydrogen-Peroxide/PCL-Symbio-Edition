@@ -2513,6 +2513,37 @@ public static class ModDownload
     }
 
     /// <summary>
+    ///     含预览版 / Beta 通道的基岩版版本列表，供下载页的 Bedrock 分类使用。
+    ///     与 <see cref="DlBedrockListMain" /> 共用同一数据源与缓存，只是额外保留 Beta / Preview 条目。
+    /// </summary>
+    public static ModLoader.LoaderTask<string, JsonObject> dlBedrockChannelListLoader =
+        new("DlBedrockList Channels", DlBedrockChannelListMain);
+
+    public static void DlBedrockChannelListMain(ModLoader.LoaderTask<string, JsonObject> loader)
+    {
+        foreach (var (url, browserUserAgent, retries, timeout) in BedrockDataSourceAttempts)
+        {
+            var data = TryFetchBedrockData(url, browserUserAgent, retries, timeout);
+            if (data is null) continue;
+            cachedBedrockRawData = data;
+            SaveBedrockDataCache(data);
+            loader.output = ConvertMcAppxToVersionList(data, true);
+            return;
+        }
+
+        var cached = LoadBedrockDataCache();
+        if (cached is not null)
+        {
+            cachedBedrockRawData = cached;
+            loader.output = ConvertMcAppxToVersionList(cached, true);
+            HintService.Hint(Lang.Text("Bedrock.List.CacheUsed"), HintType.Error);
+            return;
+        }
+
+        throw new Exception(Lang.Text("Bedrock.List.SourceFailed"));
+    }
+
+    /// <summary>
     ///     基岩版数据源。
     ///     官方文档见 https://www.mcappx.com/dev-docs/data-source/ ，其中明确说明数据源对某些地区屏蔽。
     /// </summary>
@@ -2672,15 +2703,17 @@ public static class ModDownload
     ///     将 MCAPPX 格式的版本数据转换为统一的版本列表格式。
     ///     列出全部 Release 版本（含旧小版本），按版本号降序排列。
     /// </summary>
-    private static JsonObject ConvertMcAppxToVersionList(JsonObject source)
+    private static JsonObject ConvertMcAppxToVersionList(JsonObject source, bool includeChannels = false)
     {
-        // 收集全部 Release 版本
+        // 收集版本；默认只要 Release，下载页的 Bedrock 分类会额外保留 Beta / Preview
         var allVersions = new List<(string Key, JsonObject Data)>();
 
         foreach (var kv in source)
         {
             if (kv.Value is not JsonObject verData) continue;
-            if ((string)verData["Type"] != "Release") continue;
+            var type = (string)verData["Type"] ?? "Release";
+            if (!includeChannels && type != "Release") continue;
+            if (type is not ("Release" or "Beta" or "Preview")) continue;
             allVersions.Add((kv.Key, verData));
         }
 
@@ -2698,12 +2731,20 @@ public static class ModDownload
         {
             var buildType = (string)ver.Data["BuildType"] ?? "UWP";
             var date = (string)ver.Data["Date"] ?? "";
+            var type = (string)ver.Data["Type"] ?? "Release";
+            var channel = type switch
+            {
+                "Beta" => "beta",
+                "Preview" => "preview",
+                _ => "release"
+            };
 
             versions.Add(new JsonObject
             {
                 ["id"] = ver.Key,
                 ["name"] = $"Bedrock {ver.Key}",
-                ["type"] = "release",
+                ["type"] = channel,
+                ["channel"] = channel,
                 ["releaseDate"] = date,
                 ["buildType"] = buildType,
                 ["packageVersion"] = (string)ver.Data["ID"] ?? "",

@@ -38,6 +38,12 @@ public partial class PageDownloadLeft : IRefreshable
                 ItemInstall.Checked = true;
                 break;
             }
+            case FormMain.PageSubType.DownloadBedrock:
+            {
+                ModDownload.dlBedrockChannelListLoader.Start(isForceRestart: true);
+                ItemBedrock.Checked = true;
+                break;
+            }
             case FormMain.PageSubType.DownloadMod:
             {
                 ModComp.compProjectCache.Clear();
@@ -416,6 +422,12 @@ public partial class PageDownloadLeft : IRefreshable
                 if (ModMain.frmDownloadLegacyFabric is null)
                     ModMain.frmDownloadLegacyFabric = new PageDownloadLegacyFabric();
                 return ModMain.frmDownloadLegacyFabric;
+            }
+            case FormMain.PageSubType.DownloadBedrock:
+            {
+                if (ModMain.frmDownloadBedrock is null)
+                    ModMain.frmDownloadBedrock = new PageDownloadBedrock();
+                return ModMain.frmDownloadBedrock;
             }
             case FormMain.PageSubType.DownloadBedrockAddon:
             {
