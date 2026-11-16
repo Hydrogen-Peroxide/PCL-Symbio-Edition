@@ -1,0 +1,41 @@
+<local:MyPageRight x:Class="PCL.PageBedrockInstanceSetupPage"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:local="clr-namespace:PCL" PanScroll="{Binding ElementName=PanBack}">
+    <local:MyScrollViewer x:Name="PanBack" VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+        <StackPanel x:Name="PanMain" Margin="25,10">
+            <local:MyCard Margin="0,15" Title="{DynamicResource Bedrock.Instance.LoaderTitle}">
+                <StackPanel Margin="25,40,25,15">
+                    <TextBlock Text="{DynamicResource Bedrock.Instance.LoaderHint}" FontSize="11.5"
+                               TextWrapping="Wrap" Opacity="0.6" />
+                    <Border Background="{DynamicResource ColorBrushTransparentBackground}" CornerRadius="5"
+                            Padding="14,12" Margin="0,12,0,0">
+                        <StackPanel>
+                            <local:MyRadioBox x:Name="RadioVanilla" Margin="0,0,0,10"
+                                              Text="{DynamicResource Bedrock.Loader.Vanilla}" />
+                            <local:MyRadioBox x:Name="RadioLeviLamina" Margin="0,0,0,10"
+                                              Text="{DynamicResource Bedrock.Loader.LeviLamina}" />
+                            <local:MyRadioBox x:Name="RadioBLoader"
+                                              Text="{DynamicResource Bedrock.Loader.BLoader}" />
+                        </StackPanel>
+                    </Border>
+                    <TextBlock x:Name="LabLoaderTarget" FontSize="11.5" Opacity="0.5" Margin="0,10,0,0"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </local:MyCard>
+            <local:MyCard Margin="0,0,0,15" Title="{DynamicResource Bedrock.Right.Log.Title}">
+                <StackPanel Margin="25,40,25,15">
+                    <Border Background="{DynamicResource ColorBrushTransparentBackground}" CornerRadius="5"
+                            Padding="14,10">
+                        <local:MyCheckBox x:Name="CheckShowLaunchLog"
+                                          Text="{DynamicResource Bedrock.Right.Log.Toggle}"
+                                          Change="ShowLaunchLog_Change" />
+                    </Border>
+                    <TextBlock Text="{DynamicResource Bedrock.Launching.Tip}" FontSize="11.5" Opacity="0.5"
+                               Margin="0,10,0,0" TextWrapping="Wrap" />
+                </StackPanel>
+            </local:MyCard>
+        </StackPanel>
+    </local:MyScrollViewer>
+</local:MyPageRight>

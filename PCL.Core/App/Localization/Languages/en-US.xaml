@@ -3928,4 +3928,15 @@
     <sys:String x:Key="Bedrock.Instance.Tab.Detail">Instance details</sys:String>
     <sys:String x:Key="Bedrock.Instance.LoaderHint">The loader decides which extensions are enabled when this instance starts; changes apply on next launch.</sys:String>
     <sys:String x:Key="Bedrock.Select.FolderMissing">That folder does not exist. Please pick another one.</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Game">Bedrock Instances</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Overall">Overview</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Setup">Instance Settings</sys:String>
+<sys:String x:Key="Bedrock.Instance.Overall.Info.Title">Instance Info</sys:String>
+<sys:String x:Key="Bedrock.Instance.Overall.Version">Version</sys:String>
+<sys:String x:Key="Bedrock.Instance.Overall.Channel">Channel</sys:String>
+<sys:String x:Key="Bedrock.Instance.Overall.Path">Path</sys:String>
+<sys:String x:Key="Bedrock.Instance.Overall.Launch">Launch</sys:String>
+<sys:String x:Key="Bedrock.Instance.Overall.OpenFolder">Open Folder</sys:String>
+<sys:String x:Key="Main.Title.BedrockInstanceSelect">Select Bedrock Instance</sys:String>
+<sys:String x:Key="Main.Title.BedrockInstance">Bedrock Instance - {0}</sys:String>
 </ResourceDictionary>

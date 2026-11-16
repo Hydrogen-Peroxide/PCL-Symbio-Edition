@@ -3928,4 +3928,15 @@
     <sys:String x:Key="Bedrock.Instance.Tab.Detail">实例详情</sys:String>
     <sys:String x:Key="Bedrock.Instance.LoaderHint">加载器决定这个实例启动时加载哪些扩展；修改在启动时生效。</sys:String>
     <sys:String x:Key="Bedrock.Select.FolderMissing">这个文件夹不存在，请重新选择。</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Game">基岩版实例</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Overall">实例详情</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Setup">实例设置</sys:String>
+<sys:String x:Key="Bedrock.Instance.Overall.Info.Title">实例信息</sys:String>
+<sys:String x:Key="Bedrock.Instance.Overall.Version">版本</sys:String>
+<sys:String x:Key="Bedrock.Instance.Overall.Channel">类型</sys:String>
+<sys:String x:Key="Bedrock.Instance.Overall.Path">路径</sys:String>
+<sys:String x:Key="Bedrock.Instance.Overall.Launch">启动</sys:String>
+<sys:String x:Key="Bedrock.Instance.Overall.OpenFolder">打开文件夹</sys:String>
+<sys:String x:Key="Main.Title.BedrockInstanceSelect">选择基岩版实例</sys:String>
+<sys:String x:Key="Main.Title.BedrockInstance">基岩版实例 - {0}</sys:String>
 </ResourceDictionary>

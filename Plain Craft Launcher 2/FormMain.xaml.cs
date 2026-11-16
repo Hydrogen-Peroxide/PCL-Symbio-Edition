@@ -1433,6 +1433,16 @@ public partial class FormMain
         ///     存档详细管理，这是一个副页面。
         /// </summary>
         VersionSaves = 12,
+
+        /// <summary>
+        ///     基岩版实例选择。这是一个副页面。
+        /// </summary>
+        BedrockInstanceSelect = 14,
+
+        /// <summary>
+        ///     基岩版实例设置。这是一个副页面。
+        /// </summary>
+        BedrockInstance = 15,
     }
 
     /// <summary>
@@ -1536,6 +1546,18 @@ public partial class FormMain
             {
                 return Lang.Text("Main.Title.SaveManagement", ModBase.GetFolderNameFromPath(stack.additional.Value.SavePath));
             }
+            case PageType.BedrockInstanceSelect:
+            {
+                return Lang.Text("Main.Title.BedrockInstanceSelect");
+            }
+            case PageType.BedrockInstance:
+            {
+                var versionId = Config.Launch.BedrockSelectedVersion;
+                var name = string.IsNullOrWhiteSpace(versionId)
+                    ? Lang.Text("Common.State.Unknown")
+                    : ModBedrockInstance.GetDisplayName(ModBedrockInstance.VersionsDirectory, versionId);
+                return Lang.Text("Main.Title.BedrockInstance", name);
+            }
 
             default:
             {
@@ -1606,6 +1628,13 @@ public partial class FormMain
                     if (ModMain.frmInstanceLeft is null)
                         ModMain.frmInstanceLeft = new PageInstanceLeft();
                     return ModMain.frmInstanceLeft.pageID;
+                }
+
+                case PageType.BedrockInstance:
+                {
+                    if (ModMain.frmBedrockInstanceLeft is null)
+                        ModMain.frmBedrockInstanceLeft = new PageBedrockInstanceLeft();
+                    return ModMain.frmBedrockInstanceLeft.pageID;
                 }
 
                 default:
@@ -1761,6 +1790,20 @@ public partial class FormMain
                     if (ModMain.frmInstanceLeft is null)
                         ModMain.frmInstanceLeft = new PageInstanceLeft();
                     foreach (var item in ModMain.frmInstanceLeft.PanItem.Children)
+                        if (item is MyListItem listItem &&
+                            ModBase.Val(listItem.Tag) == (double)subType)
+                        {
+                            listItem.SetChecked(true, true, stack == pageCurrent);
+                            break;
+                        }
+
+                    break;
+                }
+                case PageType.BedrockInstance:
+                {
+                    if (ModMain.frmBedrockInstanceLeft is null)
+                        ModMain.frmBedrockInstanceLeft = new PageBedrockInstanceLeft();
+                    foreach (var item in ModMain.frmBedrockInstanceLeft.PanItem.Children)
                         if (item is MyListItem listItem &&
                             ModBase.Val(listItem.Tag) == (double)subType)
                         {
@@ -1959,6 +2002,20 @@ public partial class FormMain
                         ModMain.frmInstanceLeft ??= new PageInstanceLeft();
                         subType = ModMain.frmInstanceLeft.pageID;
                         PageChangeAnim(ModMain.frmInstanceLeft, (FrameworkElement)ModMain.frmInstanceLeft.PageGet(subType));
+                        break;
+                    }
+                case PageType.BedrockInstanceSelect: // 基岩版实例选择
+                    {
+                        ModMain.frmBedrockSelect ??= new PageBedrockInstanceSelect();
+                        PageChangeAnim(new MyPageLeft(), ModMain.frmBedrockSelect);
+                        break;
+                    }
+                case PageType.BedrockInstance: // 基岩版实例设置
+                    {
+                        ModMain.frmBedrockInstanceLeft ??= new PageBedrockInstanceLeft();
+                        subType = ModMain.frmBedrockInstanceLeft.pageID;
+                        PageChangeAnim(ModMain.frmBedrockInstanceLeft,
+                            (FrameworkElement)ModMain.frmBedrockInstanceLeft.PageGet(subType));
                         break;
                     }
                 case PageType.CompDetail: // Mod 信息

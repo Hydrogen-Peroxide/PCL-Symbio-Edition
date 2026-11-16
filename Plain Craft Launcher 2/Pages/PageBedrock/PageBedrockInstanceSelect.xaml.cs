@@ -1,75 +1,27 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using PCL.Core.App;
 using PCL.Core.App.Localization;
-using PCL.Core.UI.Controls;
 
 namespace PCL;
 
-/// <summary>
-///     基岩版实例选择浮层：左侧切换数据目录，右侧按通道列出该目录下的版本实例。
-/// </summary>
-public partial class PageBedrockInstanceSelect
+public partial class PageBedrockInstanceSelect : IRefreshable
 {
-    private readonly List<ModBedrockFolders.Folder> _folders = new();
-    private readonly int _uuid = ModBase.GetUuid();
-    private Action? _onApplied;
+    private readonly List<ModBedrockFolders.Folder> _folders = [];
 
     public PageBedrockInstanceSelect()
     {
         InitializeComponent();
-        LabTitle.Text = Lang.Text("Bedrock.Select.Title");
-        LabFolderHeader.Text = Lang.Text("Bedrock.Select.Folders");
-        LabInstanceHeader.Text = Lang.Text("Bedrock.Select.Instances");
         BtnAddFolder.Text = Lang.Text("Bedrock.Select.AddFolder");
-        BtnConfirm.Text = Lang.Text("Common.Action.Confirm");
-        BtnCancel.Text = Lang.Text("Common.Action.Cancel");
-        ShapeLine.StrokeThickness = ModBase.GetWPFSize(1d);
-
         BtnAddFolder.Click += BtnAddFolder_Click;
-        BtnConfirm.Click += BtnConfirm_Click;
-        BtnCancel.Click += BtnCancel_Click;
-        Loaded += OnLoaded;
+        Loaded += (_, _) => RefreshFolders();
+    }
 
+    public void Refresh()
+    {
         RefreshFolders();
-    }
-
-    /// <summary>在启动器窗口中央显示实例选择浮层；onApplied 会在确认后调用。</summary>
-    private static PageBedrockInstanceSelect? _pageInstance;
-
-    /// <summary>页面模式下复用同一个实例。</summary>
-    public static PageBedrockInstanceSelect GetPage() => _pageInstance ??= new PageBedrockInstanceSelect();
-
-    public static void Show(Action? onApplied = null)
-    {
-        var contentHost = ModMain.frmMain?.PanMain;
-        if (contentHost?.Parent is not Panel host) return;
-
-        // 同一时间只保留一个实例选择页面
-        foreach (var existing in host.Children.OfType<PageBedrockInstanceSelect>().ToList())
-            host.Children.Remove(existing);
-
-        var page = new PageBedrockInstanceSelect { _onApplied = onApplied };
-        Panel.SetZIndex(page, 99);
-        Grid.SetRow(page, Grid.GetRow(contentHost));
-        Grid.SetRowSpan(page, Grid.GetRowSpan(contentHost));
-        host.Children.Add(page);
-    }
-
-    private void OnLoaded(object sender, RoutedEventArgs e)
-    {
-        Opacity = 0d;
-        ModAnimation.AniStart(new[]
-        {
-            ModAnimation.AaOpacity(this, 1d, 120, 40),
-            ModAnimation.AaDouble(i => TransformPos.Y += (double)i, -TransformPos.Y, 280, 40,
-                new ModAnimation.AniEaseOutBack(ModAnimation.AniEasePower.Weak))
-        }, "BedrockInstanceSelect " + _uuid);
     }
 
     #region 数据目录
@@ -262,7 +214,7 @@ public partial class PageBedrockInstanceSelect
     {
         ModBedrockInstance.SelectedVersionId = versionId;
         Config.Launch.BedrockSelectedVersion = versionId;
-        // 点一下就让左侧版本号和右侧「当前实例」跟着变，不用等确定
+        // 点一下就让左侧状态和右侧「当前实例」跟着变，不用等确定
         ModMain.frmBedrockLeft?.RefreshStatus();
         ModMain.frmBedrockRight?.RefreshInstanceCard();
     }
@@ -280,38 +232,6 @@ public partial class PageBedrockInstanceSelect
         "beta" => ModBase.pathImage + "Blocks/GoldBlock.png",
         _ => ModBase.pathImage + "Blocks/Grass.png"
     };
-
-    #endregion
-
-    #region 关闭
-
-    private void BtnConfirm_Click(object sender, MouseButtonEventArgs e)
-    {
-        var version = ModBedrockInstance.SelectedVersionId;
-        if (!string.IsNullOrWhiteSpace(version)) Config.Launch.BedrockSelectedVersion = version;
-        if (!string.IsNullOrWhiteSpace(version))
-            HintService.Hint(
-                Lang.Text("Bedrock.Instance.Selected",
-                    ModBedrockInstance.GetDisplayName(ModBedrockInstance.VersionsDirectory, version)),
-                HintType.Success);
-
-        Close();
-        _onApplied?.Invoke();
-    }
-
-    private void BtnCancel_Click(object sender, MouseButtonEventArgs e) => Close();
-
-    private void Close()
-    {
-
-        ModAnimation.AniStart(new[]
-        {
-            ModAnimation.AaOpacity(this, -Opacity, 90, 10),
-            ModAnimation.AaDouble(i => TransformPos.Y += (double)i, 20d - TransformPos.Y, 130, 0,
-                new ModAnimation.AniEaseOutFluent()),
-            ModAnimation.AaCode(() => (Parent as Panel)?.Children.Remove(this), after: true)
-        }, "BedrockInstanceSelect " + _uuid);
-    }
 
     #endregion
 }

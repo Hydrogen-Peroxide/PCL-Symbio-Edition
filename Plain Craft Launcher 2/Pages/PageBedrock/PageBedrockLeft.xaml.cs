@@ -358,11 +358,7 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
     /// <summary>打开实例选择浮层：左侧切换数据目录，右侧挑选实例。</summary>
     private void BtnInstance_Click(object sender, MouseButtonEventArgs e)
     {
-        PageBedrockInstanceSelect.Show(() =>
-        {
-            RefreshStatus();
-            ModMain.frmBedrockRight?.RefreshPage();
-        });
+        ModMain.frmMain.PageChange(FormMain.PageType.BedrockInstanceSelect);
     }
 
     /// <summary>打开实例设置：把设置面板搬到整窗浮层里显示（左栏只有 300px，塞不下）。</summary>
@@ -375,19 +371,13 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
             return;
         }
 
-        LabSettingsTarget.Text = ModBedrockInstance.GetDisplayName(ModBedrockInstance.VersionsDirectory, version);
-        LabSettingsVersion.Text = Lang.Text("Bedrock.Status.Version", version) + " · " + ChannelText(version);
-        LabSettingsPath.Text = ModBedrockInstance.GetInstanceFolder(ModBedrockInstance.VersionsDirectory, version);
-        // 与 Java 版实例页一致：左上角显示名称与版本范围
-        LabSettingsTabTitle.Text = LabSettingsTarget.Text;
-        LabSettingsTabSub.Text = Lang.Text("Bedrock.Status.Version", version) + " · " + ChannelText(version);
-        var loader = ModBedrockLoader.GetLoader(version);
-        RadioVanilla.Checked = loader == ModBedrockLoader.Vanilla;
-        RadioLeviLamina.Checked = loader == ModBedrockLoader.LeviLamina;
-        RadioBLoader.Checked = loader == ModBedrockLoader.BLoader;
-        CheckShowLaunchLog.Checked = States.UI.ShowLaunchLog;
-        ShowSettingsTab(0);
-        AttachSettingsOverlay();
+        // 与 Java 版一致：实例设置是整页界面，而不是弹窗
+        ModMain.frmBedrockInstanceLeft ??= new PageBedrockInstanceLeft();
+        ModMain.frmBedrockInstanceLeft.pageID = FormMain.PageSubType.VersionSetup;
+        PageBedrockInstanceLeft.CurrentVersion = version;
+        ModMain.frmMain.PageChange(FormMain.PageType.BedrockInstance, FormMain.PageSubType.VersionSetup);
+        return;
+
     }
 
     private static string ChannelText(string versionId) => ModBedrockInstance.GetChannel(versionId) switch

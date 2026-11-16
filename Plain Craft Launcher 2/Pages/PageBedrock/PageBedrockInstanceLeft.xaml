@@ -1,0 +1,20 @@
+<local:MyPageLeft x:Class="PCL.PageBedrockInstanceLeft"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:local="clr-namespace:PCL" AnimatedControl="{Binding ElementName=PanItem, Mode=OneWay}">
+    <local:MyScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
+                          Style="{StaticResource ScrollViewerFullMargin}">
+        <StackPanel Margin="0,12,0,0" x:Name="PanItem">
+            <TextBlock Text="{DynamicResource Bedrock.Instance.Left.Game}" Margin="13,6,5,4" Opacity="0.6"
+                       FontSize="12" />
+            <local:MyListItem x:Name="ItemOverall" IsScaleAnimationEnabled="False" Checked="True" Type="RadioBox"
+                              Check="PageCheck" Tag="0" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
+                              Title="{DynamicResource Bedrock.Instance.Left.Overall}"
+                              SvgIcon="lucide/layout-dashboard" />
+            <local:MyListItem x:Name="ItemSetup" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="1"
+                              Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
+                              Title="{DynamicResource Bedrock.Instance.Left.Setup}"
+                              SvgIcon="lucide/settings" />
+        </StackPanel>
+    </local:MyScrollViewer>
+</local:MyPageLeft>
