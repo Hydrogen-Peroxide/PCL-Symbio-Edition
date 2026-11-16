@@ -92,7 +92,18 @@
                                    Foreground="{DynamicResource ColorBrushGray4}" />
                     </StackPanel>
                 </Border>
-            </StackPanel>
+                <!-- 实例选择 / 实例设置 -->
+                <Grid Margin="0,10,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <local:MyButton x:Name="BtnInstance" Grid.Column="0" Height="32"
+                                    Text="{DynamicResource Bedrock.Instance.Select}" Click="BtnInstance_Click" />
+                    <local:MyButton x:Name="BtnInstanceSettings" Grid.Column="2" Height="32"
+                                    Text="{DynamicResource Bedrock.Instance.Settings}" Click="BtnInstanceSettings_Click" />
+                </Grid>            </StackPanel>
         </local:MyScrollViewer>
 
         <!-- 启动按钮 -->

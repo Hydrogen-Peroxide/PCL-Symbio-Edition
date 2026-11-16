@@ -343,6 +343,9 @@ public partial class PageBedrockLeft
         return null;
     }
 
+    private void BtnInstance_Click(object sender, MouseButtonEventArgs e) { }
+
+    private void BtnInstanceSettings_Click(object sender, MouseButtonEventArgs e) { }
     private static string GetAvatarText(string name) =>
         name.Length > 1 && char.IsHighSurrogate(name[0]) ? name[..2] : name[..1].ToUpperInvariant();
 
