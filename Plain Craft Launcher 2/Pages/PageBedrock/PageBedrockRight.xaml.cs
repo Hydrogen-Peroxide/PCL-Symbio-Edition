@@ -612,6 +612,9 @@ public partial class PageBedrockRight
 
     public void BtnLaunch_Click(object sender, MouseButtonEventArgs e)
     {
+        ModBase.Log(
+            $"[Bedrock] 启动请求：选中={Config.Launch.BedrockSelectedVersion}，已安装={IsBedrockInstalled}，本地版本={(string.Join(",", ModBedrockInstance.GetLocalVersions()))}",
+            ModBase.LogLevel.Debug);
         if (!IsBedrockInstalled)
         {
             // 尚未检测到安装（或检测仍在后台进行），刷新一次检测并引导到下载列表
@@ -1537,11 +1540,21 @@ public partial class PageBedrockRight
 
         // 切版本 / 重新注册可能要十几秒，先立刻把启动浮层顶上来，别让按钮看着没反应
         // 注意：本方法在后台线程执行，操作控件必须切回 UI 线程，否则会抛跨线程异常
-        ModBase.RunInUi(() =>
+        ModBase.Log($"[Bedrock] 准备切换版本 {versionId}（当前线程 {Environment.CurrentManagedThreadId}）",
+            ModBase.LogLevel.Debug);
+        try
         {
-            if (!_launching)
-                BeginLaunchProgress(Lang.Text("Bedrock.Launching.Switch", versionId));
-        }, true);
+            ModBase.RunInUi(() =>
+            {
+                if (!_launching)
+                    BeginLaunchProgress(Lang.Text("Bedrock.Launching.Switch", versionId));
+            }, true);
+            ModBase.Log("[Bedrock] 启动浮层已显示", ModBase.LogLevel.Debug);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 显示启动浮层失败（已忽略，继续启动）：{ex}", ModBase.LogLevel.Debug);
+        }
 
         // GDK 便携版：解包目录里有主程序就能直接启动，不需要改动系统包注册
         if (IsGdkVersion(versionId))
