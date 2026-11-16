@@ -40,6 +40,11 @@ public partial class PageBedrockInstanceSelect
     }
 
     /// <summary>在启动器窗口中央显示实例选择浮层；onApplied 会在确认后调用。</summary>
+    private static PageBedrockInstanceSelect? _pageInstance;
+
+    /// <summary>页面模式下复用同一个实例。</summary>
+    public static PageBedrockInstanceSelect GetPage() => _pageInstance ??= new PageBedrockInstanceSelect();
+
     public static void Show(Action? onApplied = null)
     {
         var contentHost = ModMain.frmMain?.PanMain;
@@ -298,6 +303,13 @@ public partial class PageBedrockInstanceSelect
 
     private void Close()
     {
+        // 作为独立页面存在时，关闭即返回基岩版主界面
+        if (ReferenceEquals(this, _pageInstance) && Parent is not null)
+        {
+            ModMain.frmMain?.PageChange(FormMain.PageType.Bedrock);
+            return;
+        }
+
         ModAnimation.AniStart(new[]
         {
             ModAnimation.AaOpacity(this, -Opacity, 90, 10),

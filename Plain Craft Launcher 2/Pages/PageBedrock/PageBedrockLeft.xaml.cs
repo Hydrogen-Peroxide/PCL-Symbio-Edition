@@ -358,11 +358,7 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
     /// <summary>打开实例选择浮层：左侧切换数据目录，右侧挑选实例。</summary>
     private void BtnInstance_Click(object sender, MouseButtonEventArgs e)
     {
-        PageBedrockInstanceSelect.Show(() =>
-        {
-            RefreshStatus();
-            ModMain.frmBedrockRight?.RefreshPage();
-        });
+        ModMain.frmMain?.PageChange(FormMain.PageType.BedrockInstances);
     }
 
     /// <summary>打开实例设置：把设置面板搬到整窗浮层里显示（左栏只有 300px，塞不下）。</summary>
@@ -386,7 +382,7 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         RadioLeviLamina.Checked = loader == ModBedrockLoader.LeviLamina;
         RadioBLoader.Checked = loader == ModBedrockLoader.BLoader;
         ShowSettingsTab(0);
-        AttachSettingsOverlay();
+        ModMain.frmMain?.PageChange(FormMain.PageType.BedrockSetup);
     }
 
     private static string ChannelText(string versionId) => ModBedrockInstance.GetChannel(versionId) switch
@@ -485,7 +481,19 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
             HintService.Hint(Lang.Text("Bedrock.Instance.LoaderSaved", version), HintType.Success);
         }
 
-        DetachSettingsOverlay();
+        ModMain.frmMain?.PageChange(FormMain.PageType.Bedrock);
+    }
+
+    /// <summary>把设置面板交给页面宿主使用。</summary>
+    public FrameworkElement TakeSettingsPage()
+    {
+        if (PanInstanceSettings.Parent is Panel parent) parent.Children.Remove(PanInstanceSettings);
+        PanInstanceSettings.Width = double.NaN;
+        PanInstanceSettings.Height = double.NaN;
+        PanInstanceSettings.HorizontalAlignment = HorizontalAlignment.Stretch;
+        PanInstanceSettings.VerticalAlignment = VerticalAlignment.Stretch;
+        PanInstanceSettings.Visibility = Visibility.Visible;
+        return PanInstanceSettings;
     }
 
     /// <summary>当前选中的实例；没有选中时退回本地列表里的第一个。</summary>
