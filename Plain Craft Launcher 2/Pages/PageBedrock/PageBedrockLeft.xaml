@@ -31,7 +31,7 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <Grid Grid.Column="0" Width="40" Height="40" VerticalAlignment="Center">
-                            <Ellipse Fill="{DynamicResource ColorBrush3}" />
+                            <Ellipse x:Name="ShapeAvatar" Fill="{DynamicResource ColorBrush3}" />
                             <TextBlock x:Name="LabAvatar" Text="?" FontSize="17" FontWeight="Bold"
                                        HorizontalAlignment="Center" VerticalAlignment="Center"
                                        Foreground="{DynamicResource ColorBrushWhite}" />

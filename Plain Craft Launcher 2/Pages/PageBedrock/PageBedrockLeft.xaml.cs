@@ -122,6 +122,7 @@ public partial class PageBedrockLeft
     private void RefreshAccount()
     {
         var account = DetectXboxAccount();
+        ApplyAvatar(account?.Gamertag ?? account?.Xuid);
         if (account is null)
         {
             // 没有 Xbox 账号时，再看 Windows 是否至少登录了 Microsoft 账号
@@ -167,6 +168,41 @@ public partial class PageBedrockLeft
             : account.Mail;
         BtnSwitchAccount.Text = Lang.Text("Bedrock.Account.Switch");
         LabAccountHint.Text = Lang.Text("Bedrock.Account.SwitchHint");
+    }
+
+    /// <summary>
+    ///     用 Windows 本地接口取到的头像替换圆形底图；取不到时回退为首字母 + 纯色底。
+    ///     图片会先缓存到本地目录，避免每次都读系统文件。
+    /// </summary>
+    private void ApplyAvatar(string? seed)
+    {
+        var path = ModBedrockAvatar.Resolve(seed);
+        if (path is null)
+        {
+            ShapeAvatar.Fill = (System.Windows.Media.Brush)FindResource("ColorBrush3");
+            return;
+        }
+
+        try
+        {
+            var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+            bitmap.BeginInit();
+            bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+            bitmap.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.IgnoreImageCache;
+            bitmap.UriSource = new Uri(path);
+            bitmap.EndInit();
+            bitmap.Freeze();
+            ShapeAvatar.Fill = new System.Windows.Media.ImageBrush(bitmap)
+            {
+                Stretch = System.Windows.Media.Stretch.UniformToFill
+            };
+            ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[Bedrock] 载入系统头像失败，回退为首字母", ModBase.LogLevel.Debug);
+            ShapeAvatar.Fill = (System.Windows.Media.Brush)FindResource("ColorBrush3");
+        }
     }
 
     /// <summary>
