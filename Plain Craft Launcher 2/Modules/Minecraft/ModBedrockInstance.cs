@@ -232,7 +232,11 @@ public static class ModBedrockInstance
             foreach (var dir in Directory.GetDirectories(root))
             {
                 var name = Path.GetFileName(dir);
+                // 这些是启动器的辅助目录，不是版本
                 if (name.Equals("extracted", StringComparison.OrdinalIgnoreCase)) continue;
+                if (name.Equals("cache", StringComparison.OrdinalIgnoreCase)) continue;
+                if (name.Equals("versions", StringComparison.OrdinalIgnoreCase)) continue;
+                if (name.StartsWith(".", StringComparison.Ordinal)) continue;
                 result.Add(name);
             }
         }

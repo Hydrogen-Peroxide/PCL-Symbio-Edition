@@ -1536,7 +1536,12 @@ public partial class PageBedrockRight
     private void LaunchLocalVersion(string versionId)
     {
         if (_switchingVersion)
+        {
+            ModBase.Log($"[Bedrock] 上一个版本切换还没结束，忽略本次启动请求（{versionId}）",
+                ModBase.LogLevel.Hint,
+                userSummary: Lang.Text("Bedrock.Launching.Busy"));
             return;
+        }
 
         // 切版本 / 重新注册可能要十几秒，先立刻把启动浮层顶上来，别让按钮看着没反应
         // 注意：本方法在后台线程执行，操作控件必须切回 UI 线程，否则会抛跨线程异常
