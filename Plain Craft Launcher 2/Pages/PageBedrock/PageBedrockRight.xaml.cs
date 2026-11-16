@@ -1594,6 +1594,18 @@ public partial class PageBedrockRight
                 ModBedrockUwp.StopMinecraftProcesses();
 
                 var (targetDir, manifestPath) = FindExtractedVersion(versionId);
+                if (manifestPath is null)
+                {
+                    // 用户自己解包到 versions\<版本> 的目录：里面有 AppxManifest 就直接注册它
+                    var directDir = ModBedrockUwp.GetVersionDirectory(BedrockVersionsDir, versionId);
+                    var directManifest = Path.Combine(directDir, "AppxManifest.xml");
+                    if (File.Exists(directManifest))
+                    {
+                        targetDir = directDir;
+                        manifestPath = directManifest;
+                    }
+                }
+
                 if (manifestPath is not null)
                 {
                     var result = ModBase.ShellAndGetOutput("powershell.exe",
