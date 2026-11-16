@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using PCL.Core.App;
 using PCL.Core.App.Localization;
 using PCL.Core.UI.Controls;
 
@@ -147,8 +148,12 @@ public partial class PageBedrockInstanceSelect
     {
         PanInstances.Children.Clear();
         var versions = ModBedrockInstance.GetLocalVersions();
-        if (!versions.Contains(ModBedrockInstance.SelectedVersionId))
-            ModBedrockInstance.SelectedVersionId = versions.FirstOrDefault() ?? "";
+        // 已经选过的实例优先，避免每次打开都跳回第一个
+        var configured = Config.Launch.BedrockSelectedVersion;
+        var current = !string.IsNullOrWhiteSpace(configured) && versions.Contains(configured)
+            ? configured
+            : versions.FirstOrDefault() ?? "";
+        ModBedrockInstance.SelectedVersionId = current;
 
         if (versions.Count == 0)
         {
@@ -208,9 +213,16 @@ public partial class PageBedrockInstanceSelect
             Height = 46
         };
         var target = version;
-        item.Click += (_, _) => ModBedrockInstance.SelectedVersionId = target;
+        item.Click += (_, _) => SelectVersion(target);
         PanInstances.Children.Add(item);
         if (version == ModBedrockInstance.SelectedVersionId) item.SetChecked(true, false, false);
+    }
+
+    /// <summary>选中实例：同时写入配置，启动按钮与左右页面都跟随它。</summary>
+    private void SelectVersion(string versionId)
+    {
+        ModBedrockInstance.SelectedVersionId = versionId;
+        Config.Launch.BedrockSelectedVersion = versionId;
     }
 
     private static string ChannelLabel(string channel) => channel switch
@@ -234,6 +246,7 @@ public partial class PageBedrockInstanceSelect
     private void BtnConfirm_Click(object sender, MouseButtonEventArgs e)
     {
         var version = ModBedrockInstance.SelectedVersionId;
+        if (!string.IsNullOrWhiteSpace(version)) Config.Launch.BedrockSelectedVersion = version;
         if (!string.IsNullOrWhiteSpace(version))
             HintService.Hint(
                 Lang.Text("Bedrock.Instance.Selected",

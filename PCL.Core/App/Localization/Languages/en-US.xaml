@@ -3911,4 +3911,9 @@
     <sys:String x:Key="Bedrock.Select.Title">Select Bedrock instance</sys:String>
     <sys:String x:Key="Bedrock.Right.Placeholder">The version list, download and install UI now live in the Instance Select dialog on the left. This area no longer lists versions; launching uses the currently selected instance.</sys:String>
     <sys:String x:Key="Bedrock.Folder.Alongside">Next to current .minecraft</sys:String>
+    <sys:String x:Key="Bedrock.Right.Current.None">No instance selected</sys:String>
+    <sys:String x:Key="Bedrock.Right.Current.Title">Current instance</sys:String>
+    <sys:String x:Key="Bedrock.Right.Current.Loader">Loader: {0}</sys:String>
+    <sys:String x:Key="Bedrock.Right.Log.Empty">No launches yet. Click the launch button on the left and progress will show up here.</sys:String>
+    <sys:String x:Key="Bedrock.Right.Log.Title">Launch log</sys:String>
 </ResourceDictionary>

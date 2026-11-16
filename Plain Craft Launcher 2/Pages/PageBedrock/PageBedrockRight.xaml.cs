@@ -212,6 +212,72 @@ public partial class PageBedrockRight
         DetectBedrockInstallation();
         RefreshLocalVersions();
         LoadVersionList();
+        RefreshCurrentInstanceCard();
+    }
+
+    /// <summary>刷新右侧「当前实例」卡片，切换实例后立刻能看到变化。</summary>
+    private void RefreshCurrentInstanceCard()
+    {
+        try
+        {
+            var versions = ModBedrockInstance.GetLocalVersions();
+            var versionId = Config.Launch.BedrockSelectedVersion;
+            if (string.IsNullOrWhiteSpace(versionId) || !versions.Contains(versionId))
+                versionId = versions.Count > 0 ? versions[0] : "";
+            if (string.IsNullOrWhiteSpace(versionId))
+            {
+                LabCurrentInstance.Text = Lang.Text("Bedrock.Right.Current.None");
+                LabCurrentVersion.Text = "";
+                LabCurrentLoader.Text = "";
+                LabCurrentPath.Text = ModBedrockInstance.VersionsDirectory;
+                return;
+            }
+
+            LabCurrentInstance.Text =
+                ModBedrockInstance.GetDisplayName(ModBedrockInstance.VersionsDirectory, versionId);
+            LabCurrentVersion.Text = Lang.Text("Bedrock.Status.Version", versionId) + " · " + ChannelLabel(versionId);
+            LabCurrentLoader.Text = Lang.Text("Bedrock.Right.Current.Loader", ModBedrockLoader.GetLoader(versionId));
+            LabCurrentPath.Text =
+                ModBedrockInstance.GetInstanceFolder(ModBedrockInstance.VersionsDirectory, versionId);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[Bedrock] 刷新当前实例卡片失败", ModBase.LogLevel.Debug);
+        }
+    }
+
+    private static string ChannelLabel(string versionId) => ModBedrockInstance.GetChannel(versionId) switch
+    {
+        "preview" => Lang.Text("Download.Bedrock.Channel.Preview"),
+        "beta" => Lang.Text("Download.Bedrock.Channel.Beta"),
+        _ => Lang.Text("Download.Bedrock.Channel.Release")
+    };
+
+    private string? _lastLaunchLogLine;
+    private bool _logStarted;
+
+    /// <summary>把启动过程的每一步写进右侧「启动日志」卡片。</summary>
+    private void AppendLaunchLog(string? line)
+    {
+        if (string.IsNullOrWhiteSpace(line)) return;
+        if (string.Equals(line, _lastLaunchLogLine, StringComparison.Ordinal)) return;
+        _lastLaunchLogLine = line;
+
+        void Apply()
+        {
+            if (LabLaunchLog is null) return;
+            var builder = new System.Text.StringBuilder();
+            if (_logStarted && !string.IsNullOrWhiteSpace(LabLaunchLog.Text))
+                builder.Append(LabLaunchLog.Text.TrimEnd('\n')).Append('\n');
+            builder.Append(DateTime.Now.ToString("HH:mm:ss")).Append("  ").Append(line);
+            _logStarted = true;
+            var all = builder.ToString().Split('\n');
+            if (all.Length > 200) all = all[(all.Length - 200)..];
+            LabLaunchLog.Text = string.Join('\n', all);
+        }
+
+        if (Dispatcher.CheckAccess()) Apply();
+        else ModBase.RunInUi(Apply);
     }
 
     public bool IsBedrockInstalled { get; private set; }
@@ -579,6 +645,7 @@ public partial class PageBedrockRight
         BtnLaunch.IsEnabled = false;
         LabStatus.Text = Lang.Text("Bedrock.Status.Launching");
         LabDetail.Text = detail;
+        AppendLaunchLog(Lang.Text("Bedrock.Status.Launching") + " " + detail);
         _launchProgressTimer.Start();
     }
 
@@ -589,7 +656,11 @@ public partial class PageBedrockRight
         {
             if (!_launching) return;
             if (progress > _launchActualProgress) _launchActualProgress = progress;
-            if (detail is not null) LabDetail.Text = detail;
+            if (detail is not null)
+            {
+                LabDetail.Text = detail;
+                AppendLaunchLog(detail);
+            }
         }
 
         if (Dispatcher.CheckAccess()) Apply();
@@ -603,6 +674,7 @@ public partial class PageBedrockRight
         {
             LabStatus.Text = status;
             LabDetail.Text = detail;
+            AppendLaunchLog(string.IsNullOrWhiteSpace(detail) ? status : status + "：" + detail);
             LoadLaunching.State.LoadingState = MyLoading.MyLoadingState.Stop;
 
             if (!success)

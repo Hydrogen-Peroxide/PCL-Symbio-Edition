@@ -3911,4 +3911,9 @@
     <sys:String x:Key="Bedrock.Select.Title">选择基岩版实例</sys:String>
     <sys:String x:Key="Bedrock.Right.Placeholder">版本列表、下载与安装已经搬到左侧的「实例选择」浮层里；这里不再显示版本列表，启动时使用当前选中的实例。</sys:String>
     <sys:String x:Key="Bedrock.Folder.Alongside">当前 .minecraft 旁</sys:String>
+    <sys:String x:Key="Bedrock.Right.Current.None">还没有选中实例</sys:String>
+    <sys:String x:Key="Bedrock.Right.Current.Title">当前实例</sys:String>
+    <sys:String x:Key="Bedrock.Right.Current.Loader">加载器：{0}</sys:String>
+    <sys:String x:Key="Bedrock.Right.Log.Empty">还没有启动记录，点左侧的启动按钮后，这里会实时显示进度。</sys:String>
+    <sys:String x:Key="Bedrock.Right.Log.Title">启动日志</sys:String>
 </ResourceDictionary>
