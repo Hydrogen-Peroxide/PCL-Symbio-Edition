@@ -16,6 +16,9 @@ public partial class PageBedrockInstanceLeft : IRefreshable
     private static PageBedrockInstanceSetupPage? _pageSetup;
     private static PageBedrockInstanceSaves? _pageSaves;
     private static PageBedrockInstanceActions? _pageActions;
+    private static PageBedrockInstanceLoader? _pageLoader;
+    private static PageBedrockInstanceFiles? _pageFiles;
+    private static PageBedrockInstanceStats? _pageStats;
 
     /// <summary>把过长的路径折叠成「头…尾」，保持行高不变。</summary>
     public static string FoldPath(string? path, int max = 46)
@@ -50,6 +53,17 @@ public partial class PageBedrockInstanceLeft : IRefreshable
                 break;
             case FormMain.PageSubType.VersionWorld:
                 _pageSaves?.RefreshData();
+                break;
+            case FormMain.PageSubType.BedrockLoader:
+                _pageLoader?.RefreshData();
+                break;
+            case FormMain.PageSubType.BedrockMods:
+            case FormMain.PageSubType.BedrockScreenshots:
+            case FormMain.PageSubType.BedrockServers:
+                _pageFiles?.RefreshData();
+                break;
+            case FormMain.PageSubType.BedrockStats:
+                _pageStats?.RefreshData();
                 break;
         }
     }
@@ -95,6 +109,34 @@ public partial class PageBedrockInstanceLeft : IRefreshable
             {
                 _pageActions ??= new PageBedrockInstanceActions();
                 return _pageActions;
+            }
+            case FormMain.PageSubType.BedrockLoader:
+            {
+                _pageLoader ??= new PageBedrockInstanceLoader();
+                return _pageLoader;
+            }
+            case FormMain.PageSubType.BedrockMods:
+            {
+                _pageFiles ??= new PageBedrockInstanceFiles();
+                _pageFiles.Mode = 0;
+                return _pageFiles;
+            }
+            case FormMain.PageSubType.BedrockScreenshots:
+            {
+                _pageFiles ??= new PageBedrockInstanceFiles();
+                _pageFiles.Mode = 1;
+                return _pageFiles;
+            }
+            case FormMain.PageSubType.BedrockServers:
+            {
+                _pageFiles ??= new PageBedrockInstanceFiles();
+                _pageFiles.Mode = 2;
+                return _pageFiles;
+            }
+            case FormMain.PageSubType.BedrockStats:
+            {
+                _pageStats ??= new PageBedrockInstanceStats();
+                return _pageStats;
             }
 
             default:

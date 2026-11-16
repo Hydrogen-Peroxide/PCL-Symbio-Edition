@@ -3962,4 +3962,16 @@
 <sys:String x:Key="Bedrock.Instance.Actions.Copied">已复制为「{0}」</sys:String>
 <sys:String x:Key="Bedrock.Instance.Actions.CopyFailed">复制实例失败：{0}</sys:String>
 <sys:String x:Key="Bedrock.Instance.Actions.Hint">打开文件夹会定位到实例目录；复制实例会生成一个独立副本（含安装包与解包目录）；删除操作无法撤销。</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Tools">工具</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Stats">统计数据</sys:String>
+<sys:String x:Key="Bedrock.Instance.Files.Title">列表</sys:String>
+<sys:String x:Key="Bedrock.Instance.Files.Open">打开文件夹</sys:String>
+<sys:String x:Key="Bedrock.Instance.Files.Count">{0} 项</sys:String>
+<sys:String x:Key="Bedrock.Instance.Files.EmptyMods">这个实例下还没有附加包或模组。</sys:String>
+<sys:String x:Key="Bedrock.Instance.Files.EmptyScreenshots">这个实例下还没有截图。</sys:String>
+<sys:String x:Key="Bedrock.Instance.Files.EmptyServers">还没有保存的服务器，可以在游戏内的「服务器」页添加后回来刷新。</sys:String>
+<sys:String x:Key="Bedrock.Instance.Stats.Size">占用空间</sys:String>
+<sys:String x:Key="Bedrock.Instance.Stats.Files">文件数</sys:String>
+<sys:String x:Key="Bedrock.Instance.Stats.Worlds">存档数</sys:String>
+<sys:String x:Key="Bedrock.Instance.Stats.Created">创建时间</sys:String>
 </ResourceDictionary>

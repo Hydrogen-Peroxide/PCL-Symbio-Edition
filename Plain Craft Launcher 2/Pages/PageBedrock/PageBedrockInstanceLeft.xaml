@@ -15,14 +15,33 @@
                               Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
                               Title="{DynamicResource Bedrock.Instance.Left.Setup}"
                               SvgIcon="lucide/settings" />
+            <local:MyListItem x:Name="ItemLoader" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="31"
+                              Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
+                              Title="{DynamicResource Bedrock.Instance.LoaderTitle}"
+                              SvgIcon="lucide/package-check" />
+            <local:MyListItem x:Name="ItemMod" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="32"
+                              Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
+                              Title="{DynamicResource Instance.Left.Mod}"
+                              SvgIcon="lucide/puzzle" />
             <TextBlock Text="{DynamicResource Bedrock.Instance.Left.Resources}" Margin="13,6,5,4" Opacity="0.6"
                        FontSize="12" />
             <local:MyListItem x:Name="ItemWorld" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="3"
                               Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
                               Title="{DynamicResource Instance.Left.Saves}" SvgIcon="lucide/globe" />
+            <local:MyListItem x:Name="ItemScreenshot" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="33"
+                              Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
+                              Title="{DynamicResource Instance.Left.Screenshots}" SvgIcon="lucide/image" />
+            <local:MyListItem x:Name="ItemServer" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="34"
+                              Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
+                              Title="{DynamicResource Instance.Left.Servers}" SvgIcon="lucide/server" />
+            <TextBlock Text="{DynamicResource Bedrock.Instance.Left.Tools}" Margin="13,6,5,4" Opacity="0.6"
+                       FontSize="12" />
             <local:MyListItem x:Name="ItemActions" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="30"
                               Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
                               Title="{DynamicResource Bedrock.Instance.Left.Actions}" SvgIcon="lucide/wrench" />
+            <local:MyListItem x:Name="ItemStats" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="35"
+                              Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
+                              Title="{DynamicResource Bedrock.Instance.Left.Stats}" SvgIcon="lucide/chart-line" />
         </StackPanel>
     </local:MyScrollViewer>
 </local:MyPageLeft>

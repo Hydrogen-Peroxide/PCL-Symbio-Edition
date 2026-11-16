@@ -13,7 +13,6 @@ public partial class PageBedrockInstanceSetupPage : IRefreshable
     {
         InitializeComponent();
         Loaded += (_, _) => RefreshData();
-        Unloaded += (_, _) => SaveLoader();
         BtnRename.Click += BtnRename_Click;
 
     }
@@ -41,8 +40,7 @@ public partial class PageBedrockInstanceSetupPage : IRefreshable
             LabVersion.Text = "-";
             LabChannel.Text = "-";
             LabPath.Text = Lang.Text("Bedrock.Instance.None");
-            RadioVanilla.Checked = true;
-            LabLoaderTarget.Text = "";
+
             BtnRename.IsEnabled = false;
             BtnOpenFolder.IsEnabled = false;
             return;
@@ -66,25 +64,7 @@ public partial class PageBedrockInstanceSetupPage : IRefreshable
         BtnRename.IsEnabled = true;
         BtnOpenFolder.IsEnabled = true;
 
-        var loader = ModBedrockLoader.GetLoader(version);
-        RadioVanilla.Checked = loader == ModBedrockLoader.Vanilla;
-        RadioLeviLamina.Checked = loader == ModBedrockLoader.LeviLamina;
-        RadioBLoader.Checked = loader == ModBedrockLoader.BLoader;
-        LabLoaderTarget.Text = Lang.Text("Bedrock.Instance.Loader", version);
-    }
 
-    private void SaveLoader()
-    {
-        var version = CurrentVersion;
-        if (version is null) return;
-        var loader = RadioLeviLamina.Checked
-            ? ModBedrockLoader.LeviLamina
-            : RadioBLoader.Checked
-                ? ModBedrockLoader.BLoader
-                : ModBedrockLoader.Vanilla;
-        if (ModBedrockLoader.GetLoader(version) == loader) return;
-        ModBedrockLoader.SetLoader(version, loader);
-        HintService.Hint(Lang.Text("Bedrock.Instance.LoaderSaved", version), HintType.Success);
     }
 
     private void BtnRename_Click(object sender, MouseButtonEventArgs e)

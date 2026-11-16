@@ -3962,4 +3962,16 @@
 <sys:String x:Key="Bedrock.Instance.Actions.Copied">Duplicated as "{0}"</sys:String>
 <sys:String x:Key="Bedrock.Instance.Actions.CopyFailed">Failed to duplicate: {0}</sys:String>
 <sys:String x:Key="Bedrock.Instance.Actions.Hint">Open Folder jumps to the instance directory; Duplicate creates an independent copy including package and extracted folders; deletion cannot be undone.</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Tools">Tools</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Stats">Statistics</sys:String>
+<sys:String x:Key="Bedrock.Instance.Files.Title">List</sys:String>
+<sys:String x:Key="Bedrock.Instance.Files.Open">Open Folder</sys:String>
+<sys:String x:Key="Bedrock.Instance.Files.Count">{0} items</sys:String>
+<sys:String x:Key="Bedrock.Instance.Files.EmptyMods">No add-ons or mods in this instance yet.</sys:String>
+<sys:String x:Key="Bedrock.Instance.Files.EmptyScreenshots">No screenshots in this instance yet.</sys:String>
+<sys:String x:Key="Bedrock.Instance.Files.EmptyServers">No saved servers yet. Add one in the in-game Servers tab, then refresh.</sys:String>
+<sys:String x:Key="Bedrock.Instance.Stats.Size">Disk Usage</sys:String>
+<sys:String x:Key="Bedrock.Instance.Stats.Files">Files</sys:String>
+<sys:String x:Key="Bedrock.Instance.Stats.Worlds">Worlds</sys:String>
+<sys:String x:Key="Bedrock.Instance.Stats.Created">Created</sys:String>
 </ResourceDictionary>

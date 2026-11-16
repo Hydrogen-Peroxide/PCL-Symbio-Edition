@@ -1508,6 +1508,11 @@ public partial class FormMain
         VersionSaves = 12,
         VersionModJarInJar = 13,
         BedrockActions = 30,
+        BedrockLoader = 31,
+        BedrockMods = 32,
+        BedrockScreenshots = 33,
+        BedrockServers = 34,
+        BedrockStats = 35,
 
         VersionSavesInfo = 0,
         VersionSavesDatapack = 1,
