@@ -15,8 +15,7 @@ public partial class PageBedrockInstanceSetupPage : IRefreshable
         Loaded += (_, _) => RefreshData();
         Unloaded += (_, _) => SaveLoader();
         BtnRename.Click += BtnRename_Click;
-        BtnOpenFolder.Click += BtnOpenFolder_Click;
-        BtnDelete.Click += BtnDelete_Click;
+
     }
 
     public void Refresh()
@@ -46,7 +45,6 @@ public partial class PageBedrockInstanceSetupPage : IRefreshable
             LabLoaderTarget.Text = "";
             BtnRename.IsEnabled = false;
             BtnOpenFolder.IsEnabled = false;
-            BtnDelete.IsEnabled = false;
             return;
         }
 
@@ -62,10 +60,11 @@ public partial class PageBedrockInstanceSetupPage : IRefreshable
         TextName.Text = ModBedrockInstance.GetDisplayName(versionsDirectory, version);
         LabVersion.Text = version;
         LabChannel.Text = channelText;
-        LabPath.Text = ModBedrockInstance.GetInstanceFolder(versionsDirectory, version);
+        var instancePath = ModBedrockInstance.GetInstanceFolder(versionsDirectory, version);
+        LabPath.Text = PageBedrockInstanceLeft.FoldPath(instancePath);
+        LabPath.ToolTip = instancePath;
         BtnRename.IsEnabled = true;
         BtnOpenFolder.IsEnabled = true;
-        BtnDelete.IsEnabled = true;
 
         var loader = ModBedrockLoader.GetLoader(version);
         RadioVanilla.Checked = loader == ModBedrockLoader.Vanilla;

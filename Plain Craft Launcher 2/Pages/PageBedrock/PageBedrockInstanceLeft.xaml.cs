@@ -14,6 +14,18 @@ public partial class PageBedrockInstanceLeft : IRefreshable
 
     private static PageBedrockInstanceOverall? _pageOverall;
     private static PageBedrockInstanceSetupPage? _pageSetup;
+    private static PageBedrockInstanceSaves? _pageSaves;
+    private static PageBedrockInstanceActions? _pageActions;
+
+    /// <summary>把过长的路径折叠成「头…尾」，保持行高不变。</summary>
+    public static string FoldPath(string? path, int max = 46)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return "";
+        if (path.Length <= max) return path;
+        var head = max / 2 - 2;
+        var tail = max - head - 1;
+        return path[..head] + "…" + path[^tail..];
+    }
 
     public PageBedrockInstanceLeft()
     {
@@ -35,6 +47,9 @@ public partial class PageBedrockInstanceLeft : IRefreshable
                 break;
             case FormMain.PageSubType.VersionSetup:
                 _pageSetup?.RefreshData();
+                break;
+            case FormMain.PageSubType.VersionWorld:
+                _pageSaves?.RefreshData();
                 break;
         }
     }
@@ -70,6 +85,16 @@ public partial class PageBedrockInstanceLeft : IRefreshable
             {
                 _pageSetup ??= new PageBedrockInstanceSetupPage();
                 return _pageSetup;
+            }
+            case FormMain.PageSubType.VersionWorld:
+            {
+                _pageSaves ??= new PageBedrockInstanceSaves();
+                return _pageSaves;
+            }
+            case FormMain.PageSubType.BedrockActions:
+            {
+                _pageActions ??= new PageBedrockInstanceActions();
+                return _pageActions;
             }
 
             default:

@@ -3952,4 +3952,14 @@
 <sys:String x:Key="Bedrock.Instance.Settings.Delete.Title">删除实例</sys:String>
 <sys:String x:Key="Bedrock.Instance.Settings.Delete.Failed">删除实例失败：{0}</sys:String>
 <sys:String x:Key="Bedrock.Instance.Settings.Deleted">已删除实例「{0}」</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Resources">存档与管理</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Actions">实例操作</sys:String>
+<sys:String x:Key="Bedrock.Instance.Saves.Title">存档</sys:String>
+<sys:String x:Key="Bedrock.Instance.Saves.Open">打开存档文件夹</sys:String>
+<sys:String x:Key="Bedrock.Instance.Saves.Empty">这个实例下还没有存档。</sys:String>
+<sys:String x:Key="Bedrock.Instance.Actions.Title">实例操作</sys:String>
+<sys:String x:Key="Bedrock.Instance.Actions.Copy">复制实例</sys:String>
+<sys:String x:Key="Bedrock.Instance.Actions.Copied">已复制为「{0}」</sys:String>
+<sys:String x:Key="Bedrock.Instance.Actions.CopyFailed">复制实例失败：{0}</sys:String>
+<sys:String x:Key="Bedrock.Instance.Actions.Hint">打开文件夹会定位到实例目录；复制实例会生成一个独立副本（含安装包与解包目录）；删除操作无法撤销。</sys:String>
 </ResourceDictionary>

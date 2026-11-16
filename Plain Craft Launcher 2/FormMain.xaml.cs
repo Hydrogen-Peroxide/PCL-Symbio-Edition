@@ -1507,6 +1507,8 @@ public partial class FormMain
         VersionServer = 11,
         VersionSaves = 12,
         VersionModJarInJar = 13,
+        BedrockActions = 30,
+
         VersionSavesInfo = 0,
         VersionSavesDatapack = 1,
     }

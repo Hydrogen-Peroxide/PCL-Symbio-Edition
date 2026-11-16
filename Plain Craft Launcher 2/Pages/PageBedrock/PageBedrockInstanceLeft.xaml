@@ -15,6 +15,14 @@
                               Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
                               Title="{DynamicResource Bedrock.Instance.Left.Setup}"
                               SvgIcon="lucide/settings" />
+            <TextBlock Text="{DynamicResource Bedrock.Instance.Left.Resources}" Margin="13,6,5,4" Opacity="0.6"
+                       FontSize="12" />
+            <local:MyListItem x:Name="ItemWorld" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="3"
+                              Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
+                              Title="{DynamicResource Instance.Left.Saves}" SvgIcon="lucide/globe" />
+            <local:MyListItem x:Name="ItemActions" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="30"
+                              Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
+                              Title="{DynamicResource Bedrock.Instance.Left.Actions}" SvgIcon="lucide/wrench" />
         </StackPanel>
     </local:MyScrollViewer>
 </local:MyPageLeft>

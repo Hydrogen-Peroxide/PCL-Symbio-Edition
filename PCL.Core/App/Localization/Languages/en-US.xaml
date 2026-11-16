@@ -3952,4 +3952,14 @@
 <sys:String x:Key="Bedrock.Instance.Settings.Delete.Title">Delete Instance</sys:String>
 <sys:String x:Key="Bedrock.Instance.Settings.Delete.Failed">Failed to delete instance: {0}</sys:String>
 <sys:String x:Key="Bedrock.Instance.Settings.Deleted">Deleted instance "{0}"</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Resources">Saves &amp; Tools</sys:String>
+<sys:String x:Key="Bedrock.Instance.Left.Actions">Actions</sys:String>
+<sys:String x:Key="Bedrock.Instance.Saves.Title">Saves</sys:String>
+<sys:String x:Key="Bedrock.Instance.Saves.Open">Open Saves Folder</sys:String>
+<sys:String x:Key="Bedrock.Instance.Saves.Empty">This instance has no worlds yet.</sys:String>
+<sys:String x:Key="Bedrock.Instance.Actions.Title">Instance Actions</sys:String>
+<sys:String x:Key="Bedrock.Instance.Actions.Copy">Duplicate Instance</sys:String>
+<sys:String x:Key="Bedrock.Instance.Actions.Copied">Duplicated as "{0}"</sys:String>
+<sys:String x:Key="Bedrock.Instance.Actions.CopyFailed">Failed to duplicate: {0}</sys:String>
+<sys:String x:Key="Bedrock.Instance.Actions.Hint">Open Folder jumps to the instance directory; Duplicate creates an independent copy including package and extracted folders; deletion cannot be undone.</sys:String>
 </ResourceDictionary>

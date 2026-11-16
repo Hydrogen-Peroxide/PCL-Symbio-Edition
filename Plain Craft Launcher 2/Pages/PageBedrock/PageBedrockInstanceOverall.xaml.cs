@@ -59,7 +59,9 @@ public partial class PageBedrockInstanceOverall : IRefreshable
         LabInstanceSub.Text = Lang.Text("Bedrock.Status.Version", versionId) + " · " + channelText;
         LabVersion.Text = versionId;
         LabChannel.Text = channelText;
-        LabPath.Text = ModBedrockInstance.GetInstanceFolder(versionsDirectory, versionId);
+        var instancePath = ModBedrockInstance.GetInstanceFolder(versionsDirectory, versionId);
+        LabPath.Text = PageBedrockInstanceLeft.FoldPath(instancePath);
+        LabPath.ToolTip = instancePath;
         var icon = channel switch
         {
             "preview" => "CommandBlock.png",
