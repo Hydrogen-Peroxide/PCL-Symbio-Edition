@@ -67,11 +67,7 @@
                             Text="{DynamicResource Bedrock.Action.Launch}"
                             Click="BtnLaunch_Click"
                             Padding="30,0,30,15" />
-            <TextBlock x:Name="LabVersionText" Text="{DynamicResource Bedrock.Status.NotSelected}" Margin="35,0,35,10"
-                       IsHitTestVisible="False"
-                       VerticalAlignment="Bottom" HorizontalAlignment="Center"
-                       TextTrimming="CharacterEllipsis"
-                       FontSize="11" Foreground="{DynamicResource ColorBrushGray3}" />
+
         </Grid>
 
         <!-- 实例选择 / 实例设置：与 Java 版底部同款并排两个按钮 -->

@@ -398,7 +398,8 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
     /// <summary>把设置面板挂到弹窗层，显示为整窗浮层。</summary>
     private void AttachSettingsOverlay()
     {
-        if (ModMain.frmMain?.PanMain is not { } host) return;
+        var contentHost = ModMain.frmMain?.PanMain;
+        if (contentHost?.Parent is not Panel host) return;
         if (PanInstanceSettings.Parent is Panel parent && !ReferenceEquals(parent, host))
         {
             _settingsHome = parent;
@@ -412,6 +413,8 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         PanInstanceSettings.Height = double.NaN;
         PanInstanceSettings.Visibility = Visibility.Visible;
         Panel.SetZIndex(PanInstanceSettings, 99);
+        Grid.SetRow(PanInstanceSettings, Grid.GetRow(contentHost));
+        Grid.SetRowSpan(PanInstanceSettings, Grid.GetRowSpan(contentHost));
         if (!host.Children.Contains(PanInstanceSettings)) host.Children.Add(PanInstanceSettings);
 
         var slide = new TranslateTransform(0d, 28d);
@@ -875,9 +878,7 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
 
     public void RefreshStatus()
     {
-        // 启动按钮上方的版本号跟随“当前选中的实例”，切换实例时立刻变化
         var selected = GetSelectedLocalVersion();
-        var selectedText = selected is null ? null : Lang.Text("Bedrock.Status.Version", selected);
 
         var right = ModMain.frmBedrockRight;
         if (right is null)
@@ -886,7 +887,6 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
             ShapeStatusDot.Fill = (Brush)FindResource("ColorBrushGray4");
             LabStatus.Text = Lang.Text("Bedrock.Status.NotFound");
             SetDetailPath(null);
-            LabVersionText.Text = selectedText ?? Lang.Text("Bedrock.Status.NotFound");
             return;
         }
 
@@ -894,11 +894,6 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         ShapeStatusDot.Fill = (Brush)FindResource(installed || selected is not null ? "ColorBrush3" : "ColorBrushGray4");
         LabStatus.Text = installed ? Lang.Text("Bedrock.Status.Detected") : Lang.Text("Bedrock.Status.NotFound");
         SetDetailPath(installed ? right.BedrockInstallPath : null);
-        LabVersionText.Text = selectedText ?? (installed
-            ? string.IsNullOrEmpty(right.BedrockVersion)
-                ? Lang.Text("Bedrock.Status.Ready")
-                : Lang.Text("Bedrock.Status.Version", right.BedrockVersion)
-            : Lang.Text("Bedrock.Status.NotFound"));
     }
 
     /// <summary>当前选中的本地实例：优先配置里的选择，其次内存里记录的版本。</summary>

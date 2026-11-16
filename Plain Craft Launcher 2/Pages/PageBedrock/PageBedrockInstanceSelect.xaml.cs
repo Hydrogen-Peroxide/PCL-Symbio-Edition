@@ -42,8 +42,8 @@ public partial class PageBedrockInstanceSelect
     /// <summary>在启动器窗口中央显示实例选择浮层；onApplied 会在确认后调用。</summary>
     public static void Show(Action? onApplied = null)
     {
-        var host = ModMain.frmMain?.PanMain;
-        if (host is null) return;
+        var contentHost = ModMain.frmMain?.PanMain;
+        if (contentHost?.Parent is not Panel host) return;
 
         // 同一时间只保留一个实例选择页面
         foreach (var existing in host.Children.OfType<PageBedrockInstanceSelect>().ToList())
@@ -51,6 +51,8 @@ public partial class PageBedrockInstanceSelect
 
         var page = new PageBedrockInstanceSelect { _onApplied = onApplied };
         Panel.SetZIndex(page, 99);
+        Grid.SetRow(page, Grid.GetRow(contentHost));
+        Grid.SetRowSpan(page, Grid.GetRowSpan(contentHost));
         host.Children.Add(page);
     }
 
