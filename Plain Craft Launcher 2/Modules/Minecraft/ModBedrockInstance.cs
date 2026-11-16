@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using PCL.Core.App;
 
 namespace PCL;
@@ -153,6 +155,44 @@ public static class ModBedrockInstance
             if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) != 0) continue;
             CopyDirectory(directory, Path.Combine(target, Path.GetFileName(directory)), ref copied, onProgress);
         }
+    }
+
+    /// <summary>
+    ///     判断实例所属通道：release / preview / beta。
+    ///     版本标识里带关键字时直接判断，否则读取解包目录的 AppxManifest Identity。
+    /// </summary>
+    public static string GetChannel(string versionId)
+    {
+        var lower = versionId.ToLowerInvariant();
+        if (lower.Contains("preview")) return "preview";
+        if (lower.Contains("beta")) return "beta";
+
+        try
+        {
+            var extracted = ModBedrockUwp.GetVersionDirectory(Path.Combine(VersionsDirectory, "extracted"), versionId);
+            if (Directory.Exists(extracted))
+            {
+                var manifest = Directory.GetFiles(extracted, "AppxManifest.xml", SearchOption.TopDirectoryOnly)
+                    .FirstOrDefault();
+                if (manifest is not null)
+                {
+                    var match = Regex.Match(File.ReadAllText(manifest),
+                        "<Identity\\s[^>]*Name=\"([^\"]+)\"", RegexOptions.IgnoreCase);
+                    if (match.Success)
+                    {
+                        var identity = match.Groups[1].Value;
+                        if (identity.Contains("Preview", StringComparison.OrdinalIgnoreCase)) return "preview";
+                        if (identity.Contains("Beta", StringComparison.OrdinalIgnoreCase)) return "beta";
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 判断实例通道失败（{versionId}）：{ex.Message}", ModBase.LogLevel.Debug);
+        }
+
+        return "release";
     }
 
     /// <summary>当前选中的基岩版实例（版本目录名）。</summary>

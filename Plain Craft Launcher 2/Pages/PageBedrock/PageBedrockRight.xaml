@@ -4,7 +4,9 @@
                    xmlns:local="clr-namespace:PCL"
                    xmlns:svgIcon="clr-namespace:PCL.Core.UI.Controls.SvgIcon;assembly=PCL.Core">
     <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
-        <StackPanel Name="PanMain" Margin="25,25,25,10" Grid.IsSharedSizeScope="True">
+        <Grid>
+        <!-- 版本列表与下载已移到实例选择浮层，右侧只保留占位说明 -->
+        <StackPanel x:Name="PanMain" Margin="25,25,25,10" Grid.IsSharedSizeScope="True" Visibility="Collapsed">
 
             <!-- 状态 -->
             <!-- 关闭高度动画：启动时进度条出现会让卡片瞬间变高，动画期间会被裁掉一截 -->
@@ -174,5 +176,15 @@
             <StackPanel Name="PanVersionList" Margin="0,10,0,0" />
 
         </StackPanel>
+        <StackPanel x:Name="PanPlaceholder" Margin="25,25,25,10">
+            <local:MyCard Title="{DynamicResource Bedrock.Local.Title}" UseAnimation="False">
+                <StackPanel Margin="16,38,16,16">
+                    <TextBlock Text="{DynamicResource Bedrock.Right.Placeholder}" TextWrapping="Wrap"
+                               FontSize="12.5" LineHeight="20"
+                               Foreground="{DynamicResource ColorBrushGray3}" />
+                </StackPanel>
+            </local:MyCard>
+        </StackPanel>
+        </Grid>
     </local:MyScrollViewer>
 </local:MyPageRight>

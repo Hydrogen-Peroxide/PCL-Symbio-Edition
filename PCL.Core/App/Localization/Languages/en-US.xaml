@@ -3896,4 +3896,18 @@
     <sys:String x:Key="Setup.Language.Banner.DescriptionLine2">Contribute language resource changes to the PCL SE maintenance repository.</sys:String>
     <sys:String x:Key="Setup.Language.Banner.SubmitPullRequest">Contribute translations</sys:String>
 
+    <sys:String x:Key="Bedrock.Folder.Custom">Custom folder</sys:String>
+    <sys:String x:Key="Bedrock.Folder.Default">Launcher folder</sys:String>
+    <sys:String x:Key="Bedrock.Folder.Detected">Drive {0}</sys:String>
+    <sys:String x:Key="Bedrock.Folder.User">User folder</sys:String>
+    <sys:String x:Key="Bedrock.Select.AddFolder">Add existing folder</sys:String>
+    <sys:String x:Key="Bedrock.Select.Applied">Switched to {0}</sys:String>
+    <sys:String x:Key="Bedrock.Select.FolderAdded">Data folder added: {0}</sys:String>
+    <sys:String x:Key="Bedrock.Select.FolderExists">That folder is already in the list</sys:String>
+    <sys:String x:Key="Bedrock.Select.FolderInvalid">That folder is not usable. Pick an existing folder.</sys:String>
+    <sys:String x:Key="Bedrock.Select.Folders">Data folders</sys:String>
+    <sys:String x:Key="Bedrock.Select.Instances">Version instances</sys:String>
+    <sys:String x:Key="Bedrock.Select.NoInstances">No instances in this folder yet. Install a version from the download page first.</sys:String>
+    <sys:String x:Key="Bedrock.Select.Title">Select Bedrock instance</sys:String>
+    <sys:String x:Key="Bedrock.Right.Placeholder">The version list, download and install UI now live in the Instance Select dialog on the left. This area no longer lists versions; launching uses the currently selected instance.</sys:String>
 </ResourceDictionary>

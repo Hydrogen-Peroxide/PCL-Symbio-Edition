@@ -348,22 +348,14 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         return null;
     }
 
-    /// <summary>选择当前要操作的基岩版实例（本地已安装的版本）。</summary>
+    /// <summary>打开实例选择浮层：左侧切换数据目录，右侧挑选实例。</summary>
     private void BtnInstance_Click(object sender, MouseButtonEventArgs e)
     {
-        var versions = ModBedrockInstance.GetLocalVersions();
-        if (versions.Count == 0)
+        PageBedrockInstanceSelect.Show(() =>
         {
-            HintService.Hint(Lang.Text("Bedrock.Instance.None"), HintType.Error);
-            return;
-        }
-
-        var radios = new List<IMyRadio>();
-        foreach (var version in versions) radios.Add(new MyRadioBox { Text = version });
-        var selected = (int)ModMain.MyMsgBoxSelect(radios, Lang.Text("Bedrock.Instance.Select"));
-        if (selected < 0 || selected >= versions.Count) return;
-        ModBedrockInstance.SelectedVersionId = versions[selected];
-        HintService.Hint(Lang.Text("Bedrock.Instance.Selected", versions[selected]), HintType.Success);
+            RefreshStatus();
+            ModMain.frmBedrockRight?.RefreshPage();
+        });
     }
 
     /// <summary>打开实例设置浮层：加载器切换 + 原有的快捷操作。</summary>
