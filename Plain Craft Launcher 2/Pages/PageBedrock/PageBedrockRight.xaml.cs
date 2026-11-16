@@ -246,6 +246,9 @@ public partial class PageBedrockRight
         }
     }
 
+    /// <summary>只刷新「当前实例」卡片，供实例选择浮层实时联动，不做检测与联网。</summary>
+    public void RefreshInstanceCard() => RefreshCurrentInstanceCard();
+
     private static string ChannelLabel(string versionId) => ModBedrockInstance.GetChannel(versionId) switch
     {
         "preview" => Lang.Text("Download.Bedrock.Channel.Preview"),

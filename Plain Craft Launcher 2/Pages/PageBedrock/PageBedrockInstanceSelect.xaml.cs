@@ -223,6 +223,9 @@ public partial class PageBedrockInstanceSelect
     {
         ModBedrockInstance.SelectedVersionId = versionId;
         Config.Launch.BedrockSelectedVersion = versionId;
+        // 点一下就让左侧版本号和右侧「当前实例」跟着变，不用等确定
+        ModMain.frmBedrockLeft?.RefreshStatus();
+        ModMain.frmBedrockRight?.RefreshInstanceCard();
     }
 
     private static string ChannelLabel(string channel) => channel switch

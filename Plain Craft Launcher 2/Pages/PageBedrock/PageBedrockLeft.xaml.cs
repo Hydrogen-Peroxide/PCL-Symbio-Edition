@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using Microsoft.Win32;
+using PCL.Core.App;
 using PCL.Core.App.Localization;
 using PCL.Core.UI;
 
@@ -730,6 +731,10 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
 
     public void RefreshStatus()
     {
+        // 启动按钮上方的版本号跟随“当前选中的实例”，切换实例时立刻变化
+        var selected = GetSelectedLocalVersion();
+        var selectedText = selected is null ? null : Lang.Text("Bedrock.Status.Version", selected);
+
         var right = ModMain.frmBedrockRight;
         if (right is null)
         {
@@ -737,19 +742,34 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
             ShapeStatusDot.Fill = (Brush)FindResource("ColorBrushGray4");
             LabStatus.Text = Lang.Text("Bedrock.Status.NotFound");
             SetDetailPath(null);
-            LabVersionText.Text = Lang.Text("Bedrock.Status.NotFound");
+            LabVersionText.Text = selectedText ?? Lang.Text("Bedrock.Status.NotFound");
             return;
         }
 
         var installed = right.IsBedrockInstalled;
-        ShapeStatusDot.Fill = (Brush)FindResource(installed ? "ColorBrush3" : "ColorBrushGray4");
+        ShapeStatusDot.Fill = (Brush)FindResource(installed || selected is not null ? "ColorBrush3" : "ColorBrushGray4");
         LabStatus.Text = installed ? Lang.Text("Bedrock.Status.Detected") : Lang.Text("Bedrock.Status.NotFound");
         SetDetailPath(installed ? right.BedrockInstallPath : null);
-        LabVersionText.Text = installed
+        LabVersionText.Text = selectedText ?? (installed
             ? string.IsNullOrEmpty(right.BedrockVersion)
                 ? Lang.Text("Bedrock.Status.Ready")
                 : Lang.Text("Bedrock.Status.Version", right.BedrockVersion)
-            : Lang.Text("Bedrock.Status.NotFound");
+            : Lang.Text("Bedrock.Status.NotFound"));
+    }
+
+    /// <summary>当前选中的本地实例：优先配置里的选择，其次内存里记录的版本。</summary>
+    private static string? GetSelectedLocalVersion()
+    {
+        var versions = ModBedrockInstance.GetLocalVersions();
+        if (versions.Count == 0) return null;
+
+        var configured = Config.Launch.BedrockSelectedVersion;
+        if (!string.IsNullOrWhiteSpace(configured) && versions.Contains(configured)) return configured;
+
+        var memory = ModBedrockInstance.SelectedVersionId;
+        if (!string.IsNullOrWhiteSpace(memory) && versions.Contains(memory)) return memory;
+
+        return null;
     }
 
     /// <summary>路径不直接展示，悬停查看、点击复制。</summary>
