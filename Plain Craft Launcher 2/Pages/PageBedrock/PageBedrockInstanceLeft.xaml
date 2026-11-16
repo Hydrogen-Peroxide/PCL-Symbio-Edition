@@ -18,7 +18,7 @@
             <local:MyListItem x:Name="ItemLoader" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="31"
                               Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
                               Title="{DynamicResource Bedrock.Instance.LoaderTitle}"
-                              SvgIcon="lucide/package-check" />
+                              SvgIcon="lucide/package" />
             <local:MyListItem x:Name="ItemMod" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="32"
                               Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
                               Title="{DynamicResource Instance.Left.Mod}"
@@ -41,7 +41,7 @@
                               Title="{DynamicResource Bedrock.Instance.Left.Actions}" SvgIcon="lucide/wrench" />
             <local:MyListItem x:Name="ItemStats" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="35"
                               Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
-                              Title="{DynamicResource Bedrock.Instance.Left.Stats}" SvgIcon="lucide/chart-line" />
+                              Title="{DynamicResource Bedrock.Instance.Left.Stats}" SvgIcon="lucide/layers" />
         </StackPanel>
     </local:MyScrollViewer>
 </local:MyPageLeft>

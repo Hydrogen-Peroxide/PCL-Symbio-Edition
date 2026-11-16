@@ -9,9 +9,12 @@
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Text="{DynamicResource Bedrock.Select.Instances}" FontSize="14"
                    FontWeight="Bold" Margin="0,0,0,6" />
-        <local:MyScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled" DeltaMult="0.7">
-            <StackPanel x:Name="PanInstances" />
-        </local:MyScrollViewer>
+        <Border Grid.Row="1" Background="{DynamicResource ColorBrushBackground}" CornerRadius="7"
+                Padding="14,10,10,10">
+            <local:MyScrollViewer VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled" DeltaMult="0.7">
+                <StackPanel x:Name="PanInstances" />
+            </local:MyScrollViewer>
+        </Border>
     </Grid>
 </local:MyPageRight>

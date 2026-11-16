@@ -620,6 +620,16 @@ public partial class PageBedrockRight
             return;
         }
 
+        // 实例选择页选中的实例优先：只要它在当前数据目录里存在就直接启动
+        var selectedInstance = Config.Launch.BedrockSelectedVersion;
+        if (!string.IsNullOrEmpty(selectedInstance) &&
+            !string.Equals(selectedInstance, _registeredVersionId, StringComparison.OrdinalIgnoreCase) &&
+            ModBedrockInstance.GetLocalVersions().Contains(selectedInstance))
+        {
+            LaunchLocalVersion(selectedInstance);
+            return;
+        }
+
         // 记住的选中版本优先：当前注册的不是它时，先切换到该版本
         var selected = Config.Launch.BedrockSelectedVersion;
         if (!string.IsNullOrEmpty(selected) && _localVersionIds.Contains(selected) &&
