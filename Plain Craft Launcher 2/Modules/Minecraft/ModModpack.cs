@@ -1020,8 +1020,11 @@ public static class ModModpack
             if (json["launchInfo"] is not null)
             {
                 var launchInfo = (JsonObject)json["launchInfo"];
-                Config.Instance.JvmArgs[versionFolder] = string.Join(" ", launchInfo["javaArgument"]);
-                Config.Instance.GameArgs[versionFolder] = string.Join(" ", launchInfo["launchArgument"]);
+                // javaArgument / launchArgument 是 JSON 数组，必须逐项拼接。
+                // 直接 string.Join(" ", JsonNode) 会把节点 ToString 成 JSON 文本（[] 或 ["-Xmx2G"]），
+                // 启动参数里出现字面量 [] 时 Java 会把它当成主类名，报 ClassNotFoundException: []。
+                Config.Instance.JvmArgs[versionFolder] = JoinJsonArgs(launchInfo["javaArgument"]);
+                Config.Instance.GameArgs[versionFolder] = JoinJsonArgs(launchInfo["launchArgument"]);
             }
 
             // 整合包版本
@@ -1274,6 +1277,25 @@ public static class ModModpack
         public string tweakers = null;
     }
 
+    /// <summary>把 JSON 数组形式的启动参数安全拼成空格分隔的字符串；非数组按单个值处理。</summary>
+    private static string JoinJsonArgs(JsonNode? node)
+    {
+        switch (node)
+        {
+            case null:
+                return "";
+            case JsonArray array:
+                return string.Join(" ", array
+                    .Select(item => item is JsonValue value && value.TryGetValue<string>(out var text)
+                        ? text
+                        : item?.ToString())
+                    .Where(text => !string.IsNullOrWhiteSpace(text)));
+            case JsonValue value:
+                return value.TryGetValue<string>(out var single) ? single : value.ToString();
+            default:
+                return "";
+        }
+    }
     private static LoaderCombo<string> InstallPackMMC(string fileAddress, ZipArchive archive, string archiveBaseFolder)
     {
         // 读取 Json 文件

@@ -2215,12 +2215,39 @@ public static class ModLaunch
 
     #region 启动参数
 
+    /// <summary>
+    ///     修复历史版本导入整合包时写坏的参数：当时把 JSON 数组直接 ToString 成了 "[]" 或 "["-Xmx4G"]"，
+    ///     JVM 会把字面量 [] 当成主类名，进而报 ClassNotFoundException: []。
+    /// </summary>
+    private static string NormalizeAdvanceArgs(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return "";
+        var text = raw.Trim();
+        if (!text.StartsWith('[') || !text.EndsWith(']')) return raw;
+
+        try
+        {
+            if (System.Text.Json.Nodes.JsonNode.Parse(text) is System.Text.Json.Nodes.JsonArray array)
+                return string.Join(" ", array
+                    .Select(item => item is System.Text.Json.Nodes.JsonValue value && value.TryGetValue<string>(out var arg)
+                        ? arg
+                        : item?.ToString())
+                    .Where(arg => !string.IsNullOrWhiteSpace(arg)));
+        }
+        catch
+        {
+            return raw;
+        }
+
+        return "";
+    }
     internal static void SecretLaunchJvmArgs(ref List<string> dataList)
     {
-        var dataJvmCustom = Config.Instance.JvmArgs[ModInstanceList.McMcInstanceSelected?.PathInstance];
+        var dataJvmCustom = NormalizeAdvanceArgs(
+            Config.Instance.JvmArgs[ModInstanceList.McMcInstanceSelected?.PathInstance]);
         dataList.Insert(0,
             string.IsNullOrEmpty(dataJvmCustom)
-                ? Config.Launch.JvmArgs
+                ? NormalizeAdvanceArgs(Config.Launch.JvmArgs)
                 : dataJvmCustom); // 可变 JVM 参数
         switch (Config.Launch.PreferredIpStack)
         {
@@ -2510,8 +2537,10 @@ public static class ModLaunch
         foreach (var arg in currentLaunchOptions.ExtraArgs)
             arguments += " " + arg.Trim();
         // 自定义参数
-        var argumentGame = Config.Instance.GameArgs[ModInstanceList.McMcInstanceSelected?.PathInstance];
-        arguments = arguments + " " + (string.IsNullOrEmpty(argumentGame) ? Config.Launch.GameArgs : argumentGame);
+        var argumentGame = NormalizeAdvanceArgs(
+            Config.Instance.GameArgs[ModInstanceList.McMcInstanceSelected?.PathInstance]);
+        arguments = arguments + " " +
+                    (string.IsNullOrEmpty(argumentGame) ? NormalizeAdvanceArgs(Config.Launch.GameArgs) : argumentGame);
         // 替换参数
         var replaceArguments = McLaunchArgumentsReplace(ModInstanceList.McMcInstanceSelected, ref loader);
         if (string.IsNullOrWhiteSpace(replaceArguments["${version_type}"]))
@@ -2598,9 +2627,10 @@ public static class ModLaunch
 
         // 输出固定参数
         dataList.Add("-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump");
-        var argumentJvm = Config.Instance.JvmArgs[ModInstanceList.McMcInstanceSelected?.PathInstance];
+        var argumentJvm = NormalizeAdvanceArgs(
+            Config.Instance.JvmArgs[ModInstanceList.McMcInstanceSelected?.PathInstance]);
         if (string.IsNullOrEmpty(argumentJvm))
-            argumentJvm = Config.Launch.JvmArgs;
+            argumentJvm = NormalizeAdvanceArgs(Config.Launch.JvmArgs);
         if (!argumentJvm.Contains("-Dlog4j2.formatMsgNoLookups=true"))
             argumentJvm += " -Dlog4j2.formatMsgNoLookups=true";
         argumentJvm = argumentJvm.Replace(" -XX:MaxDirectMemorySize=256M", ""); // #3511 的清理
