@@ -87,53 +87,92 @@
                             Text="{DynamicResource Bedrock.Instance.Settings}" Click="BtnInstanceSettings_Click" />
         </Grid>
 
-        <!-- 实例设置浮层：加载器切换 + 原有快捷操作 -->
+        <!-- 实例设置浮层：标题 + 状态 + 加载器 + 快捷操作 -->
         <Border x:Name="PanInstanceSettings" Grid.RowSpan="4" Background="#AA000000" Visibility="Collapsed" Margin="-1">
-            <Border Background="{DynamicResource ColorBrushBackground}" CornerRadius="6" Margin="14" Padding="14">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
+            <Border Background="{DynamicResource ColorBrushBackground}" CornerRadius="6" Margin="12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- 标题 -->
+                    <StackPanel Grid.Row="0" Margin="16,16,16,12">
                         <TextBlock Text="{DynamicResource Bedrock.Instance.Settings}" FontSize="16" FontWeight="Bold" />
-                        <TextBlock x:Name="LabSettingsTarget" Margin="0,4,0,10" FontSize="11"
+                        <TextBlock x:Name="LabSettingsTarget" Margin="0,4,0,0" FontSize="11"
                                    Foreground="{DynamicResource ColorBrushGray4}" TextWrapping="Wrap" />
-                    <!-- 基岩版状态 -->
-                <TextBlock Text="{DynamicResource Bedrock.Status.Title}" Margin="13,12,5,4" Opacity="0.6" FontSize="12" />
-                <Border Background="{DynamicResource ColorBrushTransparentBackground}" CornerRadius="5" Padding="12,10">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Ellipse x:Name="ShapeStatusDot" Width="8" Height="8" Margin="0,0,7,0"
-                                     VerticalAlignment="Center" Fill="{DynamicResource ColorBrushGray4}" />
-                            <TextBlock x:Name="LabStatus" Text="{DynamicResource Bedrock.Status.Detecting}"
-                                       FontSize="13" FontWeight="Bold" />
+                    </StackPanel>
+
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="16,0,12,4">
+                            <!-- 状态 -->
+                            <Border Background="{DynamicResource ColorBrushTransparentBackground}"
+                                    CornerRadius="5" Padding="12,10">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Ellipse x:Name="ShapeStatusDot" Width="8" Height="8" Margin="0,0,7,0"
+                                                 VerticalAlignment="Center" Fill="{DynamicResource ColorBrushGray4}" />
+                                        <TextBlock x:Name="LabStatus" Text="{DynamicResource Bedrock.Status.Detecting}"
+                                                   FontSize="13" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <TextBlock x:Name="LabDetail" Text="" FontSize="10.5" Margin="15,4,0,0"
+                                               TextWrapping="Wrap" MouseLeftButtonUp="LabDetail_Click"
+                                               Foreground="{DynamicResource ColorBrushGray4}" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 加载器 -->
+                            <TextBlock Text="{DynamicResource Bedrock.Instance.LoaderTitle}" Margin="2,16,0,6"
+                                       FontSize="12" Opacity="0.6" />
+                            <Border Background="{DynamicResource ColorBrushTransparentBackground}"
+                                    CornerRadius="5" Padding="12,10">
+                                <StackPanel>
+                                    <local:MyRadioBox x:Name="RadioVanilla" Margin="0,0,0,8"
+                                                      Text="{DynamicResource Bedrock.Loader.Vanilla}" />
+                                    <local:MyRadioBox x:Name="RadioLeviLamina" Margin="0,0,0,8"
+                                                      Text="{DynamicResource Bedrock.Loader.LeviLamina}" />
+                                    <local:MyRadioBox x:Name="RadioBLoader"
+                                                      Text="{DynamicResource Bedrock.Loader.BLoader}" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 快捷操作 -->
+                            <TextBlock Text="{DynamicResource Bedrock.Shortcuts.Title}" Margin="2,16,0,6"
+                                       FontSize="12" Opacity="0.6" />
+                            <Border Background="{DynamicResource ColorBrushTransparentBackground}"
+                                    CornerRadius="5" Padding="4,4">
+                                <StackPanel>
+                                    <local:MyListItem Height="32" Type="Clickable" IsScaleAnimationEnabled="False"
+                                                      Title="{DynamicResource Bedrock.Editor.Open}" SvgIcon="lucide/pencil"
+                                                      Click="OpenEditor_Click" />
+                                    <local:MyListItem Height="32" Type="Clickable" IsScaleAnimationEnabled="False"
+                                                      Title="{DynamicResource Bedrock.Shortcuts.OpenSaves}" SvgIcon="lucide/folder-open"
+                                                      Click="OpenSavesFolder_Click" />
+                                    <local:MyListItem Height="32" Type="Clickable" IsScaleAnimationEnabled="False"
+                                                      Title="{DynamicResource Bedrock.Shortcuts.OpenPackages}" SvgIcon="lucide/box"
+                                                      Click="OpenPackageFolder_Click" />
+                                    <local:MyListItem Height="32" Type="Clickable" IsScaleAnimationEnabled="False"
+                                                      Title="{DynamicResource Bedrock.Shortcuts.OpenScreenshots}" SvgIcon="lucide/image"
+                                                      Click="OpenScreenshotFolder_Click" />
+                                    <local:MyListItem Height="32" Type="Clickable" IsScaleAnimationEnabled="False"
+                                                      Title="{DynamicResource Bedrock.Shortcuts.OpenXbox}" SvgIcon="lucide/play"
+                                                      Click="OpenXboxApp_Click" />
+                                    <local:MyListItem Height="32" Type="Clickable" IsScaleAnimationEnabled="False"
+                                                      Title="{DynamicResource Bedrock.Shortcuts.BackupWorlds}" SvgIcon="lucide/download"
+                                                      Click="BackupWorlds_Click" />
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
-                        <TextBlock x:Name="LabDetail" Text="" FontSize="10.5" Margin="15,4,0,0"
-                                   TextWrapping="Wrap" MouseLeftButtonUp="LabDetail_Click"
-                                   Foreground="{DynamicResource ColorBrushGray4}" />
-                    </StackPanel>
-                </Border>
-                        <TextBlock Text="{DynamicResource Bedrock.Instance.LoaderTitle}" FontSize="12" Opacity="0.6" Margin="0,0,0,6" />
-                        <local:MyRadioBox x:Name="RadioVanilla" Text="{DynamicResource Bedrock.Loader.Vanilla}" Margin="0,0,0,6" />
-                        <local:MyRadioBox x:Name="RadioLeviLamina" Text="{DynamicResource Bedrock.Loader.LeviLamina}" Margin="0,0,0,6" />
-                        <local:MyRadioBox x:Name="RadioBLoader" Text="{DynamicResource Bedrock.Loader.BLoader}" Margin="0,0,0,10" />
-                        <TextBlock Text="{DynamicResource Bedrock.Shortcuts.Title}" FontSize="12" Opacity="0.6" Margin="0,4,0,6" />
-                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
-                                          Title="{DynamicResource Bedrock.Editor.Open}" SvgIcon="lucide/pencil" Click="OpenEditor_Click" />
-                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
-                                          Title="{DynamicResource Bedrock.Shortcuts.OpenSaves}" SvgIcon="lucide/folder-open" Click="OpenSavesFolder_Click" />
-                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
-                                          Title="{DynamicResource Bedrock.Shortcuts.OpenPackages}" SvgIcon="lucide/box" Click="OpenPackageFolder_Click" />
-                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
-                                          Title="{DynamicResource Bedrock.Shortcuts.OpenScreenshots}" SvgIcon="lucide/image" Click="OpenScreenshotFolder_Click" />
-                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
-                                          Title="{DynamicResource Bedrock.Shortcuts.OpenXbox}" SvgIcon="lucide/play" Click="OpenXboxApp_Click" />
-                        <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
-                                          Title="{DynamicResource Bedrock.Shortcuts.BackupWorlds}" SvgIcon="lucide/download" Click="BackupWorlds_Click" />
-                        <local:MyButton Height="30" Margin="0,12,0,0" Text="{DynamicResource Common.Action.Confirm}"
-                                        Click="BtnInstanceSettingsClose_Click" />
-                    </StackPanel>
-                </ScrollViewer>
+                    </ScrollViewer>
+
+                    <local:MyButton Grid.Row="2" Height="32" Margin="16,12,16,14"
+                                    Text="{DynamicResource Common.Action.Confirm}"
+                                    Click="BtnInstanceSettingsClose_Click" />
+                </Grid>
             </Border>
         </Border>
-
         </Grid>
         <!-- 启动中：Java 版同款面板，与输入区同级，输入区会一起缩放淡出 -->
         <local:CompLaunchingStatus x:Name="PanLaunching" />
