@@ -303,12 +303,6 @@ public partial class PageBedrockInstanceSelect
 
     private void Close()
     {
-        // 作为独立页面存在时，关闭即返回基岩版主界面
-        if (ReferenceEquals(this, _pageInstance) && Parent is not null)
-        {
-            ModMain.frmMain?.PageChange(FormMain.PageType.Bedrock);
-            return;
-        }
 
         ModAnimation.AniStart(new[]
         {

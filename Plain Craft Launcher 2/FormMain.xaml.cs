@@ -1433,16 +1433,6 @@ public partial class FormMain
         ///     存档详细管理，这是一个副页面。
         /// </summary>
         VersionSaves = 12,
-
-        /// <summary>
-        ///     基岩版实例选择。
-        /// </summary>
-        BedrockInstances = 14,
-
-        /// <summary>
-        ///     基岩版实例设置。
-        /// </summary>
-        BedrockSetup = 15,
     }
 
     /// <summary>
@@ -1985,17 +1975,7 @@ public partial class FormMain
                         PageChangeAnim(new MyPageLeft(), stack.helpPage);
                         break;
                     }
-                case PageType.BedrockInstances: // 基岩版实例选择
-                    {
-                        PageChangeAnim(new MyPageLeft(), PageBedrockInstanceSelect.GetPage());
-                        break;
-                    }
-                case PageType.BedrockSetup: // 基岩版实例设置
-                    {
-                        PageChangeAnim(new MyPageLeft(),
-                            ModMain.frmBedrockLeft?.TakeSettingsPage() as FrameworkElement ?? new MyPageRight());
-                        break;
-                    }
+
                 case PageType.VersionSaves: // 存档管理
                     {
                         if (ModMain.frmInstanceSavesLeft is null)

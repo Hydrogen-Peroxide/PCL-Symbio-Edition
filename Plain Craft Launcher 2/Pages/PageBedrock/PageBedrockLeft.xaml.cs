@@ -358,7 +358,11 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
     /// <summary>打开实例选择浮层：左侧切换数据目录，右侧挑选实例。</summary>
     private void BtnInstance_Click(object sender, MouseButtonEventArgs e)
     {
-        ModMain.frmMain?.PageChange(FormMain.PageType.BedrockInstances);
+        PageBedrockInstanceSelect.Show(() =>
+        {
+            RefreshStatus();
+            ModMain.frmBedrockRight?.RefreshPage();
+        });
     }
 
     /// <summary>打开实例设置：把设置面板搬到整窗浮层里显示（左栏只有 300px，塞不下）。</summary>
@@ -383,7 +387,7 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         RadioBLoader.Checked = loader == ModBedrockLoader.BLoader;
         CheckShowLaunchLog.Checked = States.UI.ShowLaunchLog;
         ShowSettingsTab(0);
-        ModMain.frmMain?.PageChange(FormMain.PageType.BedrockSetup);
+        AttachSettingsOverlay();
     }
 
     private static string ChannelText(string versionId) => ModBedrockInstance.GetChannel(versionId) switch
@@ -482,7 +486,7 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
             HintService.Hint(Lang.Text("Bedrock.Instance.LoaderSaved", version), HintType.Success);
         }
 
-        ModMain.frmMain?.PageChange(FormMain.PageType.Bedrock);
+        DetachSettingsOverlay();
     }
 
     private void ShowLaunchLog_Change(object sender, bool user)

@@ -188,13 +188,13 @@
                                     <Border Background="{DynamicResource ColorBrushTransparentBackground}"
                                             CornerRadius="5" Padding="4" Margin="0,10,0,0">
                                         <StackPanel>
-                                            <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                                            <local:MyListItem Height="34" Type="Clickable"
                                                               Title="{DynamicResource Bedrock.Shortcuts.OpenSaves}"
                                                               SvgIcon="lucide/folder-open" Click="OpenSavesFolder_Click" />
-                                            <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                                            <local:MyListItem Height="34" Type="Clickable"
                                                               Title="{DynamicResource Bedrock.Shortcuts.BackupWorlds}"
                                                               SvgIcon="lucide/download" Click="BackupWorlds_Click" />
-                                            <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                                            <local:MyListItem Height="34" Type="Clickable"
                                                               Title="{DynamicResource Bedrock.Shortcuts.OpenScreenshots}"
                                                               SvgIcon="lucide/image" Click="OpenScreenshotFolder_Click" />
                                         </StackPanel>
@@ -202,7 +202,7 @@
                                     <Border Background="{DynamicResource ColorBrushTransparentBackground}"
                                             CornerRadius="5" Padding="4" Margin="0,10,0,0">
                                         <StackPanel>
-                                            <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                                            <local:MyListItem Height="34" Type="Clickable"
                                                               Title="{DynamicResource Bedrock.Shortcuts.OpenPackages}"
                                                               SvgIcon="lucide/box" Click="OpenPackageFolder_Click" />
                                         </StackPanel>
@@ -216,10 +216,10 @@
                                     <Border Background="{DynamicResource ColorBrushTransparentBackground}"
                                             CornerRadius="5" Padding="4" Margin="0,10,0,0">
                                         <StackPanel>
-                                            <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                                            <local:MyListItem Height="34" Type="Clickable"
                                                               Title="{DynamicResource Bedrock.Editor.Open}"
                                                               SvgIcon="lucide/pencil" Click="OpenEditor_Click" />
-                                            <local:MyListItem Height="34" Type="Clickable" IsScaleAnimationEnabled="False"
+                                            <local:MyListItem Height="34" Type="Clickable"
                                                               Title="{DynamicResource Bedrock.Shortcuts.OpenXbox}"
                                                               SvgIcon="lucide/play" Click="OpenXboxApp_Click" />
                                         </StackPanel>
