@@ -1,0 +1,21 @@
+<local:MyPageLeft x:Class="PCL.PageBedrockSelectLeft"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:local="clr-namespace:PCL">
+    <Grid Margin="0,12,0,14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="1*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Text="{DynamicResource Bedrock.Select.FolderList}" Margin="13,6,5,6"
+                   Opacity="0.6" FontSize="12" />
+        <local:MyScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled" DeltaMult="0.7">
+            <StackPanel x:Name="PanFolders" Margin="0,0,6,0" />
+        </local:MyScrollViewer>
+        <local:MyButton Grid.Row="2" x:Name="BtnAddFolder" Margin="10,10,10,0" ColorType="Normal"
+                        TextPadding="7" Padding="5,0" HorizontalAlignment="Left" UseLayoutRounding="False"
+                        SnapsToDevicePixels="False" />
+    </Grid>
+</local:MyPageLeft>

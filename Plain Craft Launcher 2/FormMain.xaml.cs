@@ -2006,8 +2006,9 @@ public partial class FormMain
                     }
                 case PageType.BedrockInstanceSelect: // 基岩版实例选择
                     {
+                        ModMain.frmBedrockSelectLeft ??= new PageBedrockSelectLeft();
                         ModMain.frmBedrockSelect ??= new PageBedrockInstanceSelect();
-                        PageChangeAnim(new MyPageLeft(), ModMain.frmBedrockSelect);
+                        PageChangeAnim(ModMain.frmBedrockSelectLeft, ModMain.frmBedrockSelect);
                         break;
                     }
                 case PageType.BedrockInstance: // 基岩版实例设置

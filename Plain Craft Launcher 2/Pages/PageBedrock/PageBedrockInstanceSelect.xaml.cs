@@ -1,7 +1,6 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using PCL.Core.App;
 using PCL.Core.App.Localization;
 
@@ -9,103 +8,16 @@ namespace PCL;
 
 public partial class PageBedrockInstanceSelect : IRefreshable
 {
-    private readonly List<ModBedrockFolders.Folder> _folders = [];
-
     public PageBedrockInstanceSelect()
     {
         InitializeComponent();
-        BtnAddFolder.Text = Lang.Text("Bedrock.Select.AddFolder");
-        BtnAddFolder.Click += BtnAddFolder_Click;
-        Loaded += (_, _) => RefreshFolders();
+        Loaded += (_, _) => RefreshInstances();
     }
 
     public void Refresh()
     {
-        RefreshFolders();
+        RefreshInstances();
     }
-
-    #region 数据目录
-
-    private void RefreshFolders(bool refreshInstances = true)
-    {
-        _folders.Clear();
-        _folders.AddRange(ModBedrockFolders.Enumerate());
-        PanFolders.Children.Clear();
-
-        foreach (var folder in _folders)
-        {
-            var isCurrent = ModBedrockFolders.IsCurrent(folder);
-            var item = new MyListItem
-            {
-                Title = folder.Title,
-                Info = folder.Path,
-                SvgIcon = isCurrent ? "lucide/folder-open" : "lucide/folder-input",
-                Type = MyListItem.CheckType.RadioBox,
-                Height = 48
-            };
-            var target = folder;
-            item.Click += (_, _) => SwitchFolder(target);
-            PanFolders.Children.Add(item);
-            if (isCurrent) item.SetChecked(true, false, false);
-        }
-
-        if (refreshInstances) RefreshInstances();
-    }
-
-    private void SwitchFolder(ModBedrockFolders.Folder folder)
-    {
-        if (!Directory.Exists(folder.Path))
-        {
-            HintService.Hint(Lang.Text("Bedrock.Select.FolderInvalid"), HintType.Error);
-            return;
-        }
-
-        if (ModBedrockFolders.IsCurrent(folder)) return;
-
-        ModBedrockFolders.Switch(folder);
-        // 换了目录就重新挑实例，避免残留上一个目录里的选择
-        ModBedrockInstance.SelectedVersionId = "";
-        RefreshFolders(false);
-        // 直接按用户点中的目录读取，不再绕一次全局配置，避免切换后列表仍是旧目录的内容
-        RefreshInstances(folder.Path);
-        HintService.Hint(Lang.Text("Bedrock.Select.Applied", folder.Title), HintType.Success);
-    }
-
-    private void BtnAddFolder_Click(object sender, MouseButtonEventArgs e)
-    {
-        var dialog = new Microsoft.Win32.OpenFolderDialog
-        {
-            Title = Lang.Text("Bedrock.Select.AddFolder"),
-            Multiselect = false
-        };
-        if (dialog.ShowDialog() != true) return;
-
-        var path = dialog.FolderName;
-        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path))
-        {
-            HintService.Hint(Lang.Text("Bedrock.Select.FolderMissing"), HintType.Error);
-            return;
-        }
-
-        if (!ModBedrockFolders.LooksValid(path))
-        {
-            HintService.Hint(Lang.Text("Bedrock.Select.FolderInvalid"), HintType.Error);
-            return;
-        }
-
-        if (ModBedrockFolders.Add(path) is null)
-        {
-            HintService.Hint(Lang.Text("Bedrock.Select.FolderExists"), HintType.Warning);
-            return;
-        }
-
-        HintService.Hint(Lang.Text("Bedrock.Select.FolderAdded", path), HintType.Success);
-        RefreshFolders();
-    }
-
-    #endregion
-
-    #region 版本实例
 
     /// <summary>读取指定目录下的实例（兼容 &lt;root&gt;\versions 与版本目录本身两种布局）。</summary>
     private static List<string> GetVersionsIn(string root)
@@ -133,7 +45,7 @@ public partial class PageBedrockInstanceSelect : IRefreshable
         return result;
     }
 
-    private void RefreshInstances(string? rootOverride = null)
+    public void RefreshInstances(string? rootOverride = null)
     {
         PanInstances.Children.Clear();
         var versions = rootOverride is null
@@ -232,6 +144,4 @@ public partial class PageBedrockInstanceSelect : IRefreshable
         "beta" => ModBase.pathImage + "Blocks/GoldBlock.png",
         _ => ModBase.pathImage + "Blocks/Grass.png"
     };
-
-    #endregion
 }

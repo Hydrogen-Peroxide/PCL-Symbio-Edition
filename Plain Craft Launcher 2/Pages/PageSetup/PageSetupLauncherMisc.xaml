@@ -58,6 +58,9 @@
                         <local:MyCheckBox Grid.Row="0" Grid.Column="0" Text="{DynamicResource Setup.Misc.System.DisableHardwareAcceleration}" x:Name="CheckSystemDisableHardwareAcceleration" Tag="SystemDisableHardwareAcceleration" Change="CheckSystemDisableHardwareAcceleration_OnChange"/>
                         <local:MyCheckBox Grid.Row="0" Grid.Column="1" Text="{DynamicResource Setup.Misc.System.Telemetry}" x:Name="CheckSystemTelemetry" Tag="SystemTelemetry" Change="CheckBoxChange"
                           ToolTip="{DynamicResource Setup.Misc.System.Telemetry.ToolTip}"/>
+                        <local:MyCheckBox Grid.Row="0" Grid.Column="2" Text="{DynamicResource Setup.Misc.System.LaunchLog}"
+                                          x:Name="CheckShowLaunchLog" Change="CheckShowLaunchLog_Change"
+                                          ToolTip="{DynamicResource Setup.Misc.System.LaunchLog.ToolTip}"/>
                     </Grid>
                     <Grid Grid.Row="8" Grid.ColumnSpan="5">
                         <Grid.ColumnDefinitions>

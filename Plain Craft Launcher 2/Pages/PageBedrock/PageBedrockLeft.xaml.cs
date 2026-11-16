@@ -889,6 +889,10 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
     public void RefreshStatus()
     {
         var selected = GetSelectedLocalVersion();
+        LabLaunchVersion.Text = selected ?? "";
+        LabLaunchVersion.Visibility = string.IsNullOrWhiteSpace(selected)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
 
         var right = ModMain.frmBedrockRight;
         if (right is null)

@@ -67,6 +67,9 @@
                             Text="{DynamicResource Bedrock.Action.Launch}"
                             Click="BtnLaunch_Click"
                             Padding="30,0,30,15" />
+            <TextBlock x:Name="LabLaunchVersion" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                       Margin="20,0,20,8" FontSize="10.5" Opacity="0.8" Foreground="White"
+                       IsHitTestVisible="False" TextTrimming="CharacterEllipsis" Visibility="Collapsed" />
 
         </Grid>
 

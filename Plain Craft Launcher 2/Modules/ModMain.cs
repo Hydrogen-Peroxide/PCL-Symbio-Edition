@@ -78,6 +78,7 @@ public static class ModMain
     public static PageLoginProfileSkin? frmLoginProfileSkin;
     public static PageLoginOffline? frmLoginOffline;
     public static PageInstanceLeft? frmInstanceLeft;
+    public static PageBedrockSelectLeft? frmBedrockSelectLeft;
     public static PageBedrockInstanceSelect? frmBedrockSelect;
     public static PageBedrockInstanceLeft? frmBedrockInstanceLeft;
     public static PageInstanceOverall? frmInstanceOverall;

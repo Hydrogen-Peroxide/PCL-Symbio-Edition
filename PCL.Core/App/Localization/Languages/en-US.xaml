@@ -3939,4 +3939,17 @@
 <sys:String x:Key="Bedrock.Instance.Overall.OpenFolder">Open Folder</sys:String>
 <sys:String x:Key="Main.Title.BedrockInstanceSelect">Select Bedrock Instance</sys:String>
 <sys:String x:Key="Main.Title.BedrockInstance">Bedrock Instance - {0}</sys:String>
+<sys:String x:Key="Setup.Misc.System.LaunchLog">Launch Log</sys:String>
+<sys:String x:Key="Setup.Misc.System.LaunchLog.ToolTip">Show the real-time launch log and hints on the launch page (Java) and the Bedrock launch overlay.</sys:String>
+<sys:String x:Key="Bedrock.Select.FolderList">Folders</sys:String>
+<sys:String x:Key="Bedrock.Instance.Settings.Rename">Instance Name</sys:String>
+<sys:String x:Key="Bedrock.Instance.Settings.RenameAction">Rename</sys:String>
+<sys:String x:Key="Bedrock.Instance.Settings.Renamed">Renamed to "{0}"</sys:String>
+<sys:String x:Key="Bedrock.Instance.Settings.Actions.Title">Instance Actions</sys:String>
+<sys:String x:Key="Bedrock.Instance.Settings.Delete">Delete Instance</sys:String>
+<sys:String x:Key="Bedrock.Instance.Settings.Delete.Hint">Deleting removes the whole instance folder and cannot be undone.</sys:String>
+<sys:String x:Key="Bedrock.Instance.Settings.Delete.Confirm">Delete instance "{0}"? Everything inside the instance folder will be removed permanently.</sys:String>
+<sys:String x:Key="Bedrock.Instance.Settings.Delete.Title">Delete Instance</sys:String>
+<sys:String x:Key="Bedrock.Instance.Settings.Delete.Failed">Failed to delete instance: {0}</sys:String>
+<sys:String x:Key="Bedrock.Instance.Settings.Deleted">Deleted instance "{0}"</sys:String>
 </ResourceDictionary>

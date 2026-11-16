@@ -5,7 +5,47 @@
     <local:MyScrollViewer x:Name="PanBack" VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
         <StackPanel x:Name="PanMain" Margin="25,10">
-            <local:MyCard Margin="0,15" Title="{DynamicResource Bedrock.Instance.LoaderTitle}">
+            <local:MyCard Margin="0,15" Title="{DynamicResource Bedrock.Instance.Overall.Info.Title}">
+                <Grid Margin="25,40,25,15" Grid.IsSharedSizeScope="True">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" SharedSizeGroup="BedrockSetupLabel" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="{DynamicResource Bedrock.Instance.Settings.Rename}"
+                               VerticalAlignment="Center" Margin="0,0,25,0" />
+                    <local:MyTextBox x:Name="TextName" Grid.Row="0" Grid.Column="1" Height="30"
+                                     MaxLength="60" VerticalAlignment="Center" />
+                    <local:MyButton x:Name="BtnRename" Grid.Row="0" Grid.Column="2" Margin="12,0,0,0"
+                                    MinWidth="90" Padding="13,0"
+                                    Text="{DynamicResource Bedrock.Instance.Settings.RenameAction}" />
+                    <TextBlock Grid.Row="2" Text="{DynamicResource Bedrock.Instance.Overall.Version}"
+                               VerticalAlignment="Center" Margin="0,0,25,0" />
+                    <TextBlock x:Name="LabVersion" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Row="4" Text="{DynamicResource Bedrock.Instance.Overall.Path}"
+                               VerticalAlignment="Center" Margin="0,0,25,0" />
+                    <TextBlock x:Name="LabPath" Grid.Row="4" Grid.Column="1" VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" Opacity="0.75" FontSize="12.5" />
+                    <local:MyButton x:Name="BtnOpenFolder" Grid.Row="4" Grid.Column="2" Margin="12,0,0,0"
+                                    MinWidth="90" Padding="13,0"
+                                    Text="{DynamicResource Bedrock.Instance.Overall.OpenFolder}" />
+                    <TextBlock Grid.Row="6" Text="{DynamicResource Bedrock.Instance.Overall.Channel}"
+                               VerticalAlignment="Center" Margin="0,0,25,0" />
+                    <TextBlock x:Name="LabChannel" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2"
+                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                </Grid>
+            </local:MyCard>
+            <local:MyCard Margin="0,0,0,15" Title="{DynamicResource Bedrock.Instance.LoaderTitle}">
                 <StackPanel Margin="25,40,25,15">
                     <TextBlock Text="{DynamicResource Bedrock.Instance.LoaderHint}" FontSize="11.5"
                                TextWrapping="Wrap" Opacity="0.6" />
@@ -24,16 +64,18 @@
                                TextTrimming="CharacterEllipsis" />
                 </StackPanel>
             </local:MyCard>
-            <local:MyCard Margin="0,0,0,15" Title="{DynamicResource Bedrock.Right.Log.Title}">
+            <local:MyCard Margin="0,0,0,15" Title="{DynamicResource Bedrock.Instance.Settings.Actions.Title}">
                 <StackPanel Margin="25,40,25,15">
-                    <Border Background="{DynamicResource ColorBrushTransparentBackground}" CornerRadius="5"
-                            Padding="14,10">
-                        <local:MyCheckBox x:Name="CheckShowLaunchLog"
-                                          Text="{DynamicResource Bedrock.Right.Log.Toggle}"
-                                          Change="ShowLaunchLog_Change" />
-                    </Border>
-                    <TextBlock Text="{DynamicResource Bedrock.Launching.Tip}" FontSize="11.5" Opacity="0.5"
-                               Margin="0,10,0,0" TextWrapping="Wrap" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <local:MyButton x:Name="BtnDelete" ColorType="Normal" MinWidth="130" Padding="13,0"
+                                        Text="{DynamicResource Bedrock.Instance.Settings.Delete}" />
+                    </Grid>
+                    <TextBlock Text="{DynamicResource Bedrock.Instance.Settings.Delete.Hint}" FontSize="11.5"
+                               Opacity="0.5" Margin="0,10,0,0" TextWrapping="Wrap" />
                 </StackPanel>
             </local:MyCard>
         </StackPanel>
