@@ -3,7 +3,7 @@
                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                  xmlns:local="clr-namespace:PCL"
+                  xmlns:local="clr-namespace:PCL" xmlns:svgIcon="clr-namespace:PCL.Core.UI.Controls.SvgIcon;assembly=PCL.Core"
                   mc:Ignorable="d" x:Name="PanBack"
                   Width="300" AnimatedControl="{Binding ElementName=PanSide, Mode=OneWay}">
     <Grid Name="PanInput" RenderTransformOrigin="0.5,0.5">
@@ -132,5 +132,66 @@
                 </ScrollViewer>
             </Border>
         </Border>
-    </Grid>
+
+        <!-- 启动中浮层：与 Java 版启动页同款布局 -->
+        <Border x:Name="PanLaunching" Grid.RowSpan="4" Background="#AA000000" Visibility="Collapsed" Margin="-1">
+            <Border Background="{DynamicResource ColorBrushBackground}" CornerRadius="6" Margin="14" Padding="18,22,18,14">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" VerticalAlignment="Center">
+                        <svgIcon:SvgIcon x:Name="ImgLaunching" Icon="lucide/arrow-up-from-line" Width="42" Height="42"
+                                         HorizontalAlignment="Center"
+                                         IconBrush="{DynamicResource ColorBrush3}" />
+                        <TextBlock x:Name="LabLaunchingTitle" Margin="0,10,0,0" HorizontalAlignment="Center"
+                                   FontSize="17" FontWeight="Bold"
+                                   Text="{DynamicResource Bedrock.Launching.Title}" />
+                        <TextBlock x:Name="LabLaunchingName" Margin="0,4,0,0" HorizontalAlignment="Center"
+                                   FontSize="13" TextTrimming="CharacterEllipsis"
+                                   Foreground="{DynamicResource ColorBrushGray3}" />
+                        <Grid Height="4" Margin="0,12,0,0" SnapsToDevicePixels="True">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition x:Name="ColumnLaunchingDone" Width="0*" />
+                                <ColumnDefinition x:Name="ColumnLaunchingRest" Width="1*" />
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" CornerRadius="2" Background="{DynamicResource ColorBrush3}" />
+                            <Border Grid.Column="1" CornerRadius="2" Background="{DynamicResource ColorBrush6}" Opacity="0.6" />
+                        </Grid>
+                        <Grid Margin="0,14,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Grid.Column="0" FontSize="11.5"
+                                       Text="{DynamicResource Bedrock.Launching.Step}"
+                                       Foreground="{DynamicResource ColorBrushGray4}" />
+                            <TextBlock x:Name="LabLaunchingStage" Grid.Row="0" Grid.Column="1" Margin="12,0,0,0"
+                                       FontSize="11.5" Text="—" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,6,0,0" FontSize="11.5"
+                                       Text="{DynamicResource Bedrock.Launching.Method}"
+                                       Foreground="{DynamicResource ColorBrushGray4}" />
+                            <TextBlock x:Name="LabLaunchingMethod" Grid.Row="1" Grid.Column="1" Margin="12,6,0,0"
+                                       FontSize="11.5" Text="—" TextTrimming="CharacterEllipsis" />
+                        </Grid>
+                        <TextBlock Margin="0,18,0,0" HorizontalAlignment="Center" FontSize="11.5"
+                                   Text="{DynamicResource Bedrock.Launching.Tip}"
+                                   Foreground="{DynamicResource ColorBrushGray4}" />
+                        <Border Margin="0,8,0,0" CornerRadius="5" Padding="12,10"
+                                Background="{DynamicResource ColorBrushTransparentBackground}">
+                            <TextBlock TextWrapping="Wrap" FontSize="11.5" LineHeight="18"
+                                       Text="{DynamicResource Bedrock.Launching.Tip.Text}"
+                                       Foreground="{DynamicResource ColorBrushGray3}" />
+                        </Border>
+                    </StackPanel>
+                    <local:MyButton Grid.Row="1" x:Name="BtnLaunchingCancel" Height="34" Margin="0,14,0,0"
+                                    Text="{DynamicResource Common.Action.Cancel}" Click="BtnLaunchingCancel_Click" />
+                </Grid>
+            </Border>
+        </Border>    </Grid>
 </local:MyPageLeft>

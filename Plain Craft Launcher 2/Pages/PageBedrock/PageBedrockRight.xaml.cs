@@ -649,6 +649,9 @@ public partial class PageBedrockRight
         LabStatus.Text = Lang.Text("Bedrock.Status.Launching");
         LabDetail.Text = detail;
         AppendLaunchLog(Lang.Text("Bedrock.Status.Launching") + " " + detail);
+        ModMain.frmBedrockLeft?.ShowLaunchOverlay(
+            ModBedrockInstance.GetDisplayName(ModBedrockInstance.VersionsDirectory, Config.Launch.BedrockSelectedVersion),
+            _isGdkPortable);
         _launchProgressTimer.Start();
     }
 
@@ -663,6 +666,7 @@ public partial class PageBedrockRight
             {
                 LabDetail.Text = detail;
                 AppendLaunchLog(detail);
+                ModMain.frmBedrockLeft?.SetLaunchOverlayProgress(progress, detail);
             }
         }
 
@@ -678,6 +682,7 @@ public partial class PageBedrockRight
             LabStatus.Text = status;
             LabDetail.Text = detail;
             AppendLaunchLog(string.IsNullOrWhiteSpace(detail) ? status : status + "：" + detail);
+            ModMain.frmBedrockLeft?.EndLaunchOverlay(success, detail);
             LoadLaunching.State.LoadingState = MyLoading.MyLoadingState.Stop;
 
             if (!success)

@@ -3916,4 +3916,12 @@
     <sys:String x:Key="Bedrock.Right.Current.Loader">加载器：{0}</sys:String>
     <sys:String x:Key="Bedrock.Right.Log.Empty">还没有启动记录，点左侧的启动按钮后，这里会实时显示进度。</sys:String>
     <sys:String x:Key="Bedrock.Right.Log.Title">启动日志</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Method">验证方式</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Method.Portable">GDK 便携版</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Method.Store">系统商店包</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Started">已启动游戏</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Step">当前步骤</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Tip">你知道吗</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Tip.Text">基岩版的每个版本都独立存放在 .minecraft\bedrock\versions 下，切换实例时会自动改注册到对应版本，不会覆盖其它版本。</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Title">正在启动基岩版…</sys:String>
 </ResourceDictionary>

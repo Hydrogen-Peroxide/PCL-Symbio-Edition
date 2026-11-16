@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Microsoft.Win32;
 using PCL.Core.App;
 using PCL.Core.App.Localization;
@@ -407,6 +408,74 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
     private static string GetAvatarText(string name) =>
         name.Length > 1 && char.IsHighSurrogate(name[0]) ? name[..2] : name[..1].ToUpperInvariant();
 
+    #region 启动中浮层
+
+    /// <summary>显示启动中浮层（与 Java 版启动页同款）。</summary>
+    public void ShowLaunchOverlay(string? name, bool portable)
+    {
+        RunOnUi(() =>
+        {
+            LabLaunchingTitle.Text = Lang.Text("Bedrock.Launching.Title");
+            LabLaunchingName.Text = name ?? "";
+            LabLaunchingStage.Text = "—";
+            LabLaunchingMethod.Text = Lang.Text(portable
+                ? "Bedrock.Launching.Method.Portable"
+                : "Bedrock.Launching.Method.Store");
+            SetLaunchOverlayProgress(0.02d);
+            PanLaunching.Visibility = Visibility.Visible;
+        });
+    }
+
+    /// <summary>推进进度条与「当前步骤」。</summary>
+    public void SetLaunchOverlayProgress(double progress, string? stage = null)
+    {
+        RunOnUi(() =>
+        {
+            var value = Math.Clamp(progress, 0d, 1d);
+            ColumnLaunchingDone.Width = new GridLength(value, GridUnitType.Star);
+            ColumnLaunchingRest.Width = new GridLength(Math.Max(0.0001d, 1d - value), GridUnitType.Star);
+            if (!string.IsNullOrWhiteSpace(stage)) LabLaunchingStage.Text = stage;
+        });
+    }
+
+    /// <summary>结束启动：成功时先显示「已启动游戏」再自动收起，失败时立即收起。</summary>
+    public void EndLaunchOverlay(bool success, string? stage = null)
+    {
+        RunOnUi(() =>
+        {
+            if (!string.IsNullOrWhiteSpace(stage)) LabLaunchingStage.Text = stage;
+
+            if (!success)
+            {
+                PanLaunching.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            LabLaunchingTitle.Text = Lang.Text("Bedrock.Launching.Started");
+            SetLaunchOverlayProgress(1d);
+            var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(4d) };
+            timer.Tick += (_, _) =>
+            {
+                timer.Stop();
+                PanLaunching.Visibility = Visibility.Collapsed;
+            };
+            timer.Start();
+        });
+    }
+
+    private void BtnLaunchingCancel_Click(object sender, MouseButtonEventArgs e)
+    {
+        // 只收起浮层，游戏进程仍会继续启动
+        PanLaunching.Visibility = Visibility.Collapsed;
+    }
+
+    private void RunOnUi(Action action)
+    {
+        if (Dispatcher.CheckAccess()) action();
+        else ModBase.RunInUi(action);
+    }
+
+    #endregion
     private void RefreshAccount_Click(object sender, EventArgs e)
     {
         CancelSignInWatch();

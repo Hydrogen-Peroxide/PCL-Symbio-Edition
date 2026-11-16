@@ -3916,4 +3916,12 @@
     <sys:String x:Key="Bedrock.Right.Current.Loader">Loader: {0}</sys:String>
     <sys:String x:Key="Bedrock.Right.Log.Empty">No launches yet. Click the launch button on the left and progress will show up here.</sys:String>
     <sys:String x:Key="Bedrock.Right.Log.Title">Launch log</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Method">Verification</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Method.Portable">GDK portable</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Method.Store">Store package</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Started">Game launched</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Step">Current step</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Tip">Did you know</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Tip.Text">Every Bedrock version is stored separately under .minecraft\bedrock\versions. Switching instances re-registers the chosen version without overwriting the others.</sys:String>
+    <sys:String x:Key="Bedrock.Launching.Title">Launching Bedrock…</sys:String>
 </ResourceDictionary>
