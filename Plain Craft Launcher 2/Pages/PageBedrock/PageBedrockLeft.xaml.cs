@@ -398,19 +398,31 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
     /// <summary>把设置面板挂到弹窗层，显示为整窗浮层。</summary>
     private void AttachSettingsOverlay()
     {
-        if (ModMain.frmMain?.PanMsg is not { } host) return;
+        if (ModMain.frmMain?.PanMain is not { } host) return;
         if (PanInstanceSettings.Parent is Panel parent && !ReferenceEquals(parent, host))
         {
             _settingsHome = parent;
             parent.Children.Remove(PanInstanceSettings);
         }
 
-        PanInstanceSettings.HorizontalAlignment = HorizontalAlignment.Center;
-        PanInstanceSettings.VerticalAlignment = VerticalAlignment.Center;
-        PanInstanceSettings.Width = 720d;
-        PanInstanceSettings.Height = 430d;
+        // 与 Java 版实例页一致：铺满内容区，并带入场动画
+        PanInstanceSettings.HorizontalAlignment = HorizontalAlignment.Stretch;
+        PanInstanceSettings.VerticalAlignment = VerticalAlignment.Stretch;
+        PanInstanceSettings.Width = double.NaN;
+        PanInstanceSettings.Height = double.NaN;
         PanInstanceSettings.Visibility = Visibility.Visible;
+        Panel.SetZIndex(PanInstanceSettings, 99);
         if (!host.Children.Contains(PanInstanceSettings)) host.Children.Add(PanInstanceSettings);
+
+        var slide = new TranslateTransform(0d, 28d);
+        PanInstanceSettings.RenderTransform = slide;
+        PanInstanceSettings.Opacity = 0d;
+        ModAnimation.AniStart(new[]
+        {
+            ModAnimation.AaOpacity(PanInstanceSettings, 1d, 160),
+            ModAnimation.AaDouble(i => slide.Y += (double)i, -slide.Y, 300,
+                ease: new ModAnimation.AniEaseOutFluent(ModAnimation.AniEasePower.Weak))
+        }, "Bedrock Instance Settings");
     }
 
     /// <summary>关闭后把面板塞回左栏，避免影响下一次显示。</summary>
@@ -422,6 +434,8 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         parent.Children.Remove(PanInstanceSettings);
         PanInstanceSettings.Width = double.NaN;
         PanInstanceSettings.Height = double.NaN;
+        PanInstanceSettings.RenderTransform = Transform.Identity;
+        PanInstanceSettings.Opacity = 1d;
         PanInstanceSettings.HorizontalAlignment = HorizontalAlignment.Stretch;
         PanInstanceSettings.VerticalAlignment = VerticalAlignment.Stretch;
         _settingsHome?.Children.Add(PanInstanceSettings);

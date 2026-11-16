@@ -42,25 +42,21 @@ public partial class PageBedrockInstanceSelect
     /// <summary>在启动器窗口中央显示实例选择浮层；onApplied 会在确认后调用。</summary>
     public static void Show(Action? onApplied = null)
     {
-        var host = ModMain.frmMain?.PanMsg;
+        var host = ModMain.frmMain?.PanMain;
         if (host is null) return;
 
-        // 同一时间只保留一个实例选择浮层
+        // 同一时间只保留一个实例选择页面
         foreach (var existing in host.Children.OfType<PageBedrockInstanceSelect>().ToList())
             host.Children.Remove(existing);
 
-        host.Children.Add(new PageBedrockInstanceSelect { _onApplied = onApplied });
+        var page = new PageBedrockInstanceSelect { _onApplied = onApplied };
+        Panel.SetZIndex(page, 99);
+        host.Children.Add(page);
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         Opacity = 0d;
-        // 压暗下层界面，让浮层看起来是浮在页面上的
-        if (ModMain.frmMain is { } frame)
-            ModAnimation.AniStart(
-                ModAnimation.AaColor(frame.PanMsgBackground, BlurBorder.BackgroundProperty,
-                    new ModBase.MyColor(90d, 0d, 0d, 0d) - frame.PanMsgBackground.Background, 200),
-                "PanMsgBackground Background");
         ModAnimation.AniStart(new[]
         {
             ModAnimation.AaOpacity(this, 1d, 120, 40),
@@ -275,18 +271,7 @@ public partial class PageBedrockInstanceSelect
             ModAnimation.AaOpacity(this, -Opacity, 90, 10),
             ModAnimation.AaDouble(i => TransformPos.Y += (double)i, 20d - TransformPos.Y, 130, 0,
                 new ModAnimation.AniEaseOutFluent()),
-            ModAnimation.AaCode(() =>
-            {
-                var host = Parent as Panel;
-                host?.Children.Remove(this);
-                if (ModMain.frmMain is not { } frame) return;
-                if (host is not null && host.Children.Count > 0) return;
-                ModAnimation.AniStart(
-                    ModAnimation.AaColor(frame.PanMsgBackground, BlurBorder.BackgroundProperty,
-                        new ModBase.MyColor(0d, 0d, 0d, 0d) - frame.PanMsgBackground.Background, 200,
-                        ease: new ModAnimation.AniEaseOutFluent(ModAnimation.AniEasePower.Weak)),
-                    "PanMsgBackground Background");
-            }, after: true)
+            ModAnimation.AaCode(() => (Parent as Panel)?.Children.Remove(this), after: true)
         }, "BedrockInstanceSelect " + _uuid);
     }
 
