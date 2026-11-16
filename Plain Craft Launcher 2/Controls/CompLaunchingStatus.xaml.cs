@@ -27,6 +27,9 @@ public partial class CompLaunchingStatus
     /// <summary>点击取消时触发（只通知，不代表进程被终止）。</summary>
     public event EventHandler? Cancelled;
 
+    /// <summary>面板收起动画结束时触发，宿主可据此恢复输入区的缩放与透明度。</summary>
+    public event EventHandler? Hidden;
+
     /// <summary>显示面板：标题、版本名、验证方式，并播放与 Java 版相同的入场动画。</summary>
     public void Show(string? title, string? name, string? method)
     {
@@ -121,6 +124,7 @@ public partial class CompLaunchingStatus
                 Visibility = Visibility.Collapsed;
                 PanLaunchingHint.Visibility = Visibility.Collapsed;
                 PanLaunchingHint.Opacity = 0d;
+                Hidden?.Invoke(this, EventArgs.Empty);
             }, after: true)
         }, "Bedrock Launching Panel");
     }

@@ -6,7 +6,8 @@
                   xmlns:local="clr-namespace:PCL" xmlns:svgIcon="clr-namespace:PCL.Core.UI.Controls.SvgIcon;assembly=PCL.Core"
                   mc:Ignorable="d" x:Name="PanBack"
                   Width="300" AnimatedControl="{Binding ElementName=PanSide, Mode=OneWay}">
-    <Grid Name="PanInput" RenderTransformOrigin="0.5,0.5">
+    <Grid Name="PanRoot">
+        <Grid Name="PanInput" RenderTransformOrigin="0.5,0.5">
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="Auto" />
@@ -133,7 +134,8 @@
             </Border>
         </Border>
 
-        <!-- 启动中：直接用 Java 版同款面板 -->
-        <local:CompLaunchingStatus x:Name="PanLaunching" Grid.RowSpan="4" />
+        </Grid>
+        <!-- 启动中：Java 版同款面板，与输入区同级，输入区会一起缩放淡出 -->
+        <local:CompLaunchingStatus x:Name="PanLaunching" />
     </Grid>
 </local:MyPageLeft>

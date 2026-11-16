@@ -50,6 +50,8 @@ public partial class PageBedrockLeft
     public PageBedrockLeft()
     {
         InitializeComponent();
+        // 面板收起后把输入区的缩放与透明度还原（与 Java 版一致）
+        PanLaunching.Hidden += (_, _) => RestoreLaunchInput();
         Loaded += PageBedrockLeft_Loaded;
         Unloaded += PageBedrockLeft_Unloaded;
     }
@@ -413,8 +415,37 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
     // 直接复用 Java 版同款启动面板 CompLaunchingStatus，这里只做线程与文案转接
     public void ShowLaunchOverlay(string? name, bool portable)
     {
-        RunOnUi(() => PanLaunching.Show(Lang.Text("Bedrock.Launching.Title"), name,
-            Lang.Text(portable ? "Bedrock.Launching.Method.Portable" : "Bedrock.Launching.Method.Store")));
+        RunOnUi(() =>
+        {
+            // 与 Java 版一致：背后的输入区放大到 1.2 并淡出
+            PanInput.IsHitTestVisible = false;
+            PanInput.Visibility = Visibility.Visible;
+            ModAnimation.AniStart(new[]
+            {
+                ModAnimation.AaOpacity(PanInput, -PanInput.Opacity, 120),
+                ModAnimation.AaScaleTransform(PanInput,
+                    1.2d - ((ScaleTransform)PanInput.RenderTransform).ScaleX, 160)
+            }, "Bedrock Launching Input");
+
+            PanLaunching.Show(Lang.Text("Bedrock.Launching.Title"), name,
+                Lang.Text(portable ? "Bedrock.Launching.Method.Portable" : "Bedrock.Launching.Method.Store"));
+        });
+    }
+
+    /// <summary>启动面板收起后，把输入区缩放回 1 并淡入。</summary>
+    private void RestoreLaunchInput()
+    {
+        RunOnUi(() =>
+        {
+            ModAnimation.AniStart(new[]
+            {
+                ModAnimation.AaOpacity(PanInput, 1d - PanInput.Opacity, 250, 50),
+                ModAnimation.AaScaleTransform(PanInput,
+                    1d - ((ScaleTransform)PanInput.RenderTransform).ScaleX, 300, 50,
+                    new ModAnimation.AniEaseOutBack(ModAnimation.AniEasePower.Weak)),
+                ModAnimation.AaCode(() => PanInput.IsHitTestVisible = true, 200)
+            }, "Bedrock Launching Input");
+        });
     }
 
     public void SetLaunchOverlayProgress(double progress, string? stage = null)
