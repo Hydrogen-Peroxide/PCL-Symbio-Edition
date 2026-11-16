@@ -1546,6 +1546,14 @@ public partial class PageBedrockRight
                 return;
             }
 
+            // 用户自己解包到 versions\<版本> 的便携版：主程序就在版本目录里，直接用，不必再找安装包
+            var directDir = ModBedrockUwp.GetVersionDirectory(BedrockVersionsDir, versionId);
+            if (ModBedrockGdk.IsInstalled(directDir))
+            {
+                ActivateGdkVersion(versionId, directDir);
+                return;
+            }
+
             var files = GetPackageFiles(ModBedrockUwp.GetVersionDirectory(BedrockVersionsDir, versionId));
             if (files.Count == 0)
             {
