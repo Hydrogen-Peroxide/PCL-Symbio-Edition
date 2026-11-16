@@ -381,6 +381,7 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         RadioVanilla.Checked = loader == ModBedrockLoader.Vanilla;
         RadioLeviLamina.Checked = loader == ModBedrockLoader.LeviLamina;
         RadioBLoader.Checked = loader == ModBedrockLoader.BLoader;
+        CheckShowLaunchLog.Checked = States.UI.ShowLaunchLog;
         ShowSettingsTab(0);
         ModMain.frmMain?.PageChange(FormMain.PageType.BedrockSetup);
     }
@@ -482,6 +483,12 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         }
 
         ModMain.frmMain?.PageChange(FormMain.PageType.Bedrock);
+    }
+
+    private void ShowLaunchLog_Change(object sender, bool user)
+    {
+        if (!user) return;
+        States.UI.ShowLaunchLog = CheckShowLaunchLog.Checked == true;
     }
 
     /// <summary>把设置面板交给页面宿主使用。</summary>

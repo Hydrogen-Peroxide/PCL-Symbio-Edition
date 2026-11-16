@@ -177,7 +177,7 @@
 
         </StackPanel>
         <StackPanel x:Name="PanPlaceholder" Margin="25,25,25,10">
-            <local:MyCard Title="{DynamicResource Bedrock.Right.Current.Title}" UseAnimation="False">
+            <local:MyCard Title="{DynamicResource Bedrock.Right.Current.Title}" UseAnimation="False" Visibility="Collapsed">
                 <StackPanel Margin="16,38,16,16">
                     <TextBlock x:Name="LabCurrentInstance" FontSize="17" FontWeight="Bold"
                                TextTrimming="CharacterEllipsis" />
@@ -193,7 +193,7 @@
                                Foreground="{DynamicResource ColorBrushGray4}" />
                 </StackPanel>
             </local:MyCard>
-            <local:MyCard Margin="0,12,0,0" Title="{DynamicResource Bedrock.Right.Log.Title}">
+            <local:MyCard Margin="0,12,0,0" Title="{DynamicResource Bedrock.Right.Log.Title}" Visibility="Collapsed">
                 <TextBlock x:Name="LabLaunchLog" Margin="16,38,16,16" TextWrapping="Wrap"
                            FontSize="12" LineHeight="19"
                            Text="{DynamicResource Bedrock.Right.Log.Empty}"

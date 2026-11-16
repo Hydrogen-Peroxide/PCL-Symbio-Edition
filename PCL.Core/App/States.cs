@@ -200,6 +200,9 @@ public static partial class States
         /// </summary>
         [ConfigItem<bool>("UiBedrockLegacy", false)] public partial bool BedrockLegacy { get; set; }
 
+        /// <summary>是否显示启动日志卡片（Java 版启动页 / 基岩版启动页共用）。</summary>
+        [ConfigItem<bool>("UiShowLaunchLog", true)] public partial bool ShowLaunchLog { get; set; }
+
     }
 
     /// <summary>

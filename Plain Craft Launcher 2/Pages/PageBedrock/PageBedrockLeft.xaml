@@ -151,6 +151,16 @@
                                     </Border>
                                 </StackPanel>
 
+                                <!-- 启动日志开关 -->
+                                <TextBlock Text="{DynamicResource Bedrock.Right.Log.Title}" Margin="2,16,0,6"
+                                           FontSize="12" Opacity="0.6" />
+                                <Border Background="{DynamicResource ColorBrushTransparentBackground}"
+                                        CornerRadius="5" Padding="12,10">
+                                    <local:MyCheckBox Height="22" x:Name="CheckShowLaunchLog"
+                                                      Text="{DynamicResource Bedrock.Right.Log.Toggle}"
+                                                      Change="ShowLaunchLog_Change" />
+                                </Border>
+
                                 <!-- 加载器 -->
                                 <StackPanel x:Name="PanSettingsLoader" Visibility="Collapsed">
                                     <TextBlock Text="{DynamicResource Bedrock.Instance.LoaderTitle}" FontSize="15"
