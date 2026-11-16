@@ -77,6 +77,7 @@ public partial class PageSetupUI
             // 启动器
             SliderLauncherOpacity.Value = Config.Preference.Theme.WindowOpacity;
             CheckLauncherLogo.Checked = Config.Preference.ShowStartupLogo;
+            CheckBedrockLegacy.Checked = States.UI.BedrockLegacy;
             ComboDarkMode.SelectedIndex = (int)Config.Preference.Theme.ColorMode;
             ComboDarkColor.SelectedIndex = Array.IndexOf(CurrentThemeValues, Config.Preference.Theme.DarkColor);
             ComboLightColor.SelectedIndex = Array.IndexOf(CurrentThemeValues, Config.Preference.Theme.LightColor);
@@ -724,6 +725,17 @@ public partial class PageSetupUI
         CheckMusicStop_Change();
     }
 
+    private void BedrockLegacy_Change(object sender, bool value)
+    {
+        if (!value) return;
+        if (ModMain.MyMsgBox(
+                Lang.Text("Setup.Ui.Basic.BedrockLegacy.Message"),
+                Lang.Text("Setup.Ui.Basic.BedrockLegacy.Title"),
+                Lang.Text("Common.Action.Confirm"), Lang.Text("Common.Action.Cancel"), isWarn: true) == 1)
+            return;
+        // 取消：取消勾选，配置由 Change 事件写回
+        CheckBedrockLegacy.Checked = false;
+    }
     #region 功能隐藏
 
     /// <summary>

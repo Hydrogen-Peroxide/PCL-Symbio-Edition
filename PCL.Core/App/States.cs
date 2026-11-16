@@ -195,6 +195,11 @@ public static partial class States
         /// </summary>
         [ConfigItem<double>("WindowWidth", 900, ConfigSource.Local)] public partial double WindowWidth { get; set; }
 
+        /// <summary>
+        /// 基岩版是否使用旧版界面（已不再维护）。
+        /// </summary>
+        [ConfigItem<bool>("UiBedrockLegacy", false)] public partial bool BedrockLegacy { get; set; }
+
     }
 
     /// <summary>

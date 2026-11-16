@@ -3363,6 +3363,9 @@
     <sys:String x:Key="Setup.Ui.Basic.LockWindow">Lock launcher size</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.Opacity">Opacity</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.Opacity2">Opacity</sys:String>
+    <sys:String x:Key="Setup.Ui.Basic.BedrockLegacy">Use the legacy Bedrock layout</sys:String>
+    <sys:String x:Key="Setup.Ui.Basic.BedrockLegacy.Title">Switch Bedrock layout</sys:String>
+    <sys:String x:Key="Setup.Ui.Basic.BedrockLegacy.Message">The legacy Bedrock layout is no longer maintained. New features (instance settings, channel downloads, etc.) only appear in the new layout. Switch to the legacy layout anyway?</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.ShowLogo">Display the PCL SE logo while opening the launcher</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.ShowTriviaHint">Show "Trivia" when launching the game</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.Title">Basics</sys:String>

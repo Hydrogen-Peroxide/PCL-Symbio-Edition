@@ -3363,6 +3363,9 @@
     <sys:String x:Key="Setup.Ui.Basic.LockWindow">锁定启动器大小</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.Opacity">不透明度</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.Opacity2">不透明度</sys:String>
+    <sys:String x:Key="Setup.Ui.Basic.BedrockLegacy">使用基岩版旧版界面</sys:String>
+    <sys:String x:Key="Setup.Ui.Basic.BedrockLegacy.Title">切换基岩版界面</sys:String>
+    <sys:String x:Key="Setup.Ui.Basic.BedrockLegacy.Message">基岩版旧版界面已不再维护：它保留了较早的布局，后续新功能（实例设置、通道下载等）只会出现在新版界面里。确定要切换到旧版吗？</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.ShowLogo">打开启动器时显示 PCL SE 图标</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.ShowTriviaHint">在启动游戏时显示"你知道吗"</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.Title">基础</sys:String>
