@@ -98,8 +98,9 @@ public partial class PageBedrockInstanceSelect : IRefreshable
         var header = new TextBlock
         {
             Text = text,
-            FontSize = 12d,
-            Margin = new Thickness(6, 12, 0, 4)
+            FontSize = 13.5d,
+            FontWeight = FontWeights.Bold,
+            Margin = new Thickness(2, 16, 0, 6)
         };
         header.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray2");
         return header;
