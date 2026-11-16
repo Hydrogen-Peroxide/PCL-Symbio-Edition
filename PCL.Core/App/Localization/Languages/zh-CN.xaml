@@ -3910,4 +3910,5 @@
     <sys:String x:Key="Bedrock.Select.NoInstances">这个目录下还没有实例，可以先去下载页安装一个版本。</sys:String>
     <sys:String x:Key="Bedrock.Select.Title">选择基岩版实例</sys:String>
     <sys:String x:Key="Bedrock.Right.Placeholder">版本列表、下载与安装已经搬到左侧的「实例选择」浮层里；这里不再显示版本列表，启动时使用当前选中的实例。</sys:String>
+    <sys:String x:Key="Bedrock.Folder.Alongside">当前 .minecraft 旁</sys:String>
 </ResourceDictionary>

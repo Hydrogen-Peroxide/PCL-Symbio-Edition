@@ -178,6 +178,21 @@ public static class ModBedrockFolders
         // 3. 手动添加过的目录
         foreach (var folder in LoadManual()) Push(folder.Path, folder.Alias, false);
 
+        // 3.5 启动器里 Java 版当前选择的 .minecraft 旁的 bedrock（换台机器、换启动器副本时最常见的位置）
+        try
+        {
+            var javaFolder = ModFolder.mcFolderSelected;
+            if (!string.IsNullOrWhiteSpace(javaFolder))
+            {
+                var candidate = System.IO.Path.Combine(javaFolder, "bedrock");
+                if (Directory.Exists(candidate)) Push(candidate, Lang.Text("Bedrock.Folder.Alongside"), false);
+            }
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 读取 Java 版目录失败：{ex.Message}", ModBase.LogLevel.Debug);
+        }
+
         // 4. 各磁盘上的 .minecraft\bedrock
         try
         {

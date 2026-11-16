@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using PCL.Core.App.Localization;
+using PCL.Core.UI.Controls;
 
 namespace PCL;
 
@@ -53,6 +54,12 @@ public partial class PageBedrockInstanceSelect
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         Opacity = 0d;
+        // 压暗下层界面，让浮层看起来是浮在页面上的
+        if (ModMain.frmMain is { } frame)
+            ModAnimation.AniStart(
+                ModAnimation.AaColor(frame.PanMsgBackground, BlurBorder.BackgroundProperty,
+                    new ModBase.MyColor(90d, 0d, 0d, 0d) - frame.PanMsgBackground.Background, 200),
+                "PanMsgBackground Background");
         ModAnimation.AniStart(new[]
         {
             ModAnimation.AaOpacity(this, 1d, 120, 40),
@@ -154,6 +161,17 @@ public partial class PageBedrockInstanceSelect
             };
             empty.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray3");
             PanInstances.Children.Add(empty);
+
+            // 顺带把正在看的路径写出来，避免“实例都不见了”时不知道在哪个目录里找
+            var pathHint = new TextBlock
+            {
+                Text = ModBedrockInstance.VersionsDirectory,
+                Margin = new Thickness(6, 6, 6, 0),
+                FontSize = 11.5d,
+                TextWrapping = TextWrapping.Wrap
+            };
+            pathHint.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray4");
+            PanInstances.Children.Add(pathHint);
             return;
         }
 
@@ -235,7 +253,18 @@ public partial class PageBedrockInstanceSelect
             ModAnimation.AaOpacity(this, -Opacity, 90, 10),
             ModAnimation.AaDouble(i => TransformPos.Y += (double)i, 20d - TransformPos.Y, 130, 0,
                 new ModAnimation.AniEaseOutFluent()),
-            ModAnimation.AaCode(() => (Parent as Panel)?.Children.Remove(this), after: true)
+            ModAnimation.AaCode(() =>
+            {
+                var host = Parent as Panel;
+                host?.Children.Remove(this);
+                if (ModMain.frmMain is not { } frame) return;
+                if (host is not null && host.Children.Count > 0) return;
+                ModAnimation.AniStart(
+                    ModAnimation.AaColor(frame.PanMsgBackground, BlurBorder.BackgroundProperty,
+                        new ModBase.MyColor(0d, 0d, 0d, 0d) - frame.PanMsgBackground.Background, 200,
+                        ease: new ModAnimation.AniEaseOutFluent(ModAnimation.AniEasePower.Weak)),
+                    "PanMsgBackground Background");
+            }, after: true)
         }, "BedrockInstanceSelect " + _uuid);
     }
 

@@ -3910,4 +3910,5 @@
     <sys:String x:Key="Bedrock.Select.NoInstances">No instances in this folder yet. Install a version from the download page first.</sys:String>
     <sys:String x:Key="Bedrock.Select.Title">Select Bedrock instance</sys:String>
     <sys:String x:Key="Bedrock.Right.Placeholder">The version list, download and install UI now live in the Instance Select dialog on the left. This area no longer lists versions; launching uses the currently selected instance.</sys:String>
+    <sys:String x:Key="Bedrock.Folder.Alongside">Next to current .minecraft</sys:String>
 </ResourceDictionary>
