@@ -69,7 +69,7 @@ public partial class PageBedrockInstanceSelect
 
     #region 数据目录
 
-    private void RefreshFolders()
+    private void RefreshFolders(bool refreshInstances = true)
     {
         _folders.Clear();
         _folders.AddRange(ModBedrockFolders.Enumerate());
@@ -92,7 +92,7 @@ public partial class PageBedrockInstanceSelect
             if (isCurrent) item.SetChecked(true, false, false);
         }
 
-        RefreshInstances();
+        if (refreshInstances) RefreshInstances();
     }
 
     private void SwitchFolder(ModBedrockFolders.Folder folder)
@@ -108,7 +108,9 @@ public partial class PageBedrockInstanceSelect
         ModBedrockFolders.Switch(folder);
         // 换了目录就重新挑实例，避免残留上一个目录里的选择
         ModBedrockInstance.SelectedVersionId = "";
-        RefreshFolders();
+        RefreshFolders(false);
+        // 直接按用户点中的目录读取，不再绕一次全局配置，避免切换后列表仍是旧目录的内容
+        RefreshInstances(folder.Path);
         HintService.Hint(Lang.Text("Bedrock.Select.Applied", folder.Title), HintType.Success);
     }
 
@@ -148,10 +150,38 @@ public partial class PageBedrockInstanceSelect
 
     #region 版本实例
 
-    private void RefreshInstances()
+    /// <summary>读取指定目录下的实例（兼容 &lt;root&gt;\versions 与版本目录本身两种布局）。</summary>
+    private static List<string> GetVersionsIn(string root)
+    {
+        var result = new List<string>();
+        try
+        {
+            if (!Directory.Exists(root)) return result;
+            var nested = Path.Combine(root, "versions");
+            var target = Directory.Exists(nested) ? nested : root;
+            foreach (var dir in Directory.GetDirectories(target))
+            {
+                var name = Path.GetFileName(dir);
+                if (name.Equals("extracted", StringComparison.OrdinalIgnoreCase)) continue;
+                result.Add(name);
+            }
+
+            result.Sort((a, b) => ModDownload.CompareBedrockVersions(b, a));
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 读取实例列表失败（{root}）：{ex.Message}", ModBase.LogLevel.Debug);
+        }
+
+        return result;
+    }
+
+    private void RefreshInstances(string? rootOverride = null)
     {
         PanInstances.Children.Clear();
-        var versions = ModBedrockInstance.GetLocalVersions();
+        var versions = rootOverride is null
+            ? ModBedrockInstance.GetLocalVersions()
+            : GetVersionsIn(rootOverride);
         // 已经选过的实例优先，避免每次打开都跳回第一个
         var configured = Config.Launch.BedrockSelectedVersion;
         var current = !string.IsNullOrWhiteSpace(configured) && versions.Contains(configured)
