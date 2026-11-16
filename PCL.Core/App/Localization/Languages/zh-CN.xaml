@@ -3977,4 +3977,8 @@
 <sys:String x:Key="Bedrock.Launching.Switch">正在切换版本 {0}</sys:String>
 <sys:String x:Key="Bedrock.Launching.Busy">正在切换版本，请等当前这次启动准备完成</sys:String>
 <sys:String x:Key="Bedrock.Launching.Downgrade">系统中已安装更高版本的基岩版，正在保留存档卸载后重新注册 {0}</sys:String>
+<sys:String x:Key="Setup.Misc.System.BedrockLegacy">旧版基岩版界面</sys:String>
+<sys:String x:Key="Setup.Misc.System.BedrockLegacy.ToolTip">打开后基岩版沿用旧版界面（实例设置是浮层、保留旧版布局）。</sys:String>
+<sys:String x:Key="Setup.Misc.System.BedrockLegacy.On">已切换为旧版基岩版界面，重新打开实例设置后生效</sys:String>
+<sys:String x:Key="Setup.Misc.System.BedrockLegacy.Off">已切换为新版基岩版界面</sys:String>
 </ResourceDictionary>

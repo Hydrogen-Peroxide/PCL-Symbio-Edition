@@ -3977,4 +3977,8 @@
 <sys:String x:Key="Bedrock.Launching.Switch">Switching to version {0}</sys:String>
 <sys:String x:Key="Bedrock.Launching.Busy">Still switching versions, please wait for the current launch to be prepared.</sys:String>
 <sys:String x:Key="Bedrock.Launching.Downgrade">A newer Bedrock build is installed; removing it (save data kept) and registering {0} again</sys:String>
+<sys:String x:Key="Setup.Misc.System.BedrockLegacy">Legacy Bedrock UI</sys:String>
+<sys:String x:Key="Setup.Misc.System.BedrockLegacy.ToolTip">Keep the old Bedrock interface (instance settings as an overlay, legacy layout).</sys:String>
+<sys:String x:Key="Setup.Misc.System.BedrockLegacy.On">Switched to the legacy Bedrock UI. Reopen instance settings to apply.</sys:String>
+<sys:String x:Key="Setup.Misc.System.BedrockLegacy.Off">Switched to the new Bedrock UI.</sys:String>
 </ResourceDictionary>

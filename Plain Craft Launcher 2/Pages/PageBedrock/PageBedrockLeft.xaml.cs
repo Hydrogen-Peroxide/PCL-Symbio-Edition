@@ -371,6 +371,24 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
             return;
         }
 
+        // 旧版界面：仍然使用原来的整窗浮层
+        if (States.UI.BedrockLegacy)
+        {
+            LabSettingsTarget.Text = ModBedrockInstance.GetDisplayName(ModBedrockInstance.VersionsDirectory, version);
+            LabSettingsVersion.Text = Lang.Text("Bedrock.Status.Version", version) + " · " + ChannelText(version);
+            LabSettingsPath.Text = ModBedrockInstance.GetInstanceFolder(ModBedrockInstance.VersionsDirectory, version);
+            LabSettingsTabTitle.Text = LabSettingsTarget.Text;
+            LabSettingsTabSub.Text = Lang.Text("Bedrock.Status.Version", version) + " · " + ChannelText(version);
+            var legacyLoader = ModBedrockLoader.GetLoader(version);
+            RadioVanilla.Checked = legacyLoader == ModBedrockLoader.Vanilla;
+            RadioLeviLamina.Checked = legacyLoader == ModBedrockLoader.LeviLamina;
+            RadioBLoader.Checked = legacyLoader == ModBedrockLoader.BLoader;
+            CheckShowLaunchLog.Checked = States.UI.ShowLaunchLog;
+            ShowSettingsTab(0);
+            AttachSettingsOverlay();
+            return;
+        }
+
         // 与 Java 版一致：实例设置是整页界面，而不是弹窗
         ModMain.frmBedrockInstanceLeft ??= new PageBedrockInstanceLeft();
         ModMain.frmBedrockInstanceLeft.pageID = FormMain.PageSubType.VersionSetup;
