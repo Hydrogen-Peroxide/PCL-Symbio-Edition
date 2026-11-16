@@ -3924,4 +3924,7 @@
     <sys:String x:Key="Bedrock.Launching.Tip">Did you know</sys:String>
     <sys:String x:Key="Bedrock.Launching.Tip.Text">Every Bedrock version is stored separately under .minecraft\bedrock\versions. Switching instances re-registers the chosen version without overwriting the others.</sys:String>
     <sys:String x:Key="Bedrock.Launching.Title">Launching Bedrock…</sys:String>
+    <sys:String x:Key="Bedrock.Instance.Tab.Data">Data and saves</sys:String>
+    <sys:String x:Key="Bedrock.Instance.Tab.Detail">Instance details</sys:String>
+    <sys:String x:Key="Bedrock.Instance.LoaderHint">The loader decides which extensions are enabled when this instance starts; changes apply on next launch.</sys:String>
 </ResourceDictionary>

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -47,6 +48,7 @@ public partial class PageBedrockLeft
     // 宿主窗口，用于在从 Xbox 应用切回时刷新账号
     private Window? _hostWindow;
 
+    private System.Windows.Controls.Panel? _settingsHome;
     public PageBedrockLeft()
     {
         InitializeComponent();
@@ -362,7 +364,7 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         });
     }
 
-    /// <summary>打开实例设置浮层：加载器切换 + 原有的快捷操作。</summary>
+    /// <summary>打开实例设置：把设置面板搬到整窗浮层里显示（左栏只有 300px，塞不下）。</summary>
     private void BtnInstanceSettings_Click(object sender, MouseButtonEventArgs e)
     {
         var version = EnsureSelectedVersion();
@@ -372,12 +374,69 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
             return;
         }
 
-        LabSettingsTarget.Text = Lang.Text("Bedrock.Instance.Selected", version);
+        LabSettingsTarget.Text = ModBedrockInstance.GetDisplayName(ModBedrockInstance.VersionsDirectory, version);
+        LabSettingsVersion.Text = Lang.Text("Bedrock.Status.Version", version) + " · " + ChannelText(version);
+        LabSettingsPath.Text = ModBedrockInstance.GetInstanceFolder(ModBedrockInstance.VersionsDirectory, version);
         var loader = ModBedrockLoader.GetLoader(version);
         RadioVanilla.Checked = loader == ModBedrockLoader.Vanilla;
         RadioLeviLamina.Checked = loader == ModBedrockLoader.LeviLamina;
         RadioBLoader.Checked = loader == ModBedrockLoader.BLoader;
+        ShowSettingsTab(0);
+        AttachSettingsOverlay();
+    }
+
+    private static string ChannelText(string versionId) => ModBedrockInstance.GetChannel(versionId) switch
+    {
+        "preview" => Lang.Text("Download.Bedrock.Channel.Preview"),
+        "beta" => Lang.Text("Download.Bedrock.Channel.Beta"),
+        _ => Lang.Text("Download.Bedrock.Channel.Release")
+    };
+
+    /// <summary>把设置面板挂到弹窗层，显示为整窗浮层。</summary>
+    private void AttachSettingsOverlay()
+    {
+        if (ModMain.frmMain?.PanMsg is not { } host) return;
+        if (PanInstanceSettings.Parent is Panel parent && !ReferenceEquals(parent, host))
+        {
+            _settingsHome = parent;
+            parent.Children.Remove(PanInstanceSettings);
+        }
+
+        PanInstanceSettings.HorizontalAlignment = HorizontalAlignment.Center;
+        PanInstanceSettings.VerticalAlignment = VerticalAlignment.Center;
+        PanInstanceSettings.Width = 720d;
+        PanInstanceSettings.Height = 430d;
         PanInstanceSettings.Visibility = Visibility.Visible;
+        if (!host.Children.Contains(PanInstanceSettings)) host.Children.Add(PanInstanceSettings);
+    }
+
+    /// <summary>关闭后把面板塞回左栏，避免影响下一次显示。</summary>
+    private void DetachSettingsOverlay()
+    {
+        PanInstanceSettings.Visibility = Visibility.Collapsed;
+        if (PanInstanceSettings.Parent is not Panel parent || ReferenceEquals(parent, _settingsHome)) return;
+
+        parent.Children.Remove(PanInstanceSettings);
+        PanInstanceSettings.Width = double.NaN;
+        PanInstanceSettings.Height = double.NaN;
+        PanInstanceSettings.HorizontalAlignment = HorizontalAlignment.Stretch;
+        PanInstanceSettings.VerticalAlignment = VerticalAlignment.Stretch;
+        _settingsHome?.Children.Add(PanInstanceSettings);
+    }
+
+    private void SettingsTab_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not MyListItem item || item.Parent is not Panel nav) return;
+        // 导航面板第一个子元素是标题，所以索引要减一
+        ShowSettingsTab(nav.Children.IndexOf(item) - 1);
+    }
+
+    private void ShowSettingsTab(int tab)
+    {
+        PanSettingsDetail.Visibility = tab == 0 ? Visibility.Visible : Visibility.Collapsed;
+        PanSettingsLoader.Visibility = tab == 1 ? Visibility.Visible : Visibility.Collapsed;
+        PanSettingsData.Visibility = tab == 2 ? Visibility.Visible : Visibility.Collapsed;
+        PanSettingsShortcuts.Visibility = tab == 3 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     /// <summary>关闭浮层时保存加载器选择。</summary>
@@ -395,7 +454,7 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
             HintService.Hint(Lang.Text("Bedrock.Instance.LoaderSaved", version), HintType.Success);
         }
 
-        PanInstanceSettings.Visibility = Visibility.Collapsed;
+        DetachSettingsOverlay();
     }
 
     /// <summary>当前选中的实例；没有选中时退回本地列表里的第一个。</summary>

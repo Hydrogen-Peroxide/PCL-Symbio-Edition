@@ -3924,4 +3924,7 @@
     <sys:String x:Key="Bedrock.Launching.Tip">你知道吗</sys:String>
     <sys:String x:Key="Bedrock.Launching.Tip.Text">基岩版的每个版本都独立存放在 .minecraft\bedrock\versions 下，切换实例时会自动改注册到对应版本，不会覆盖其它版本。</sys:String>
     <sys:String x:Key="Bedrock.Launching.Title">正在启动基岩版…</sys:String>
+    <sys:String x:Key="Bedrock.Instance.Tab.Data">数据与存档</sys:String>
+    <sys:String x:Key="Bedrock.Instance.Tab.Detail">实例详情</sys:String>
+    <sys:String x:Key="Bedrock.Instance.LoaderHint">加载器决定这个实例启动时加载哪些扩展；修改在启动时生效。</sys:String>
 </ResourceDictionary>
