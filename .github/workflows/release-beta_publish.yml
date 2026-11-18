@@ -8,23 +8,8 @@ on:
     types: [published]
 
 jobs:
-  preflight:
-    if: ${{ github.event.release.prerelease }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    steps:
-      - name: Check required signing configuration
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        run: |
-          if [ -z "$GPG_PRIVATE_KEY" ]; then
-            echo "::error::Configure the GPG_PRIVATE_KEY repository secret before publishing a signed release. If the key is protected, also configure GPG_PASSPHRASE."
-            exit 1
-          fi
-
   build:
     if: ${{ github.event.release.prerelease }}
-    needs: preflight
     strategy:
       matrix:
         include:
@@ -41,7 +26,6 @@ jobs:
     secrets: inherit
 
   changelog:
-    needs: preflight
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -93,24 +77,12 @@ jobs:
         run: |
           mv "./artifact/Plain Craft Launcher 2.exe" "PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}.exe"
 
-      - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-
-      - name: Sign the binary
-        run: |
-          gpg --detach-sign --armor "PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}.exe"
-          gpg --verify "PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}.exe.asc" "PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}.exe"
-
-      - name: Upload binary and signature to Release
+      - name: Upload binary to Release
         uses: softprops/action-gh-release@v2.2.2
         with:
           fail_on_unmatched_files: true
           files: |
             PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}.exe
-            PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}.exe.asc
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

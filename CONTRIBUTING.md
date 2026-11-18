@@ -31,7 +31,9 @@ dotnet run --project tests/LauncherServicesRegression -c Release
 
 ## 发布工作流配置
 
-Release / Beta 发布必须提供仓库机密 `GPG_PRIVATE_KEY`；私钥若有口令，还需提供 `GPG_PASSPHRASE`。工作流会在构建前检查私钥是否配置，签名并验证成功后才上传二进制文件和对应的 `.asc` 签名。缺少私钥或签名失败会使发布失败。
+Release / Beta 发布**不需要** GPG 签名：工作流直接上传 `PCL2_CE_<configuration>_<architecture>.exe`（x64 与 ARM64 各一份），不再生成 `.asc`。仓库内的 `GPG-PUBLIC-KEY.asc` 为历史遗留文件，仅供校验早期已签名版本使用。
+
+发布前需要配置的仓库机密为 `BEDROCK_RELEASE_CIK`、`BEDROCK_PREVIEW_CIK`、`CLIENT_ID`、`CURSEFORGE_API_KEY`（可选的 `SENTRY_DSN`）与 `CNB_TOKEN`。缺少前四项时构建不会失败，但产物会相应地无法解包 GDK 安装包、微软登录回退到上游公共 Client ID、CurseForge 搜索报错；缺少 `CNB_TOKEN` 会让 CNB 同步失败、客户端更新回退到 GitHub。
 
 <details>
 
