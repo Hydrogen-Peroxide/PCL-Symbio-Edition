@@ -1,0 +1,22 @@
+name: Sync Release Tag To CNB
+on:
+  release:
+    types: [published]
+jobs:
+  sync_tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Push tag to CNB
+        env:
+          CNB_TOKEN: 2V717a69FDh0FA5cwpdWCc4bPKA
+        run: |
+          git remote add cnb https://${CNB_TOKEN}@cnb.cool/PCL-Symbio/PCL-Symbio-Edition.git
+          git config user.name "Release Bot"
+          git config user.email "bot@symbio.local"
+          git push cnb ${{ github.ref_name }}
