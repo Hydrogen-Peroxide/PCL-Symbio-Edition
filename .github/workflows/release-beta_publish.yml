@@ -10,19 +10,10 @@ on:
 jobs:
   build:
     if: ${{ github.event.release.prerelease }}
-    strategy:
-      matrix:
-        include:
-          - configuration: Beta
-            architecture: x64
-          - configuration: Beta
-            architecture: ARM64
-      fail-fast: false
-
     uses: ./.github/workflows/reusable-build.yml
     with:
-      configuration: ${{ matrix.configuration }}
-      architecture: ${{ matrix.architecture }}
+      configuration: Beta
+      architecture: x64
     secrets: inherit
 
   changelog:
@@ -55,34 +46,28 @@ jobs:
   rename_and_release:
     permissions:
       contents: write
-      actions: write
     needs: [build, changelog]
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    strategy:
-      matrix:
-        include:
-          - configuration: Beta
-            architecture: x64
-          - configuration: Beta
-            architecture: ARM64
     steps:
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
-          name: PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}
+          name: PCL2_CE_Beta_x64
           path: ./artifact
 
-      - name: Rename binaries
+      - name: Rename binary
         run: |
-          mv "./artifact/Plain Craft Launcher 2.exe" "PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}.exe"
+          VERSION="${GITHUB_REF_NAME#v}"
+          ASSET_NAME="PCL-Symbio-Edition-${VERSION}-x64.exe"
+          mv "./artifact/Plain Craft Launcher 2.exe" "$ASSET_NAME"
+          echo "ASSET_NAME=$ASSET_NAME" >> "$GITHUB_ENV"
 
       - name: Upload binary to Release
         uses: softprops/action-gh-release@v2.2.2
         with:
           fail_on_unmatched_files: true
-          files: |
-            PCL2_CE_${{ matrix.configuration }}_${{ matrix.architecture }}.exe
+          files: ${{ env.ASSET_NAME }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
