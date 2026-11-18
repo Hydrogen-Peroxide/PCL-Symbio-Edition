@@ -250,7 +250,27 @@ def ensure_tag(tag: str) -> None:
     raise SyncError(f"推送 tag {tag} 到 CNB 失败：{last_error}")
 
 
-def upsert_release(tag: str, name: str, body: str, prerelease: bool) -> str:
+def _resolve_commitish(tag: str) -> str:
+    """给 CNB 建 Release 用的 target_commitish。
+
+    CNB 在 tag 尚不存在时强制要求该字段（HTTP 400 target_commitish is required），
+    更新清单用的 `updates` 就是这种「只有 Release、不推 tag」的合成 tag。
+    优先取本 tag 指向的提交，退回默认分支的当前提交。
+    """
+    for spec in (f"refs/tags/{tag}^{{commit}}", "HEAD"):
+        proc = run(["git", "rev-parse", "-q", "--verify", spec], check=False, echo=False)
+        if proc.returncode == 0 and (proc.stdout or "").strip():
+            return proc.stdout.strip().splitlines()[0].strip()
+    raise SyncError(f"无法确定 {tag} 的 target_commitish")
+
+
+def upsert_release(
+    tag: str,
+    name: str,
+    body: str,
+    prerelease: bool,
+    target_commitish: str | None = None,
+) -> str:
     common = {
         "name": name,
         "body": body,
@@ -271,11 +291,18 @@ def upsert_release(tag: str, name: str, body: str, prerelease: bool) -> str:
     elif resp.status == 404:
         log(f"CNB 上还没有 Release {tag}，创建")
         payload = {"tag_name": tag, **common}
+        if target_commitish:
+            payload["target_commitish"] = target_commitish
         created = cnb("POST", f"/{CNB_REPO}/-/releases", payload)
         if created.status not in (200, 201):
             # 刚推完 tag 时 CNB 可能还没建好索引，稍等再试一次
             log(f"创建返回 HTTP {created.status}，5s 后重试一次")
             time.sleep(5)
+            created = cnb("POST", f"/{CNB_REPO}/-/releases", payload)
+        if created.status not in (200, 201) and not target_commitish:
+            # 老版本 CNB 可能只缺 target_commitish，补上再试一次
+            payload["target_commitish"] = _resolve_commitish(tag)
+            log(f"补上 target_commitish={payload['target_commitish']} 后重试")
             created = cnb("POST", f"/{CNB_REPO}/-/releases", payload)
         expect(created, f"创建 CNB Release {tag}", ok=(200, 201))
         release_id = (created.json() or {}).get("id")
@@ -408,6 +435,8 @@ def write_manifest(tag: str, name: str, body: str, prerelease: bool, files: list
         "更新清单",
         "启动器 CNB 更新源读取的版本清单，由 CI 自动维护，请勿手动修改。",
         False,
+        # updates 是合成 tag，CNB 上没有对应 ref，建 Release 必须带 target_commitish
+        _resolve_commitish(tag),
     )
 
     # 先上传、再从 CNB 侧读回真实下载地址，避免猜测 URL 形态
