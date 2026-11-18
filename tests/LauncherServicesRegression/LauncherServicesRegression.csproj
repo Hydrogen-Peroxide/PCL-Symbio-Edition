@@ -9,6 +9,7 @@
     <Compile Include="../../Plain Craft Launcher 2/Modules/Base/WindowsProcessExecution.cs" Link="WindowsProcessExecution.cs" />
     <Compile Include="../../Plain Craft Launcher 2/Modules/Minecraft/ModBedrockMods.cs" Link="ModBedrockMods.cs" />
     <Compile Include="../../Plain Craft Launcher 2/Modules/Updates/UpdatesGitHubModel.cs" Link="UpdatesGitHubModel.cs" />
+    <Compile Include="../../Plain Craft Launcher 2/Modules/Updates/UpdatesCnbModel.cs" Link="UpdatesCnbModel.cs" />
     <Compile Include="../../Plain Craft Launcher 2/Modules/Updates/UpdatesWrapperModel.cs" Link="UpdatesWrapperModel.cs" />
     <Compile Include="../../Plain Craft Launcher 2/Modules/Updates/UpdateDownloadSnapshot.cs" Link="UpdateDownloadSnapshot.cs" />
     <Compile Include="../../Plain Craft Launcher 2/Modules/Updates/IUpdateSource.cs" Link="IUpdateSource.cs" />

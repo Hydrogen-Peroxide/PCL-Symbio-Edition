@@ -33,6 +33,12 @@ public static class Secrets
     public static byte[]? BedrockPreviewCik { get; } = EnvironmentInterop.GetSecretBytes("BEDROCK_PREVIEW_CIK");
 
     /// <summary>
+    /// CNB 访问令牌。CNB 的 Release 列举接口不开放匿名访问，
+    /// 构建时由 PCL_CNB_TOKEN 注入（建议使用仅具备读取权限的令牌）。
+    /// </summary>
+    public static string CnbToken { get; } = EnvironmentInterop.GetSecret("CNB_TOKEN", readEnvDebugOnly: true).ReplaceNullOrEmpty();
+
+    /// <summary>
     /// 当前版本的 Git 提交 SHA
     /// </summary>
     public static string CommitHash { get; } = EnvironmentInterop.GetSecret("GITHUB_SHA", readEnvDebugOnly: true).ReplaceNullOrEmpty();

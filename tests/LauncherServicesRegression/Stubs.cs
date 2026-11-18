@@ -23,7 +23,14 @@ namespace PCL
 
 namespace PCL.Network
 {
-    public sealed class RequestParam { public int Retries; public int Timeout; public bool UseBrowserUserAgent; }
+    public sealed class RequestParam
+    {
+        public int Retries;
+        public int Timeout;
+        public bool UseBrowserUserAgent;
+        public string? Accept;
+        public Dictionary<string, string>? Headers;
+    }
     public static class Requester
     {
         public static string FetchString(string url, RequestParam options) => throw new InvalidOperationException("Real network is forbidden in this regression host.");
@@ -34,7 +41,14 @@ namespace PCL.Network.Loaders
 {
     public sealed class LoaderDownload(string name, List<PCL.Network.DownloadFile> files) : PCL.ModLoader.LoaderBase;
 }
-namespace PCL.Core.App { }
+namespace PCL.Core.App
+{
+    // UpdatesCnbModel 只读取该令牌以决定是否附加鉴权头，测试中默认无令牌。
+    public static class Secrets
+    {
+        public static string CnbToken { get; set; } = "";
+    }
+}
 namespace PCL.Core.App.IoC
 {
     // FileConfigStorage 仅依赖 HasShutdownStarted，测试宿主无需引入完整生命周期实现。

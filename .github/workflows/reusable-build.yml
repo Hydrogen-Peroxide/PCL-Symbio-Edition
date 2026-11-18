@@ -42,6 +42,7 @@ jobs:
           PCL_MS_CLIENT_ID: ${{ secrets.CLIENT_ID }}
           PCL_CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
           PCL_SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          PCL_CNB_TOKEN: ${{ secrets.CNB_TOKEN }}
         run: |
           if [ -z "$PCL_BEDROCK_RELEASE_CIK" ]; then
             echo "::warning::仓库未配置 BEDROCK_RELEASE_CIK，产物将无法解包基岩版 GDK 安装包。请在 Settings → Secrets and variables → Actions 中添加该 Secret。"
@@ -58,6 +59,9 @@ jobs:
           if [ -z "$PCL_SENTRY_DSN" ]; then
             echo "::notice::未配置 SENTRY_DSN，遥测与崩溃上报功能将保持关闭。"
           fi
+          if [ -z "$PCL_CNB_TOKEN" ]; then
+            echo "::warning::未配置 CNB_TOKEN，CNB 更新源的列举接口会返回 401，更新将回退到 GitHub。"
+          fi
 
       - name: Build Project
         env:
@@ -68,6 +72,7 @@ jobs:
           PCL_BEDROCK_RELEASE_CIK: ${{ secrets.BEDROCK_RELEASE_CIK }}
           PCL_BEDROCK_PREVIEW_CIK: ${{ secrets.BEDROCK_PREVIEW_CIK }}
           PCL_GITHUB_SHA: ${{ github.sha }}
+          PCL_CNB_TOKEN: ${{ secrets.CNB_TOKEN }}
         run: |
           dotnet publish "Plain Craft Launcher 2/Plain Craft Launcher 2.csproj" \
           -p:Configuration=${{ inputs.configuration }} -p:Platform=${{ inputs.architecture }} \

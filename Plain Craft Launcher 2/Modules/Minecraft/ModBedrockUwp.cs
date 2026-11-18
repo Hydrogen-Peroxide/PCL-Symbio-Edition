@@ -468,18 +468,31 @@ public static class ModBedrockUwp
     /// </summary>
     public static (string FullName, string Version, string FamilyName)? GetInstalledPackage(string packageName = ReleasePackageName)
     {
+        var detail = GetInstalledPackageDetail(packageName);
+        return detail is null ? null : (detail.Value.FullName, detail.Value.Version, detail.Value.FamilyName);
+    }
+
+    /// <summary>
+    ///     读取已安装包的完整注册信息。InstallLocation 用来确认注册的确实是当前实例目录，
+    ///     而不是同名的商店版或其它目录里的版本。
+    /// </summary>
+    public static (string FullName, string Version, string FamilyName, string InstallLocation)?
+        GetInstalledPackageDetail(string packageName = ReleasePackageName)
+    {
         try
         {
             var output = ModBase.ShellAndGetOutputChecked("powershell.exe",
-                $"-NoProfile -Command \"Get-AppxPackage -Name '{packageName}' -ErrorAction Stop | Select-Object -First 1 -Property PackageFullName,Version,PackageFamilyName | ConvertTo-Csv -NoTypeInformation\"",
+                $"-NoProfile -Command \"Get-AppxPackage -Name '{packageName}' -ErrorAction Stop | Select-Object -First 1 -Property PackageFullName,Version,PackageFamilyName,InstallLocation | ConvertTo-Csv -NoTypeInformation\"",
                 timeout: 20000);
             var lines = output.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
             if (lines.Length < 2) return null;
 
-            var parts = lines[1].Split(',');
-            if (parts.Length < 3) return null;
+            // 安装路径可能带逗号，必须按 CSV 规则解析而不是直接 Split(',')
+            var parts = ParseCsvLine(lines[1].Trim());
+            if (parts.Count < 4) return null;
 
-            return (parts[0].Trim().Trim('"'), parts[1].Trim().Trim('"'), parts[2].Trim().Trim('"'));
+            return (parts[0].Trim().Trim('"'), parts[1].Trim().Trim('"'), parts[2].Trim().Trim('"'),
+                parts[3].Trim().Trim('"'));
         }
         catch (Exception ex)
         {
@@ -679,6 +692,102 @@ public static class ModBedrockUwp
         }
 
         return false;
+    }
+
+    /// <summary>
+    ///     读取解包目录里安装清单的包标识、版本号与首个 Application Id。
+    ///     直接读本地清单而不是查系统注册信息，才能确保启动的是当前选中的那个实例。
+    /// </summary>
+    public static (string Name, string Version, string ApplicationId)? ReadDirectoryManifest(string directory)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory)) return null;
+            var manifestPath = Directory
+                .GetFiles(directory, "AppxManifest.xml", SearchOption.TopDirectoryOnly)
+                .FirstOrDefault();
+            if (manifestPath is null) return null;
+
+            var document = XDocument.Load(manifestPath);
+            var root = document.Root;
+            if (root is null) return null;
+
+            var identity = root.Elements().FirstOrDefault(element => element.Name.LocalName == "Identity");
+            var name = identity?.Attribute("Name")?.Value?.Trim();
+            if (string.IsNullOrEmpty(name)) return null;
+
+            var version = identity?.Attribute("Version")?.Value?.Trim() ?? "";
+            var application = root.Elements().FirstOrDefault(element => element.Name.LocalName == "Applications")
+                ?.Elements().FirstOrDefault(element => element.Name.LocalName == "Application");
+            var appId = application?.Attribute("Id")?.Value?.Trim() ?? "";
+            return (name, version, appId);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 读取安装清单失败: {ex.Message}", ModBase.LogLevel.Normal);
+            return null;
+        }
+    }
+
+    /// <summary>
+    ///     启动指定解包目录对应的已注册包：按目录清单里的包标识与 Application Id 拼 AUMID，
+    ///     并确认系统里注册的包确实指向该目录。
+    ///     不能直接启动“第一个已安装的基岩版包”，否则同一台机器注册过多个通道时
+    ///     （例如预览版 Microsoft.MinecraftWindowsBeta），切到别的版本后启动的还是旧版本。
+    /// </summary>
+    public static bool LaunchInstalledPackageFromDirectory(string directory, out string detail)
+    {
+        detail = "";
+        try
+        {
+            var manifest = ReadDirectoryManifest(directory);
+            if (manifest is null)
+            {
+                detail = "解包目录内没有可用的安装清单";
+                return false;
+            }
+
+            var installed = GetInstalledPackageDetail(manifest.Value.Name);
+            if (installed is null)
+            {
+                detail = $"系统里没有注册 {manifest.Value.Name}";
+                return false;
+            }
+
+            var expected = Path.TrimEndingDirectorySeparator(Path.GetFullPath(directory));
+            var actual = string.IsNullOrEmpty(installed.Value.InstallLocation)
+                ? ""
+                : Path.TrimEndingDirectorySeparator(Path.GetFullPath(installed.Value.InstallLocation));
+            if (!string.Equals(expected, actual, StringComparison.OrdinalIgnoreCase))
+            {
+                detail = $"已注册的 {manifest.Value.Name} 指向 {actual}";
+                return false;
+            }
+
+            var appId = manifest.Value.ApplicationId;
+            if (string.IsNullOrEmpty(appId)) appId = GetApplicationId(manifest.Value.Name);
+            if (string.IsNullOrEmpty(appId))
+            {
+                detail = "无法从清单确定应用的启动入口";
+                return false;
+            }
+
+            var aumid = $"{installed.Value.FamilyName}!{appId}";
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"shell:AppsFolder\\{aumid}",
+                UseShellExecute = true
+            });
+            detail = aumid;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            detail = ex.Message;
+            ModBase.Log($"[Bedrock] 按实例目录启动失败: {ex.Message}", ModBase.LogLevel.Normal);
+            return false;
+        }
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -14,7 +14,11 @@ public partial class PageBedrockInstanceSetupPage : IRefreshable
         InitializeComponent();
         Loaded += (_, _) => RefreshData();
         BtnRename.Click += BtnRename_Click;
-
+        BtnOpenFolder.Click += (_, _) => OpenFolder(CurrentVersion is null
+            ? ""
+            : ModBedrockInstance.GetInstanceFolder(ModBedrockInstance.VersionsDirectory, CurrentVersion));
+        BtnOpenData.Click += (_, _) => OpenFolder(ModBedrockInstance.VersionsDirectory);
+        BtnGotoActions.Click += (_, _) => ModMain.frmBedrockInstanceLeft?.PageChange(FormMain.PageSubType.BedrockActions);
     }
 
     public void Refresh()
@@ -34,12 +38,18 @@ public partial class PageBedrockInstanceSetupPage : IRefreshable
     public void RefreshData()
     {
         var version = CurrentVersion ?? ModBedrockInstance.SelectedVersionId;
+        var dataFolder = ModBedrockInstance.VersionsDirectory;
+        LabDataFolder.Text = PageBedrockInstanceLeft.FoldPath(dataFolder);
+        LabDataFolder.ToolTip = dataFolder;
+        BtnOpenData.IsEnabled = Directory.Exists(dataFolder);
+
         if (string.IsNullOrWhiteSpace(version))
         {
             TextName.Text = "";
             LabVersion.Text = "-";
             LabChannel.Text = "-";
             LabPath.Text = Lang.Text("Bedrock.Instance.None");
+            LabPath.ToolTip = null;
 
             BtnRename.IsEnabled = false;
             BtnOpenFolder.IsEnabled = false;
@@ -63,8 +73,6 @@ public partial class PageBedrockInstanceSetupPage : IRefreshable
         LabPath.ToolTip = instancePath;
         BtnRename.IsEnabled = true;
         BtnOpenFolder.IsEnabled = true;
-
-
     }
 
     private void BtnRename_Click(object sender, MouseButtonEventArgs e)
@@ -80,48 +88,17 @@ public partial class PageBedrockInstanceSetupPage : IRefreshable
             string.IsNullOrWhiteSpace(name) ? version : name), HintType.Success);
     }
 
-    private void BtnOpenFolder_Click(object sender, MouseButtonEventArgs e)
+    private static void OpenFolder(string path)
     {
-        var version = CurrentVersion;
-        if (version is null) return;
-        var path = ModBedrockInstance.GetInstanceFolder(ModBedrockInstance.VersionsDirectory, version);
-        if (!Directory.Exists(path)) return;
+        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path)) return;
         try
         {
             Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
         }
         catch (Exception ex)
         {
-            ModBase.Log($"[Bedrock] 打开实例文件夹失败：{ex.Message}", ModBase.LogLevel.Feedback);
+            ModBase.Log($"[Bedrock] 打开文件夹失败：{ex.Message}", ModBase.LogLevel.Feedback);
         }
     }
 
-    private void BtnDelete_Click(object sender, MouseButtonEventArgs e)
-    {
-        var version = CurrentVersion;
-        if (version is null) return;
-        var name = ModBedrockInstance.GetDisplayName(ModBedrockInstance.VersionsDirectory, version);
-        if (ModMain.MyMsgBox(Lang.Text("Bedrock.Instance.Settings.Delete.Confirm", name),
-                Lang.Text("Bedrock.Instance.Settings.Delete.Title"),
-                button2: Lang.Text("Common.Action.Cancel"), isWarn: true) != 1)
-            return;
-
-        var path = ModBedrockInstance.GetInstanceFolder(ModBedrockInstance.VersionsDirectory, version);
-        try
-        {
-            if (Directory.Exists(path)) Directory.Delete(path, true);
-        }
-        catch (Exception ex)
-        {
-            HintService.Hint(Lang.Text("Bedrock.Instance.Settings.Delete.Failed", ex.Message), HintType.Error);
-            return;
-        }
-
-        Config.Launch.BedrockSelectedVersion = "";
-        ModBedrockInstance.SelectedVersionId = "";
-        ModMain.frmBedrockSelect?.RefreshInstances();
-        ModMain.frmBedrockLeft?.RefreshStatus();
-        ModMain.frmBedrockRight?.RefreshPage();
-        HintService.Hint(Lang.Text("Bedrock.Instance.Settings.Deleted", name), HintType.Success);
-    }
 }

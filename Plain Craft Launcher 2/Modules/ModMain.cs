@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -60,6 +60,7 @@ public static class ModMain
     public static PageDownloadBedrockMaterial? frmDownloadBedrockMaterial;
     public static PageDownloadBedrockScript? frmDownloadBedrockScript;
     public static PageDownloadBedrockSkin? frmDownloadBedrockSkin;
+    public static PageDownloadBedrockLip? frmDownloadBedrockLip;
     public static PageDownloadBedrock? frmDownloadBedrock;
     public static PageSetupLeft? frmSetupLeft;
     public static PageSetupLaunch? frmSetupLaunch;

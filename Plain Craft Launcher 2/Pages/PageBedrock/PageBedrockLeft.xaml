@@ -25,7 +25,12 @@
             <Grid Margin="0,52,0,0">
                 <StackPanel x:Name="PanSide" VerticalAlignment="Center">
                 <!-- 账号：大头像居中 + 名称 + 副标题，与 Java 版一致 -->
-                <Grid Margin="0,52,0,0">
+                <!-- 账号状态说明不常驻，鼠标移到头像/昵称区域时以提示形式显示 -->
+                <Grid Margin="0,52,0,0"
+                      ToolTip="{Binding Text, ElementName=LabAccountHint}"
+                      ToolTipService.Placement="Bottom"
+                      ToolTipService.InitialShowDelay="250"
+                      ToolTipService.ShowDuration="20000">
                     <StackPanel HorizontalAlignment="Center">
                         <Grid Width="64" Height="64" HorizontalAlignment="Center">
                             <Ellipse x:Name="ShapeAvatar" Fill="{DynamicResource ColorBrush3}" />
@@ -42,12 +47,18 @@
                     </StackPanel>
                 </Grid>
 
-                <local:MyIconButton x:Name="BtnSwitchAccount" Height="24" Margin="0,10,0,0" HorizontalAlignment="Center" SvgIcon="lucide/arrow-left-right" ToolTip="{DynamicResource Bedrock.Account.SwitchShort}" ToolTipService.Placement="Center" ToolTipService.VerticalOffset="35" ToolTipService.InitialShowDelay="50" Click="BtnSwitchAccount_Click" />
+                <local:MyIconTextButton x:Name="BtnSwitchAccount" Margin="0,10,0,0" HorizontalAlignment="Center"
+                                        Text="{DynamicResource Bedrock.Account.SwitchShort}"
+                                        LogoScale="0.8" SvgIcon="lucide/arrow-right-left"
+                                        ToolTip="{DynamicResource Bedrock.Account.SwitchHint}"
+                                        ToolTipService.Placement="Center" ToolTipService.VerticalOffset="35"
+                                        ToolTipService.InitialShowDelay="50"
+                                        Click="BtnSwitchAccount_Click" />
 
 
-                <TextBlock Visibility="Collapsed" x:Name="LabAccountHint" Margin="3,8,3,0" FontSize="10.5" TextWrapping="Wrap"
-                           Text="{DynamicResource Bedrock.Account.Hint}"
-                           Foreground="{DynamicResource ColorBrushGray4}" />
+                <!-- 账号状态说明的文本来源：本身不显示，只用于上面的悬停提示 -->
+                <TextBlock x:Name="LabAccountHint" Visibility="Collapsed" FontSize="10.5" TextWrapping="Wrap"
+                           Text="{DynamicResource Bedrock.Account.Hint}" />
                 <local:MyIconButton x:Name="BtnRefreshAccount" Height="26" Margin="0,8,0,0" HorizontalAlignment="Center"
                                     SvgIcon="lucide/refresh-cw" LogoScale="0.85"
                                     ToolTip="{DynamicResource Bedrock.Account.Refresh}" Click="RefreshAccount_Click" />

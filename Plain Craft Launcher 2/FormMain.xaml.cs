@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -1474,6 +1474,7 @@ public partial class FormMain
         DownloadBedrockScript = 22,
         DownloadBedrockSkin = 23,
         DownloadBedrock = 24,
+        DownloadBedrockLip = 25,
 
         SetupLaunch = 0,
         SetupUI = 1,

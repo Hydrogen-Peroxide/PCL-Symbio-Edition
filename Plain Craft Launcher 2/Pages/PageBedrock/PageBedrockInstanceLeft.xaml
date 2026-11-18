@@ -1,4 +1,4 @@
-<local:MyPageLeft x:Class="PCL.PageBedrockInstanceLeft"
+﻿<local:MyPageLeft x:Class="PCL.PageBedrockInstanceLeft"
                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                   xmlns:local="clr-namespace:PCL" AnimatedControl="{Binding ElementName=PanItem, Mode=OneWay}">
@@ -10,7 +10,17 @@
             <local:MyListItem x:Name="ItemOverall" IsScaleAnimationEnabled="False" Checked="True" Type="RadioBox"
                               Check="PageCheck" Tag="0" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
                               Title="{DynamicResource Bedrock.Instance.Left.Overall}"
-                              SvgIcon="lucide/layout-dashboard" />
+                              SvgIcon="lucide/layout-dashboard">
+                <local:MyListItem.Buttons>
+                    <x:Array Type="{x:Type local:MyIconButton}">
+                        <local:MyIconButton Tag="0" ToolTip="{DynamicResource Common.Action.Refresh}"
+                                            ToolTipService.Placement="Right"
+                                            ToolTipService.InitialShowDelay="200" ToolTipService.VerticalOffset="-1"
+                                            LogoScale="0.85" Click="RefreshButton_Click"
+                                            SvgIcon="lucide/refresh-cw" />
+                    </x:Array>
+                </local:MyListItem.Buttons>
+            </local:MyListItem>
             <local:MyListItem x:Name="ItemSetup" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="1"
                               Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
                               Title="{DynamicResource Bedrock.Instance.Left.Setup}"
@@ -22,18 +32,58 @@
             <local:MyListItem x:Name="ItemMod" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="32"
                               Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
                               Title="{DynamicResource Instance.Left.Mod}"
-                              SvgIcon="lucide/puzzle" />
+                              SvgIcon="lucide/puzzle">
+                <local:MyListItem.Buttons>
+                    <x:Array Type="{x:Type local:MyIconButton}">
+                        <local:MyIconButton Tag="32" ToolTip="{DynamicResource Common.Action.Refresh}"
+                                            ToolTipService.Placement="Right"
+                                            ToolTipService.InitialShowDelay="200" ToolTipService.VerticalOffset="-1"
+                                            LogoScale="0.85" Click="RefreshButton_Click"
+                                            SvgIcon="lucide/refresh-cw" />
+                    </x:Array>
+                </local:MyListItem.Buttons>
+            </local:MyListItem>
             <TextBlock Text="{DynamicResource Bedrock.Instance.Left.Resources}" Margin="13,6,5,4" Opacity="0.6"
                        FontSize="12" />
             <local:MyListItem x:Name="ItemWorld" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="3"
                               Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
-                              Title="{DynamicResource Instance.Left.Saves}" SvgIcon="lucide/globe" />
+                              Title="{DynamicResource Instance.Left.Saves}" SvgIcon="lucide/globe">
+                <local:MyListItem.Buttons>
+                    <x:Array Type="{x:Type local:MyIconButton}">
+                        <local:MyIconButton Tag="3" ToolTip="{DynamicResource Common.Action.Refresh}"
+                                            ToolTipService.Placement="Right"
+                                            ToolTipService.InitialShowDelay="200" ToolTipService.VerticalOffset="-1"
+                                            LogoScale="0.85" Click="RefreshButton_Click"
+                                            SvgIcon="lucide/refresh-cw" />
+                    </x:Array>
+                </local:MyListItem.Buttons>
+            </local:MyListItem>
             <local:MyListItem x:Name="ItemScreenshot" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="33"
                               Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
-                              Title="{DynamicResource Instance.Left.Screenshots}" SvgIcon="lucide/image" />
+                              Title="{DynamicResource Instance.Left.Screenshots}" SvgIcon="lucide/image">
+                <local:MyListItem.Buttons>
+                    <x:Array Type="{x:Type local:MyIconButton}">
+                        <local:MyIconButton Tag="33" ToolTip="{DynamicResource Common.Action.Refresh}"
+                                            ToolTipService.Placement="Right"
+                                            ToolTipService.InitialShowDelay="200" ToolTipService.VerticalOffset="-1"
+                                            LogoScale="0.85" Click="RefreshButton_Click"
+                                            SvgIcon="lucide/refresh-cw" />
+                    </x:Array>
+                </local:MyListItem.Buttons>
+            </local:MyListItem>
             <local:MyListItem x:Name="ItemServer" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="34"
                               Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
-                              Title="{DynamicResource Instance.Left.Servers}" SvgIcon="lucide/server" />
+                              Title="{DynamicResource Instance.Left.Servers}" SvgIcon="lucide/server">
+                <local:MyListItem.Buttons>
+                    <x:Array Type="{x:Type local:MyIconButton}">
+                        <local:MyIconButton Tag="34" ToolTip="{DynamicResource Common.Action.Refresh}"
+                                            ToolTipService.Placement="Right"
+                                            ToolTipService.InitialShowDelay="200" ToolTipService.VerticalOffset="-1"
+                                            LogoScale="0.85" Click="RefreshButton_Click"
+                                            SvgIcon="lucide/refresh-cw" />
+                    </x:Array>
+                </local:MyListItem.Buttons>
+            </local:MyListItem>
             <TextBlock Text="{DynamicResource Bedrock.Instance.Left.Tools}" Margin="13,6,5,4" Opacity="0.6"
                        FontSize="12" />
             <local:MyListItem x:Name="ItemActions" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="30"
@@ -41,7 +91,17 @@
                               Title="{DynamicResource Bedrock.Instance.Left.Actions}" SvgIcon="lucide/wrench" />
             <local:MyListItem x:Name="ItemStats" IsScaleAnimationEnabled="False" Type="RadioBox" Tag="35"
                               Check="PageCheck" MinPaddingRight="35" Height="36" VerticalAlignment="Top"
-                              Title="{DynamicResource Bedrock.Instance.Left.Stats}" SvgIcon="lucide/layers" />
+                              Title="{DynamicResource Bedrock.Instance.Left.Stats}" SvgIcon="lucide/layers">
+                <local:MyListItem.Buttons>
+                    <x:Array Type="{x:Type local:MyIconButton}">
+                        <local:MyIconButton Tag="35" ToolTip="{DynamicResource Common.Action.Refresh}"
+                                            ToolTipService.Placement="Right"
+                                            ToolTipService.InitialShowDelay="200" ToolTipService.VerticalOffset="-1"
+                                            LogoScale="0.85" Click="RefreshButton_Click"
+                                            SvgIcon="lucide/refresh-cw" />
+                    </x:Array>
+                </local:MyListItem.Buttons>
+            </local:MyListItem>
         </StackPanel>
     </local:MyScrollViewer>
 </local:MyPageLeft>

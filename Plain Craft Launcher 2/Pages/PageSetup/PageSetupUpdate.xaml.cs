@@ -21,14 +21,23 @@ public partial class PageSetupUpdate
     private void Init()
     {
         ModAnimation.AniBeginControl();
-        TextMirrorCDK.Password = Config.Update.MirrorChyanKey;
 
         ComboSystemUpdateChannel.SelectedIndex = (int)Config.Update.UpdateChannel;
         ComboSystemUpdateMode.SelectedIndex = (int)Config.Update.UpdateMode;
+        ComboUpdateSource.SelectedIndex = (int)Config.Update.UpdateSource;
 
         TextCurrentVersion.Text = "PCL SE " + VersionNameFormat(ModBase.versionBaseName);
         ModAnimation.AniEndControl();
         CheckUpdate();
+    }
+
+    /// <summary>
+    ///     在文案后标注实际应答的更新源，便于确认 CNB / GitHub 哪一个真正生效。
+    /// </summary>
+    private static string WithSource(string text)
+    {
+        var source = UpdateManager.remoteServer.SourceName;
+        return string.IsNullOrWhiteSpace(source) ? text : Lang.Text("Setup.Update.FromSource", text, source);
     }
 
     private async Task<UpdateStatus> IsLatestAsync()
@@ -81,6 +90,7 @@ public partial class PageSetupUpdate
                             ? UpdateChannel.beta
                             : UpdateChannel.stable, SystemInfo.IsArm64System ? UpdateArch.arm64 : UpdateArch.x64);
                     TextUpdateName.Text = "PCL SE " + VersionNameFormat(updateInfo.VersionName);
+                    TextUpdateDesc.Text = WithSource("by PCL Symbio");
                     var summary = updateInfo.Changelog.Between("<summary>", "</summary>");
                     if (!updateInfo.Changelog.Contains("<summary>") || string.IsNullOrWhiteSpace(summary.Trim()))
                         TextChangelog.Text = Lang.Text("Setup.Update.Changelog.Empty");
@@ -135,7 +145,7 @@ public partial class PageSetupUpdate
                 CardUpdate.Visibility = Visibility.Collapsed;
                 CardCheck.Visibility = Visibility.Visible;
                 BtnCheckAgain.IsEnabled = true;
-                TextCurrentDesc.Text = Lang.Text("Setup.Update.Latest");
+                TextCurrentDesc.Text = WithSource(Lang.Text("Setup.Update.Latest"));
                 break;
             }
             case UpdateStatus.Error:
@@ -262,19 +272,20 @@ public partial class PageSetupUpdate
         }
     }
 
-    private void TextMirrorCDK_PasswordChanged(object sender, EventArgs e)
-    {
-        Config.Update.MirrorChyanKey = TextMirrorCDK.Password;
-    }
-
-    private void BtnGetMirrorCDK_Click(object sender, MouseButtonEventArgs e)
-    {
-        ModBase.OpenWebsite("https://mirrorchyan.com/");
-    }
-
     private void BtnChangelog_Click(object sender, MouseButtonEventArgs e)
     {
         ModBase.OpenWebsite("https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/releases");
+    }
+
+    private void ComboUpdateSource_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (ModAnimation.AniExitsAnyControl())
+            return;
+        Config.Update.UpdateSource = (LauncherUpdateSource)ComboUpdateSource.SelectedIndex;
+        // 重建源列表会丢弃旧源的版本缓存，避免切换后仍沿用上一个源的查询结果
+        UpdateManager.RebuildRemoteServer();
+        if (IsLoaded)
+            CheckUpdate();
     }
 
     public string VersionNameFormat(string str)

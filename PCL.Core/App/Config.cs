@@ -121,11 +121,11 @@ public static partial class Config
         /// 更新分支。
         /// </summary>
         [ConfigItem<UpdateChannel>("SystemUpdateChannel", UpdateChannel.Release, ConfigSource.Local)] public partial UpdateChannel UpdateChannel { get; set; }
-            
+
         /// <summary>
-        /// Mirror 酱 CDK。
+        /// 更新源。默认 CNB 优先，失败时自动回退 GitHub。
         /// </summary>
-        [ConfigItem<string>("SystemMirrorChyanKey", "", ConfigSource.SharedEncrypt)] public partial string MirrorChyanKey { get; set; }
+        [ConfigItem<LauncherUpdateSource>("SystemUpdateSource", LauncherUpdateSource.CnbFirst, ConfigSource.Local)] public partial LauncherUpdateSource UpdateSource { get; set; }
     }
 
     /// <summary>

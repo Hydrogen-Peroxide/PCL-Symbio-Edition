@@ -357,3 +357,5 @@ MaskFiles/
 /local-secrets.ps1
 /dist/
 /assets/
+/old-versions/
+_patch-backup-*/

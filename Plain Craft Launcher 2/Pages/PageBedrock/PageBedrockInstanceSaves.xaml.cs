@@ -62,6 +62,7 @@ public partial class PageBedrockInstanceSaves : IRefreshable
             ModBase.Log($"[Bedrock] 读取存档失败：{ex.Message}", ModBase.LogLevel.Debug);
         }
 
+        CardSaves.Title = Lang.Text("Bedrock.Instance.Saves.Title") + "  (" + worlds.Count + ")";
         if (worlds.Count == 0)
         {
             var empty = new TextBlock

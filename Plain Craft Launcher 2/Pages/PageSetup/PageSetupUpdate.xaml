@@ -46,14 +46,20 @@
                             <local:MyComboBoxItem Content="{DynamicResource Setup.Update.Auto.NotifyOnly}" ToolTip="{DynamicResource Setup.Update.Auto.NotifyOnly.ToolTip}" />
                             <local:MyComboBoxItem Content="{DynamicResource Setup.Update.Auto.Disabled}" ToolTip="{DynamicResource Setup.Update.Auto.Disabled.ToolTip}" />
                         </local:MyComboBox>
-                        <TextBlock Text="{DynamicResource Setup.Update.MirrorChyanCdk.Label}" Grid.Row="4" VerticalAlignment="Center"
+                        <TextBlock Text="{DynamicResource Setup.Update.Source.Title}" Grid.Row="4" VerticalAlignment="Center"
                                    HorizontalAlignment="Left" Margin="0,0,25,0" />
-                        <PasswordBox x:Name="TextMirrorCDK"
-                                      ToolTip="{DynamicResource Setup.Update.MirrorChyanCdk.ToolTip}"
-                                     Grid.Row="4" Grid.Column="1"
-                                     PasswordChanged="TextMirrorCDK_PasswordChanged" />
-                        <local:MyButton x:Name="BtnGetMirrorCDK" Text="{DynamicResource Setup.Update.MirrorChyanCdk.Get}" Grid.Column="3" Grid.Row="4"
-                                        ColorType="Highlight" Click="BtnGetMirrorCDK_Click" />
+                        <local:MyComboBox x:Name="ComboUpdateSource" Tag="UpdateSource" Grid.Column="1"
+                                          Grid.ColumnSpan="3" Grid.Row="4"
+                                          SelectionChanged="ComboUpdateSource_SelectionChanged">
+                            <local:MyComboBoxItem Content="{DynamicResource Setup.Update.Source.CnbFirst}"
+                                                  ToolTip="{DynamicResource Setup.Update.Source.CnbFirst.ToolTip}" />
+                            <local:MyComboBoxItem Content="{DynamicResource Setup.Update.Source.GitHubFirst}"
+                                                  ToolTip="{DynamicResource Setup.Update.Source.GitHubFirst.ToolTip}" />
+                            <local:MyComboBoxItem Content="{DynamicResource Setup.Update.Source.CnbOnly}"
+                                                  ToolTip="{DynamicResource Setup.Update.Source.CnbOnly.ToolTip}" />
+                            <local:MyComboBoxItem Content="{DynamicResource Setup.Update.Source.GitHubOnly}"
+                                                  ToolTip="{DynamicResource Setup.Update.Source.GitHubOnly.ToolTip}" />
+                        </local:MyComboBox>
                     </Grid>
                 </StackPanel>
             </local:MyCard>

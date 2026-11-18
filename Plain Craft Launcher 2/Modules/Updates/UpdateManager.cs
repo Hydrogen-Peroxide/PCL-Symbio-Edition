@@ -12,10 +12,53 @@ public static class UpdateManager
 {
     public static bool isUpdateWaitingRestart;
 
-    public static UpdatesWrapperModel remoteServer = new(new List<IUpdateSource>
+    /// <summary>
+    ///     CNB 国内镜像仓库，作为国内更新通道使用。
+    /// </summary>
+    private const string CnbRepo = "PCL-Symbio/PCL-Symbio-Edition";
+
+    private static UpdatesWrapperModel _remoteServer;
+
+    /// <summary>
+    ///     远端更新源。按配置决定优先顺序，前面的源取不到可用版本时自动回退到下一个。
+    /// </summary>
+    public static UpdatesWrapperModel remoteServer => _remoteServer ??= BuildRemoteServer();
+
+    private static UpdatesWrapperModel BuildRemoteServer()
     {
-        new UpdatesGitHubModel("Hydrogen-Peroxide", "PCL-Symbio-Edition")
-    });
+        LauncherUpdateSource preferred;
+        try
+        {
+            preferred = Config.Update.UpdateSource;
+        }
+        catch (Exception ex)
+        {
+            // 配置尚未就绪时按默认顺序继续，避免静态初始化阶段直接抛异常
+            ModBase.Log(ex, "[Update] 读取更新源配置失败，改用默认顺序", ModBase.LogLevel.Developer);
+            preferred = LauncherUpdateSource.CnbFirst;
+        }
+
+        var github = new UpdatesGitHubModel("Hydrogen-Peroxide", "PCL-Symbio-Edition");
+        var cnb = new UpdatesCnbModel(CnbRepo);
+
+        List<IUpdateSource> sources = preferred switch
+        {
+            LauncherUpdateSource.GitHubFirst => [github, cnb],
+            LauncherUpdateSource.CnbOnly => [cnb],
+            LauncherUpdateSource.GitHubOnly => [github],
+            _ => [cnb, github]
+        };
+        ModBase.Log("[Update] 更新源顺序：" + string.Join(" → ", sources.Select(x => x.SourceName)));
+        return new UpdatesWrapperModel(sources);
+    }
+
+    /// <summary>
+    ///     配置中的更新源发生变化后重建源列表，丢弃上一个源的版本缓存。
+    /// </summary>
+    public static void RebuildRemoteServer()
+    {
+        _remoteServer = BuildRemoteServer();
+    }
 
     public static bool IsCurrentVersionBeta
     {
@@ -104,12 +147,18 @@ public static class UpdateManager
                 {
                     // 下载
                     loaders.AddRange(remoteServer.GetDownloadLoader(channel, arch, dlTargetPath, version));
-                    loaders.Add(new ModLoader.LoaderTask<int, int>(Lang.Text("Update.Task.Check"), _ =>
+                    // CNB 等更新源可能不提供 SHA256，此时无法校验，跳过而不是直接判定失败
+                    if (string.IsNullOrWhiteSpace(version.Sha256))
                     {
-                        var curHash = ModBase.GetFileSHA256(dlTargetPath);
-                        if ((curHash ?? "") != (version.Sha256 ?? ""))
-                            throw new Exception(Lang.Text("Update.Error.Sha256Mismatch", version.Sha256, curHash));
-                    }));
+                        ModBase.Log($"[Update] {version.Source} 未提供 SHA256，跳过文件校验");
+                    }
+                    else
+                        loaders.Add(new ModLoader.LoaderTask<int, int>(Lang.Text("Update.Task.Check"), _ =>
+                        {
+                            var curHash = ModBase.GetFileSHA256(dlTargetPath);
+                            if ((curHash ?? "") != (version.Sha256 ?? ""))
+                                throw new Exception(Lang.Text("Update.Error.Sha256Mismatch", version.Sha256, curHash));
+                        }));
                 }
                 else
                 {
@@ -206,9 +255,10 @@ public static class UpdateManager
         var latestPCLPath = Path.Combine(ModBase.pathTemp, "SE-Latest.exe");
         var target = remoteServer.GetLatestVersion(UpdateChannel.stable,
             SystemInfo.IsArm64System ? UpdateArch.arm64 : UpdateArch.x64);
-        if (target is null || string.IsNullOrWhiteSpace(target.Sha256))
+        if (target is null)
             throw new Exception(Lang.Text("Update.Error.UnableToGetUpdate"));
-        if (File.Exists(latestPCLPath) && (ModBase.GetFileSHA256(latestPCLPath) ?? "") == (target.Sha256 ?? ""))
+        if (!string.IsNullOrWhiteSpace(target.Sha256) && File.Exists(latestPCLPath) &&
+            (ModBase.GetFileSHA256(latestPCLPath) ?? "") == (target.Sha256 ?? ""))
         {
             ModBase.Log("[System] 最新版 PCL 已存在，跳过下载");
             return;

@@ -10,6 +10,7 @@ public partial class PageBedrockInstanceStats : IRefreshable
     {
         InitializeComponent();
         Loaded += (_, _) => RefreshData();
+        BtnRefresh.Click += (_, _) => RefreshData();
     }
 
     public void Refresh() => RefreshData();
@@ -19,7 +20,8 @@ public partial class PageBedrockInstanceStats : IRefreshable
         var version = Config.Launch.BedrockSelectedVersion;
         if (string.IsNullOrWhiteSpace(version))
         {
-            LabSize.Text = LabFiles.Text = LabWorlds.Text = LabCreated.Text = "-";
+            LabSize.Text = LabFiles.Text = LabWorlds.Text = LabCreated.Text = LabModified.Text = "-";
+            BtnRefresh.IsEnabled = false;
             return;
         }
 
@@ -29,7 +31,8 @@ public partial class PageBedrockInstanceStats : IRefreshable
             var info = new DirectoryInfo(root);
             if (!info.Exists)
             {
-                LabSize.Text = LabFiles.Text = LabWorlds.Text = LabCreated.Text = "-";
+                LabSize.Text = LabFiles.Text = LabWorlds.Text = LabCreated.Text = LabModified.Text = "-";
+                BtnRefresh.IsEnabled = false;
                 return;
             }
 
@@ -51,11 +54,14 @@ public partial class PageBedrockInstanceStats : IRefreshable
             var worlds = Path.Combine(root, "minecraftWorlds");
             LabWorlds.Text = Directory.Exists(worlds) ? Directory.GetDirectories(worlds).Length.ToString() : "0";
             LabCreated.Text = info.CreationTime.ToString("yyyy-MM-dd HH:mm");
+            LabModified.Text = info.LastWriteTime.ToString("yyyy-MM-dd HH:mm");
+            BtnRefresh.IsEnabled = true;
         }
         catch (Exception ex)
         {
             ModBase.Log($"[Bedrock] 统计实例信息失败：{ex.Message}", ModBase.LogLevel.Debug);
-            LabSize.Text = LabFiles.Text = LabWorlds.Text = LabCreated.Text = "-";
+            LabSize.Text = LabFiles.Text = LabWorlds.Text = LabCreated.Text = LabModified.Text = "-";
+            BtnRefresh.IsEnabled = false;
         }
     }
 }

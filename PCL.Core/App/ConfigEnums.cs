@@ -94,6 +94,33 @@ public enum LauncherAutoUpdateBehavior
     Disable = 3
 }
 
+/// <summary>
+/// 启动器更新源。
+/// 自动模式下会按顺序尝试各个源，前一个源取不到可用版本时自动回退到下一个源。
+/// </summary>
+public enum LauncherUpdateSource
+{
+    /// <summary>
+    /// CNB 优先，失败时回退 GitHub。
+    /// </summary>
+    CnbFirst = 0,
+
+    /// <summary>
+    /// GitHub 优先，失败时回退 CNB。
+    /// </summary>
+    GitHubFirst = 1,
+
+    /// <summary>
+    /// 仅使用 CNB，不回退。
+    /// </summary>
+    CnbOnly = 2,
+
+    /// <summary>
+    /// 仅使用 GitHub，不回退。
+    /// </summary>
+    GitHubOnly = 3
+}
+
 public enum LauncherTitleType
 {
     None = 0,

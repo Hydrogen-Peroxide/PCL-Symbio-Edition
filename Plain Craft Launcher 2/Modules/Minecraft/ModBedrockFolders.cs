@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -31,7 +31,17 @@ public static class ModBedrockFolders
         /// <summary>该目录下的实例数量。</summary>
         public int InstanceCount;
 
-        public string Title => IsDefault ? Lang.Text("Bedrock.Folder.Default") : Alias;
+        /// <summary>列表里显示的名字：与 Java 版一致，直接用文件夹本身的名字。</summary>
+        public string Title
+        {
+            get
+            {
+                var trimmed = (Path ?? "").TrimEnd(System.IO.Path.DirectorySeparatorChar,
+                    System.IO.Path.AltDirectorySeparatorChar);
+                var name = System.IO.Path.GetFileName(trimmed);
+                return string.IsNullOrEmpty(name) ? Path : name;
+            }
+        }
 
         public override string ToString() => Path;
     }
@@ -45,7 +55,7 @@ public static class ModBedrockFolders
         return full.TrimEnd(System.IO.Path.DirectorySeparatorChar);
     }
 
-    private static bool SamePath(string a, string b)
+    public static bool SamePath(string a, string b)
     {
         try
         {
@@ -141,8 +151,9 @@ public static class ModBedrockFolders
     }
 
     /// <summary>
-    ///     列出全部可选目录：默认目录、当前配置目录、手动添加的目录，以及在各磁盘探测到的目录。
-    ///     默认目录始终保留在第一位，其余按存在与否排序。
+    ///     列出全部可选目录。
+    ///     顺序固定为：启动器默认目录 → 手动添加的目录 → Java 版旁边的 bedrock → 各磁盘探测 → 用户目录 → 当前配置目录。
+    ///     当前配置目录放到最后兜底，这样切换目录时列表位置不会跳动（它会留在原来的分组里）。
     /// </summary>
     public static List<Folder> Enumerate()
     {
@@ -173,14 +184,10 @@ public static class ModBedrockFolders
         // 1. 启动器默认目录
         Push(DefaultPath, "", true);
 
-        // 2. 当前配置的目录
-        var configured = Config.Launch.BedrockFolder;
-        if (!string.IsNullOrWhiteSpace(configured)) Push(configured, Lang.Text("Bedrock.Folder.Custom"), false);
-
-        // 3. 手动添加过的目录
+        // 2. 手动添加过的目录（保持添加顺序）
         foreach (var folder in LoadManual()) Push(folder.Path, folder.Alias, false);
 
-        // 3.5 启动器里 Java 版当前选择的 .minecraft 旁的 bedrock（换台机器、换启动器副本时最常见的位置）
+        // 3. 启动器里 Java 版当前选择的 .minecraft 旁的 bedrock（换台机器、换启动器副本时最常见的位置）
         try
         {
             var javaFolder = ModFolder.mcFolderSelected;
@@ -219,6 +226,10 @@ public static class ModBedrockFolders
             var candidate = System.IO.Path.Combine(basePath, ".minecraft", "bedrock");
             if (Directory.Exists(candidate)) Push(candidate, Lang.Text("Bedrock.Folder.User", variable), false);
         }
+
+        // 6. 当前配置的目录（通常已经出现在上面某一组里；不在时补在最后，保证列表顺序稳定）
+        var configured = Config.Launch.BedrockFolder;
+        if (!string.IsNullOrWhiteSpace(configured)) Push(configured, Lang.Text("Bedrock.Folder.Custom"), false);
 
         return result;
     }

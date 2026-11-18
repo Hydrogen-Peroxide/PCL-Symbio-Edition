@@ -29,7 +29,8 @@ public sealed partial class TelemetryService
         var dsn = EnvironmentInterop.GetSecret("SENTRY_DSN");
         if (dsn is null)
         {
-            Context.Warn("未找到 Sentry DSN");
+            // 本地构建本来就没有 SENTRY_DSN，不属于异常情况，不要以警告级别污染日志
+            Context.Debug("未找到 Sentry DSN，已跳过遥测初始化");
             return;
         }
         

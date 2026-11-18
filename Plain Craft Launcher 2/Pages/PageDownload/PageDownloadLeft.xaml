@@ -1,4 +1,4 @@
-<local:MyPageLeft x:Class="PCL.PageDownloadLeft"
+﻿<local:MyPageLeft x:Class="PCL.PageDownloadLeft"
                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                   xmlns:local="clr-namespace:PCL">
@@ -129,6 +129,21 @@
             </local:MyListItem>
 
             <TextBlock Text="{DynamicResource Download.Left.Bedrock}" Margin="13,10,5,4" Opacity="0.6" FontSize="12" />
+            <local:MyListItem x:Name="ItemBedrockLip" Type="RadioBox" IsScaleAnimationEnabled="False" Tag="25"
+                              Check="PageCheck"
+                              MinPaddingRight="35" Height="36" VerticalAlignment="Top"
+                              Title="{DynamicResource Download.Left.BedrockLip}"
+                              LogoScale="0.85"
+                              SvgIcon="lucide/cpu">
+                <local:MyListItem.Buttons>
+                    <x:Array Type="{x:Type local:MyIconButton}">
+                        <local:MyIconButton Tag="25" ToolTip="{DynamicResource Common.Action.Refresh}"
+                                            ToolTipService.Placement="Right" Click="RefreshButton_Click"
+                                            ToolTipService.InitialShowDelay="200" ToolTipService.VerticalOffset="-1"
+                                            LogoScale="0.85" SvgIcon="lucide/refresh-cw" />
+                    </x:Array>
+                </local:MyListItem.Buttons>
+            </local:MyListItem>
             <local:MyListItem x:Name="ItemBedrockAddon" Type="RadioBox" IsScaleAnimationEnabled="False" Tag="19"
                               Check="PageCheck"
                               MinPaddingRight="35" Height="36" VerticalAlignment="Top"

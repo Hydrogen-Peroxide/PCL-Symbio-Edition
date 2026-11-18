@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using PCL;
+using PCL.Core.App;
 using PCL.Core.App.Configuration.Storage;
 using PCL.Core.Utils;
 using PCL.Network;
@@ -350,6 +351,180 @@ Check("successful empty refresh clears stale releases", () =>
     Require(source.GetLatestVersion(UpdateChannel.stable, UpdateArch.x64).VersionName == ModBase.versionBaseName, "Deleted release remained latest.");
 });
 
+object CnbRelease(string tag, bool prerelease = false, bool draft = false, string[]? assets = null) => new
+{
+    tag_name = tag, prerelease, draft, body = tag + " cnb notes",
+    assets = (assets ?? new[] { "PCL_Symbio_x64.exe" })
+        .Select(n => (object)new
+        {
+            name = n,
+            brower_download_url = "https://cnb.example.invalid/" + tag + "/" + n
+        }).ToArray()
+};
+UpdatesCnbModel CnbSource(params object[] releases) =>
+    new("test/cnb", "MockCNB", _ => JsonSerializer.Serialize(releases));
+string AnyDownloadUrl(IUpdateSource source, UpdateChannel channel, UpdateArch arch)
+{
+    var loader = (ModLoader.LoaderTask<int, List<DownloadFile>>)source.GetDownloadLoader(channel, arch, "temporary.exe")[0];
+    loader.Run(); return loader.output[0].Urls[0];
+}
+Check("CNB reads the exe attachment of a release", () =>
+{
+    var source = CnbSource(CnbRelease("v2.0.0"));
+    var version = source.GetLatestVersion(UpdateChannel.stable, UpdateArch.x64);
+    Require(version.VersionName == "2.0.0" && version.Source == "MockCNB" && version.Changelog == "v2.0.0 cnb notes",
+        "CNB release metadata mismatched.");
+    // CNB 附件没有 digest，此源在无校验文件时应留空而不是伪造哈希
+    Require(version.Sha256 == "", "CNB source invented a checksum.");
+    Require(AnyDownloadUrl(source, UpdateChannel.stable, UpdateArch.x64) ==
+            "https://cnb.example.invalid/v2.0.0/PCL_Symbio_x64.exe", "CNB download URL mismatched.");
+});
+Check("CNB uses the published checksum file when present", () =>
+{
+    var sha = new string('c', 64);
+    var json = JsonSerializer.Serialize(new[]
+        { CnbRelease("v2.0.0", assets: new[] { "PCL_Symbio_x64.exe", "PCL_Symbio_x64.exe.sha256" }) });
+    var source = new UpdatesCnbModel("test/cnb", "MockCNB", url =>
+        url.EndsWith(".sha256", StringComparison.Ordinal) ? sha + "  PCL_Symbio_x64.exe" : json);
+    Require(source.GetLatestVersion(UpdateChannel.stable, UpdateArch.x64).Sha256 == sha,
+        "CNB checksum file was ignored.");
+});
+Check("CNB release without a usable exe falls over to GitHub", () =>
+{
+    // 只有源码包时不能谎报“已是最新”，必须抛出让 wrapper 回退
+    var cnb = CnbSource(CnbRelease("v2.0.0", assets: new[] { "Source code.zip" }));
+    Reject<InvalidDataException>(() => cnb.GetLatestVersion(UpdateChannel.stable, UpdateArch.x64));
+    Reject<InvalidDataException>(() => cnb.IsLatest(UpdateChannel.stable, UpdateArch.x64, SemVer.Parse("1.0.0"), 10000));
+    var wrapper = new UpdatesWrapperModel(new IUpdateSource[] { cnb, Source(Release("v1.5.0")) });
+    Require(wrapper.GetLatestVersion(UpdateChannel.stable, UpdateArch.x64).VersionName == "1.5.0",
+        "Wrapper did not fail over from CNB to GitHub.");
+    Require(wrapper.IsLatest(UpdateChannel.stable, UpdateArch.x64, SemVer.Parse("1.5.0"), 10500),
+        "Wrapper lost GitHub's verdict while failing over.");
+});
+Check("CNB falls over when the attachment lacks the requested architecture", () =>
+{
+    var cnb = CnbSource(CnbRelease("v2.0.0", assets: new[] { "PCL_Symbio_arm64.exe" }));
+    Reject<InvalidDataException>(() => cnb.GetLatestVersion(UpdateChannel.stable, UpdateArch.x64));
+    Require(cnb.GetLatestVersion(UpdateChannel.stable, UpdateArch.arm64).VersionName == "2.0.0",
+        "CNB arm64 attachment was not recognised.");
+});
+Check("CNB keeps prereleases out of the stable channel", () =>
+{
+    var source = CnbSource(CnbRelease("v2.0.0-beta.3", true), CnbRelease("v1.9.0"),
+        CnbRelease("v8.0.0", draft: true));
+    Require(source.GetLatestVersion(UpdateChannel.stable, UpdateArch.x64).VersionName == "1.9.0",
+        "CNB prerelease or draft leaked into stable.");
+    Require(source.GetLatestVersion(UpdateChannel.beta, UpdateArch.x64).VersionName == "2.0.0-beta.3",
+        "CNB beta channel selection mismatched.");
+});
+
+bool IsManifestUrl(string url) => url.Contains("/-/git/raw/updates/", StringComparison.Ordinal);
+UpdatesCnbModel CnbRouted(Func<string, string> fetch) => new("test/cnb", "MockCNB", fetch);
+var manifestHash = new string('d', 64);
+Check("CNB prefers the updates manifest over the releases API", () =>
+{
+    var manifest = JsonSerializer.Serialize(new
+    {
+        version = "2.0.0", sha256 = manifestHash, changelog = "manifest notes",
+        downloads = new { x64 = "https://cnb.example.invalid/manifest/2.0.0-x64.exe" }
+    });
+    var api = JsonSerializer.Serialize(new[] { CnbRelease("v1.5.0") });
+    var source = CnbRouted(url => IsManifestUrl(url) ? manifest : api);
+    var version = source.GetLatestVersion(UpdateChannel.stable, UpdateArch.x64);
+    Require(version.VersionName == "2.0.0" && version.Sha256 == manifestHash &&
+            version.Changelog == "manifest notes", "Manifest metadata was ignored.");
+    Require(AnyDownloadUrl(source, UpdateChannel.stable, UpdateArch.x64) ==
+            "https://cnb.example.invalid/manifest/2.0.0-x64.exe", "Manifest download URL was ignored.");
+    Require(source.IsLatest(UpdateChannel.stable, UpdateArch.x64, SemVer.Parse("2.0.0"), 20000),
+        "Manifest version comparison is wrong.");
+});
+Check("CNB falls back to the releases API when the manifest is absent", () =>
+{
+    // 清单尚未发布时是 404 页面（HTML），必须安静退回 Releases API
+    var source = CnbRouted(url => IsManifestUrl(url)
+        ? "<!DOCTYPE html><html>404</html>"
+        : JsonSerializer.Serialize(new[] { CnbRelease("v1.5.0") }));
+    Require(source.GetLatestVersion(UpdateChannel.stable, UpdateArch.x64).VersionName == "1.5.0",
+        "Absent manifest did not fall back to the releases API.");
+});
+Check("CNB reads the beta manifest for the beta channel", () =>
+{
+    var stableManifest = JsonSerializer.Serialize(new
+    {
+        version = "1.9.0", downloads = new { x64 = "https://cnb.example.invalid/stable/1.9.0-x64.exe" }
+    });
+    var betaManifest = JsonSerializer.Serialize(new
+    {
+        version = "2.0.0-beta.1", downloads = new { x64 = "https://cnb.example.invalid/beta/2.0.0-beta.1-x64.exe" }
+    });
+    var source = CnbRouted(url => url.EndsWith("latest-beta.json", StringComparison.Ordinal)
+        ? betaManifest
+        : IsManifestUrl(url) ? stableManifest : "[]");
+    Require(source.GetLatestVersion(UpdateChannel.stable, UpdateArch.x64).VersionName == "1.9.0",
+        "Stable manifest was not used.");
+    Require(source.GetLatestVersion(UpdateChannel.beta, UpdateArch.x64).VersionName == "2.0.0-beta.1",
+        "Beta manifest was not used.");
+});
+Check("CNB falls back to the releases API when the manifest lacks the architecture", () =>
+{
+    var manifest = JsonSerializer.Serialize(new
+    {
+        version = "2.0.0", downloads = new { arm64 = "https://cnb.example.invalid/2.0.0-arm64.exe" }
+    });
+    var source = CnbRouted(url => IsManifestUrl(url)
+        ? manifest
+        : JsonSerializer.Serialize(new[] { CnbRelease("v1.5.0") }));
+    Require(source.GetLatestVersion(UpdateChannel.stable, UpdateArch.x64).VersionName == "1.5.0",
+        "Manifest without x64 did not fall back to the releases API.");
+    Require(source.GetLatestVersion(UpdateChannel.stable, UpdateArch.arm64).VersionName == "2.0.0",
+        "Manifest arm64 entry was not used.");
+});
+
+Check("a failing source is queried only once per check", () =>
+{
+    var dead = new CountingSource("Dead", () => throw new IOException("offline"));
+    var live = new CountingSource("Live", () => true);
+    var wrapper = new UpdatesWrapperModel(new IUpdateSource[] { dead, live });
+    Require(wrapper.IsLatest(UpdateChannel.stable, UpdateArch.x64, SemVer.Parse("1.0.0"), 10000),
+        "Live source was not used after the dead one failed.");
+    // 此前实现会在每轮循环里重试一次「缓存的版本源」，导致同一源被请求 2~3 次（日志中表现为反复 401）
+    Require(dead.Calls == 1, "Dead source was queried " + dead.Calls + " times instead of once.");
+    Require(live.Calls == 1, "Live source was queried " + live.Calls + " times instead of once.");
+});
+Check("a source without data is not adopted as the cached source", () =>
+{
+    var empty = new CountingSource("Empty", () => true) { RefreshResult = false };
+    var live = new CountingSource("Live", () => true);
+    var wrapper = new UpdatesWrapperModel(new IUpdateSource[] { empty, live });
+    Require(wrapper.RefreshCache(), "RefreshCache reported failure although one source had data.");
+    Require(wrapper.SourceName == "Live", "An empty source was cached as the version source: " + wrapper.SourceName);
+});
+
+Check("CNB request carries the token only when it is configured", () =>
+{
+    var previous = Secrets.CnbToken;
+    try
+    {
+        Secrets.CnbToken = "";
+        Require(UpdatesCnbModel.CreateRequestParam(true).Headers is null,
+            "Authorization header was added without a token.");
+        Require(UpdatesCnbModel.CreateRequestParam(true).Accept == "application/vnd.cnb.api+json",
+            "API request lost its OpenAPI Accept header.");
+        Require(UpdatesCnbModel.CreateRequestParam(false).Accept is null,
+            "Manifest request should not force the OpenAPI Accept header.");
+
+        Secrets.CnbToken = "test-token";
+        Require(UpdatesCnbModel.CreateRequestParam(true).Headers?["Authorization"] == "Bearer test-token",
+            "API request did not carry the token.");
+        Require(UpdatesCnbModel.CreateRequestParam(false).Headers is null,
+            "Manifest request must not carry the token, it is anonymously readable.");
+    }
+    finally
+    {
+        Secrets.CnbToken = previous;
+    }
+});
+
 Console.WriteLine($"{passed}/{passed + failed} passed");
 return failed == 0 ? 0 : 1;
 
@@ -384,4 +559,22 @@ sealed class LegacyUpdateSource : IUpdateSource
     public bool IsLatest(UpdateChannel channel, UpdateArch arch, SemVer currentVersion, int currentVersionCode) => true;
     public VersionAnnouncementDataModel GetAnnouncementList() => new() { Content = [] };
     public List<ModLoader.LoaderBase> GetDownloadLoader(UpdateChannel channel, UpdateArch arch, string output) { DownloadCalls++; return []; }
+}
+
+/// <summary>统计调用次数的替身源，用于验证回退时不会重复请求同一个源。</summary>
+sealed class CountingSource(string name, Func<bool> isLatest) : IUpdateSource
+{
+    public int Calls { get; private set; }
+    public bool RefreshResult { get; init; } = true;
+    public string SourceName { get; set; } = name;
+    public bool IsAvailable() => true;
+    public bool RefreshCache() => RefreshResult;
+    public VersionDataModel GetLatestVersion(UpdateChannel channel, UpdateArch arch) => throw new NotSupportedException();
+    public bool IsLatest(UpdateChannel channel, UpdateArch arch, SemVer currentVersion, int currentVersionCode)
+    {
+        Calls++;
+        return isLatest();
+    }
+    public VersionAnnouncementDataModel GetAnnouncementList() => new() { Content = [] };
+    public List<ModLoader.LoaderBase> GetDownloadLoader(UpdateChannel channel, UpdateArch arch, string output) => throw new NotSupportedException();
 }

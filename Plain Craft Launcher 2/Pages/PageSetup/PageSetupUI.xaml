@@ -68,7 +68,6 @@
                                           x:Name="CheckLauncherLogo" Tag="UiLauncherLogo" Change="CheckBoxChange" />
                         <local:MyCheckBox Text="{DynamicResource Setup.Ui.Basic.LockWindow}" Margin="-1,0,0,7" Height="22" x:Name="CheckLockWindowSize"
                                           Tag="UiLockWindowSize" Change="CheckBoxChange" />
-                        <local:MyCheckBox Text="{DynamicResource Setup.Ui.Basic.BedrockLegacy}" Margin="-1,0,0,7" Height="22" x:Name="CheckBedrockLegacy" Tag="UiBedrockLegacy" Change="BedrockLegacy_Change" />
                         <local:MyCheckBox Text="{DynamicResource Setup.Ui.Basic.ShowTriviaHint}" Margin="-1,0,0,7" Height="22"
                                            x:Name="CheckShowLaunchingHint" Tag="UiShowLaunchingHint"
                                            Change="CheckBoxChange" />

@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 using PCL.Core.Logging;
 using PCL.Core.Utils.Exts;
 
@@ -9,7 +12,13 @@ public static partial class EnvironmentInterop
     private const string LogModule = "Environment";
 
     /// <summary>
-    /// 读取环境变量并使用 <see cref="StringExtension.Convert{T}"/> 将其转换为指定类型并写入目标引用。
+    ///     解密后的密钥缓存：明文只在内存里出现一次，避免每次读取都重新还原。
+    /// </summary>
+    private static readonly Dictionary<string, string?> SecretCache = new();
+    private static readonly Dictionary<string, byte[]?> SecretBytesCache = new();
+
+    /// <summary>
+    ///     读取环境变量并使用 <see cref="StringExtension.Convert{T}"/> 将其转换为指定类型并写入目标引用。
     /// </summary>
     /// <param name="key">环境变量名</param>
     /// <param name="target">需要写入的目标引用 (不存在该环境变量或转换失败时不会写入)</param>
@@ -34,13 +43,21 @@ public static partial class EnvironmentInterop
 
     public static string? GetSecret(string key, bool readEnv = true, bool readEnvDebugOnly = false)
     {
-        if (!SecretDictionary.TryGetValue(key, out var value) &&
-            readEnv &&
+        if (SecretCache.TryGetValue(key, out var cached)) return cached;
+
+        string? value = null;
+        if (SecretDictionary.TryGetValue(key, out var entry))
+            value = Encoding.UTF8.GetString(_DecodeSecret(entry.Chunks, entry.Seed, entry.Length));
+        else if (readEnv
 #if !DEBUG
-            !readEnvDebugOnly &&
+                 && !readEnvDebugOnly
 #endif
-            ReadVariable($"PCL_{key}", ref value, false)
-        ) SecretDictionary[key] = value;
+                 && ReadVariable($"PCL_{key}", ref value, false))
+        {
+            // 值已由 ReadVariable 写入
+        }
+
+        SecretCache[key] = value;
         return value;
     }
 
@@ -49,24 +66,52 @@ public static partial class EnvironmentInterop
     /// </summary>
     public static byte[]? GetSecretBytes(string key)
     {
-        if (SecretBytesDictionary.TryGetValue(key, out var bytes)) return bytes;
+        if (SecretBytesCache.TryGetValue(key, out var cached)) return cached;
+
+        byte[]? result = null;
+        if (SecretBytesDictionary.TryGetValue(key, out var entry))
+        {
+            result = _DecodeSecret(entry.Chunks, entry.Seed, entry.Length);
+        }
 #if DEBUG
-        // 调试构建下允许直接通过环境变量提供十六进制密钥
-        var hex = Environment.GetEnvironmentVariable($"PCL_{key}");
-        if (string.IsNullOrWhiteSpace(hex)) return null;
-        try
+        else
         {
-            return Convert.FromHexString(hex.Trim());
+            // 调试构建下允许直接通过环境变量提供十六进制密钥
+            var hex = Environment.GetEnvironmentVariable($"PCL_{key}");
+            if (!string.IsNullOrWhiteSpace(hex))
+            {
+                try
+                {
+                    result = Convert.FromHexString(hex.Trim());
+                }
+                catch (FormatException)
+                {
+                    LogWrapper.Warn(LogModule, $"环境变量 PCL_{key} 不是合法的十六进制字符串");
+                }
+            }
         }
-        catch (FormatException)
-        {
-            LogWrapper.Warn(LogModule, $"环境变量 PCL_{key} 不是合法的十六进制字符串");
-            return null;
-        }
-#else
-        return null;
 #endif
+
+        SecretBytesCache[key] = result;
+        return result;
     }
+
+    /// <summary>
+    ///     还原生成器写入的密钥：先由种子滚动出 SHA-256 掩码，再拆开 64 位分块异或还原。
+    /// </summary>
+    private static byte[] _DecodeSecret(ulong[] chunks, string seed, int length)
+    {
+        var mask = SHA256.HashData(Encoding.UTF8.GetBytes(seed));
+        var buffer = new byte[length];
+        for (var i = 0; i < length; i++)
+        {
+            var cipher = (byte)(chunks[i >> 3] >> (8 * (i & 7)));
+            buffer[i] = (byte)(cipher ^ mask[i % mask.Length]);
+        }
+
+        return buffer;
+    }
+
     
     /// <summary>
     /// 获取当前操作系统名称。

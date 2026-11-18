@@ -33,8 +33,6 @@ dotnet run --project tests/LauncherServicesRegression -c Release
 
 Release / Beta 发布必须提供仓库机密 `GPG_PRIVATE_KEY`；私钥若有口令，还需提供 `GPG_PASSPHRASE`。工作流会在构建前检查私钥是否配置，签名并验证成功后才上传二进制文件和对应的 `.asc` 签名。缺少私钥或签名失败会使发布失败。
 
-MirrorChyan 同步默认关闭。仅在仓库维护者已确认自己的镜像目标后，配置仓库变量 `MIRRORCHYAN_ENABLED=true`、`MIRRORCHYAN_RID` 和机密 `MirrorChyanUploadToken`。同步从当前仓库读取发布产物，资源 ID 不预设为上游项目。启用但缺少资源 ID 或令牌时，同步工作流会给出明确错误。该可选同步开关不会取消 Release / Beta 发布的签名要求。
-
 <details>
 
 <summary>原 CONTRIBUTING.md 内容</summary>

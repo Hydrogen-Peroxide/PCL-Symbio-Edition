@@ -128,7 +128,6 @@ public partial class PageBedrockLeft
     /// </summary>
     private void RefreshAccount()
     {
-        LabAccountHint.Visibility = Visibility.Collapsed;
         var account = DetectXboxAccount();
         ApplyAvatar(account?.Gamertag ?? account?.Xuid);
         if (account is null)
@@ -361,7 +360,7 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         ModMain.frmMain.PageChange(FormMain.PageType.BedrockInstanceSelect);
     }
 
-    /// <summary>打开实例设置：把设置面板搬到整窗浮层里显示（左栏只有 300px，塞不下）。</summary>
+    /// <summary>打开实例设置：与 Java 版一致，使用整页界面而不是弹窗。</summary>
     private void BtnInstanceSettings_Click(object sender, MouseButtonEventArgs e)
     {
         var version = EnsureSelectedVersion();
@@ -371,31 +370,10 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
             return;
         }
 
-        // 旧版界面：仍然使用原来的整窗浮层
-        if (States.UI.BedrockLegacy)
-        {
-            LabSettingsTarget.Text = ModBedrockInstance.GetDisplayName(ModBedrockInstance.VersionsDirectory, version);
-            LabSettingsVersion.Text = Lang.Text("Bedrock.Status.Version", version) + " · " + ChannelText(version);
-            LabSettingsPath.Text = ModBedrockInstance.GetInstanceFolder(ModBedrockInstance.VersionsDirectory, version);
-            LabSettingsTabTitle.Text = LabSettingsTarget.Text;
-            LabSettingsTabSub.Text = Lang.Text("Bedrock.Status.Version", version) + " · " + ChannelText(version);
-            var legacyLoader = ModBedrockLoader.GetLoader(version);
-            RadioVanilla.Checked = legacyLoader == ModBedrockLoader.Vanilla;
-            RadioLeviLamina.Checked = legacyLoader == ModBedrockLoader.LeviLamina;
-            RadioBLoader.Checked = legacyLoader == ModBedrockLoader.BLoader;
-            CheckShowLaunchLog.Checked = States.UI.ShowLaunchLog;
-            ShowSettingsTab(0);
-            AttachSettingsOverlay();
-            return;
-        }
-
-        // 与 Java 版一致：实例设置是整页界面，而不是弹窗
         ModMain.frmBedrockInstanceLeft ??= new PageBedrockInstanceLeft();
         ModMain.frmBedrockInstanceLeft.pageID = FormMain.PageSubType.VersionSetup;
         PageBedrockInstanceLeft.CurrentVersion = version;
         ModMain.frmMain.PageChange(FormMain.PageType.BedrockInstance, FormMain.PageSubType.VersionSetup);
-        return;
-
     }
 
     private static string ChannelText(string versionId) => ModBedrockInstance.GetChannel(versionId) switch
@@ -589,9 +567,8 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         RefreshStatus();
     }
 
-    private void BtnSwitchAccount_Click(object sender, EventArgs e)
+    private void BtnSwitchAccount_Click(object sender, ModBase.RouteEventArgs e)
     {
-        LabAccountHint.Visibility = Visibility.Visible;
         // 打开应用前先记下当前账号，避免 Xbox 应用瞬间完成登录时被当成“没有变化”
         var baseline = AccountSignature(DetectXboxAccount());
 

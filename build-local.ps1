@@ -19,6 +19,10 @@
     CIK 需要自行提供（仓库 Secrets 中的 BEDROCK_RELEASE_CIK / BEDROCK_PREVIEW_CIK，
     或直接使用 CI 构建出的产物）。缺少 CIK 时脚本仍会构建，但会给出警告。
 
+    可选：PCL_CNB_TOKEN 供 CNB 更新源列举 Release 使用（该接口不开放匿名访问，
+    未提供时 CNB 源会因 401 自动回退到 GitHub）。本地构建若希望包含它，
+    在 local-secrets.ps1 中添加 $env:PCL_CNB_TOKEN = '<令牌>'。
+
 .PARAMETER Configuration
     Release（默认）或 Debug。
 
@@ -76,9 +80,15 @@ function Test-CikValue {
 
 $cikNames = @('PCL_BEDROCK_RELEASE_CIK', 'PCL_BEDROCK_PREVIEW_CIK')
 
-# 本地密钥文件（未入库）：存在时自动加载，避免每次构建都手动设置环境变量
+# 本地密钥文件（未入库）：存在时自动加载，避免每次构建都手动设置环境变量。
+# 不直接 dot-source：部分机器的执行策略禁止运行 .ps1，会让密钥被静默跳过（构建照常成功但产物没有密钥）。
 $localSecrets = Join-Path $root 'local-secrets.ps1'
-if (Test-Path $localSecrets) { . $localSecrets }
+if (Test-Path $localSecrets) {
+    $secretContent = Get-Content $localSecrets -Raw
+    foreach ($match in [regex]::Matches($secretContent, '\$env:(PCL_[A-Za-z0-9_]+)\s*=\s*([''"])([^''"]+)\2')) {
+        Set-Item -Path ("env:" + $match.Groups[1].Value) -Value $match.Groups[3].Value
+    }
+}
 
 $missingCik = @()
 foreach ($name in $cikNames) {
@@ -140,15 +150,44 @@ $injectedSecrets = @(
 Write-Host "已注入密钥：$(if ($injectedSecrets.Count -gt 0) { $injectedSecrets -join '、' } else { '无' })"
 if ($missingCik.Count -gt 0) { Write-Host "缺少密钥：$($missingCik -join '、')" }
 
+# 必须关闭编译服务器复用：EnvironmentInteropGenerator 读取的是「编译器进程」的环境变量，
+# 常驻的 VBCSCompiler 会沿用启动时的旧环境，导致密钥被静默地漏注入（产物能跑，但登录/解包全失败）。
 & $dotnetPath publish 'Plain Craft Launcher 2/Plain Craft Launcher 2.csproj' `
     "-p:Configuration=$Configuration" `
     "-p:Platform=$Platform" `
     '-p:DeleteExistingFiles=true' `
+    '-p:UseSharedCompilation=false' `
     '-o' $outPath `
     '--no-self-contained'
 
 if ($LASTEXITCODE -ne 0) {
     throw "dotnet publish 失败，退出码 $LASTEXITCODE"
+}
+
+# 密钥在产物里是混淆过的（按 64 位分块 + SHA-256 掩码），直接搜明文必然搜不到。
+# 这里用与源生成器相同的算法算出该密钥的种子（16 位十六进制，以 UTF-16 字符串留在程序集里）来确认确实注入。
+$builtExe = Join-Path $outPath 'Plain Craft Launcher 2.exe'
+$probeName = @($injectedSecrets | Where-Object { $_ -notlike '*_CIK' }) | Select-Object -First 1
+if ((Test-Path $builtExe) -and $probeName) {
+    $probeKey = $probeName.Substring(4) # 去掉 PCL_ 前缀，与源生成器保持一致
+    $plainBytes = [System.Text.Encoding]::UTF8.GetBytes([string][Environment]::GetEnvironmentVariable($probeName))
+    $plainHex = -join ($plainBytes | ForEach-Object { $_.ToString('X2') })
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $seedHash = $sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes("PCLSE_SECRET_V1|$probeKey|$plainHex"))
+    }
+    finally {
+        $sha.Dispose()
+    }
+
+    $seed = -join ($seedHash[0..7] | ForEach-Object { $_.ToString('X2') })
+    $binaryText = [System.Text.Encoding]::Unicode.GetString([System.IO.File]::ReadAllBytes($builtExe))
+    if ($binaryText.Contains($seed)) {
+        Write-Host '密钥校验：已写入产物（混淆形式）'
+    }
+    else {
+        Write-Warning '密钥校验失败：产物中未找到注入的密钥种子，请确认构建时 VBCSCompiler 未被复用（清理 obj 后重试）。'
+    }
 }
 
 Write-Host "构建完成：$outPath"

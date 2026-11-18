@@ -195,11 +195,6 @@ public static partial class States
         /// </summary>
         [ConfigItem<double>("WindowWidth", 900, ConfigSource.Local)] public partial double WindowWidth { get; set; }
 
-        /// <summary>
-        /// 基岩版是否使用旧版界面（已不再维护）。
-        /// </summary>
-        [ConfigItem<bool>("UiBedrockLegacy", false)] public partial bool BedrockLegacy { get; set; }
-
         /// <summary>是否显示启动日志卡片（Java 版启动页 / 基岩版启动页共用）。</summary>
         [ConfigItem<bool>("UiShowLaunchLog", true)] public partial bool ShowLaunchLog { get; set; }
 

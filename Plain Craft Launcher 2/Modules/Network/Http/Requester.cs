@@ -25,6 +25,7 @@ public static class Requester
             Method = "GET",
             Accept = param.Accept,
             FallbackUrl = param.FallbackUrl,
+            Headers = param.Headers,
             UseBrowserUserAgent = param.UseBrowserUserAgent,
             Timeout = param.Timeout,
             Encoding = param.Encoding,

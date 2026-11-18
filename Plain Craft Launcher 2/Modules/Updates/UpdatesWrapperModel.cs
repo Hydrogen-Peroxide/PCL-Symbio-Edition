@@ -6,8 +6,8 @@ namespace PCL;
 public class UpdatesWrapperModel : IUpdateSource
 {
     private readonly IEnumerable<IUpdateSource> _sources;
-    private IUpdateSource _announcementSource;
-    private IUpdateSource _versionSource;
+    private IUpdateSource? _announcementSource;
+    private IUpdateSource? _versionSource;
 
     public UpdatesWrapperModel(IEnumerable<IUpdateSource> sources)
     {
@@ -35,9 +35,11 @@ public class UpdatesWrapperModel : IUpdateSource
         foreach (var item in _sources)
             try
             {
-                item.RefreshCache();
+                // 只有真正取到数据的源才作为缓存源；空来源（如缺清单又无权限的源）
+                // 若被缓存，后续每次查询都会先撞它一次。
+                if (!item.RefreshCache()) continue;
                 _versionSource = item;
-                break;
+                return true;
             }
             catch (Exception ex)
             {
@@ -47,21 +49,32 @@ public class UpdatesWrapperModel : IUpdateSource
         return _versionSource is not null;
     }
 
+    /// <summary>
+    ///     按“上次成功的源优先”的顺序枚举，且保证每个源在一次查询中只被尝试一次。
+    /// </summary>
+    private IEnumerable<IUpdateSource> OrderedSources(IUpdateSource? cached)
+    {
+        if (cached is not null && _sources.Contains(cached))
+            yield return cached;
+        foreach (var item in _sources)
+            if (!ReferenceEquals(item, cached))
+                yield return item;
+    }
+
+    /// <summary>
+    ///     查询失败的源不再保留为缓存源，避免后续查询继续命中它。
+    /// </summary>
+    private void DropCache(IUpdateSource failed)
+    {
+        if (ReferenceEquals(_versionSource, failed)) _versionSource = null;
+        if (ReferenceEquals(_announcementSource, failed)) _announcementSource = null;
+    }
+
     public VersionDataModel GetLatestVersion(UpdateChannel channel, UpdateArch arch)
     {
-        foreach (var item in _sources)
+        foreach (var item in OrderedSources(_versionSource))
             try
             {
-                if (_versionSource is not null)
-                    try
-                    {
-                        return _versionSource.GetLatestVersion(channel, arch);
-                    }
-                    catch (Exception ex)
-                    {
-                        ModBase.Log(ex, $"[Update] 缓存的版本源 {_versionSource.SourceName} 不可用");
-                    }
-
                 var ret = item.GetLatestVersion(channel, arch);
                 _versionSource = item;
                 return ret;
@@ -69,6 +82,7 @@ public class UpdatesWrapperModel : IUpdateSource
             catch (Exception ex)
             {
                 ModBase.Log(ex, $"[Update] {item.SourceName} 无法获取最新版本信息");
+                DropCache(item);
             }
 
         ModBase.Log("[Update] 错误！所有的版本源都无法使用！");
@@ -77,19 +91,9 @@ public class UpdatesWrapperModel : IUpdateSource
 
     public bool IsLatest(UpdateChannel channel, UpdateArch arch, SemVer currentVersion, int currentVersionCode)
     {
-        foreach (var item in _sources)
+        foreach (var item in OrderedSources(_versionSource))
             try
             {
-                if (_versionSource is not null)
-                    try
-                    {
-                        return _versionSource.IsLatest(channel, arch, currentVersion, currentVersionCode);
-                    }
-                    catch (Exception ex)
-                    {
-                        ModBase.Log(ex, $"[Update] 缓存的版本源 {_versionSource.SourceName} 不可用");
-                    }
-
                 var ret = item.IsLatest(channel, arch, currentVersion, currentVersionCode);
                 _versionSource = item;
                 return ret;
@@ -97,6 +101,7 @@ public class UpdatesWrapperModel : IUpdateSource
             catch (Exception ex)
             {
                 ModBase.Log(ex, $"[Update] {item.SourceName} 无法获取最新版本信息");
+                DropCache(item);
             }
 
         ModBase.Log("[Update] 错误！所有的版本源都无法使用！");
@@ -105,19 +110,9 @@ public class UpdatesWrapperModel : IUpdateSource
 
     public VersionAnnouncementDataModel GetAnnouncementList()
     {
-        foreach (var item in _sources)
+        foreach (var item in OrderedSources(_announcementSource))
             try
             {
-                if (_announcementSource is not null)
-                    try
-                    {
-                        return _announcementSource.GetAnnouncementList();
-                    }
-                    catch (Exception ex)
-                    {
-                        ModBase.Log(ex, $"[Update] 缓存的公告源 {_announcementSource.SourceName} 不可用");
-                    }
-
                 var ret = item.GetAnnouncementList();
                 _announcementSource = item;
                 return ret;
@@ -125,6 +120,7 @@ public class UpdatesWrapperModel : IUpdateSource
             catch (Exception ex)
             {
                 ModBase.Log(ex, $"[Update] {item.SourceName} 无法获取最新公告信息");
+                DropCache(item);
             }
 
         ModBase.Log("[Update] 错误！所有的公告源都无法使用！");
@@ -133,19 +129,9 @@ public class UpdatesWrapperModel : IUpdateSource
 
     public List<ModLoader.LoaderBase> GetDownloadLoader(UpdateChannel channel, UpdateArch arch, string output)
     {
-        foreach (var item in _sources)
+        foreach (var item in OrderedSources(_versionSource))
             try
             {
-                if (_versionSource is not null)
-                    try
-                    {
-                        return _versionSource.GetDownloadLoader(channel, arch, output);
-                    }
-                    catch (Exception ex)
-                    {
-                        ModBase.Log(ex, $"[Update] 缓存的版本源 {_versionSource.SourceName} 不可用");
-                    }
-
                 var ret = item.GetDownloadLoader(channel, arch, output);
                 _versionSource = item;
                 return ret;
@@ -153,6 +139,7 @@ public class UpdatesWrapperModel : IUpdateSource
             catch (Exception ex)
             {
                 ModBase.Log(ex, $"[Update] {item.SourceName} 无法获取最新版本信息");
+                DropCache(item);
             }
 
         ModBase.Log("[Update] 错误！所有的版本源都无法使用！");

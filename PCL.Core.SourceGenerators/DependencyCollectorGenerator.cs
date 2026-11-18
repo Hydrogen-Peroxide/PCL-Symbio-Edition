@@ -153,23 +153,42 @@ public sealed class DependencyCollectorGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(injectionPointMatches, _GenerateDependencyInjectionMethods);
 
         // 保留旧生成模式以供旧组件兼容
-        context.RegisterSourceOutput(matches, _GenerateDependencyGroup);
+        context.RegisterSourceOutput(matches.Combine(collectorAttrs), _GenerateDependencyGroup);
     }
 
-    private static void _GenerateDependencyGroup(SourceProductionContext spc, ImmutableArray<DependencyMatchResult> matches)
+    private static readonly AttributeTargets[] _AllTargets =
+    [
+        AttributeTargets.Class,
+        AttributeTargets.Method,
+        AttributeTargets.Property
+    ];
+
+    private static Dictionary<AttributeTargets, List<DependencyMatchResult>> _CreateTargetMap() => new()
+    {
+        [AttributeTargets.Class] = [],
+        [AttributeTargets.Method] = [],
+        [AttributeTargets.Property] = []
+    };
+
+    private static void _GenerateDependencyGroup(SourceProductionContext spc,
+        (ImmutableArray<DependencyMatchResult> Left, ImmutableDictionary<INamedTypeSymbol, List<CollectorInfo>> Right)
+            input)
     {
         var dependencyMap = new Dictionary<CollectorInfo, Dictionary<AttributeTargets, List<DependencyMatchResult>>>();
-        foreach (var dep in matches)
+
+        // 先把所有声明过的收集器登记进来：即使某个标识符当前一个成员都没有，
+        // 也应当生成一个空集合的 DependencyGroup，否则运行时会把它当成“依赖注入失败”。
+        foreach (var info in input.Right.Values.SelectMany(infos => infos))
+        {
+            if (!dependencyMap.ContainsKey(info)) dependencyMap[info] = _CreateTargetMap();
+        }
+
+        foreach (var dep in input.Left)
         {
             var info = dep.Info;
             if (!dependencyMap.TryGetValue(info, out var map))
             {
-                map = new Dictionary<AttributeTargets, List<DependencyMatchResult>>
-                {
-                    [AttributeTargets.Class] = [],
-                    [AttributeTargets.Method] = [],
-                    [AttributeTargets.Property] = []
-                };
+                map = _CreateTargetMap();
                 dependencyMap[info] = map;
             }
             map[dep.TargetType].Add(dep);
@@ -194,16 +213,22 @@ public sealed class DependencyCollectorGenerator : IIncrementalGenerator
         sb.AppendLine("    private static readonly Dictionary<string, Dictionary<AttributeTargets, DependencyGroup>> _GroupMap = new()");
         sb.AppendLine("    {");
         
+        // 同一个标识符可能被多个收集器注解声明，这里只输出第一份，避免生成重复的字典键
+        var emittedIdentifiers = new HashSet<string>(StringComparer.Ordinal);
         foreach (var (info, map) in dependencyMap
+            .OrderBy(x => x.Key.Identifier, StringComparer.Ordinal)
+            .ThenBy(x => x.Key.Targets)
             .Select(x => (x.Key, x.Value)))
         {
+            if (!emittedIdentifiers.Add(info.Identifier)) continue;
             sb.Append("        [").Append(info.Identifier.ToLiteral()).AppendLine("] = new()");
             sb.AppendLine("        {");
             string? typeStr = null;
             string? argTypeList = null;
-            foreach (var (target, deps) in map
-                .Where(x => x.Value.Count > 0)
-                .Select(x => (x.Key, x.Value)))
+            foreach (var (target, deps) in _AllTargets
+                         .Select(target => (target,
+                             deps: map.TryGetValue(target, out var list) ? list : new List<DependencyMatchResult>()))
+                         .Where(x => x.deps.Count > 0 || info.Targets.HasFlag(x.target)))
             {
                 sb.Append("            [AttributeTargets.").Append(target).Append("] = new DependencyGroup<");
                 typeStr ??= info.DependencyType.GetFullyQualifiedName();

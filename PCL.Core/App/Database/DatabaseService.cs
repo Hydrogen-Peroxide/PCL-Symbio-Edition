@@ -8,7 +8,10 @@ namespace PCL.Core.App.Database;
 [LifecycleService(LifecycleState.Loading)]
 public class DatabaseService() : GeneralService("database", "数据库管理")
 {
-    private static readonly ConcurrentDictionary<string, LiteDatabase> _Instances = new();
+    // 注意这里存的是 IDisposable 而不是 LiteDatabase：
+    // 程序集是单文件发布、按需加载的，若 Stop() 里直接引用 LiteDatabase 类型，
+    // 从未打开过数据库的进程在关闭时会去加载 LiteDB 并抛出 FileNotFoundException。
+    private static readonly ConcurrentDictionary<string, IDisposable> _Instances = new();
 
     /// <inheritdoc />
     public override void Stop()
@@ -34,6 +37,6 @@ public class DatabaseService() : GeneralService("database", "数据库管理")
             throw new ArgumentException("Connection string canot be null or whitespace.", nameof(connectionPath));
         }
 
-        return _Instances.GetOrAdd(connectionPath, cp => new LiteDatabase(cp));
+        return (LiteDatabase)_Instances.GetOrAdd(connectionPath, cp => new LiteDatabase(cp));
     }
 }

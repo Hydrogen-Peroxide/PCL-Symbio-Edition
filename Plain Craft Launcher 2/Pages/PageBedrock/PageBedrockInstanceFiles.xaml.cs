@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json.Nodes;
 using System.Windows;
 using System.Windows.Controls;
 using PCL.Core.App;
@@ -86,6 +87,8 @@ public partial class PageBedrockInstanceFiles : IRefreshable
             switch (Mode)
             {
                 case 0:
+                    AddLoaderEntries(entries, root);
+
                     foreach (var dir in new[]
                              {
                                  "behavior_packs", "resource_packs", "development_behavior_packs",
@@ -141,6 +144,13 @@ public partial class PageBedrockInstanceFiles : IRefreshable
             ModBase.Log($"[Bedrock] 读取列表失败：{ex.Message}", ModBase.LogLevel.Debug);
         }
 
+        CardFiles.Title = Lang.Text(Mode switch
+        {
+            0 => "Instance.Left.Mod",
+            1 => "Instance.Left.Screenshots",
+            _ => "Instance.Left.Servers"
+        }) + "  (" + entries.Count + ")";
+
         if (entries.Count == 0)
         {
             var empty = new TextBlock
@@ -189,6 +199,69 @@ public partial class PageBedrockInstanceFiles : IRefreshable
         catch
         {
             return [];
+        }
+    }
+
+    private static string[] SafeDirectories(string path)
+    {
+        try
+        {
+            return Directory.Exists(path) ? Directory.GetDirectories(path) : [];
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    /// <summary>
+    ///     列出加载器相关的内容：mods / plugins / preload 三个目录，以及各自下一层的文件夹与 DLL。
+    ///     DLL 模组（LeviLamina 本体和 lip 装的插件）就放在这些目录里，
+    ///     只扫附加包目录的话这一页会一直是空的。
+    /// </summary>
+    private static void AddLoaderEntries(List<(string Path, string Title, string Info, string Icon)> entries,
+        string root)
+    {
+        foreach (var name in new[] { "mods", "plugins", "preload" })
+        {
+            var directory = Path.Combine(root, name);
+            if (!Directory.Exists(directory)) continue;
+
+            var subDirectories = SafeDirectories(directory);
+            var dlls = SafeFiles(directory)
+                .Where(file => string.Equals(Path.GetExtension(file), ".dll", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            entries.Add((directory, name,
+                Lang.Text("Bedrock.Instance.Files.ModsSummary", dlls.Count, subDirectories.Length),
+                "lucide/puzzle"));
+
+            foreach (var sub in subDirectories)
+            {
+                var title = Path.GetFileName(sub);
+                var info = Lang.Text("Bedrock.Instance.Files.Folder");
+                var manifest = Path.Combine(sub, "manifest.json");
+                if (File.Exists(manifest))
+                {
+                    try
+                    {
+                        var node = JsonNode.Parse(File.ReadAllText(manifest));
+                        var manifestName = (string?)node?["name"];
+                        if (!string.IsNullOrWhiteSpace(manifestName)) title = manifestName!.Trim();
+                        var version = (string?)node?["version"];
+                        if (!string.IsNullOrWhiteSpace(version))
+                            info = Lang.Text("Bedrock.Instance.Files.PluginVersion", version!.Trim());
+                    }
+                    catch
+                    {
+                        // 清单损坏时只显示文件夹名
+                    }
+                }
+
+                entries.Add((sub, title, info, "lucide/package"));
+            }
+
+            foreach (var dll in dlls) entries.Add((dll, Path.GetFileName(dll), FileInfo(dll), "lucide/package"));
         }
     }
 

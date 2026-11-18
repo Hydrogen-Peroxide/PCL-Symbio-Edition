@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -45,11 +46,13 @@ public class EnvironmentInteropGenerator : IIncrementalGenerator
 
         foreach (var (key, value) in secretPairs)
         {
-            // 内容密钥（CIK）等二进制密钥直接生成 byte[]，避免以十六进制字符串的形式留在程序集里
+            // 内容密钥（CIK）等二进制密钥：先按十六进制解析，再按字节混淆
             if (key.EndsWith("_CIK", StringComparison.Ordinal) && _TryParseHex(value, out var bytes))
-                bytePairs.AppendLine($"        [\"{key}\"] = new byte[] {{ {string.Join(", ", bytes.Select(b => $"0x{b:X2}"))} }},");
+                bytePairs.Append("        [\"").Append(key).Append("\"] = ")
+                    .Append(_EmitObfuscated(bytes, key)).AppendLine(",");
             else
-                textPairs.AppendLine($"        [\"{key}\"] = {_ToVerbatimString(value)},");
+                textPairs.Append("        [\"").Append(key).Append("\"] = ")
+                    .Append(_EmitObfuscated(Encoding.UTF8.GetBytes(value), key)).AppendLine(",");
         }
 
         var sb = new StringBuilder();
@@ -62,12 +65,12 @@ public class EnvironmentInteropGenerator : IIncrementalGenerator
         sb.AppendLine();
         sb.AppendLine("partial class EnvironmentInterop");
         sb.AppendLine("{");
-        sb.AppendLine("    private static readonly System.Collections.Generic.Dictionary<string, string?> SecretDictionary = new()");
+        sb.AppendLine("    private static readonly System.Collections.Generic.Dictionary<string, (ulong[] Chunks, string Seed, int Length)> SecretDictionary = new()");
         sb.AppendLine("    {");
         sb.Append(textPairs);
         sb.AppendLine("    };");
         sb.AppendLine();
-        sb.AppendLine("    private static readonly System.Collections.Generic.Dictionary<string, byte[]> SecretBytesDictionary = new()");
+        sb.AppendLine("    private static readonly System.Collections.Generic.Dictionary<string, (ulong[] Chunks, string Seed, int Length)> SecretBytesDictionary = new()");
         sb.AppendLine("    {");
         sb.Append(bytePairs);
         sb.AppendLine("    };");
@@ -76,9 +79,33 @@ public class EnvironmentInteropGenerator : IIncrementalGenerator
         context.AddSource("EnvironmentInterop.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));
     }
 
-    private static string _ToVerbatimString(string text)
+    /// <summary>
+    ///     把明文密钥打散：以 SHA-256 掩码异或后按 64 位分块写出，附带一个随密钥变化的种子。
+    ///     这样二进制里不会出现完整密钥的连续字节（直接扫字节 / 跑 strings 都打不中），
+    ///     运行时用同一种子重新生成掩码还原。注意这只是提高提取成本，不是密码学意义上的保密。
+    /// </summary>
+    private static string _EmitObfuscated(byte[] plain, string key)
     {
-        return "@\"" + text.Replace("\"", "\"\"") + "\"";
+        using var sha = SHA256.Create();
+        var seedHash = sha.ComputeHash(Encoding.UTF8.GetBytes($"PCLSE_SECRET_V1|{key}|{_ToHex(plain)}"));
+        var seed = _ToHex(seedHash, 8);
+        var mask = sha.ComputeHash(Encoding.UTF8.GetBytes(seed));
+
+        var chunks = new ulong[(plain.Length + 7) / 8];
+        for (var i = 0; i < plain.Length; i++)
+            chunks[i >> 3] |= (ulong)(byte)(plain[i] ^ mask[i % mask.Length]) << (8 * (i & 7));
+
+        var chunkText = string.Join(", ", chunks.Select(c => "0x" + c.ToString("X16")));
+        return $"(new ulong[] {{ {chunkText} }}, \"{seed}\", {plain.Length})";
+    }
+
+    private static string _ToHex(byte[] bytes) => _ToHex(bytes, bytes.Length);
+
+    private static string _ToHex(byte[] bytes, int count)
+    {
+        var builder = new StringBuilder(count * 2);
+        for (var i = 0; i < count; i++) builder.Append(bytes[i].ToString("X2"));
+        return builder.ToString();
     }
 
     private static bool _TryParseHex(string text, out byte[] bytes)

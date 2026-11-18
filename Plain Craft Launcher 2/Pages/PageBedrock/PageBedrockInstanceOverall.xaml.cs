@@ -15,7 +15,9 @@ public partial class PageBedrockInstanceOverall : IRefreshable
         InitializeComponent();
         Loaded += (_, _) => RefreshData();
         BtnLaunch.Click += BtnLaunch_Click;
-        BtnOpenFolder.Click += BtnOpenFolder_Click;
+        BtnOpenFolder.Click += (_, _) => OpenFolder(CurrentInstancePath);
+        BtnOpenSaves.Click += (_, _) => OpenFolder(CurrentSavesPath);
+        BtnOpenPackages.Click += (_, _) => OpenFolder(CurrentPackagePath);
     }
 
     public void Refresh()
@@ -23,22 +25,52 @@ public partial class PageBedrockInstanceOverall : IRefreshable
         RefreshData();
     }
 
+    private static string? CurrentVersion
+    {
+        get
+        {
+            var versionId = Config.Launch.BedrockSelectedVersion;
+            if (string.IsNullOrWhiteSpace(versionId)) versionId = ModBedrockInstance.SelectedVersionId;
+            return string.IsNullOrWhiteSpace(versionId) ? null : versionId;
+        }
+    }
+
+    private static string CurrentInstancePath => CurrentVersion is null
+        ? ""
+        : ModBedrockInstance.GetInstanceFolder(ModBedrockInstance.VersionsDirectory, CurrentVersion);
+
+    private static string CurrentSavesPath
+    {
+        get
+        {
+            var root = CurrentInstancePath;
+            if (string.IsNullOrEmpty(root)) return "";
+            var nested = Path.Combine(root, "minecraftWorlds");
+            return Directory.Exists(nested) ? nested : Path.Combine(root, "data", "minecraftWorlds");
+        }
+    }
+
+    private static string CurrentPackagePath => CurrentVersion is null
+        ? ""
+        : Path.Combine(ModBedrockInstance.VersionsDirectory, CurrentVersion);
+
     public void RefreshData()
     {
-        var versionId = Config.Launch.BedrockSelectedVersion;
-        if (string.IsNullOrWhiteSpace(versionId))
-            versionId = ModBedrockInstance.SelectedVersionId;
-
-        if (string.IsNullOrWhiteSpace(versionId))
+        var versionId = CurrentVersion;
+        if (versionId is null)
         {
             LabInstanceName.Text = Lang.Text("Bedrock.Instance.None");
             LabInstanceSub.Text = "";
             LabVersion.Text = "-";
             LabChannel.Text = "-";
+            LabMethod.Text = "-";
             LabPath.Text = "-";
+            LabDataFolder.Text = "-";
             LabEmpty.Visibility = Visibility.Visible;
             BtnLaunch.IsEnabled = false;
             BtnOpenFolder.IsEnabled = false;
+            BtnOpenSaves.IsEnabled = false;
+            BtnOpenPackages.IsEnabled = false;
             ImgLogo.Source = null;
             return;
         }
@@ -48,6 +80,8 @@ public partial class PageBedrockInstanceOverall : IRefreshable
         LabEmpty.Visibility = Visibility.Collapsed;
         BtnLaunch.IsEnabled = true;
         BtnOpenFolder.IsEnabled = true;
+        BtnOpenSaves.IsEnabled = true;
+        BtnOpenPackages.IsEnabled = true;
 
         var channelText = channel switch
         {
@@ -59,9 +93,14 @@ public partial class PageBedrockInstanceOverall : IRefreshable
         LabInstanceSub.Text = Lang.Text("Bedrock.Status.Version", versionId) + " · " + channelText;
         LabVersion.Text = versionId;
         LabChannel.Text = channelText;
+
         var instancePath = ModBedrockInstance.GetInstanceFolder(versionsDirectory, versionId);
-        LabPath.Text = PageBedrockInstanceLeft.FoldPath(instancePath);
-        LabPath.ToolTip = instancePath;
+        LabMethod.Text = ModBedrockGdk.IsGdkBuild(instancePath)
+            ? Lang.Text("Bedrock.Instance.Method.Gdk")
+            : Lang.Text("Bedrock.Instance.Method.Uwp");
+        SetFoldablePath(LabPath, instancePath);
+        SetFoldablePath(LabDataFolder, versionsDirectory);
+
         var icon = channel switch
         {
             "preview" => "CommandBlock.png",
@@ -78,23 +117,28 @@ public partial class PageBedrockInstanceOverall : IRefreshable
         }
     }
 
-    private void BtnLaunch_Click(object sender, MouseButtonEventArgs e)
+    /// <summary>路径按固定长度折叠显示，完整路径放进悬停提示。</summary>
+    private static void SetFoldablePath(System.Windows.Controls.TextBlock target, string path)
     {
-        ModMain.frmBedrockRight?.BtnLaunch_Click(this, null!);
+        target.Text = PageBedrockInstanceLeft.FoldPath(path);
+        target.ToolTip = path;
     }
 
-    private void BtnOpenFolder_Click(object sender, MouseButtonEventArgs e)
+    private static void OpenFolder(string path)
     {
-        var path = ModBedrockInstance.GetInstanceFolder(ModBedrockInstance.VersionsDirectory,
-            Config.Launch.BedrockSelectedVersion);
-        if (!Directory.Exists(path)) return;
+        if (string.IsNullOrWhiteSpace(path) || !Directory.Exists(path)) return;
         try
         {
             Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
         }
         catch (Exception ex)
         {
-            ModBase.Log($"[Bedrock] 打开实例文件夹失败：{ex.Message}", ModBase.LogLevel.Feedback);
+            ModBase.Log($"[Bedrock] 打开文件夹失败：{ex.Message}", ModBase.LogLevel.Feedback);
         }
+    }
+
+    private void BtnLaunch_Click(object sender, MouseButtonEventArgs e)
+    {
+        ModMain.frmBedrockRight?.BtnLaunch_Click(this, null!);
     }
 }

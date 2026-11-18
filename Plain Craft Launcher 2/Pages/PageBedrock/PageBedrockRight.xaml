@@ -193,7 +193,8 @@
                                Foreground="{DynamicResource ColorBrushGray4}" />
                 </StackPanel>
             </local:MyCard>
-            <local:MyCard Margin="0,12,0,0" Title="{DynamicResource Bedrock.Right.Log.Title}" Visibility="Collapsed">
+            <local:MyCard x:Name="CardLaunchLog" Margin="0,12,0,0"
+                          Title="{DynamicResource Bedrock.Right.Log.Title}">
                 <TextBlock x:Name="LabLaunchLog" Margin="16,38,16,16" TextWrapping="Wrap"
                            FontSize="12" LineHeight="19"
                            Text="{DynamicResource Bedrock.Right.Log.Empty}"

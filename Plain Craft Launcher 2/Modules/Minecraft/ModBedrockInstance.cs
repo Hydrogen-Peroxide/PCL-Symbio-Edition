@@ -182,7 +182,9 @@ public static class ModBedrockInstance
 
     /// <summary>
     ///     判断实例所属通道：release / preview / beta。
-    ///     版本标识里带关键字时直接判断，否则读取解包目录的 AppxManifest Identity。
+    ///     版本标识里带关键字时直接判断，否则读取实例目录里的 AppxManifest Identity。
+    ///     兼容 extracted&lt;版本号&gt; 与版本目录本身两种布局，否则直接放在数据目录里的
+    ///     预览版会被一律当成正式版。
     /// </summary>
     public static string GetChannel(string versionId)
     {
@@ -192,21 +194,23 @@ public static class ModBedrockInstance
 
         try
         {
-            var extracted = ModBedrockUwp.GetVersionDirectory(Path.Combine(VersionsDirectory, "extracted"), versionId);
-            if (Directory.Exists(extracted))
+            var folder = GetInstanceFolder(VersionsDirectory, versionId);
+            var manifest = Directory.GetFiles(folder, "AppxManifest.xml", SearchOption.TopDirectoryOnly)
+                               .FirstOrDefault()
+                           ?? Directory.GetFiles(folder, "AppxManifest.xml", SearchOption.AllDirectories)
+                               .FirstOrDefault();
+            if (manifest is not null)
             {
-                var manifest = Directory.GetFiles(extracted, "AppxManifest.xml", SearchOption.TopDirectoryOnly)
-                    .FirstOrDefault();
-                if (manifest is not null)
+                var match = Regex.Match(File.ReadAllText(manifest),
+                    "<Identity\\s[^>]*Name=\"([^\"]+)\"", RegexOptions.IgnoreCase);
+                if (match.Success)
                 {
-                    var match = Regex.Match(File.ReadAllText(manifest),
-                        "<Identity\\s[^>]*Name=\"([^\"]+)\"", RegexOptions.IgnoreCase);
-                    if (match.Success)
-                    {
-                        var identity = match.Groups[1].Value;
-                        if (identity.Contains("Preview", StringComparison.OrdinalIgnoreCase)) return "preview";
-                        if (identity.Contains("Beta", StringComparison.OrdinalIgnoreCase)) return "beta";
-                    }
+                    var identity = match.Groups[1].Value;
+                    // Microsoft.MinecraftWindowsBeta 就是商店里的「Minecraft Preview」，
+                    // 它是预览版而不是普通 Beta 通道，分组时归到预览版
+                    if (identity.Contains("Preview", StringComparison.OrdinalIgnoreCase) ||
+                        identity.Contains("WindowsBeta", StringComparison.OrdinalIgnoreCase)) return "preview";
+                    if (identity.Contains("Beta", StringComparison.OrdinalIgnoreCase)) return "beta";
                 }
             }
         }

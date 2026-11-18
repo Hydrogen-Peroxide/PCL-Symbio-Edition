@@ -36,6 +36,30 @@ public static class ModBedrockGdk
         return FindExecutable(directory) is not null;
     }
 
+    /// <summary>
+    ///     目录是否为 GDK（Windows 桌面）构建。
+    ///     GDK 解包目录带 MicrosoftGame.Config（部分版本带 Installers），可以直接运行主程序；
+    ///     UWP 版同样有 Minecraft.Windows.exe，但只有 AppxMetadata，必须注册成系统包才能启动。
+    ///     只看主程序是否存在会把 UWP 版误判成便携版，所以必须按清单外的文件区分。
+    /// </summary>
+    public static bool IsGdkBuild(string directory)
+    {
+        if (string.IsNullOrEmpty(directory) || !Directory.Exists(directory)) return false;
+
+        try
+        {
+            if (FindExecutable(directory) is null) return false;
+            if (Directory.Exists(Path.Combine(directory, "AppxMetadata"))) return false;
+            return File.Exists(Path.Combine(directory, "MicrosoftGame.Config")) ||
+                   File.Exists(Path.Combine(directory, "MicrosoftGame.Config.xml")) ||
+                   Directory.Exists(Path.Combine(directory, "Installers"));
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     /// <summary>在解包目录中查找游戏主程序。</summary>
     public static string? FindExecutable(string directory)
     {

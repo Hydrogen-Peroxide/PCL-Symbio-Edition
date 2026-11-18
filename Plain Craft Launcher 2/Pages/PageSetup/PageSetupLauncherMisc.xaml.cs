@@ -27,23 +27,14 @@ public partial class PageSetupLauncherMisc
         Loaded += (_, _) =>
         {
             CheckShowLaunchLog.Checked = States.UI.ShowLaunchLog;
-            CheckBedrockLegacy.Checked = States.UI.BedrockLegacy;
         };
     }
 
     private void CheckShowLaunchLog_Change(object sender, bool user)
     {
         States.UI.ShowLaunchLog = CheckShowLaunchLog.Checked == true;
-    }
-
-    private void CheckBedrockLegacy_Change(object sender, bool user)
-    {
-        States.UI.BedrockLegacy = CheckBedrockLegacy.Checked == true;
-        HintService.Hint(
-            Lang.Text(States.UI.BedrockLegacy
-                ? "Setup.Misc.System.BedrockLegacy.On"
-                : "Setup.Misc.System.BedrockLegacy.Off"),
-            HintType.Success);
+        // 让已经打开的基岩版页面立刻跟随开关，不必重启
+        ModMain.frmBedrockRight?.RefreshLaunchLogVisibility();
     }
 
     private void PageSetupLink_Loaded(object sender, RoutedEventArgs e)

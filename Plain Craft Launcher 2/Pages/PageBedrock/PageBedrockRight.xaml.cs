@@ -5,6 +5,8 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -198,6 +200,7 @@ public partial class PageBedrockRight
         });
 
         CheckIsolation.Checked = Config.Launch.BedrockVersionIsolation;
+        RefreshLaunchLogVisibility();
         UpdateBedrockPathDisplay();
         DetectBedrockInstallation();
         RefreshLocalVersions();
@@ -208,6 +211,7 @@ public partial class PageBedrockRight
 
     public void RefreshPage()
     {
+        RefreshLaunchLogVisibility();
         UpdateBedrockPathDisplay();
         DetectBedrockInstallation();
         RefreshLocalVersions();
@@ -258,6 +262,15 @@ public partial class PageBedrockRight
 
     private string? _lastLaunchLogLine;
     private bool _logStarted;
+
+    /// <summary>「启动日志」卡片是否显示，跟随设置里的启动日志开关（调试模式强制显示）。</summary>
+    public void RefreshLaunchLogVisibility()
+    {
+        if (CardLaunchLog is null) return;
+        CardLaunchLog.Visibility = States.UI.ShowLaunchLog || ModBase.modeDebug
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+    }
 
     /// <summary>把启动过程的每一步写进右侧「启动日志」卡片。</summary>
     private void AppendLaunchLog(string? line)
@@ -564,28 +577,43 @@ public partial class PageBedrockRight
     }
 
     /// <summary>
-    ///     路径是否为启动器解包出来的 GDK 便携版目录（extracted\&lt;版本号&gt;）。
+    ///     路径是否为可直接运行的 GDK 便携版目录：extracted\&lt;版本号&gt; 或版本目录本身。
     /// </summary>
     private static bool IsPortableGdkPath(string path)
     {
         try
         {
-            var root = Path.GetFullPath(Path.Combine(BedrockVersionsDir, "extracted"))
-                .TrimEnd(Path.DirectorySeparatorChar);
+            var root = Path.GetFullPath(BedrockVersionsDir).TrimEnd(Path.DirectorySeparatorChar);
             var full = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar);
             if (!full.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
                 return false;
 
-            var relative = full[(root.Length + 1)..];
-            var versionId = relative.Split(Path.DirectorySeparatorChar)[0];
-            return !string.IsNullOrEmpty(versionId) &&
-                   IsGdkVersion(versionId) &&
-                   ModBedrockGdk.IsInstalled(full);
+            var segments = full[(root.Length + 1)..].Split(Path.DirectorySeparatorChar);
+            var versionIndex = segments[0].Equals("extracted", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+            if (segments.Length <= versionIndex || string.IsNullOrEmpty(segments[versionIndex])) return false;
+
+            // UWP 版虽然也有 Minecraft.Windows.exe，但必须注册成系统包才能启动，不能当便携版直接跑
+            return ModBedrockGdk.IsGdkBuild(full);
         }
         catch
         {
             return false;
         }
+    }
+
+    /// <summary>
+    ///     查找某个版本可直接运行的 GDK 目录：优先 extracted\&lt;版本号&gt;，其次是版本目录本身。
+    ///     不是 GDK 构建或还没解包时返回 null，由调用方继续走 UWP 的包注册流程。
+    /// </summary>
+    private static string? FindPortableGdkDirectory(string versionId)
+    {
+        foreach (var root in new[] { Path.Combine(BedrockVersionsDir, "extracted"), BedrockVersionsDir })
+        {
+            var directory = ModBedrockUwp.GetVersionDirectory(root, versionId);
+            if (ModBedrockGdk.IsGdkBuild(directory)) return directory;
+        }
+
+        return null;
     }
 
     /// <summary>
@@ -595,16 +623,20 @@ public partial class PageBedrockRight
     {
         try
         {
-            var extractedRoot = Path.Combine(BedrockVersionsDir, "extracted");
-            if (!Directory.Exists(extractedRoot)) return null;
-
             (string Path, string Version)? best = null;
-            foreach (var dir in Directory.GetDirectories(extractedRoot))
+            foreach (var root in new[] { Path.Combine(BedrockVersionsDir, "extracted"), BedrockVersionsDir })
             {
-                var versionId = Path.GetFileName(dir);
-                if (!IsGdkVersion(versionId) || !ModBedrockGdk.IsInstalled(dir)) continue;
-                if (best is null || ModDownload.CompareBedrockVersions(versionId, best.Value.Version) > 0)
-                    best = (dir, versionId);
+                if (!Directory.Exists(root)) continue;
+                foreach (var dir in Directory.GetDirectories(root))
+                {
+                    var versionId = Path.GetFileName(dir);
+                    if (versionId.Equals("extracted", StringComparison.OrdinalIgnoreCase) ||
+                        versionId.Equals("cache", StringComparison.OrdinalIgnoreCase) ||
+                        versionId.StartsWith('.')) continue;
+                    if (!ModBedrockGdk.IsGdkBuild(dir)) continue;
+                    if (best is null || ModDownload.CompareBedrockVersions(versionId, best.Value.Version) > 0)
+                        best = (dir, versionId);
+                }
             }
 
             return best;
@@ -753,6 +785,29 @@ public partial class PageBedrockRight
         LoadLaunching.State.LoadingState = MyLoading.MyLoadingState.Stop;
     }
 
+    /// <summary>
+    ///     启动流程提前退出（找不到安装包等）时收起进度条。
+    ///     不收起的话浮层会一直转圈，看起来就像「点了启动没反应」。
+    /// </summary>
+    private void AbortLaunch(string status, string detail)
+    {
+        _launching = false;
+
+        void Apply()
+        {
+            _launchProgressTimer.Stop();
+            LoadLaunching.State.LoadingState = MyLoading.MyLoadingState.Stop;
+            PanLaunchProgress.Visibility = Visibility.Collapsed;
+            BtnLaunch.IsEnabled = true;
+            LabStatus.Text = status;
+            LabDetail.Text = detail;
+            ModMain.frmBedrockLeft?.EndLaunchOverlay(false, detail);
+        }
+
+        if (Dispatcher.CheckAccess()) Apply();
+        else ModBase.RunInUi(Apply);
+    }
+
     private void LaunchProgressTimer_Tick(object? sender, EventArgs e)
     {
         if (!_launching) return;
@@ -775,38 +830,156 @@ public partial class PageBedrockRight
         }, "Bedrock Launch Progress");
     }
 
-    /// <summary>等待游戏窗口出现；拿不到进程句柄时（注册式启动）按进程名查找。</summary>
-    private static bool WaitForGameWindow(Process? process, TimeSpan timeout)
+    /// <summary>
+    ///     等待游戏窗口出现；拿不到进程句柄时（注册式启动）按进程名查找。
+    ///     注册式启动由 explorer 拉起进程，拿不到句柄，所以还要看窗口标题——
+    ///     UWP 版的窗口属于 ApplicationFrameHost，它的 MainWindowHandle 一直是 0。
+    /// </summary>
+    /// <param name="process">直接启动拿到的游戏进程；注册式启动为 null。</param>
+    /// <param name="timeout">最长等待时间。</param>
+    /// <param name="failure">明确的失败原因（进程启动后立即退出 / 始终没有出现进程）；仅超时但有进程时为 null。</param>
+    private static bool WaitForGameWindow(Process? process, TimeSpan timeout, out string? failure)
     {
-        var deadline = DateTime.UtcNow + timeout;
-        while (DateTime.UtcNow < deadline)
-        {
-            try
-            {
-                if (process is not null)
-                {
-                    if (process.HasExited) return false;
-                    process.Refresh();
-                    if (process.MainWindowHandle != IntPtr.Zero) return true;
-                }
-                else
-                {
-                    foreach (var name in new[] { "Minecraft.Windows", "Minecraft.Win10.DX11" })
-                    foreach (var running in Process.GetProcessesByName(name))
-                        using (running)
-                        {
-                            running.Refresh();
-                            if (running.MainWindowHandle != IntPtr.Zero) return true;
-                        }
-                }
-            }
-            catch { }
+        failure = null;
+        var startedAt = DateTime.UtcNow;
+        var deadline = startedAt + timeout;
+        var observed = process;
+        var ownsObserved = false;
 
-            Thread.Sleep(200);
+        try
+        {
+            while (DateTime.UtcNow < deadline)
+            {
+                try
+                {
+                    if (observed is null)
+                    {
+                        observed = FindGameProcess();
+                        ownsObserved = observed is not null;
+                    }
+
+                    if (observed is not null)
+                    {
+                        if (observed.HasExited)
+                        {
+                            failure = Lang.Text("Bedrock.Launch.Exited", observed.ExitCode);
+                            return false;
+                        }
+
+                        observed.Refresh();
+                        if (observed.MainWindowHandle != IntPtr.Zero) return true;
+                    }
+
+                    if (HasMinecraftWindow()) return true;
+
+                    // 20 秒还没有游戏进程，说明激活被系统拦住了（包不完整、依赖缺失等），不必干等满 60 秒
+                    if (observed is null && DateTime.UtcNow - startedAt > TimeSpan.FromSeconds(20))
+                    {
+                        failure = Lang.Text("Bedrock.Launch.NotStarted");
+                        return false;
+                    }
+                }
+                catch
+                {
+                    // 进程可能在枚举后立刻退出，忽略并继续轮询
+                }
+
+                Thread.Sleep(200);
+            }
+        }
+        finally
+        {
+            if (ownsObserved) observed?.Dispose();
         }
 
         return false;
     }
+
+    /// <summary>按进程名查找已激活的游戏进程。</summary>
+    private static Process? FindGameProcess()
+    {
+        foreach (var name in new[] { "Minecraft.Windows", "Minecraft.Win10.DX11" })
+        {
+            try
+            {
+                var processes = Process.GetProcessesByName(name);
+                if (processes.Length == 0) continue;
+
+                var first = processes[0];
+                for (var i = 1; i < processes.Length; i++) processes[i].Dispose();
+                return first;
+            }
+            catch
+            {
+                // 忽略单个进程的访问错误
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>是否已经出现 Minecraft 的游戏窗口（兼容 UWP 的 ApplicationFrameHost 宿主）。</summary>
+    private static bool HasMinecraftWindow()
+    {
+        var found = false;
+        try
+        {
+            EnumWindows((hwnd, _) =>
+            {
+                if (!IsWindowVisible(hwnd)) return true;
+                var length = GetWindowTextLength(hwnd);
+                if (length <= 0) return true;
+
+                var title = new StringBuilder(length + 1);
+                GetWindowText(hwnd, title, title.Capacity);
+                if (!title.ToString().Contains("Minecraft", StringComparison.OrdinalIgnoreCase)) return true;
+                if (!IsGameWindowProcess(hwnd)) return true;
+
+                found = true;
+                return false;
+            }, IntPtr.Zero);
+        }
+        catch
+        {
+            // 枚举窗口失败不影响主流程，交给进程句柄判断
+        }
+
+        return found;
+    }
+
+    /// <summary>窗口是否属于游戏本体或它的 UWP 宿主，避免把商店/Xbox 窗口当成游戏窗口。</summary>
+    private static bool IsGameWindowProcess(IntPtr hwnd)
+    {
+        try
+        {
+            GetWindowThreadProcessId(hwnd, out var processId);
+            if (processId == 0) return false;
+
+            using var process = Process.GetProcessById((int)processId);
+            return process.ProcessName is "Minecraft.Windows" or "Minecraft.Win10.DX11" or "ApplicationFrameHost";
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    private static extern bool IsWindowVisible(IntPtr hWnd);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+    [DllImport("user32.dll")]
+    private static extern int GetWindowTextLength(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
 
     #endregion
 
@@ -818,6 +991,10 @@ public partial class PageBedrockRight
             DetectBedrockInstallation();
             return;
         }
+
+        // 启动方式由实际目录决定：GDK 目录直接跑主程序，UWP 目录必须走包注册。
+        // 只用缓存标记的话，切换版本后可能沿用上一个版本的启动方式（例如把 UWP 版当便携版裸跑）
+        _isGdkPortable = IsPortableGdkPath(BedrockInstallPath);
 
         BeginLaunchProgress(Lang.Text("Bedrock.Status.CallingSystem"));
 
@@ -914,11 +1091,10 @@ public partial class PageBedrockRight
                         watchingExit = true;
                     }
 
-                    if (!WaitForGameWindow(process, TimeSpan.FromSeconds(60)))
+                    if (!WaitForGameWindow(process, TimeSpan.FromSeconds(60), out var gdkFailure))
                     {
                         // 进程在出窗口前就退出了，说明启动确实失败，不能报成功
-                        if (process is { HasExited: true })
-                            throw new InvalidOperationException(Lang.Text("Bedrock.Launch.Exited", process.ExitCode));
+                        if (gdkFailure is not null) throw new InvalidOperationException(gdkFailure);
                         ModBase.Log("[Bedrock] 60 秒内未检测到游戏窗口，游戏可能仍在启动",
                             ModBase.LogLevel.Hint);
                     }
@@ -931,29 +1107,38 @@ public partial class PageBedrockRight
                     return;
                 }
 
-                // 优先用 shell:AppsFolder 启动已注册的包：旧版 Manifest 被设为 AppListEntry=none，
-                // minecraft:// 协议可能被商店版或其他版本抢占
+                // 优先按当前实例的包启动：旧版 Manifest 被设为 AppListEntry=none，
+                // minecraft:// 协议可能被商店版或其他版本抢占；直接启动“第一个已安装的基岩版包”
+                // 也会在同一台机器注册过多个通道时启动成旧版本
                 SetLaunchStage(0.4, Lang.Text("Bedrock.Launch.Stage.Starting"));
-                if (ModBedrockUwp.LaunchPackage())
+                if (!TryLaunchCurrentPackage())
                 {
-                    ModBase.Log("[Bedrock] 正在启动 Minecraft Bedrock Edition...");
-                }
-                else
-                {
-                    Process.Start(new ProcessStartInfo
+                    if (ModBedrockUwp.LaunchPackage())
                     {
-                        FileName = "minecraft://",
-                        UseShellExecute = true
-                    });
-                    ModBase.Log("[Bedrock] 正在通过 minecraft:// 启动 Minecraft Bedrock Edition...");
+                        ModBase.Log("[Bedrock] 正在启动 Minecraft Bedrock Edition...");
+                    }
+                    else
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = "minecraft://",
+                            UseShellExecute = true
+                        });
+                        ModBase.Log("[Bedrock] 正在通过 minecraft:// 启动 Minecraft Bedrock Edition...");
+                    }
                 }
 
                 CountLaunch();
 
                 SetLaunchStage(0.6, Lang.Text("Bedrock.Launch.Stage.WaitingWindow"));
-                if (!WaitForGameWindow(null, TimeSpan.FromSeconds(60)))
+                if (!WaitForGameWindow(null, TimeSpan.FromSeconds(60), out var uwpFailure))
+                {
+                    // 游戏进程都没起来（激活被系统拦截）或者起来后立刻退出，都说明这次启动失败了，
+                    // 不能再报“已启动”让用户对着桌面等
+                    if (uwpFailure is not null) throw new InvalidOperationException(uwpFailure);
                     ModBase.Log("[Bedrock] 60 秒内未检测到游戏窗口，游戏可能仍在启动",
                         ModBase.LogLevel.Hint);
+                }
 
                 SetLaunchStage(0.9);
                 EndLaunchProgress(true, Lang.Text("Bedrock.Status.Launched"),
@@ -973,6 +1158,24 @@ public partial class PageBedrockRight
                     ModBedrockIsolation.Restore(isolationSession);
             }
         });
+    }
+
+    /// <summary>
+    ///     按当前实例目录精确启动其对应的已注册包。
+    ///     只有确认系统里注册的包指向这个目录才会启动，避免切到新版本后启动的仍是旧版本。
+    /// </summary>
+    private bool TryLaunchCurrentPackage()
+    {
+        if (string.IsNullOrEmpty(BedrockInstallPath)) return false;
+
+        if (ModBedrockUwp.LaunchInstalledPackageFromDirectory(BedrockInstallPath, out var detail))
+        {
+            ModBase.Log($"[Bedrock] 正在启动 Minecraft Bedrock Edition: {detail}", ModBase.LogLevel.Normal);
+            return true;
+        }
+
+        ModBase.Log($"[Bedrock] 无法按当前实例启动（{detail}），改用系统默认的基岩版包", ModBase.LogLevel.Hint);
+        return false;
     }
 
     #region 注册式启动（GDK）
@@ -1010,6 +1213,15 @@ public partial class PageBedrockRight
             // 已按该目录注册过就直接启动，避免每次启动都跑一次耗时的 PowerShell 注册
             if (!IsRegisteredFromDirectory(identityName, extractDir))
             {
+                // 带 desktop6:RegistryWriteVirtualization / FileSystemWriteVirtualization 的 GDK 清单
+                // 注册时要求 unvirtualizedResources 受信任功能，而清单里没有声明，注册必然报 0x80080204。
+                // 改写清单只会把版本目录弄脏（版本号、AppListEntry 都会被改），所以这类版本直接运行主程序
+                if (NeedsUnvirtualizedResources(manifestPath))
+                {
+                    ModBase.Log("[Bedrock] 该 GDK 清单不支持注册式启动，直接运行主程序", ModBase.LogLevel.Debug);
+                    return false;
+                }
+
                 SetLaunchStage(0.35, Lang.Text("Bedrock.Launch.Stage.Register"));
 
                 // 改写过的清单与旧签名不匹配，注册前按 BedrockBoot 的方式删除签名文件
@@ -1095,6 +1307,24 @@ public partial class PageBedrockRight
         }
     }
 
+    /// <summary>
+    ///     清单关掉了写虚拟化（RegistryWriteVirtualization / FileSystemWriteVirtualization），
+    ///     这类 GDK 清单注册时需要 unvirtualizedResources 受限功能，而 EditManifest 会删掉所有 rescap 能力、
+    ///     只补回 runFullTrust，改写后注册必然报 0x80080204。这种版本只能直接运行主程序。
+    /// </summary>
+    private static bool NeedsUnvirtualizedResources(string manifestPath)
+    {
+        try
+        {
+            return Regex.IsMatch(File.ReadAllText(manifestPath),
+                "RegistryWriteVirtualization|FileSystemWriteVirtualization", RegexOptions.IgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     private static bool IsPowerShellFailure(string output)
     {
         return output.Contains("Exception", StringComparison.OrdinalIgnoreCase) ||
@@ -1146,7 +1376,7 @@ public partial class PageBedrockRight
 
     /// <summary>
     ///     判断当前安装的基岩版是否由启动器从某个本地版本注册而来。
-    ///     注册时解压目录为 extracted\&lt;版本号&gt;（包束会多一层 inner）。
+    ///     兼容两种布局：extracted\&lt;版本号&gt;（含包束多出来的 inner）与版本目录本身。
     /// </summary>
     private void UpdateInstalledVersionId()
     {
@@ -1155,14 +1385,16 @@ public partial class PageBedrockRight
 
         try
         {
-            var root = Path.GetFullPath(Path.Combine(BedrockVersionsDir, "extracted"))
-                .TrimEnd(Path.DirectorySeparatorChar);
+            var root = Path.GetFullPath(BedrockVersionsDir).TrimEnd(Path.DirectorySeparatorChar);
             var installPath = Path.GetFullPath(BedrockInstallPath).TrimEnd(Path.DirectorySeparatorChar);
             if (!installPath.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
                 return;
 
-            var relative = installPath[(root.Length + 1)..];
-            var segment = relative.Split(Path.DirectorySeparatorChar)[0];
+            var segments = installPath[(root.Length + 1)..].Split(Path.DirectorySeparatorChar);
+            var versionIndex = segments[0].Equals("extracted", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+            if (segments.Length <= versionIndex) return;
+
+            var segment = segments[versionIndex];
             if (!string.IsNullOrEmpty(segment))
                 _registeredVersionId = segment;
         }
@@ -1577,36 +1809,30 @@ public partial class PageBedrockRight
             ModBase.Log($"[Bedrock] 显示启动浮层失败（已忽略，继续启动）：{ex}", ModBase.LogLevel.Debug);
         }
 
-        // GDK 便携版：解包目录里有主程序就能直接启动，不需要改动系统包注册
+        // GDK 构建（带 MicrosoftGame.Config）直接运行主程序：不注册系统包，也就没有“切换”这回事，
+        // 因此不存在切换到一半、启动成旧版本的问题；加载器（LeviLamina / BLoader）也只有这条路才生效
+        var portableDir = FindPortableGdkDirectory(versionId);
+        if (portableDir is not null)
+        {
+            ActivateGdkVersion(versionId, portableDir);
+            return;
+        }
+
+        // 只有 GDK 安装包、还没解包：先解包成便携版
         if (IsGdkVersion(versionId))
         {
-            var gdkDir = ModBedrockUwp.GetVersionDirectory(
-                Path.Combine(BedrockVersionsDir, "extracted"), versionId);
-            if (ModBedrockGdk.IsInstalled(gdkDir))
-            {
-                ActivateGdkVersion(versionId, gdkDir);
-                return;
-            }
-
-            // 用户自己解包到 versions\<版本> 的便携版：主程序就在版本目录里，直接用，不必再找安装包
-            var directDir = ModBedrockUwp.GetVersionDirectory(BedrockVersionsDir, versionId);
-            if (ModBedrockGdk.IsInstalled(directDir))
-            {
-                ActivateGdkVersion(versionId, directDir);
-                return;
-            }
-
             var files = GetPackageFiles(ModBedrockUwp.GetVersionDirectory(BedrockVersionsDir, versionId));
             if (files.Count == 0)
             {
                 ModBase.Log($"[Bedrock] 版本 {versionId} 的安装包已被删除，无法解包启动",
                     ModBase.LogLevel.Hint,
                     userSummary: Lang.Text("Bedrock.Local.PackageMissing"));
+                AbortLaunch(Lang.Text("Bedrock.Status.LaunchFailed"), Lang.Text("Bedrock.Local.PackageMissing"));
                 return;
             }
 
-            // 尚未解包：先解包，安装完成后不会注册系统包
-            StartInstall(files[0], versionId);
+            // 尚未解包：先解包；因为这次是「启动」触发的，解包完成后要继续启动，而不是停在这里
+            StartInstall(files[0], versionId, launchAfterInstall: true);
             return;
         }
 
@@ -1664,11 +1890,28 @@ public partial class PageBedrockRight
                         result = RegisterExtractedVersion(manifestPath);
                     }
 
+                    // 注册命令没报错也不代表真的切过去了：系统里可能仍指向商店版或其它目录。
+                    // 但查询本身可能失败或返回看不懂的内容，只有明确查到“指向别处”才回退重装，
+                    // 否则会把一次成功的切换误判成失败（本次 1.21.113 就是这么被挡住的）
                     if (IsRegisterFailed(result))
                     {
-                        ModBase.Log($"[Bedrock] 重新注册 {versionId} 失败，改为重新安装: {result.Trim()}",
+                        ModBase.Log($"[Bedrock] 注册 {versionId} 失败，改为重新安装: {result.Trim()}",
                             ModBase.LogLevel.Normal);
                         targetDir = null;
+                    }
+                    else
+                    {
+                        var registered = VerifyRegisteredTarget(targetDir);
+                        if (registered == false)
+                        {
+                            ModBase.Log($"[Bedrock] 注册命令已执行，但系统里注册的基岩版并未指向 {targetDir}",
+                                ModBase.LogLevel.Normal);
+                            targetDir = null;
+                        }
+                        else if (registered is null)
+                        {
+                            ModBase.Log("[Bedrock] 无法确认注册位置，按注册成功继续启动", ModBase.LogLevel.Normal);
+                        }
                     }
                 }
 
@@ -1677,13 +1920,20 @@ public partial class PageBedrockRight
                     // 解压目录缺失或被清理：用已下载的安装包重新解压并注册
                     var files = GetPackageFiles(ModBedrockUwp.GetVersionDirectory(BedrockVersionsDir, versionId));
                     if (files.Count == 0)
-                        throw new FileNotFoundException(Lang.Text("Bedrock.Local.PackageMissing"));
+                        throw new InvalidOperationException(Lang.Text("Bedrock.Local.SwitchFailed", versionId));
                     InstallWithRegister(files[0], versionId);
                     (targetDir, _) = FindExtractedVersion(versionId);
+                    if (targetDir is null || VerifyRegisteredTarget(targetDir) == false)
+                        throw new InvalidOperationException(Lang.Text("Bedrock.Local.SwitchFailed", versionId));
                 }
 
                 installedPath = targetDir;
-                ModBase.Log($"[Bedrock] 已切换到版本 {versionId}", ModBase.LogLevel.Normal);
+                var package = ModBedrockUwp.ReadDirectoryManifest(targetDir);
+                ModBase.Log(
+                    package is null
+                        ? $"[Bedrock] 已切换到版本 {versionId}"
+                        : $"[Bedrock] 已切换到版本 {versionId}（{package.Value.Name} {package.Value.Version}）",
+                    ModBase.LogLevel.Normal);
             }
             catch (Exception ex)
             {
@@ -1700,8 +1950,7 @@ public partial class PageBedrockRight
                     ModBase.Log(error, $"切换到基岩版 {versionId} 失败",
                         ModBase.LogLevel.Feedback,
                         userSummary: Lang.Text("Bedrock.Launch.Error"));
-                    LabStatus.Text = Lang.Text("Bedrock.Status.LaunchFailed");
-                    LabDetail.Text = error.Message;
+                    AbortLaunch(Lang.Text("Bedrock.Status.LaunchFailed"), error.Message);
                     RefreshLocalVersions();
                     return;
                 }
@@ -1710,6 +1959,9 @@ public partial class PageBedrockRight
                 BedrockInstallPath = installedPath;
                 BedrockVersion = versionId;
                 _isStorePackage = false;
+                // 刚刚注册的是 UWP 包，不能再按 GDK 便携版直接跑主程序
+                _isGdkPortable = false;
+                _registeredVersionId = versionId;
                 BtnUpdate.Visibility = Visibility.Collapsed;
                 SelectVersion(versionId);
                 RefreshLocalVersions();
@@ -1719,6 +1971,28 @@ public partial class PageBedrockRight
                 LaunchBedrock();
             });
         });
+    }
+
+    /// <summary>
+    ///     确认系统里注册的基岩版是否指向这个解包目录。
+    ///     返回 true 已指向该目录，false 明确指向别处，null 无法确认（查询失败或输出看不懂）。
+    /// </summary>
+    private static bool? VerifyRegisteredTarget(string? directory)
+    {
+        if (string.IsNullOrEmpty(directory)) return false;
+
+        var identity = ModBedrockUwp.ReadDirectoryManifest(directory)?.Name;
+        if (string.IsNullOrEmpty(identity)) return null;
+
+        try
+        {
+            return ModBedrockRegistration.IsRegisteredFromDirectory(identity, directory);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 校验注册位置失败（按未确认处理）: {ex.Message}", ModBase.LogLevel.Normal);
+            return null;
+        }
     }
 
     /// <summary>以开发模式注册解包目录，返回 PowerShell 的完整输出。</summary>
@@ -1776,7 +2050,7 @@ public partial class PageBedrockRight
         StartInstall(allFiles[0], versionId);
     }
 
-    private void StartInstall(string filePath, string versionId)
+    private void StartInstall(string filePath, string versionId, bool launchAfterInstall = false)
     {
         if (_installingVersions.Contains(versionId))
             return;
@@ -1784,7 +2058,7 @@ public partial class PageBedrockRight
         // GDK 版是加密的 .msixvc，不能侧载注册，改为解密解包成便携版
         if (ModBedrockGdk.IsGdkPackage(filePath))
         {
-            StartInstallGdk(filePath, versionId);
+            StartInstallGdk(filePath, versionId, launchAfterInstall);
             return;
         }
 
@@ -1815,7 +2089,7 @@ public partial class PageBedrockRight
     /// <summary>
     ///     GDK 版安装：解包 .msixvc 到独立目录后直接可运行，不做系统包注册。
     /// </summary>
-    private void StartInstallGdk(string filePath, string versionId)
+    private void StartInstallGdk(string filePath, string versionId, bool launchAfterInstall = false)
     {
         if (_installingVersions.Contains(versionId))
             return;
@@ -1838,10 +2112,10 @@ public partial class PageBedrockRight
         LabDetail.Text = Lang.Text("Bedrock.Gdk.ExtractingDetail", versionId);
         BtnLaunch.IsEnabled = false;
 
-        InstallGdkPackage(filePath, versionId);
+        InstallGdkPackage(filePath, versionId, launchAfterInstall);
     }
 
-    private void InstallGdkPackage(string filePath, string versionId)
+    private void InstallGdkPackage(string filePath, string versionId, bool launchAfterInstall = false)
     {
         Task.Run(() =>
         {
@@ -1869,6 +2143,13 @@ public partial class PageBedrockRight
 
                 ModBase.RunInUi(() =>
                 {
+                    if (launchAfterInstall)
+                    {
+                        // 这次是「启动」触发的安装，解包完成后直接接着启动，不用再点一次
+                        ActivateGdkVersion(versionId, extractDir);
+                        return;
+                    }
+
                     IsBedrockInstalled = true;
                     BedrockInstallPath = extractDir;
                     BedrockVersion = versionId;
@@ -2102,7 +2383,10 @@ public partial class PageBedrockRight
     /// <summary>
     ///     导入手动下载的旧版本安装包：读取包内 Identity 版本号 → 复制到版本目录 → 直接开始安装。
     /// </summary>
-    private void ImportPackage_Click(object sender, MouseButtonEventArgs e)
+    private void ImportPackage_Click(object sender, MouseButtonEventArgs e) => ImportPackage();
+
+    /// <summary>导入安装包到当前数据目录；右侧按钮与左侧「实例选择」页共用同一条流程。</summary>
+    public void ImportPackage()
     {
         var dialog = new Microsoft.Win32.OpenFileDialog
         {

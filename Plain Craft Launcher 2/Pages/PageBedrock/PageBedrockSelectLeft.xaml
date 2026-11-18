@@ -15,8 +15,12 @@
                               Style="{StaticResource ScrollViewerFullMargin}">
             <StackPanel x:Name="PanFolders" Margin="0,0,6,0" />
         </local:MyScrollViewer>
-        <local:MyButton Grid.Row="2" x:Name="BtnAddFolder" Margin="10,10,10,0" ColorType="Normal"
-                        TextPadding="7" Padding="5,0" HorizontalAlignment="Left" UseLayoutRounding="False"
-                        SnapsToDevicePixels="False" />
+
+        <!-- 添加或导入：与 Java 版「实例选择」页一致的列表项样式，固定在左下角 -->
+        <StackPanel Grid.Row="2" Margin="0,6,6,0">
+            <TextBlock Text="{DynamicResource Select.Folder.AddOrImport}" Margin="13,6,5,4"
+                       Opacity="0.6" FontSize="12" />
+            <StackPanel x:Name="PanActions" />
+        </StackPanel>
     </Grid>
 </local:MyPageLeft>

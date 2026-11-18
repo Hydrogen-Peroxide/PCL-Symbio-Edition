@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using PCL.Core.App;
 using PCL.Core.App.Localization;
@@ -82,6 +82,13 @@ public partial class PageBedrockInstanceLeft : IRefreshable
     {
         if (sender is MyListItem item && item.Tag is not null)
             PageChange((FormMain.PageSubType)ModBase.Val(item.Tag));
+    }
+
+    /// <summary>导航行右侧的刷新按钮：重新读取该行对应页面的数据。</summary>
+    private void RefreshButton_Click(object sender, EventArgs e)
+    {
+        if (sender is MyIconButton button && button.Tag is not null)
+            Refresh((FormMain.PageSubType)ModBase.Val(button.Tag));
     }
 
     public object PageGet(FormMain.PageSubType id)

@@ -259,6 +259,13 @@ public partial class PageDownloadLeft : IRefreshable
                 ItemBedrockSkin.Checked = true;
                 break;
             }
+            case FormMain.PageSubType.DownloadBedrockLip:
+            {
+                if (ModMain.frmDownloadBedrockLip is null)
+                    ModMain.frmDownloadBedrockLip = new PageDownloadBedrockLip();
+                ItemBedrockLip.Checked = true;
+                break;
+            }
         }
 
         HintService.Hint(Lang.Text("Download.Left.Hint.Refreshing"), log: false);
@@ -304,6 +311,7 @@ public partial class PageDownloadLeft : IRefreshable
         ItemBedrockMaterial.Check += PageCheck;
         ItemBedrockScript.Check += PageCheck;
         ItemBedrockSkin.Check += PageCheck;
+        ItemBedrockLip.Check += PageCheck;
     }
 
     /// <summary>
@@ -458,6 +466,12 @@ public partial class PageDownloadLeft : IRefreshable
                 if (ModMain.frmDownloadBedrockSkin is null)
                     ModMain.frmDownloadBedrockSkin = new PageDownloadBedrockSkin();
                 return ModMain.frmDownloadBedrockSkin;
+            }
+            case FormMain.PageSubType.DownloadBedrockLip:
+            {
+                if (ModMain.frmDownloadBedrockLip is null)
+                    ModMain.frmDownloadBedrockLip = new PageDownloadBedrockLip();
+                return ModMain.frmDownloadBedrockLip;
             }
 
             default:
