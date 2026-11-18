@@ -418,7 +418,7 @@ Check("CNB keeps prereleases out of the stable channel", () =>
         "CNB beta channel selection mismatched.");
 });
 
-bool IsManifestUrl(string url) => url.Contains("/-/git/raw/updates/", StringComparison.Ordinal);
+bool IsManifestUrl(string url) => url.Contains("/-/releases/download/updates/", StringComparison.Ordinal);
 UpdatesCnbModel CnbRouted(Func<string, string> fetch) => new("test/cnb", "MockCNB", fetch);
 var manifestHash = new string('d', 64);
 Check("CNB prefers the updates manifest over the releases API", () =>
@@ -523,6 +523,26 @@ Check("CNB request carries the token only when it is configured", () =>
     {
         Secrets.CnbToken = previous;
     }
+});
+
+Check("CNB understands the manifest produced by the CI sync script", () =>
+{
+    // 与 .github/scripts/sync_cnb_release.py 的 write_manifest() 输出保持一致的形状
+    var produced = JsonSerializer.Serialize(new
+    {
+        version = "2.17.16-beta.6",
+        channel = "beta",
+        changelog = "ci body",
+        sha256 = new string('e', 64),
+        downloads = new { x64 = "https://cnb.cool/o/r/-/releases/download/v2.17.16-beta.6/PCL2_CE_Release_x64.exe" }
+    });
+    var source = CnbRouted(url => IsManifestUrl(url) ? produced : "[]");
+    var version = source.GetLatestVersion(UpdateChannel.beta, UpdateArch.x64);
+    Require(version.VersionName == "2.17.16-beta.6" && version.Sha256 == new string('e', 64),
+        "Manifest produced by CI was not understood.");
+    Require(AnyDownloadUrl(source, UpdateChannel.beta, UpdateArch.x64)
+                .EndsWith("PCL2_CE_Release_x64.exe", StringComparison.Ordinal),
+        "CI manifest download URL was dropped.");
 });
 
 Console.WriteLine($"{passed}/{passed + failed} passed");

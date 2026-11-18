@@ -20,6 +20,9 @@ public class UpdatesCnbModel : IUpdateSource
 {
     private const int PageSize = 100;
 
+    /// <summary>更新清单挂在 CNB 该 tag 的 Release 上，由 CI 自动维护。</summary>
+    private const string ManifestTag = "updates";
+
     /// <summary>正式版清单，位于 updates 分支。</summary>
     private static readonly string[] StableManifestNames = ["latest.json"];
 
@@ -206,14 +209,15 @@ public class UpdatesCnbModel : IUpdateSource
 
     private CnbManifestVersion? TryFetchManifest(UpdateChannel channel, string fileName)
     {
-        var url = $"https://cnb.cool/{_repo}/-/git/raw/updates/{fileName}";
+        // 清单由 CI 同步脚本挂在固定 tag 的 Release 上，地址固定且无需令牌
+        var url = $"https://cnb.cool/{_repo}/-/releases/download/{ManifestTag}/{fileName}";
         try
         {
             return ParseManifest(_fetch(url));
         }
         catch (Exception ex)
         {
-            // 清单尚未发布时是 404 页面而非 JSON，属正常情况，安静退回 Releases API
+            // 清单尚未生成时返回 404 页面而非 JSON，属正常情况，安静退回 Releases API
             ModBase.Log(ex, $"[Update] 无法读取 {SourceName} 清单 {fileName}", ModBase.LogLevel.Developer);
             return null;
         }

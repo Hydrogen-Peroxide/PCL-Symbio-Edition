@@ -15,12 +15,15 @@
   2. 按 tag 创建或更新 CNB Release（标题 / 说明 / 预发布标记）
   3. 下载 GitHub Release 的全部附件，逐个上传（同名覆盖）
   4. 可选：删掉 CNB 上 GitHub 已经没有的附件
+  5. 生成启动器用的更新清单（正式版 latest.json / 预发布版 latest-beta.json），
+     挂到固定 tag（默认 updates）的 Release 上
 
 只依赖 Python 标准库 + git / gh 命令。
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import pathlib
@@ -72,6 +75,7 @@ try:
 except ValueError:
     BATCH_LIMIT = 3
 PRUNE = _env("PRUNE", "true").lower() == "true"
+WRITE_MANIFEST = _env("WRITE_MANIFEST", "true").lower() == "true"
 
 RELEASES_URL = f"https://{CNB_HOST}/{CNB_REPO}/-/releases"
 
@@ -352,6 +356,94 @@ def download_assets(tag: str, dest: pathlib.Path) -> list[pathlib.Path]:
     return sorted(p for p in dest.iterdir() if p.is_file())
 
 
+# ---------------------------------------------------------------------------
+# 更新清单（供启动器的 CNB 更新源读取）
+# ---------------------------------------------------------------------------
+
+# 清单挂在一个固定 tag 的 Release 上，客户端地址因此永远是同一个：
+#   https://cnb.cool/{repo}/-/releases/download/updates/latest.json
+MANIFEST_TAG = _env("CNB_MANIFEST_TAG", "updates")
+MANIFEST_STABLE = "latest.json"
+MANIFEST_BETA = "latest-beta.json"
+
+
+def _sha256_file(path: pathlib.Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _pick_installer(files: list[pathlib.Path]) -> pathlib.Path | None:
+    """从附件里挑出安装包。
+
+    CI 产出的附件名是 PCL2_CE_<配置>_<架构>.exe，与手工命名的
+    PCL-Symbio-Edition-<版本>-x64.exe 并存，因此不硬编码文件名，
+    只按扩展名与架构标记判断。
+    """
+    candidates = [
+        p for p in files
+        if p.suffix.lower() == ".exe"
+        and "x64" in p.name.lower()
+        and "arm64" not in p.name.lower()
+    ]
+    return sorted(candidates)[0] if candidates else None
+
+
+def _asset_url(asset: dict) -> str:
+    # CNB 的字段拼写是 brower_download_url（少一个 s），按原样取
+    return (asset.get("brower_download_url") or asset.get("url") or "").strip()
+
+
+def write_manifest(tag: str, name: str, body: str, prerelease: bool, files: list[pathlib.Path]) -> None:
+    """把本次发布的版本信息写进 CNB 的更新清单。失败由调用方决定是否算致命。"""
+    installer = _pick_installer(files)
+    if installer is None:
+        log(f"WARN {tag} 没有找到 x64 安装包附件，跳过更新清单")
+        return
+
+    release_id = upsert_release(
+        MANIFEST_TAG,
+        "更新清单",
+        "启动器 CNB 更新源读取的版本清单，由 CI 自动维护，请勿手动修改。",
+        False,
+    )
+
+    # 先上传、再从 CNB 侧读回真实下载地址，避免猜测 URL 形态
+    upload_asset(release_id, installer)
+    listing = expect(
+        cnb("GET", f"/{CNB_REPO}/-/releases/{release_id}"),
+        "读取清单 Release 的附件列表",
+    ).json() or {}
+    matched = next(
+        (a for a in (listing.get("assets") or []) if a.get("name") == installer.name),
+        None,
+    )
+    url = _asset_url(matched) if matched else ""
+    if not url:
+        raise SyncError(f"CNB 未返回 {installer.name} 的下载地址，无法生成清单")
+
+    version_name = tag.strip().lstrip("vV")
+    manifest = {
+        "version": version_name,
+        "channel": "beta" if prerelease else "stable",
+        "changelog": body,
+        "sha256": _sha256_file(installer),
+        "downloads": {"x64": url},
+    }
+    file_name = MANIFEST_BETA if prerelease else MANIFEST_STABLE
+
+    manifest_path = pathlib.Path(tempfile.mkdtemp(prefix="cnb-manifest-")) / file_name
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+    upload_asset(release_id, manifest_path)
+    log(
+        f"✓ 更新清单 {file_name} → {version_name}"
+        f"（{RELEASES_URL}/download/{MANIFEST_TAG}/{file_name}）"
+    )
+
+
+
 def sync_one(tag: str) -> None:
     meta_proc = run(
         [
@@ -389,6 +481,24 @@ def sync_one(tag: str) -> None:
             prune_assets(release_id, files)
 
     log(f"=== {tag} 同步完成：{len(files)} 个附件 → {RELEASES_URL} ===")
+
+    if tag == MANIFEST_TAG:
+        log("这是更新清单自身的 Release，跳过清单生成")
+        return
+    # 清单只是给启动器提速的附属产物，写失败不应让整次发布失败
+    if not prerequisites_ok():
+        return
+    try:
+        write_manifest(tag, name, body, prerelease, files)
+    except SyncError as exc:
+        log(f"WARN 更新清单生成失败，本次发布不受影响：{exc}")
+
+
+def prerequisites_ok() -> bool:
+    if WRITE_MANIFEST:
+        return True
+    log("已关闭更新清单生成（WRITE_MANIFEST=false）")
+    return False
 
 
 def main() -> int:

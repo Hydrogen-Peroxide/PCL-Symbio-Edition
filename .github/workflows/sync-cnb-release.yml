@@ -3,6 +3,8 @@ name: Sync (CNB Release)
 # 把 GitHub Release 同步到 CNB（cnb.cool）：
 #   - Release 说明、标题、预发布标记
 #   - Release 的全部附件（同名覆盖，适配「不改版本号、直接重发同一版本」的习惯）
+#   - 启动器用的更新清单：正式版 latest.json / 预发布版 latest-beta.json，
+#     挂在固定 tag（默认 updates）的 Release 上，客户端地址因此固定
 #
 # 由 release-stable_publish.yml / release-beta_publish.yml 在附件上传完成后调用，
 # 也可以在 Actions 页面手动运行做补同步。
@@ -76,6 +78,7 @@ jobs:
           TAG: ${{ inputs.tag }}
           BATCH_LIMIT: ${{ inputs.limit || '3' }}
           PRUNE: ${{ inputs.prune }}
+          WRITE_MANIFEST: 'true'
         run: python3 .github/scripts/sync_cnb_release.py
 
       - name: Write job summary
