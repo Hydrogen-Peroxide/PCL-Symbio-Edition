@@ -127,3 +127,13 @@ jobs:
           gh workflow run --repo $GITHUB_REPOSITORY mirrorchyan_release_note.yml
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  sync_cnb:
+    # 附件都传到 GitHub Release 之后，整体镜像一份到 CNB（含预发布标记）
+    needs: [rename_and_release]
+    permissions:
+      contents: read
+    uses: ./.github/workflows/sync-cnb-release.yml
+    with:
+      tag: ${{ github.event.release.tag_name }}
+    secrets: inherit

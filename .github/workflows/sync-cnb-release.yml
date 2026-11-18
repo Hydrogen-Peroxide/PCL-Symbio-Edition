@@ -1,0 +1,95 @@
+name: Sync (CNB Release)
+
+# 把 GitHub Release 同步到 CNB（cnb.cool）：
+#   - Release 说明、标题、预发布标记
+#   - Release 的全部附件（同名覆盖，适配「不改版本号、直接重发同一版本」的习惯）
+#
+# 由 release-stable_publish.yml / release-beta_publish.yml 在附件上传完成后调用，
+# 也可以在 Actions 页面手动运行做补同步。
+
+permissions:
+  contents: read
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        description: 要同步的 tag
+        required: true
+        type: string
+      prune:
+        description: 删除 CNB 上 GitHub Release 已不存在的附件
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      CNB_TOKEN:
+        required: false
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 只同步这个 tag（留空则同步最近 limit 个 Release）
+        required: false
+        type: string
+        default: ''
+      limit:
+        description: 批量同步时拉取多少个 Release
+        required: false
+        type: string
+        default: '3'
+      prune:
+        description: 删除 CNB 上 GitHub Release 已不存在的附件
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  sync:
+    name: Sync ${{ inputs.tag || 'recent releases' }} to CNB
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    concurrency:
+      group: cnb-release-sync
+      cancel-in-progress: false
+    steps:
+      - name: Check CNB token
+        env:
+          CNB_TOKEN: ${{ secrets.CNB_TOKEN }}
+        run: |
+          if [ -z "$CNB_TOKEN" ]; then
+            echo "::error::未配置 CNB_TOKEN。请到 Settings → Secrets and variables → Actions 新建 Secret，值为 CNB 访问令牌（https://cnb.cool/profile/token/create ，授权范围需同时勾选「代码仓库 repo-code 读写」和「Release repo-release 读写」）。"
+            exit 1
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          # 需要完整历史：CNB 仓库首次同步时要把 tag 连同历史一起推过去
+          fetch-depth: 0
+
+      - name: Sync release to CNB
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CNB_TOKEN: ${{ secrets.CNB_TOKEN }}
+          CNB_REPO: ${{ vars.CNB_REPO || 'PCL-Symbio/PCL-Symbio-Edition' }}
+          TAG: ${{ inputs.tag }}
+          BATCH_LIMIT: ${{ inputs.limit || '3' }}
+          PRUNE: ${{ inputs.prune }}
+        run: python3 .github/scripts/sync_cnb_release.py
+
+      - name: Write job summary
+        if: ${{ always() }}
+        env:
+          CNB_REPO: ${{ vars.CNB_REPO || 'PCL-Symbio/PCL-Symbio-Edition' }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          {
+            echo "## CNB Release 同步"
+            echo ""
+            echo "- 仓库：\`${CNB_REPO}\`"
+            echo "- 范围：\`${TAG:-最近几个 Release}\`"
+            echo "- 结果：${{ job.status }}"
+            echo ""
+            echo "https://cnb.cool/${CNB_REPO}/-/releases"
+          } >> "$GITHUB_STEP_SUMMARY"
