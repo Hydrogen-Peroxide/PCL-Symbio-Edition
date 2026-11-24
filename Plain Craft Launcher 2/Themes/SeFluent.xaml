@@ -1,0 +1,171 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:local="clr-namespace:PCL"
+                    xmlns:controls="clr-namespace:PCL.Core.UI.Controls;assembly=PCL.Core">
+    <!-- Geometry in WPF DIPs. Only the existing theme service owns the palette. -->
+    <CornerRadius x:Key="SeRadiusXs">4</CornerRadius>
+    <CornerRadius x:Key="SeRadiusSm">16</CornerRadius>
+    <CornerRadius x:Key="SeRadiusMd">18</CornerRadius>
+    <CornerRadius x:Key="SeRadiusLg">16</CornerRadius>
+    <CornerRadius x:Key="SeRadiusPill">999</CornerRadius>
+    <SolidColorBrush x:Key="SeWallpaperAccent" Color="#FF5269C5" />
+    <SolidColorBrush x:Key="SeDarkScrim" Color="#BF1E1E28" />
+    <SolidColorBrush x:Key="SeDarkCard" Color="#14FFFFFF" />
+    <SolidColorBrush x:Key="SeDarkStroke" Color="#29FFFFFF" />
+    <Thickness x:Key="SeHairline">1</Thickness>
+    <Thickness x:Key="SeFocusLine">2</Thickness>
+    <Thickness x:Key="SePageMargin">24</Thickness>
+    <Thickness x:Key="SePageScrollMargin">24,24,24,12</Thickness>
+    <Thickness x:Key="SeCardGap">0,0,0,16</Thickness>
+    <Thickness x:Key="SeCardSectionMargin">20,40,20,16</Thickness>
+    <Thickness x:Key="SeButtonPadding">12,0</Thickness>
+    <Thickness x:Key="SeSidebarMargin">8,12,8,12</Thickness>
+    <Thickness x:Key="SeSidebarLabelMargin">8,12,4,4</Thickness>
+    <Thickness x:Key="SeInsetCompact">16</Thickness>
+    <Thickness x:Key="SeInsetRegular">20</Thickness>
+    <Thickness x:Key="SeTopSm">0,8,0,0</Thickness>
+    <Thickness x:Key="SeTopMd">0,12,0,0</Thickness>
+    <Thickness x:Key="SeSideMd">12,0,12,0</Thickness>
+    <Thickness x:Key="SeLeftSm">8,0,0,0</Thickness>
+    <Thickness x:Key="SeLaunchInset">24,8,24,8</Thickness>
+    <Thickness x:Key="SeLaunchButtonInset">24,0,24,0</Thickness>
+    <Thickness x:Key="SeLaunchButtonContent">24,0,24,12</Thickness>
+    <Thickness x:Key="SeLaunchVersionInset">32,0,32,4</Thickness>
+    <Thickness x:Key="SeLaunchSecondaryInset">0,8,8,0</Thickness>
+    <Thickness x:Key="SeSplitLeft">0,0,24,0</Thickness>
+    <Thickness x:Key="SeSplitRight">24,0,0,0</Thickness>
+    <sys:Double x:Key="SeCaption">11</sys:Double>
+    <sys:Double x:Key="SeBody">12</sys:Double>
+    <sys:Double x:Key="SeBodyStrong">13</sys:Double>
+    <sys:Double x:Key="SeCardTitle">14</sys:Double>
+    <sys:Double x:Key="SeSubtitle">16</sys:Double>
+    <sys:Double x:Key="SeTitle">20</sys:Double>
+    <sys:Double x:Key="SeHero">24</sys:Double>
+    <sys:Double x:Key="SeButtonHeight">32</sys:Double>
+    <sys:Double x:Key="SeInputHeight">32</sys:Double>
+    <sys:Double x:Key="SePrimaryHeight">44</sys:Double>
+    <sys:Double x:Key="SeListHeight">42</sys:Double>
+    <sys:Double x:Key="SeCaptionHeight">40</sys:Double>
+    <sys:Double x:Key="SeIconSmall">16</sys:Double>
+    <sys:Double x:Key="SeIconMedium">20</sys:Double>
+    <sys:Double x:Key="SeIconLarge">24</sys:Double>
+    <sys:Double x:Key="SeSeparatorSize">1</sys:Double>
+    <sys:Double x:Key="SeDisabledOpacity">0.38</sys:Double>
+    <sys:Int32 x:Key="SeHoverMilliseconds">120</sys:Int32>
+    <sys:Double x:Key="SePressedScale">0.98</sys:Double>
+    <GridLength x:Key="SeInputTrack">32</GridLength>
+    <GridLength x:Key="SeFilterGap">8</GridLength>
+
+    <Style x:Key="SeFocusVisual" TargetType="Control">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Control">
+                    <Border CornerRadius="{StaticResource SeRadiusSm}" BorderThickness="{StaticResource SeFocusLine}"
+                            BorderBrush="{DynamicResource ColorBrush4}" SnapsToDevicePixels="True" IsHitTestVisible="False" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="SeButton" TargetType="local:MyButton">
+        <Setter Property="Height" Value="{StaticResource SeButtonHeight}" />
+        <Setter Property="CornerRadius" Value="{StaticResource SeRadiusSm}" />
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="{StaticResource SeDisabledOpacity}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="SePrimaryButton" TargetType="local:MyButton" BasedOn="{StaticResource SeButton}">
+        <Setter Property="Height" Value="{StaticResource SePrimaryHeight}" />
+        <Setter Property="CornerRadius" Value="{StaticResource SeRadiusMd}" />
+    </Style>
+    <!-- 胶囊切换按钮：用于实例/版本选择的 pill 形态 -->
+    <Style x:Key="SePillButton" TargetType="local:MyButton" BasedOn="{StaticResource SeButton}">
+        <Setter Property="Height" Value="30" />
+        <Setter Property="CornerRadius" Value="{StaticResource SeRadiusPill}" />
+    </Style>
+    <Style x:Key="SeIconButton" TargetType="local:MyIconButton">
+        <Setter Property="Height" Value="{StaticResource SeButtonHeight}" />
+        <Setter Property="Width" Value="{StaticResource SeButtonHeight}" />
+        <Setter Property="CornerRadius" Value="{StaticResource SeRadiusSm}" />
+    </Style>
+    <Style x:Key="SeCard" TargetType="local:MyCard">
+        <Setter Property="Margin" Value="{StaticResource SeCardGap}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+    <Style x:Key="SeListItem" TargetType="local:MyListItem">
+        <Setter Property="FontSize" Value="{StaticResource SeBodyStrong}" />
+    </Style>
+    <Style x:Key="SeSidebarLabel" TargetType="TextBlock">
+        <Setter Property="Margin" Value="{StaticResource SeSidebarLabelMargin}" />
+        <Setter Property="FontSize" Value="{StaticResource SeCaption}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource ColorBrushGray2}" />
+    </Style>
+    <Style x:Key="SeSubtitleText" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="{StaticResource SeSubtitle}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource ColorBrush1}" />
+    </Style>
+    <Style x:Key="SeSolidSurface" TargetType="Border">
+        <Setter Property="CornerRadius" Value="{StaticResource SeRadiusMd}" />
+        <Setter Property="BorderThickness" Value="{StaticResource SeHairline}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource ColorBrushGray6}" />
+        <Setter Property="Background" Value="{DynamicResource ColorBrushBackground}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+    <Style x:Key="SeAcrylic" TargetType="controls:BlurBorder" BasedOn="{StaticResource SeSolidSurface}">
+        <Setter Property="BlurRadius" Value="{DynamicResource BlurRadius}" />
+        <Setter Property="BlurSamplingRate" Value="{DynamicResource BlurSamplingRate}" />
+        <Setter Property="BlurKernelType" Value="{DynamicResource BlurType}" />
+        <Setter Property="Background" Value="{DynamicResource ColorBrushTransparentBackground}" />
+        <Style.Triggers>
+            <!-- The existing advanced-material switch sets the shared radius to zero. -->
+            <Trigger Property="BlurRadius" Value="0">
+                <Setter Property="Background" Value="{DynamicResource ColorBrushBackground}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="SeFluentCard" TargetType="controls:BlurBorder" BasedOn="{StaticResource SeAcrylic}">
+        <Setter Property="Background" Value="{DynamicResource SeCardFill}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SeCardStroke}" />
+    </Style>
+    <Style x:Key="SeSkinTile" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource SeCardFill}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SeCardStroke}" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect Color="Black" Opacity="0.15" BlurRadius="16" ShadowDepth="2" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="RenderTransform">
+            <Setter.Value><TranslateTransform /></Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Effect">
+                    <Setter.Value>
+                        <DropShadowEffect Color="Black" Opacity="0.36" BlurRadius="24" ShadowDepth="4" />
+                    </Setter.Value>
+                </Setter>
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                             To="-3" Duration="0:0:0.16" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                                             To="0" Duration="0:0:0.16" />
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+</ResourceDictionary>

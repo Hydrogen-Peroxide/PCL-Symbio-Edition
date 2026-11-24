@@ -4,7 +4,7 @@
                    xmlns:local="clr-namespace:PCL" PanScroll="{Binding ElementName=PanBack}">
     <local:MyScrollViewer x:Name="PanBack" VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
-        <StackPanel x:Name="PanMain" Margin="25,10">
+        <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}">
             <local:MyCard x:Name="CardSaves" Margin="0,15" Title="{DynamicResource Bedrock.Instance.Saves.Title}">
                 <StackPanel Margin="25,40,25,15">
                     <WrapPanel Margin="0,-5,-20,7">

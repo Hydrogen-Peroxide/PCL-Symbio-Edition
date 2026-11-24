@@ -6,6 +6,8 @@ namespace PCL;
 
 public partial class PageLoginMs
 {
+    public event Action<bool>? LoginCompleted;
+
     public PageLoginMs()
     {
         // Handles
@@ -26,24 +28,12 @@ public partial class PageLoginMs
         BtnLogin.Text = Lang.Number(0d, "P0");
         ModBase.RunInNewThread(() =>
         {
+            var succeeded = false;
             try
             {
                 ModProfile.selectedProfile = null;
-                ModLaunch.mcLoginMsLoader.Start(ModProfile.GetLoginData(ModLaunch.McLoginType.Ms), true);
-                while (ModLaunch.mcLoginMsLoader.State == ModBase.LoadState.Loading)
-                {
-                    ModBase.RunInUi(() => BtnLogin.Text = Lang.Number(ModLaunch.mcLoginMsLoader.Progress, "P0"));
-                    Thread.Sleep(50);
-                }
-
-                if (ModLaunch.mcLoginMsLoader.State == ModBase.LoadState.Finished)
-                    ModBase.RunInUi(() => ModMain.frmLaunchLeft.RefreshPage(true));
-                else if (ModLaunch.mcLoginMsLoader.State == ModBase.LoadState.Aborted)
-                    throw new ThreadInterruptedException();
-                else if (ModLaunch.mcLoginMsLoader.Error is null)
-                    throw new Exception(Lang.Text("Launch.Account.Microsoft.Error.Unknown"));
-                else
-                    throw new Exception(ModLaunch.mcLoginMsLoader.Error.Message, ModLaunch.mcLoginMsLoader.Error);
+                NewMicrosoftLogin.LoginAsync().GetAwaiter().GetResult();
+                succeeded = true;
             }
             catch (ThreadInterruptedException ex)
             {
@@ -84,8 +74,11 @@ public partial class PageLoginMs
                     BtnLogin.IsEnabled = true;
                     BtnBack.Visibility = Visibility.Visible;
                     BtnLogin.Text = Lang.Text("Launch.Account.Login");
+                    LoginCompleted?.Invoke(succeeded);
                 });
             }
         }, "Ms Login");
     }
+
+    public void StartLogin() => BtnLogin_Click(this, EventArgs.Empty);
 }

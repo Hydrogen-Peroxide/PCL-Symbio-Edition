@@ -11,7 +11,8 @@ namespace PCL;
 /// <summary>
 ///     基岩版 GDK 便携版的 DLL 模组支持。
 ///     GDK 便携版的主程序是磁盘上的普通文件，不受 UWP 的代码完整性限制，因此可以注入 mods 目录内的 DLL。
-///     这里只做最小实现：挂起创建进程 → 恢复主线程让加载器映射 kernel32 → 重新挂起 → CreateRemoteThread(LoadLibraryW) 注入 → 恢复。
+///     流程：挂起创建进程 → 恢复主线程让加载器映射 kernel32 → 定位 LoadLibraryW →
+///     CreateRemoteThread(LoadLibraryW) 注入（期间保持主线程运行）→ 交给游戏继续启动。
 /// </summary>
 public static class ModBedrockMods
 {
@@ -19,6 +20,9 @@ public static class ModBedrockMods
 
     /// <summary>与 BedrockBoot 同名的预加载目录：放这里的 DLL 不区分加载器，启动时一律注入。</summary>
     public const string PreloadFolderName = "preload";
+
+    /// <summary>等待单个注入线程结束的上限。BLoader 首次初始化较慢，给足余量。</summary>
+    private const uint InjectionTimeoutMs = 60000;
 
     public static string GetModsDirectory(string gameDirectory)
     {
@@ -63,9 +67,14 @@ public static class ModBedrockMods
 
     /// <summary>启动游戏，并在需要时注入 DLL 模组；找不到主程序以外的失败都会退化为普通启动。</summary>
     public static Process? Launch(string exePath, string workingDirectory, string? arguments,
-        IReadOnlyList<string> mods)
+        IReadOnlyList<string> mods, BLoaderXUserBridge.Session? xuserSession = null)
     {
         // 跨架构无法注入：ARM64 版启动器写不进 x64 游戏进程
+        if (xuserSession is not null && RuntimeInformation.ProcessArchitecture != Architecture.X64)
+            throw new PlatformNotSupportedException("基岩版 Xbox 登录需要 x64 启动器来注入 BLoader.dll。");
+        if (xuserSession is not null && mods.Count == 0)
+            throw new InvalidOperationException("基岩版登录会话缺少 BLoader.dll，游戏未启动。");
+
         if (mods.Count == 0 || RuntimeInformation.ProcessArchitecture != Architecture.X64)
         {
             if (mods.Count > 0)
@@ -76,7 +85,7 @@ public static class ModBedrockMods
 
         try
         {
-            return StartWithInjection(exePath, workingDirectory, arguments, mods);
+            return StartWithInjection(exePath, workingDirectory, arguments, mods, xuserSession);
         }
         catch (InjectionProcessTerminationException)
         {
@@ -85,6 +94,12 @@ public static class ModBedrockMods
         }
         catch (Exception ex)
         {
+            if (xuserSession is not null)
+            {
+                ModBase.Log(ex, "基岩版 Xbox 会话注入失败，已阻止无登录会话启动", ModBase.LogLevel.Hint,
+                    userSummary: "基岩版登录会话注入失败，游戏未启动");
+                throw new InvalidOperationException("基岩版 Xbox 登录会话注入失败，游戏未启动。", ex);
+            }
             ModBase.Log(ex, $"注入基岩版 DLL 模组失败（{mods.Count} 个），本次直接启动", ModBase.LogLevel.Hint,
                 userSummary: "注入基岩版 DLL 模组失败，本次未加载模组");
             return StartDirect(exePath, workingDirectory, arguments);
@@ -106,7 +121,7 @@ public static class ModBedrockMods
     }
 
     private static Process? StartWithInjection(string exePath, string workingDirectory, string? arguments,
-        IReadOnlyList<string> mods)
+        IReadOnlyList<string> mods, BLoaderXUserBridge.Session? xuserSession)
     {
         var commandLine = new StringBuilder();
         commandLine.Append('"').Append(exePath).Append('"');
@@ -119,11 +134,13 @@ public static class ModBedrockMods
                 ref startupInfo, out var processInfo))
             throw new InvalidOperationException($"创建游戏进程失败（错误码 {Marshal.GetLastWin32Error()}）");
 
-        var suspended = false;
         try
         {
+            if (xuserSession is not null)
+                BLoaderXUserBridge.BeginForSuspendedProcess((int)processInfo.dwProcessId, xuserSession);
+
             // 挂起态下系统加载器还没跑，kernel32 尚未映射，此时无法定位 LoadLibraryW。
-            // 先恢复主线程让加载器完成映射，再重新挂起，把注入窗口压到游戏真正初始化之前。
+            // 先恢复主线程让加载器完成映射，再定位函数地址。
             ResumeThread(processInfo.hThread);
             var remoteLoadLibrary = WaitForRemoteLoadLibrary((int)processInfo.dwProcessId, 5000);
             if (remoteLoadLibrary == IntPtr.Zero)
@@ -133,8 +150,9 @@ public static class ModBedrockMods
             }
             else
             {
-                SuspendThread(processInfo.hThread);
-                suspended = true;
+                // 注入期间不挂起主线程：BLoader 的 DllMain 需要游戏主线程继续初始化
+                // （XUser/GDK 运行时未就绪时它会等待），挂起主线程会让注入线程一直卡到超时。
+                // 此时加载器已完成映射、游戏主体尚未开始渲染，注入窗口依然足够早。
                 foreach (var mod in mods)
                     InjectModule(processInfo.hProcess, remoteLoadLibrary, mod);
             }
@@ -143,14 +161,12 @@ public static class ModBedrockMods
         {
             // 注入线程可能仍使用远程参数。结束且确认本次创建的进程退出后，系统会回收其地址空间。
             // 终止失败时禁止普通启动回退，避免遗留游戏进程与下一次启动并存。
-            suspended = false;
             AbortCreatedProcess(processInfo.hProcess, WaitForSingleObject,
                 handle => TerminateProcess(handle, 1));
             throw;
         }
         finally
         {
-            if (suspended) ResumeThread(processInfo.hThread);
             CloseHandle(processInfo.hThread);
             CloseHandle(processInfo.hProcess);
         }
@@ -194,8 +210,9 @@ public static class ModBedrockMods
             }
 
             argumentOwnedByThread = true;
+            // BLoader 首次加载要做较多初始化（XUser/GDK 桥接），15 秒在慢机器上不够
             var exitCode = CompleteInjectionThread(thread,
-                handle => WaitForSingleObject(handle, 15000),
+                handle => WaitForSingleObject(handle, InjectionTimeoutMs),
                 handle => GetExitCodeThread(handle, out var code)
                     ? code : throw new InvalidOperationException("无法读取 DLL 注入线程的退出状态。"),
                 handle => CloseHandle(handle),

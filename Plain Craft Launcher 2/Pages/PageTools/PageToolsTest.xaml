@@ -6,7 +6,7 @@
                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
                    PanScroll="{Binding ElementName=PanBack}">
     <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
-        <StackPanel x:Name="PanMain" Margin="25,10" Grid.IsSharedSizeScope="True">
+        <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}" Grid.IsSharedSizeScope="True">
             <local:MyCard Margin="0,15" Title="{DynamicResource Tools.Test.Title}">
                 <WrapPanel Margin="25,40,21,5" ItemHeight="50">
                     <local:MyButton x:Name="BtnClear" MinWidth="120" Text="{DynamicResource Tools.Test.Clean.Title}"

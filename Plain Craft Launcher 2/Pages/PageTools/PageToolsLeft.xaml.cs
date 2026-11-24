@@ -10,7 +10,6 @@ public partial class PageToolsLeft
     private bool isLoad;
     private bool isPageSwitched; // 如果在 Loaded 前切换到其他页面，会导致触发 Loaded 时再次切换一次
     private PageInstanceSaves? frmSaves;
-    private PageToolsSkinLibrary? frmSkins;
     private PageToolsDeviceInfo? frmDeviceInfo;
     private PageToolsSchematic? frmSchematic;
 
@@ -42,12 +41,6 @@ public partial class PageToolsLeft
         if (pageID == FormMain.PageSubType.ToolsSaves)
         {
             ItemSaves.SetChecked(true, false, false);
-            return;
-        }
-
-        if (pageID == FormMain.PageSubType.ToolsSkins)
-        {
-            ItemSkins.SetChecked(true, false, false);
             return;
         }
 
@@ -160,11 +153,6 @@ public partial class PageToolsLeft
                 frmSaves ??= new PageInstanceSaves();
                 frmSaves.EnableStandaloneMode();
                 return frmSaves;
-            }
-            case FormMain.PageSubType.ToolsSkins:
-            {
-                frmSkins ??= new PageToolsSkinLibrary();
-                return frmSkins;
             }
             case FormMain.PageSubType.ToolsDeviceInfo:
             {

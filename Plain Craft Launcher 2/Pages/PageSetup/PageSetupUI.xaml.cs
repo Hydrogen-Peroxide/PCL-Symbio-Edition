@@ -373,6 +373,7 @@ public partial class PageSetupUI
             {
                 if (refresh)
                 {
+                    FluentAppearance.UpdateWallpaperAccent(null);
                     if (ModMain.frmMain.ImgBack.Visibility == Visibility.Collapsed)
                     {
                         if (isHint)
@@ -402,6 +403,7 @@ public partial class PageSetupUI
                         ModMain.frmMain.ImgBack.Background = new MyBitmap(address);
                         _ = Config.Preference.Background.WallpaperSuitMode;
                         ModMain.frmMain.ImgBack.Visibility = Visibility.Visible;
+                        FluentAppearance.UpdateWallpaperAccent(ModMain.frmMain.ImgBack.Background);
                         if (isHint)
                                 HintService.Hint(Lang.Text("Setup.Ui.Background.Refresh.Success", ModBase.GetFileNameFromPath(address)), HintType.Success,
                                 false);
@@ -411,6 +413,7 @@ public partial class PageSetupUI
                         try
                         {
                             ModMain.frmMain.VideoBack.MediaFailed += videoHandler;
+                            FluentAppearance.UpdateWallpaperAccent(null);
                             ModBase.Log(ex, "[UI] 加载背景图片失败" + address);
                             if (ModBase.modeDebug)
                                 HintService.Hint(Lang.Text("Setup.Ui.Background.ImageLoadFailed", address));
@@ -431,6 +434,9 @@ public partial class PageSetupUI
                 if (ModMain.frmSetupUI is not null)
                     ModMain.frmSetupUI.BackgroundRefreshUI(true, pic.Count);
             }
+
+            if (refresh)
+                ThemeManager.ThemeRefreshMain();
         }
 
         catch (Exception ex)
@@ -744,7 +750,7 @@ public partial class PageSetupUI
     /// </summary>
     public static void HiddenRefresh()
     {
-        if (ModMain.frmMain.PanTitleSelect is null || !ModMain.frmMain.PanTitleSelect.IsLoaded)
+        if (ModMain.frmMain.PanSidebar is null || !ModMain.frmMain.PanSidebar.IsLoaded)
             return;
         try
         {
@@ -760,19 +766,18 @@ public partial class PageSetupUI
             };
             var isAllTitleHidden = !HiddenForceShow && conf.PageDownload && conf.PageSetup && conf.PageTools;
 
+            foreach (var (button, hidden) in titleItems)
+                button.Visibility = !HiddenForceShow && hidden ? Visibility.Collapsed : Visibility.Visible;
+
             if (isAllTitleHidden)
             {
-                ModMain.frmMain.PanTitleSelect.Visibility = Visibility.Collapsed;
+                ModMain.frmMain.PanSidebar.Visibility = Visibility.Collapsed;
             }
             else
             {
-                ModMain.frmMain.PanTitleSelect.Visibility = Visibility.Visible;
-                foreach (var (button, hidden) in titleItems)
-                {
-                    button.Visibility =
-                        !HiddenForceShow && hidden ? Visibility.Collapsed : Visibility.Visible;
-                }
+                ModMain.frmMain.PanSidebar.Visibility = Visibility.Visible;
             }
+            ModMain.frmMain.RefreshUpstreamGlass();
 
             // 功能隐藏设置卡片
             if (ModMain.frmSetupUI is not null)

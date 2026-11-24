@@ -7,7 +7,7 @@
     PanScroll="{Binding ElementName=PanBack}">
     <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
         <Grid>
-            <StackPanel x:Name="PanMain" Margin="25,25,25,10">
+            <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}">
                 <local:MyCard Margin="0,0,0,15">
                     <StackPanel Margin="8" Orientation="Horizontal">
                         <local:MyIconTextButton x:Name="BtnAdd" Text="{DynamicResource Setup.Java.Add}" LogoScale="0.9" Click="BtnAdd_Click"

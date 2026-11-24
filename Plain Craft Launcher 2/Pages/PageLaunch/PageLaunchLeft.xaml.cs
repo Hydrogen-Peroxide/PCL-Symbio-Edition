@@ -202,7 +202,11 @@ public partial class PageLaunchLeft
     {
         if (ModLaunch.mcLaunchLoader.State == ModBase.LoadState.Loading)
             return;
-        ModMain.frmMain.PageChange(FormMain.PageType.InstanceSelect);
+
+        // 基岩模式进基岩版自己的实例选择页，Java 版进实例选择页
+        ModMain.frmMain.PageChange(PageGameLeft.IsBedrockMode
+            ? FormMain.PageType.BedrockInstanceSelect
+            : FormMain.PageType.InstanceSelect);
     }
 
     // 启动按钮
@@ -249,7 +253,10 @@ public partial class PageLaunchLeft
     public void RefreshButtonsUI()
     {
         if (!BtnLaunch.IsLoaded)
+        {
+            ModMain.frmMain?.RefreshUpstreamGlass();
             return;
+        }
         // 获取当前状态
         int currentState;
         if (!isLoadFinished || ModInstanceList.mcInstanceListLoader.State == ModBase.LoadState.Loading ||
@@ -338,6 +345,7 @@ public partial class PageLaunchLeft
                 ? Visibility.Collapsed
                 : Visibility.Visible;
         if (currentState == 3) ModMain.frmLaunchLeft.BtnMore.Visibility = ModMain.frmLaunchLeft.BtnInstance.Visibility;
+        ModMain.frmMain?.RefreshUpstreamGlass();
     }
 
     // 取消按钮
@@ -676,6 +684,9 @@ public partial class PageLaunchLeft
     /// </summary>
     private PageType pageCurrent = PageType.None;
 
+    /// <summary>Whether the legacy login content is currently active inside the modern shell.</summary>
+    public bool IsLoginPageVisible => pageCurrent is PageType.Auth or PageType.Ms or PageType.Offline;
+
     private object PageGet(PageType type)
     {
         switch (type)
@@ -819,6 +830,7 @@ public partial class PageLaunchLeft
         if (pageCurrent == type)
             return;
         PageChange(type, anim);
+        ModMain.frmMain?.RefreshUpstreamGlass();
     }
 
     #endregion

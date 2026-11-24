@@ -359,3 +359,8 @@ MaskFiles/
 /assets/
 /old-versions/
 _patch-backup-*/
+
+# 本地打包产物与临时备份，不入库
+/*.rar
+/_pcl_backup_*/
+/package/

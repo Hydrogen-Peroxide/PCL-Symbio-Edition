@@ -6,7 +6,7 @@
     <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
         <Grid>
         <!-- 版本列表与下载已移到实例选择浮层，右侧只保留占位说明 -->
-        <StackPanel x:Name="PanMain" Margin="25,25,25,10" Grid.IsSharedSizeScope="True" Visibility="Collapsed">
+        <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}" Grid.IsSharedSizeScope="True" Visibility="Collapsed">
 
             <!-- 状态 -->
             <!-- 关闭高度动画：启动时进度条出现会让卡片瞬间变高，动画期间会被裁掉一截 -->

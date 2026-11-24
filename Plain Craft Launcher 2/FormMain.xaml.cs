@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -97,10 +97,10 @@ public partial class FormMain
         HintWrapper.OnShow += HintService.HintWrapper_OnShow;
         // 加载 UI
         InitializeComponent();
+        InitializeWindowMotion();
         // 统一的游戏页：Java 版与基岩版共用同一个入口
         ModMain.frmGameRight = new PageGameRight();
         ModMain.frmGameLeft = new PageGameLeft();
-        Opacity = 0d;
         try
         {
             Height = States.UI.WindowHeight;
@@ -127,7 +127,6 @@ public partial class FormMain
                 _helper.HwndSource = HwndSource.FromHwnd(windowInterop.Handle);
                 _helper.AddHook();
             };
-            Closing += (_, _) => _helper.RemoveHook();
             _helper.DragDrop += (_, _) => FileDrag(_helper.DropFilePaths);
         }
 
@@ -140,6 +139,7 @@ public partial class FormMain
         PanMainRight.Child = ModMain.frmGameRight;
         pageRight = ModMain.frmGameRight;
         ModMain.frmGameRight.PageState = MyPageRight.PageStates.ContentStay;
+        AttachUpstreamGlass();
         // 调试模式提醒
         if (ModBase.modeDebug)
             HintService.Hint(Lang.Text("Main.DebugMode.Hint"));
@@ -205,14 +205,8 @@ public partial class FormMain
         ModAnimation.AniStart(new[]
         {
             ModAnimation.AaCode(() => ModAnimation.AniEndControl(), 50),
-            ModAnimation.AaOpacity(this, Config.Preference.Theme.WindowOpacity / 1000d + 0.4d - Opacity, 250, 100),
-            ModAnimation.AaDouble(i => TransformPos.Y += (double)i, -TransformPos.Y, 600,
-                100, new ModAnimation.AniEaseOutBack(ModAnimation.AniEasePower.Weak)),
-            ModAnimation.AaDouble(i => TransformRotate.Angle += (double)i,
-                -TransformRotate.Angle, 500, 100, new ModAnimation.AniEaseOutBack(ModAnimation.AniEasePower.Weak)),
             ModAnimation.AaCode(() =>
             {
-                RenderTransform = null;
                 isWindowLoadFinished = true;
                 ModBase.Log(
                     $"[System] DPI：{ModBase.dpi}，系统版本：{Environment.OSVersion.VersionString}，PCL 位置：{Basics.ExecutablePath}");
@@ -380,96 +374,6 @@ public partial class FormMain
 
     #region 自定义窗口
 
-    private bool canResize = true;
-
-    // 重写窗口边缘判定以使 DWM 自带的 resizer 行为看起来比较正常
-    private nint _SizeWndProc(nint hWnd, int msg, nint wParam, nint lParam, ref bool handled)
-    {
-        // 窗口活动常量
-        const int WM_NCHITTEST = 0x84;
-        const int HTCLIENT = 1;
-        const int HTLEFT = 10;
-        const int HTRIGHT = 11;
-        const int HTTOP = 12;
-        const int HTTOPLEFT = 13;
-        const int HTTOPRIGHT = 14;
-        const int HTBOTTOM = 15;
-        const int HTBOTTOMLEFT = 16;
-        const int HTBOTTOMRIGHT = 17;
-
-        // WPF 尺寸的 offset
-        const int offsetWpf = 6;
-        const int hitWidthWpf = 5;
-
-        // 过滤非 WM_NCHITTEST 事件
-        if (msg != WM_NCHITTEST)
-            return nint.Zero;
-
-        // 提取鼠标坐标
-        // 没妈的 VB 强转还得检查一下幻想的妈是不是还活着
-        var mouseBytes = BitConverter.GetBytes(lParam.ToInt64());
-        var xMouse = BitConverter.ToInt16(mouseBytes, 0);
-        var yMouse = BitConverter.ToInt16(mouseBytes, 2);
-
-        // 获取窗口参数
-        var windowRect = WindowInterop.GetWindowRectangle(hWnd);
-        var windowBounds = windowRect.ToWindowBounds();
-
-        // 判断鼠标是否在窗口范围内
-        var isInWindow = xMouse >= windowRect.Left && xMouse <= windowRect.Right && yMouse >= windowRect.Top &&
-                         yMouse <= windowRect.Bottom;
-
-        // 过滤不在窗口内的请求
-        if (!isInWindow)
-            return nint.Zero;
-
-        // 如果 CanResize 为 False，直接返回 HTCLIENT
-        if (!canResize)
-            return new nint(HTCLIENT);
-
-        // 真实像素尺寸的 offset
-        var dpi = VisualTreeHelper.GetDpi(this);
-        var offsetPxX = offsetWpf * dpi.DpiScaleX;
-        var offsetPxY = offsetWpf * dpi.DpiScaleY;
-        var hitWidthPxX = hitWidthWpf * dpi.DpiScaleX;
-        var hitWidthPxY = hitWidthWpf * dpi.DpiScaleY;
-
-        // 计算鼠标相对于窗口左上角的物理像素位置
-        var relX = xMouse - windowRect.Left;
-        var relY = yMouse - windowRect.Top;
-        var w = windowBounds.Width;
-        var h = windowBounds.Height;
-
-        // 判定是否命中偏移后的热区
-        var inLeft = relX >= offsetPxX && relX <= offsetPxX + hitWidthPxX && relY >= offsetPxY && relY <= h - offsetPxY;
-        var inRight = relX <= w - offsetPxX && relX >= w - offsetPxX - hitWidthPxX && relY >= offsetPxY && relY <= h - offsetPxY;
-        var inTop = relY >= offsetPxY && relY <= offsetPxY + hitWidthPxY && relX >= offsetPxX && relX <= w - offsetPxX;
-        var inBottom = relY <= h - offsetPxY && relY >= h - offsetPxY - hitWidthPxY && relX >= offsetPxX && relX <= w - offsetPxX;
-
-        handled = true; // 接管该区域的消息
-
-        // 返回结果
-        if (inTop && inLeft)
-            return new nint(HTTOPLEFT);
-        if (inTop && inRight)
-            return new nint(HTTOPRIGHT);
-        if (inBottom && inLeft)
-            return new nint(HTBOTTOMLEFT);
-        if (inBottom && inRight)
-            return new nint(HTBOTTOMRIGHT);
-        if (inLeft)
-            return new nint(HTLEFT);
-        if (inRight)
-            return new nint(HTRIGHT);
-        if (inTop)
-            return new nint(HTTOP);
-        if (inBottom)
-            return new nint(HTBOTTOM);
-
-        // 如果在 0-offset 范围内，返回 HTCLIENT 杀掉默认缩放
-        return new nint(HTCLIENT);
-    }
-
     protected override void OnSourceInitialized(EventArgs e)
     {
         // 硬件加速
@@ -480,27 +384,6 @@ public partial class FormMain
         }
 
         base.OnSourceInitialized(e);
-
-        // 获取当前窗口句柄
-        var hwnd = new WindowInteropHelper(this).Handle;
-        var source = HwndSource.FromHwnd(hwnd);
-        if (source is not null)
-        {
-            // 渲染层允许 Alpha 通道通过
-            source.CompositionTarget.BackgroundColor = Colors.Transparent;
-            // 魔改窗口边缘判定
-            source.AddHook(_SizeWndProc);
-        }
-
-        // 设置 DWM 窗口框架
-        try
-        {
-            WindowInterop.ExtendFrameIntoClientArea(hwnd, -1);
-        }
-        catch (Exception ex)
-        {
-            LogWrapper.Error("DWM 窗口框架应用失败: " + ex.Message);
-        }
     }
 
     // 关闭
@@ -517,71 +400,48 @@ public partial class FormMain
     /// <param name="isUpdating">是否正在更新重启</param>
     public void EndProgram(bool sendWarning, bool isUpdating = false)
     {
-        // 发出警告
-        if (sendWarning && ModNet.HasDownloadingTask())
+        if (!Dispatcher.CheckAccess())
         {
-            if (ModMain.MyMsgBox(Lang.Text("Main.Exit.HasDownloadingTask"), Lang.Text("Common.Dialog.Title"), Lang.Text("Common.Action.Confirm"), Lang.Text("Common.Action.Cancel")) == 1)
-                // 强行结束下载任务
-                ModBase.RunInNewThread(() =>
-                {
-                    ModBase.Log("[System] 正在强行停止任务");
-                    foreach (var Task in ModLoader.loaderTaskbar.ToList())
-                        Task.Abort();
-                }, "强行停止下载任务");
-            else
-                return;
+            Dispatcher.Invoke(() => EndProgram(sendWarning, isUpdating));
+            return;
         }
-
-        // 存储上次使用的档案编号
-        ModProfile.SaveProfile();
-        // 关闭
-        ModBase.RunInUiWait(() =>
+        // Guard both the confirmation dialog and the animation against repeated close requests.
+        if (windowCloseRequested) return;
+        windowCloseRequested = true;
+        var closeStarted = false;
+        try
         {
+            // 发出警告
+            if (sendWarning && ModNet.HasDownloadingTask())
+            {
+                if (ModMain.MyMsgBox(Lang.Text("Main.Exit.HasDownloadingTask"), Lang.Text("Common.Dialog.Title"), Lang.Text("Common.Action.Confirm"), Lang.Text("Common.Action.Cancel")) == 1)
+                    // 强行结束下载任务
+                    ModBase.RunInNewThread(() =>
+                    {
+                        ModBase.Log("[System] 正在强行停止任务");
+                        foreach (var Task in ModLoader.loaderTaskbar.ToList())
+                            Task.Abort();
+                    }, "强行停止下载任务");
+                else
+                    return;
+            }
+
+            // 存储上次使用的档案编号
+            ModProfile.SaveProfile();
             // 清理视频背景
             VideoBack.Stop();
             VideoBack.Source = null;
             VideoBack.Close();
-            IsHitTestVisible = false;
-            if (RenderTransform is null)
-            {
-                var transformPos = new TranslateTransform(0d, 0d);
-                var transformRotate = new RotateTransform(0d);
-                var transformScale = new ScaleTransform(1d, 1d);
-                transformScale.CenterX = Width / 2d;
-                transformScale.CenterY = Height / 2d;
-                RenderTransform = new TransformGroup
-                    { Children = new TransformCollection([transformRotate, transformPos, transformScale]) };
-                ModAnimation.AniStart(new[]
-                {
-                    ModAnimation.AaOpacity(this, -Opacity, 140, 40,
-                        new ModAnimation.AniEaseOutFluent(ModAnimation.AniEasePower.Weak)),
-                    ModAnimation.AaDouble(i =>
-                    {
-                        transformScale.ScaleX += (double)i;
-                        transformScale.ScaleY += (double)i;
-                    }, 0.88d - transformScale.ScaleX, 180),
-                    ModAnimation.AaDouble(i => transformPos.Y += (double)i,
-                        20d - transformPos.Y, 180, 0,
-                        new ModAnimation.AniEaseOutFluent(ModAnimation.AniEasePower.Weak)),
-                    ModAnimation.AaDouble(i => transformRotate.Angle += (double)i,
-                        0.6d - transformRotate.Angle, 180, 0,
-                        new ModAnimation.AniEaseInoutFluent(ModAnimation.AniEasePower.Weak)),
-                    ModAnimation.AaCode(() =>
-                    {
-                        IsHitTestVisible = false;
-                        Visibility = Visibility.Collapsed;
-                        ShowInTaskbar = false;
-                    }, 210),
-                    ModAnimation.AaCode(() => EndProgramForce(force: false, isUpdating: isUpdating), 230)
-                }, "Form Close");
-            }
-            else
-            {
-                EndProgramForce(force: false, isUpdating: isUpdating);
-            }
-
+            _helper.RemoveHook();
             ModBase.Log("[System] 收到关闭指令");
-        });
+            BeginWindowClose(isUpdating);
+            closeStarted = true;
+        }
+        finally
+        {
+            // Cancelling the download warning must leave the window usable and closable.
+            if (!closeStarted) windowCloseRequested = false;
+        }
     }
 
     private static bool isLogShown;
@@ -640,28 +500,13 @@ public partial class FormMain
             States.UI.WindowWidth = Width;
         }
 
-        if (PanBack is not null)
-        {
-            RectForm.Rect = new Rect(0d, 0d, PanBack.ActualWidth, PanBack.ActualHeight);
-
-            var formWidth = PanBack.ActualWidth + 0.001d;
-            var formHeight = PanBack.ActualHeight + 0.001d;
-
-            PanForm.Width = formWidth;
-            PanForm.Height = formHeight;
-            PanMain.Width = formWidth;
-
-            if (PanTitle is not null)
-                PanMain.Height = Math.Max(0d, formHeight - PanTitle.ActualHeight);
-            else
-                PanMain.Height = formHeight;
-
-            VideoBack.Width = formWidth;
-            VideoBack.Height = formHeight;
-        }
-
         if (WindowState == WindowState.Maximized)
             WindowState = WindowState.Normal; // 修复 #1938
+    }
+
+    private void PanBack_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        RectForm.Rect = new Rect(e.NewSize);
     }
 
     // 标题栏改变大小
@@ -690,12 +535,12 @@ public partial class FormMain
 
     public void AddResizer()
     {
-        canResize = true;
+        ResizeMode = ResizeMode.CanResize;
     }
 
     public void RemoveResizer()
     {
-        canResize = false;
+        ResizeMode = ResizeMode.CanMinimize;
     }
 
     // 按键事件
@@ -1443,6 +1288,12 @@ public partial class FormMain
         ///     基岩版实例设置。这是一个副页面。
         /// </summary>
         BedrockInstance = 15,
+        SkinLibrary = 16,
+
+        /// <summary>
+        ///     联机大厅。这是一级页面。
+        /// </summary>
+        Lan = 17,
     }
 
     /// <summary>
@@ -1475,6 +1326,8 @@ public partial class FormMain
         DownloadBedrockSkin = 23,
         DownloadBedrock = 24,
         DownloadBedrockLip = 25,
+        SkinLibrarySkins = 26,
+        SkinLibraryCapes = 27,
 
         SetupLaunch = 0,
         SetupUI = 1,
@@ -1489,7 +1342,6 @@ public partial class FormMain
         SetupLauncherLanguage = 11,
 
         ToolsSaves = 4,
-        ToolsSkins = 5,
         ToolsDeviceInfo = 6,
         ToolsSchematic = 7,
         ToolsTest = 3,
@@ -1631,6 +1483,9 @@ public partial class FormMain
                     return ModMain.frmToolsLeft.pageID;
                 }
 
+                case PageType.SkinLibrary:
+                    return skinLibraryHeader?.SelectedPage ?? PageSubType.SkinLibrarySkins;
+
                 case PageType.InstanceSetup:
                 {
                     if (ModMain.frmInstanceLeft is null)
@@ -1731,6 +1586,10 @@ public partial class FormMain
 
     public MyPageLeft pageLeft;
     public MyPageRight pageRight;
+    private MyPageLeft? skinLibraryLeft;
+    private PageSkinLibraryLeft? skinLibraryHeader;
+    private PageToolsSkinLibrary? skinLibraryPage;
+    private PageSkinLibraryCapes? skinLibraryCapes;
 
     // 引发实际页面切换的入口
     private bool isChangingPage;
@@ -1747,10 +1606,10 @@ public partial class FormMain
             isChangingPage = true; // 防止下面的勾选直接触发了 PageChangeActual
             // 顶部栏按钮顺序与 PageType 数值不再一致，按 Tag 匹配；基岩版与 Java 版共用“游戏”入口
             var tabPage = stack.page == PageType.Bedrock ? PageType.Launch : stack.page;
-            foreach (var child in PanTitleSelect.Children)
-                if (child is MyRadioButton button && ModBase.Val(button.Tag) == (double)tabPage)
+            foreach (var child in PanSidebar.Children)
+                if (child is MyListItem listItem && ModBase.Val(listItem.Tag) == (double)tabPage)
                 {
-                    button.SetChecked(true, true, string.IsNullOrEmpty(PageNameGet(pageCurrent)));
+                    listItem.SetChecked(true, true, string.IsNullOrEmpty(PageNameGet(pageCurrent)));
                     break;
                 }
             isChangingPage = false;
@@ -1842,15 +1701,17 @@ public partial class FormMain
     }
 
     /// <summary>
-    ///     通过点击导航栏改变页面。
+    ///     通过点击侧边栏导航改变页面。
     /// </summary>
-    private void BtnTitleSelect_Click(MyRadioButton sender, bool raiseByMouse)
+    private void BtnTitleSelect_Click(object sender, ModBase.RouteEventArgs e)
     {
-        if (isChangingPage)
-            return;
-        var pageType = (PageType)int.Parse(sender.Tag.ToString());
-        PageChangeActual(pageType, PageSubType.Default);
+        if (isChangingPage) return;
+        if (sender is MyListItem item)
+        {
+            var pageType = (PageType)int.Parse(item.Tag.ToString());
+            PageChangeActual(pageType, PageSubType.Default);
         }
+    }
 
     private void BtnTitleInner_Click(object sender, EventArgs e)
     {
@@ -1987,6 +1848,13 @@ public partial class FormMain
                         PageChangeAnim(ModMain.frmLogLeft, ModMain.frmLogRight);
                         break;
                     }
+                case PageType.Lan: // 联机大厅
+                    {
+                        ModMain.frmLanLeft ??= new PageLanLeft();
+                        ModMain.frmLanRight ??= new PageLanRight();
+                        PageChangeAnim(ModMain.frmLanLeft, ModMain.frmLanRight);
+                        break;
+                    }
                 case PageType.InstanceSelect: // 实例选择
                     {
                         if (ModMain.frmSelectLeft is null)
@@ -2039,6 +1907,19 @@ public partial class FormMain
                         if (stack.helpPage is null)
                             throw new InvalidOperationException("帮助详情页面未初始化");
                         PageChangeAnim(new MyPageLeft(), stack.helpPage);
+                        break;
+                    }
+                case PageType.SkinLibrary:
+                    {
+                        skinLibraryLeft ??= new MyPageLeft();
+                        skinLibraryHeader ??= new PageSkinLibraryLeft();
+                        if (subType is not (PageSubType.SkinLibrarySkins or PageSubType.SkinLibraryCapes))
+                            subType = skinLibraryHeader.SelectedPage;
+                        skinLibraryHeader.SelectPage(subType);
+                        var target = subType == PageSubType.SkinLibraryCapes
+                            ? (MyPageRight)(skinLibraryCapes ??= new PageSkinLibraryCapes())
+                            : skinLibraryPage ??= new PageToolsSkinLibrary();
+                        PageChangeAnim(skinLibraryLeft, target);
                         break;
                     }
 
@@ -2132,6 +2013,8 @@ public partial class FormMain
             {
                 // 延迟触发页面通用动画，以使得在 Loaded 事件中加载的控件得以处理
                 pageRight.Opacity = 1d;
+                RefreshUpstreamGlass();
+                FluentAppearance.AnimatePage(PanMainRight);
                 pageRight.PageOnEnter();
             }, 30, true)
         }, "FrmMain PageChangeRight");

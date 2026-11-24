@@ -3,9 +3,9 @@
                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                    xmlns:local="clr-namespace:PCL"> <!-- 不知道为啥只有这个文件不能在 XAML 设置 PanScroll -->
     <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
-        <StackPanel Name="PanMain" Margin="25,25,25,10" Grid.IsSharedSizeScope="True">
+        <StackPanel Name="PanMain" Margin="{StaticResource SePageScrollMargin}" Grid.IsSharedSizeScope="True">
             <StackPanel x:Name="PanCustom" />
-            <local:MyCard Margin="0,0,0,15" Title="{DynamicResource Launch.Right.CommunityHint.Title}" x:Name="PanHint">
+            <local:MyCard Margin="0,0,0,15" Title="{DynamicResource Launch.Right.CommunityHint.Title}" x:Name="PanHint" CornerRadius="{StaticResource SeRadiusMd}">
                 <local:MyIconButton LogoScale="1.1"
                                     SvgIcon="lucide/x"
                                     Height="20" Width="20" Margin="10" HorizontalAlignment="Right" VerticalAlignment="Top"
@@ -15,7 +15,7 @@
                     <TextBlock x:Name="LabHint1" TextWrapping="Wrap" />
                 </StackPanel>
             </local:MyCard>
-            <local:MyCard Margin="0,0,0,15" Title="{DynamicResource Launch.Right.Log.Title}" x:Name="PanLog">
+            <local:MyCard Margin="0,0,0,15" Title="{DynamicResource Launch.Right.Log.Title}" x:Name="PanLog" CornerRadius="{StaticResource SeRadiusMd}">
                 <TextBlock x:Name="LabLog" Margin="20,38,20,18" TextTrimming="None" TextWrapping="Wrap" />
             </local:MyCard>
         </StackPanel>

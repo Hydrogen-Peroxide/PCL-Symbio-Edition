@@ -30,17 +30,18 @@ public class MyCard : AnimatedBackgroundGrid
     {
         MainChrome = new MyDropShadow
         {
-            Margin = new Thickness(-3, -3, -3, -3 - ModBase.GetWPFSize(1d)), ShadowRadius = 3d,
-            Opacity = dropShadowIdleOpacity, CornerRadius = new CornerRadius(5d)
+            Margin = new Thickness(-16, -16, -16, -16 - ModBase.GetWPFSize(1d)), ShadowRadius = 16d,
+            Opacity = dropShadowIdleOpacity, CornerRadius = new CornerRadius(18d)
         };
         MainChrome.SetResourceReference(MyDropShadow.ColorProperty, "ColorObject1");
         Children.Insert(0, MainChrome);
-        mainBorder = new BlurBorder { CornerRadius = new CornerRadius(5d), IsHitTestVisible = false };
+        mainBorder = new BlurBorder { CornerRadius = new CornerRadius(18d), IsHitTestVisible = false, BorderThickness = new Thickness(1) };
+        mainBorder.SetResourceReference(Border.BorderBrushProperty, "SeCardStroke");
         Children.Insert(1, mainBorder);
         mainGrid = new Grid();
         Children.Add(mainGrid);
         // 设置背景色
-        SetResourceReference(BackgroundBrushProperty, "ColorBrushTransparentBackground");
+        SetResourceReference(BackgroundBrushProperty, "SeCardFill");
         Loaded += (_, _) => Init();
         MouseEnter += MyCard_MouseEnter;
         MouseLeave += MyCard_MouseLeave;

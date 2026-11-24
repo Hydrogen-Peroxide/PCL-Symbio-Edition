@@ -55,7 +55,11 @@ public static class ModBedrockInstance
 
             try
             {
-                if (Directory.Exists(root) && Directory.EnumerateDirectories(root).Any()) return root;
+                // 只有当根目录里确实存在「版本目录」时才把根目录当 versions 用；
+                // 只有 cache/loaders 这类辅助目录时仍然返回 versions，避免把它们列成版本。
+                if (Directory.Exists(root) &&
+                    Directory.EnumerateDirectories(root).Any(dir => !IsReservedDirectory(Path.GetFileName(dir))))
+                    return root;
             }
             catch (Exception ex)
             {
@@ -222,31 +226,122 @@ public static class ModBedrockInstance
         return "release";
     }
 
+    /// <summary>
+    ///     额外的外部版本目录（例如其它启动器的 bedrock_versions），用 ; 分隔。
+    ///     这些目录里的版本只读识别，不复制到启动器目录。
+    /// </summary>
+    public static IReadOnlyList<string> ExternalDirectories
+    {
+        get
+        {
+            var raw = Config.Launch.BedrockExternalFolders;
+            if (string.IsNullOrWhiteSpace(raw)) return [];
+
+            var result = new List<string>();
+            foreach (var part in raw.Split(';', StringSplitOptions.RemoveEmptyEntries))
+            {
+                var trimmed = part.Trim();
+                if (string.IsNullOrEmpty(trimmed)) continue;
+                try
+                {
+                    var full = Path.GetFullPath(trimmed);
+                    if (Directory.Exists(full) && !result.Contains(full, StringComparer.OrdinalIgnoreCase))
+                        result.Add(full);
+                }
+                catch (Exception ex)
+                {
+                    ModBase.Log($"[Bedrock] 外部版本目录无效（{trimmed}）：{ex.Message}", ModBase.LogLevel.Debug);
+                }
+            }
+
+            return result;
+        }
+    }
+
+    /// <summary>登记一个外部版本目录；已存在时不重复添加。</summary>
+    public static void AddExternalDirectory(string path)
+    {
+        var trimmed = path?.Trim();
+        if (string.IsNullOrEmpty(trimmed)) return;
+
+        var list = ExternalDirectories.ToList();
+        if (!list.Contains(trimmed, StringComparer.OrdinalIgnoreCase))
+            list.Add(trimmed);
+
+        Config.Launch.BedrockExternalFolders = string.Join(";", list);
+        ModBase.Log($"[Bedrock] 已登记外部版本目录：{trimmed}", ModBase.LogLevel.Normal);
+    }
+
+    /// <summary>移除一个已登记的外部版本目录。</summary>
+    public static void RemoveExternalDirectory(string path)
+    {
+        var list = ExternalDirectories
+            .Where(item => !string.Equals(item, path, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        Config.Launch.BedrockExternalFolders = string.Join(";", list);
+    }
+
     /// <summary>当前选中的基岩版实例（版本目录名）。</summary>
     public static string SelectedVersionId { get; set; } = "";
 
-    /// <summary>列出本地已安装的基岩版实例（排除解包缓存目录），按版本号降序。</summary>
+    /// <summary>这些是启动器的辅助目录，不是版本，枚举时必须排除。</summary>
+    private static bool IsReservedDirectory(string name) =>
+        name.Equals("extracted", StringComparison.OrdinalIgnoreCase) ||
+        name.Equals("cache", StringComparison.OrdinalIgnoreCase) ||
+        name.Equals("loaders", StringComparison.OrdinalIgnoreCase) ||
+        name.Equals("versions", StringComparison.OrdinalIgnoreCase) ||
+        name.StartsWith(".", StringComparison.Ordinal);
+
+    /// <summary>
+    ///     判断某个版本标识来自哪个版本目录；外部目录优先按自身路径匹配。
+    ///     找不到时返回主版本目录，保持调用方行为不变。
+    /// </summary>
+    public static string ResolveVersionsDirectory(string versionId)
+    {
+        foreach (var external in ExternalDirectories)
+            if (VersionExistsIn(external, versionId)) return external;
+        return VersionsDirectory;
+    }
+
+    private static bool VersionExistsIn(string versionsDirectory, string versionId)
+    {
+        try
+        {
+            return Directory.Exists(Path.Combine(versionsDirectory, versionId)) ||
+                   Directory.Exists(Path.Combine(versionsDirectory, "extracted", versionId));
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    /// <summary>
+    ///     列出本地已安装的基岩版实例：主版本目录 + 已登记的外部版本目录，
+    ///     排除解包缓存等辅助目录，按版本号降序。
+    /// </summary>
     public static List<string> GetLocalVersions()
     {
         var result = new List<string>();
-        try
+        var sources = new List<string> { VersionsDirectory };
+        sources.AddRange(ExternalDirectories);
+
+        foreach (var root in sources)
         {
-            var root = VersionsDirectory;
-            if (!Directory.Exists(root)) return result;
-            foreach (var dir in Directory.GetDirectories(root))
+            try
             {
-                var name = Path.GetFileName(dir);
-                // 这些是启动器的辅助目录，不是版本
-                if (name.Equals("extracted", StringComparison.OrdinalIgnoreCase)) continue;
-                if (name.Equals("cache", StringComparison.OrdinalIgnoreCase)) continue;
-                if (name.Equals("versions", StringComparison.OrdinalIgnoreCase)) continue;
-                if (name.StartsWith(".", StringComparison.Ordinal)) continue;
-                result.Add(name);
+                if (!Directory.Exists(root)) continue;
+                foreach (var dir in Directory.GetDirectories(root))
+                {
+                    var name = Path.GetFileName(dir);
+                    if (IsReservedDirectory(name)) continue;
+                    if (!result.Contains(name, StringComparer.OrdinalIgnoreCase)) result.Add(name);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            ModBase.Log(ex, "[Bedrock] 枚举本地实例失败", ModBase.LogLevel.Debug);
+            catch (Exception ex)
+            {
+                ModBase.Log(ex, $"[Bedrock] 枚举本地实例失败（{root}）", ModBase.LogLevel.Debug);
+            }
         }
 
         result.Sort((a, b) => ModDownload.CompareBedrockVersions(b, a));

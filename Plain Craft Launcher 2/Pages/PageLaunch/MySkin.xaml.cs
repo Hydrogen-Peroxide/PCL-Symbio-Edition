@@ -374,7 +374,7 @@ public partial class MySkin
                         };
                         selectionControl.AddRange(from Cape in skinData["capes"].AsArray()
                             let CapeAlias = Cape["alias"].ToString()
-                            let CapeName = _GetCapeDisplayName(CapeAlias)
+                            let CapeName = GetCapeDisplayName(CapeAlias)
                             let state = Cape["state"]
                             let active = state is not null && state.ToString().ToUpper().Equals("ACTIVE")
                             select new MyListItem
@@ -435,7 +435,7 @@ public partial class MySkin
         }, "Cape Change");
     }
 
-    private static string _GetCapeDisplayName(string capeAlias)
+    internal static string GetCapeDisplayName(string capeAlias)
     {
         var safeName = capeAlias
             .Replace("-", "")

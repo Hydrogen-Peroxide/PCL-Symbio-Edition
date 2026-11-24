@@ -6,6 +6,8 @@ namespace PCL;
 
 public partial class PageLoginOffline
 {
+    public event Action? LoginCompleted;
+
     public PageLoginOffline()
     {
         // Handles
@@ -83,6 +85,12 @@ public partial class PageLoginOffline
         ModProfile.selectedProfile = newProfile;
         ModProfile.isCreatingProfile = false;
         HintService.Hint(Lang.Text("Launch.Account.Profile.Created"), HintType.Success);
-        ModBase.RunInUi(() => ModMain.frmLaunchLeft.RefreshPage(true));
+        LoginCompleted?.Invoke();
+    }
+
+    public void StartLogin(string username)
+    {
+        TextName.Text = username;
+        BtnLogin_Click(this, EventArgs.Empty);
     }
 }

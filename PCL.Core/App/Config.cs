@@ -559,6 +559,12 @@ public static partial class Config
         [ConfigItem<string>("BedrockFolder", "", ConfigSource.Local)] public partial string BedrockFolder { get; set; }
 
         /// <summary>
+        /// 额外的基岩版版本目录（外部目录，例如其它启动器的 bedrock_versions），用 ; 分隔。
+        /// 登记后这些目录里的版本会一并列在基岩版实例列表里，可直接启动。
+        /// </summary>
+        [ConfigItem<string>("BedrockExternalFolders", "", ConfigSource.Local)] public partial string BedrockExternalFolders { get; set; }
+
+        /// <summary>
         /// 是否对基岩版 GDK 便携版启用版本隔离。
         /// </summary>
         [ConfigItem<bool>("BedrockVersionIsolation", false, ConfigSource.Local)] public partial bool BedrockVersionIsolation { get; set; }

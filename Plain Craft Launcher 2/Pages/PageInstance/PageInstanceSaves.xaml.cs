@@ -618,7 +618,9 @@ public partial class PageInstanceSaves : IRefreshable
             ModBase.Log("[World] 刷新存档文件");
             saveFolders.Clear();
             if (Directory.Exists(worldPath))
-                saveFolders = Directory.EnumerateDirectories(worldPath).ToList();
+                saveFolders = Directory.EnumerateDirectories(worldPath)
+                    .Where(folder => File.Exists(Path.Combine(folder, "level.dat")))
+                    .ToList();
             else
                 saveFolders = new List<string>();
 

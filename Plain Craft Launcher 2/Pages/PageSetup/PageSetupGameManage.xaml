@@ -6,7 +6,7 @@
     mc:Ignorable="d" x:Class="PCL.PageSetupGameManage"
     PanScroll="{Binding ElementName=PanBack}">
     <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
-        <StackPanel x:Name="PanMain" Margin="25,10">
+        <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}">
             <local:MyCard Margin="0,15" Title="{DynamicResource Setup.GameManage.Source.Title}">
                 <StackPanel Margin="25,37,25,15">
                     <Grid>

@@ -1,0 +1,505 @@
+<!-- SPDX-License-Identifier: MPL-2.0; Copyright (c) 2026 PCL Living Fork contributors. -->
+<UserControl x:Class="PCLLF.Wpf.Glass.GlassLauncherView" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:motion="clr-namespace:PCLLF.Wpf.Motion" xmlns:glass="clr-namespace:PCLLF.Wpf.Glass" xmlns:sys="clr-namespace:System;assembly=System.Runtime" FontFamily="Segoe UI Variable Text, Microsoft YaHei UI, Segoe UI" FontSize="13" Foreground="{DynamicResource GlassTextBrush}" Background="Transparent" UseLayoutRounding="True" SnapsToDevicePixels="True" Focusable="False">
+    <UserControl.Resources>
+        <sys:Double x:Key="WorkspaceNavRowHeight">52</sys:Double>
+        <SolidColorBrush x:Key="GlassListSelectedBrush" Color="#B8B9BBBD" />
+        <SolidColorBrush x:Key="HomeTextBrush" Color="White" />
+        <SolidColorBrush x:Key="HomeSecondaryTextBrush" Color="#D9E6F0F8" />
+        <FontFamily x:Key="GlassDisplayFont">Segoe UI Variable Display, Microsoft YaHei UI, Segoe UI</FontFamily>
+        <CornerRadius x:Key="GlassRadiusMain">8</CornerRadius>
+        <CornerRadius x:Key="GlassRadiusHero">20</CornerRadius>
+        <CornerRadius x:Key="GlassRadiusCard">14</CornerRadius>
+        <CornerRadius x:Key="GlassRadiusChrome">10</CornerRadius>
+        <CornerRadius x:Key="GlassRadiusPopover">14</CornerRadius>
+        <CornerRadius x:Key="GlassRadiusControl">10</CornerRadius>
+        <Thickness x:Key="GlassPaddingMain">24</Thickness>
+        <SolidColorBrush x:Key="GlassWindowBrush" Color="#FF181818" />
+        <SolidColorBrush x:Key="GlassTextBrush" Color="#FFF4F4F4" />
+        <SolidColorBrush x:Key="GlassSecondaryTextBrush" Color="#FFB8B8B8" />
+        <SolidColorBrush x:Key="GlassMainBrush" Color="#FF181818" />
+        <SolidColorBrush x:Key="GlassCardBrush" Color="#FF202020" />
+        <SolidColorBrush x:Key="GlassChromeBrush" Color="#F5202020" />
+        <SolidColorBrush x:Key="GlassOutlineBrush" Color="#20FFFFFF" />
+        <SolidColorBrush x:Key="GlassControlBrush" Color="#FF333333" />
+        <SolidColorBrush x:Key="GlassHoverBrush" Color="#FF414141" />
+        <SolidColorBrush x:Key="GlassSelectedBrush" Color="#24FFFFFF" />
+        <SolidColorBrush x:Key="GlassAccentBrush" Color="#FFE6E6E6" />
+        <SolidColorBrush x:Key="GlassAccentTextBrush" Color="#FF1A1A1A" />
+        <Geometry x:Key="IconPlay">M 7,4 L 19,12 7,20 Z</Geometry>
+        <Geometry x:Key="IconDownload">M12,3 V15 M7,10 L12,15 17,10 M4,16 V20 H20 V16</Geometry>
+        <Geometry x:Key="IconSkinLibrary">M8,4 L4,6 2,10 6,12 7,10 V20 H17 V10 L18,12 22,10 20,6 16,4 C15,6 14,7 12,7 C10,7 9,6 8,4 Z</Geometry>
+        <Geometry x:Key="IconSettings">M9,3 L15,3 16,6 19,7 21,10 19,12 21,15 19,18 16,18 14,21 10,21 8,18 5,18 3,15 5,12 3,9 5,6 8,6 Z M15.5,12 A3.5,3.5 0 1 1 8.5,12 A3.5,3.5 0 1 1 15.5,12</Geometry>
+        <Geometry x:Key="IconMore">M5,12 A1,1 0 1 1 3,12 A1,1 0 1 1 5,12 M13,12 A1,1 0 1 1 11,12 A1,1 0 1 1 13,12 M21,12 A1,1 0 1 1 19,12 A1,1 0 1 1 21,12</Geometry>
+        <Geometry x:Key="IconGrid">M3,3 H10 V10 H3 Z M14,3 H21 V10 H14 Z M3,14 H10 V21 H3 Z M14,14 H21 V21 H14 Z</Geometry>
+        <Geometry x:Key="IconPlus">M12,4 V20 M4,12 H20</Geometry>
+        <Geometry x:Key="IconClose">M5,5 L19,19 M19,5 L5,19</Geometry>
+        <Geometry x:Key="IconBack">M15,5 L8,12 15,19</Geometry>
+        <Geometry x:Key="IconAccount">M16.5,7 A4.5,4.5 0 1 1 7.5,7 A4.5,4.5 0 1 1 16.5,7 M4,22 V20 C4,12 20,12 20,20 V22</Geometry>
+        <Geometry x:Key="IconWallpaper">M4,3 H20 A1,1 0 0 1 21,4 V20 A1,1 0 0 1 20,21 H4 A1,1 0 0 1 3,20 V4 A1,1 0 0 1 4,3 M3,17 L9,11 14,16 17,13 21,17 M17,7 A1,1 0 1 1 15,7 A1,1 0 1 1 17,7</Geometry>
+        <Geometry x:Key="IconWorld">M21,12 A9,9 0 1 1 3,12 A9,9 0 1 1 21,12 M3,12 H21 M12,3 C6,8 6,16 12,21 C18,16 18,8 12,3</Geometry>
+        <Geometry x:Key="IconLan">M9,2 H15 V8 H9 Z M2,16 H8 V22 H2 Z M16,16 H22 V22 H16 Z M5,16 V13 A1,1 0 0 1 6,12 H18 A1,1 0 0 1 19,13 V16 M12,12 V8</Geometry>
+        <Style x:Key="GlassText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GlassTextBrush}" />
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+        </Style>
+        <Style x:Key="GlassPath" TargetType="Path">
+            <Setter Property="Stroke" Value="{Binding Foreground,RelativeSource={RelativeSource AncestorType=Button}}" />
+            <Setter Property="StrokeThickness" Value="1.6" />
+            <Setter Property="StrokeStartLineCap" Value="Round" />
+            <Setter Property="StrokeEndLineCap" Value="Round" />
+            <Setter Property="StrokeLineJoin" Value="Round" />
+            <Setter Property="Stretch" Value="Uniform" />
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Height" Value="18" />
+        </Style>
+        <Style x:Key="GlassFocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border Margin="2" CornerRadius="8" BorderBrush="{DynamicResource GlassAccentBrush}" BorderThickness="2" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="GlassButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{DynamicResource GlassTextBrush}" />
+            <Setter Property="Background" Value="{DynamicResource GlassControlBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource GlassOutlineBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="14,8" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource GlassFocusVisual}" />
+            <Setter Property="motion:PressFeedback.IsEnabled" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" CornerRadius="10" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource GlassHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.8" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="GlassCircleButton" TargetType="Button" BasedOn="{StaticResource GlassButton}">
+            <Setter Property="Width" Value="36" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="9" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style x:Key="GlassPillButton" TargetType="Button" BasedOn="{StaticResource GlassButton}">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="18,7" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="{DynamicResource GlassControlBrush}" />
+        </Style>
+        <Style x:Key="GlassNavButton" TargetType="Button" BasedOn="{StaticResource GlassButton}">
+            <Setter Property="Height" Value="60" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style x:Key="GlassLaunchButton" TargetType="Button" BasedOn="{StaticResource GlassButton}">
+            <Setter Property="Background" Value="{DynamicResource GlassAccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource GlassAccentTextBrush}" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style x:Key="GlassCheckBox" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{DynamicResource GlassTextBrush}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="MinHeight" Value="38" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource GlassFocusVisual}" />
+            <Setter Property="motion:ToggleFeedback.IsEnabled" Value="True" />
+            <Setter Property="motion:ToggleFeedback.Travel" Value="16" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="46" />
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter VerticalAlignment="Center" Margin="0,0,12,0" RecognizesAccessKey="True" />
+                            <Grid Grid.Column="1" Width="36" Height="20" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                <Border CornerRadius="10" Background="{DynamicResource GlassControlBrush}" BorderBrush="{DynamicResource GlassOutlineBrush}" BorderThickness="1" />
+                                <Border x:Name="TrackActive" CornerRadius="10" Background="{DynamicResource GlassAccentBrush}" Opacity="0" IsHitTestVisible="False" />
+                                <Border Width="16" Height="16" CornerRadius="8" Background="White" HorizontalAlignment="Left" Margin="2,0,0,0" RenderTransformOrigin="0.5,0.5" IsHitTestVisible="False">
+                                    <Border.RenderTransform>
+                                        <TransformGroup>
+                                            <ScaleTransform x:Name="ThumbScale" />
+                                            <TranslateTransform x:Name="ThumbTransform" />
+                                        </TransformGroup>
+                                    </Border.RenderTransform>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="GlassProgress" TargetType="ProgressBar">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid x:Name="PART_Track" ClipToBounds="True">
+                            <Border CornerRadius="2" Background="{TemplateBinding Background}" />
+                            <Border x:Name="PART_Indicator" HorizontalAlignment="Left" CornerRadius="2" Background="{TemplateBinding Foreground}" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Border x:Name="MainSurface">
+        <Border.OpacityMask>
+            <DrawingBrush x:Name="FrameMask" ViewboxUnits="Absolute" ViewportUnits="Absolute" Stretch="Fill">
+                <DrawingBrush.Drawing>
+                    <GeometryDrawing Brush="White">
+                        <GeometryDrawing.Geometry>
+                            <GeometryGroup x:Name="FrameClip" FillRule="Nonzero" />
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingBrush.Drawing>
+            </DrawingBrush>
+        </Border.OpacityMask>
+        <Grid x:Name="ShellRoot" Background="{DynamicResource GlassWindowBrush}">
+            <Image x:Name="WallpaperImage" Stretch="UniformToFill" IsHitTestVisible="False" Visibility="Collapsed" />
+            <Grid x:Name="WorkspaceGrid" Margin="0,10,10,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="64" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <glass:GlassSurface x:Name="NavigationSurface" Width="64" HorizontalAlignment="Right" CornerRadius="12" Background="{DynamicResource GlassChromeBrush}" BorderBrush="{DynamicResource GlassOutlineBrush}" BorderThickness="1" BlurRadius="24" TintOpacity="0.48" HighlightOpacity="0">
+                    <Grid x:Name="NavigationRailContent">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Border x:Name="AccountSurface" Grid.Row="2" Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}}">
+                            <Button x:Name="AccountButton" Style="{StaticResource GlassCircleButton}" Width="40" Height="40" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="4" Click="AccountButton_Click" AutomationProperties.Name="当前账户">
+                                <Grid Width="32" Height="32" UseLayoutRounding="True" SnapsToDevicePixels="True">
+                                    <Path x:Name="AccountFallbackGlyph" Data="{StaticResource IconAccount}" Stroke="{DynamicResource GlassTextBrush}" StrokeThickness="1.6" Stretch="Uniform" Margin="3" />
+                                    <Image x:Name="AccountAvatarImage" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="NearestNeighbor" UseLayoutRounding="True" SnapsToDevicePixels="True" />
+                                    <TextBlock x:Name="AccountNameText" Visibility="Collapsed" />
+                                </Grid>
+                            </Button>
+                        </Border>
+                        <Grid x:Name="NavigationButtons" Grid.Row="1" Height="312" VerticalAlignment="Top" Margin="8,16,8,0">
+                            <Grid.RenderTransform>
+                                <TranslateTransform x:Name="NavigationButtonsTranslation" />
+                            </Grid.RenderTransform>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="64" />
+                                <RowDefinition Height="52" />
+                                <RowDefinition Height="52" />
+                                <RowDefinition Height="52" />
+                                <RowDefinition Height="52" />
+                                <RowDefinition Height="52" />
+                            </Grid.RowDefinitions>
+                            <Border x:Name="NavSelection" Grid.RowSpan="6" Height="42" HorizontalAlignment="Left" VerticalAlignment="Top" CornerRadius="8" Background="{DynamicResource GlassSelectedBrush}" IsHitTestVisible="False">
+                                <Border.RenderTransform>
+                                    <TranslateTransform x:Name="NavigationTranslation" />
+                                </Border.RenderTransform>
+                            </Border>
+                            <Button x:Name="NavLaunch" Grid.Row="0" Style="{StaticResource GlassNavButton}" Height="42" Padding="9" Tag="0" Click="NavigationButton_Click" ToolTip="启动" AutomationProperties.Name="启动">
+                                <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconPlay}" Width="22" Height="22" />
+                            </Button>
+                            <Button x:Name="NavDownload" Grid.Row="1" Style="{StaticResource GlassNavButton}" Height="42" Padding="9" Tag="1" Click="NavigationButton_Click" ToolTip="下载" AutomationProperties.Name="下载">
+                                <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconDownload}" Width="22" Height="22" />
+                            </Button>
+                            <Button x:Name="NavSkinLibrary" Grid.Row="2" Style="{StaticResource GlassNavButton}" Height="42" Padding="9"
+                                    Tag="16" Click="NavigationButton_Click" ToolTip="{DynamicResource Tools.SkinLibrary.Title}"
+                                    AutomationProperties.Name="{DynamicResource Tools.SkinLibrary.Title}">
+                                <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconSkinLibrary}" Width="22" Height="22" />
+                            </Button>
+                            <Button x:Name="NavLan" Grid.Row="3" Style="{StaticResource GlassNavButton}" Height="42" Padding="9"
+                                    Tag="17" Click="NavigationButton_Click" ToolTip="{DynamicResource Main.Title.Lan}"
+                                    AutomationProperties.Name="{DynamicResource Main.Title.Lan}">
+                                <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconLan}" Width="22" Height="22" />
+                            </Button>
+                            <Button x:Name="NavSettings" Grid.Row="4" Style="{StaticResource GlassNavButton}" Height="42" Padding="9" Tag="3" Click="NavigationButton_Click" ToolTip="设置" AutomationProperties.Name="设置">
+                                <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconSettings}" Width="22" Height="22" />
+                            </Button>
+                            <Button x:Name="NavOther" Grid.Row="5" Style="{StaticResource GlassNavButton}" Height="42" Padding="9" Tag="4" Click="NavigationButton_Click" ToolTip="更多" AutomationProperties.Name="更多">
+                                <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconMore}" Width="22" Height="22" />
+                            </Button>
+                        </Grid>
+                        <Grid x:Name="NavigationHeaderEndcap" Height="{Binding ActualWidth, RelativeSource={RelativeSource Self}}">
+                            <Image x:Name="AppLogoImage" Source="/Plain Craft Launcher 2;component/Images/icon.png"
+                                   Width="32" Height="32" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality" IsHitTestVisible="False" />
+                        </Grid>
+                    </Grid>
+                </glass:GlassSurface>
+                <Border x:Name="BodyFrame" Grid.Column="2" CornerRadius="12" Background="Transparent" BorderBrush="{DynamicResource GlassOutlineBrush}" BorderThickness="1">
+                    <Grid>
+                        <glass:GlassSurface x:Name="ApplicationBackdrop" Background="{DynamicResource GlassMainBrush}" BorderThickness="0" CornerRadius="12" PaintsWallpaper="False" IsHitTestVisible="False" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition x:Name="SecondaryColumn" Width="254" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <glass:GlassSurface x:Name="SecondarySurface" Grid.Column="0" Margin="24,24,0,24" CornerRadius="12" Background="{DynamicResource GlassCardBrush}" BorderBrush="{DynamicResource GlassOutlineBrush}" BorderThickness="1" BlurRadius="36" TintOpacity="0.72" HighlightOpacity="0">
+                                <Grid x:Name="SecondaryLayout" Margin="12,0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition x:Name="SecondaryHeaderRow" Height="70" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition x:Name="SecondaryFooterRow" Height="52" />
+                                    </Grid.RowDefinitions>
+                                    <Border x:Name="ContextStrip" Background="Transparent">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="36" />
+                                            </Grid.ColumnDefinitions>
+                                            <!-- 左缩进必须为 0：SecondaryLayout 已有 12px 边距，
+                                                 再叠加会与下方卡片的左缘对不齐。上边距略微下移以获得视觉基线 -->
+                                            <TextBlock x:Name="SecondaryTitleText" Grid.Column="0" Style="{StaticResource GlassText}" FontFamily="{StaticResource GlassDisplayFont}" Text="主页" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Top" Margin="0,21,10,0" />
+                                            <ContentControl x:Name="HostedEditionSwitch" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" HorizontalContentAlignment="Left" Margin="0,0,8,0" />
+                                            <TextBlock x:Name="WorkspaceHint" Opacity="0" IsHitTestVisible="False" />
+                                            <Grid xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" x:Name="ExpandButtonContainer" Grid.Column="2" Width="36" Height="36" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                <Grid.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform x:Name="ExpandAvailabilityScale" />
+                                                        <TranslateTransform x:Name="ExpandTranslation" />
+                                                    </TransformGroup>
+                                                </Grid.RenderTransform>
+                                                <Button x:Name="ExpandButton" Style="{StaticResource GlassCircleButton}" Width="36" Height="36" Padding="9" Click="ExpandButton_Click" ToolTip="启动选项" AutomationProperties.Name="展开启动选项">
+                                                    <Path Style="{StaticResource GlassPath}" Data="M12,4 V20 M4,12 H20" Width="14" Height="14" RenderTransformOrigin="0.5,0.5">
+                                                        <Path.RenderTransform>
+                                                            <RotateTransform x:Name="ExpandRotation" />
+                                                        </Path.RenderTransform>
+                                                    </Path>
+                                                </Button>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                    <Border x:Name="SideRail" Grid.Row="1" Opacity="0" Visibility="Hidden" IsHitTestVisible="False">
+                                        <Border.RenderTransform>
+                                            <TranslateTransform x:Name="RailTranslation" />
+                                        </Border.RenderTransform>
+                                        <ScrollViewer Style="{StaticResource ScrollViewerNoMargin}" x:Name="SidebarScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                            <StackPanel x:Name="SidebarPanel" />
+                                        </ScrollViewer>
+                                    </Border>
+                                    <Grid Grid.Row="2" x:Name="PrimaryActions">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="38" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="38" />
+                                            <ColumnDefinition Width="0" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button x:Name="SelectInstanceButton" Style="{StaticResource GlassCircleButton}" Padding="10" Margin="0" FontSize="11" Click="SelectInstanceButton_Click" AutomationProperties.Name="选择实例" Width="38" Height="38" Grid.Column="0">
+                                            <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconGrid}" />
+                                        </Button>
+                                        <Button x:Name="InstanceSettingsButton" Grid.Column="2" Style="{StaticResource GlassCircleButton}" Padding="10" Margin="0" FontSize="11" Click="InstanceSettingsButton_Click" AutomationProperties.Name="实例设置" Width="38" Height="38">
+                                            <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconSettings}" />
+                                        </Button>
+                                        <Button x:Name="NavigationMenuButton" Grid.Column="3" Style="{StaticResource GlassCircleButton}" Width="36" Height="36" Visibility="Collapsed" Click="NavigationMenuButton_Click" ToolTip="全部页面选项" AutomationProperties.Name="展开全部页面选项">
+                                            <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconMore}" Width="16" Height="16" />
+                                        </Button>
+                                    </Grid>
+                                    <Border x:Name="PrimaryCard" MaxWidth="360" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="0" Background="Transparent" BorderThickness="0" Grid.Row="1">
+                                        <Border.RenderTransform>
+                                            <TranslateTransform x:Name="PrimaryTranslation" />
+                                        </Border.RenderTransform>
+                                        <StackPanel x:Name="InstanceCenter" HorizontalAlignment="Stretch">
+                                            <Grid Width="64" Height="64" HorizontalAlignment="Center">
+                                                <Image x:Name="InstanceImage" Width="64" Height="64" Stretch="Uniform" VerticalAlignment="Center" />
+                                            </Grid>
+                                            <TextBlock x:Name="InstanceNameText" Style="{StaticResource GlassText}" FontFamily="{StaticResource GlassDisplayFont}" FontSize="18" FontWeight="SemiBold" TextAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,14,0,0" />
+                                            <TextBlock x:Name="InstanceDescriptionText" Style="{StaticResource GlassText}" FontSize="13" TextAlignment="Center" TextTrimming="CharacterEllipsis" Foreground="{DynamicResource GlassSecondaryTextBrush}" Margin="0,4,0,0" />
+                                            <Button x:Name="LaunchButton" Style="{StaticResource GlassLaunchButton}" Width="190" Height="48" HorizontalAlignment="Center" Margin="0,22,0,0" Click="LaunchButton_Click" AutomationProperties.Name="启动游戏">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Path x:Name="LaunchGlyph" Data="{StaticResource IconPlay}" Fill="{Binding Foreground,ElementName=LaunchButton}" Width="13" Height="14" Stretch="Uniform" Margin="0,0,10,0" />
+                                                    <TextBlock x:Name="LaunchButtonText" Text="启动游戏" FontSize="17" FontWeight="SemiBold" Foreground="{Binding Foreground,ElementName=LaunchButton}" VerticalAlignment="Center" />
+                                                </StackPanel>
+                                            </Button>
+                                            <TextBlock x:Name="LaunchStatusText" Style="{StaticResource GlassText}" FontSize="11" TextAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,8,0,0" Visibility="Collapsed" />
+                                            <ProgressBar x:Name="LaunchProgressBar" Style="{StaticResource GlassProgress}" Width="210" Height="4" Maximum="1" Foreground="{DynamicResource GlassAccentBrush}" Background="{DynamicResource GlassControlBrush}" Margin="0,8,0,0" Visibility="Collapsed" />
+                                            <Border x:Name="RecentWorldCard" MaxWidth="252" HorizontalAlignment="Stretch" Margin="0,18,0,0">
+                                                <Grid>
+                                                    <Button x:Name="RecentWorldButton" Cursor="Hand" Click="RecentWorldButton_Click" AutomationProperties.Name="继续上次游玩的世界" ToolTip="继续游玩">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border x:Name="RecentWorldChrome" CornerRadius="12" Background="{DynamicResource GlassSelectedBrush}" BorderBrush="{DynamicResource GlassOutlineBrush}" BorderThickness="1" Padding="8,7,12,7">
+                                                                    <ContentPresenter />
+                                                                </Border>
+                                                                <ControlTemplate.Triggers>
+                                                                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="RecentWorldChrome" Property="Background" Value="{DynamicResource GlassListSelectedBrush}" /></Trigger>
+                                                                    <Trigger Property="IsPressed" Value="True"><Setter TargetName="RecentWorldChrome" Property="Opacity" Value="0.84" /></Trigger>
+                                                                    <Trigger Property="IsEnabled" Value="False"><Setter TargetName="RecentWorldChrome" Property="Opacity" Value="0.45" /></Trigger>
+                                                                </ControlTemplate.Triggers>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
+                                                        <Grid>
+                                                            <Grid.ColumnDefinitions><ColumnDefinition Width="36" /><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                                            <Border Width="36" Height="36" CornerRadius="8" ClipToBounds="True" Background="{DynamicResource GlassOutlineBrush}">
+                                                                <Grid>
+                                                                    <Path x:Name="WorldFallbackGlyph" Data="{StaticResource IconWorld}" Stroke="{DynamicResource GlassSecondaryTextBrush}" StrokeThickness="1.4" Stretch="Uniform" Margin="8" />
+                                                                    <Image x:Name="RecentWorldImage" Stretch="UniformToFill" />
+                                                                </Grid>
+                                                            </Border>
+                                                            <StackPanel Grid.Column="1" Margin="10,0,8,0" VerticalAlignment="Center">
+                                                                <TextBlock Style="{StaticResource GlassText}" Text="继续游玩" FontSize="11" Foreground="{DynamicResource GlassSecondaryTextBrush}" />
+                                                                <TextBlock x:Name="RecentWorldNameText" Style="{StaticResource GlassText}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,1,0,0" />
+                                                                <TextBlock x:Name="RecentWorldDetailText" Style="{StaticResource GlassText}" FontSize="11" Foreground="{DynamicResource GlassSecondaryTextBrush}" TextTrimming="CharacterEllipsis" Visibility="Collapsed" />
+                                                            </StackPanel>
+                                                            <Path Grid.Column="2" Data="{StaticResource IconPlay}" Fill="{DynamicResource GlassSecondaryTextBrush}" Width="9" Height="10" Stretch="Uniform" VerticalAlignment="Center" />
+                                                        </Grid>
+                                                    </Button>
+                                                    <TextBlock x:Name="NoRecentWorldText" Style="{StaticResource GlassText}" Text="暂无最近游玩的世界" FontSize="12" HorizontalAlignment="Center" Foreground="{DynamicResource GlassSecondaryTextBrush}" Visibility="Collapsed" />
+                                                </Grid>
+                                            </Border>
+                                        </StackPanel>
+                                    </Border>
+                                </Grid>
+                            </glass:GlassSurface>
+                            <Grid Grid.Column="1">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="52" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Border x:Name="Header" Background="Transparent" MouseLeftButtonDown="Chrome_MouseLeftButtonDown">
+                                    <Grid Margin="20,8,14,0">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Grid x:Name="BackTitlePanel" Visibility="Hidden">
+                                            <Grid.RenderTransform>
+                                                <TranslateTransform x:Name="BackTitleTranslation" />
+                                            </Grid.RenderTransform>
+                                            <Button Style="{StaticResource GlassCircleButton}" Width="40" Height="40" Padding="10" Click="BackButton_Click" AutomationProperties.Name="返回上一页">
+                                                <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconBack}" />
+                                            </Button>
+                                        </Grid>
+                                        <!-- 标题只保留水平间距：叠加垂直 Margin 会让它与返回/窗口按钮错位 -->
+                                        <TextBlock x:Name="PageTitleText" Grid.Column="1" Style="{StaticResource GlassText}" FontSize="16" FontWeight="Bold" VerticalAlignment="Center" Margin="14,0,0,0" TextTrimming="CharacterEllipsis" />
+                                        <Border x:Name="WindowControlsSurface" Grid.Column="2">
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Button x:Name="WallpaperButton" Style="{StaticResource GlassCircleButton}" Click="WallpaperButton_Click"
+                                                        ToolTip="更换应用壁纸" AutomationProperties.Name="更换启动器背景">
+                                                    <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconWallpaper}" Width="16" Height="16" />
+                                                </Button>
+                                                <Button Style="{StaticResource GlassCircleButton}" Click="MinimizeButton_Click" AutomationProperties.Name="最小化窗口">
+                                                    <Border Width="14" Height="1.5" Background="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                                </Button>
+                                                <Button Style="{StaticResource GlassCircleButton}" Click="CloseButton_Click" AutomationProperties.Name="关闭窗口">
+                                                    <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconClose}" Width="14" Height="14" />
+                                                </Button>
+                                            </StackPanel>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+                                <Grid x:Name="WorkspaceSurface" Grid.Row="1" Background="Transparent" ClipToBounds="True">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <!-- 页面标题与主体内容共用同一水平边距，左缘与下方圆角卡片对齐 -->
+                                    <ContentControl x:Name="HostedPageHeader" Visibility="Collapsed"
+                                                    HorizontalContentAlignment="Stretch" Margin="24,20,24,4" />
+                                    <Grid x:Name="MainContentGrid" Grid.Row="1" Margin="24,0,24,24" MaxWidth="1000">
+                                        <Grid x:Name="HomePanel">
+                                            <Grid.RenderTransform>
+                                                <TranslateTransform x:Name="HomeTranslation" />
+                                            </Grid.RenderTransform>
+                                            <Grid x:Name="HomeDeck" SizeChanged="HomeDeck_SizeChanged">
+                                                <Grid x:Name="AuxiliaryCards" Width="272" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0" Opacity="0" Visibility="Hidden" IsHitTestVisible="False">
+                                                    <Grid.RenderTransform>
+                                                        <TranslateTransform x:Name="AuxiliaryTranslation" />
+                                                    </Grid.RenderTransform>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="Auto" />
+                                                        <RowDefinition Height="12" />
+                                                        <RowDefinition Height="Auto" />
+                                                    </Grid.RowDefinitions>
+                                                    <!-- SE 没有 LF 的「启动前检查/自动补全依赖」功能，此卡暂留作布局占位，事件未接线 -->
+                                                </Grid>
+                                            </Grid>
+                                        </Grid>
+                                        <Grid x:Name="PageScene" Visibility="Hidden" Opacity="0">
+                                            <Grid.RenderTransform>
+                                                <TranslateTransform x:Name="PageSceneTranslation" />
+                                            </Grid.RenderTransform>
+                                            <Grid x:Name="PageLayer">
+                                                <ContentControl x:Name="PageContent" Visibility="Hidden" IsHitTestVisible="False" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                                                    <ContentControl.RenderTransform>
+                                                        <TranslateTransform x:Name="PageEntryTranslation" />
+                                                    </ContentControl.RenderTransform>
+                                                </ContentControl>
+                                                <Image x:Name="PageSnapshot" Opacity="0" Visibility="Hidden" IsHitTestVisible="False" Stretch="Fill" />
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+            <glass:GlassSurface x:Name="AccountPopover" Width="920" MaxHeight="680" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="84,0,0,16" CornerRadius="12" Background="{DynamicResource GlassCardBrush}" BorderBrush="{DynamicResource GlassOutlineBrush}" BorderThickness="1" BlurRadius="24" TintOpacity="0.7" HighlightOpacity="0" Padding="18" Visibility="Collapsed" Opacity="0" RenderTransformOrigin="0,1">
+                <glass:GlassSurface.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="AccountPopoverScale" />
+                        <TranslateTransform x:Name="AccountPopoverTranslation" />
+                    </TransformGroup>
+                </glass:GlassSurface.RenderTransform>
+                <Grid>
+                    <ScrollViewer Style="{StaticResource ScrollViewerNoMargin}" x:Name="AccountScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <ContentControl x:Name="AccountContent" HorizontalContentAlignment="Stretch" />
+                    </ScrollViewer>
+                    <Button Style="{StaticResource GlassCircleButton}" HorizontalAlignment="Right" VerticalAlignment="Top" Click="CloseAccountButton_Click" AutomationProperties.Name="关闭账户面板">
+                        <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconClose}" Width="12" Height="12" />
+                    </Button>
+                </Grid>
+            </glass:GlassSurface>
+            <glass:GlassSurface x:Name="NavigationPopover" Width="320" MaxHeight="480" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,48,24,20" CornerRadius="12" Background="{DynamicResource GlassCardBrush}" BorderBrush="{DynamicResource GlassOutlineBrush}" BorderThickness="1" BlurRadius="24" TintOpacity="0.7" HighlightOpacity="0" Padding="18" Visibility="Collapsed" Opacity="0">
+                <glass:GlassSurface.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="NavigationPopoverScale" />
+                        <TranslateTransform x:Name="NavigationPopoverTranslation" />
+                    </TransformGroup>
+                </glass:GlassSurface.RenderTransform>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="36" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock x:Name="NavigationPopoverTitle" Style="{StaticResource GlassText}" Text="页面选项" FontSize="15" FontWeight="Medium" VerticalAlignment="Center" />
+                    <Button Style="{StaticResource GlassCircleButton}" HorizontalAlignment="Right" Click="CloseNavigationButton_Click" AutomationProperties.Name="关闭页面选项面板">
+                        <Path Style="{StaticResource GlassPath}" Data="{StaticResource IconClose}" Width="12" Height="12" />
+                    </Button>
+                    <ScrollViewer Style="{StaticResource ScrollViewerNoMargin}" Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,12,0,0">
+                        <ContentControl x:Name="NavigationContent" HorizontalContentAlignment="Stretch" />
+                    </ScrollViewer>
+                </Grid>
+            </glass:GlassSurface>
+        </Grid>
+    </Border>
+</UserControl>

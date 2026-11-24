@@ -71,6 +71,11 @@ public partial class PageInstanceOverall
         ModAnimation.AniBeginControl();
 
         var instance = PageInstanceLeft.McInstance;
+        if (instance is null)
+        {
+            ModAnimation.AniEndControl();
+            return;
+        }
         // 刷新设置项目
         ComboDisplayType.SelectedIndex = States.Instance.CardType[instance.PathInstance];
         BtnDisplayStar.Text = instance.IsStar ? Lang.Text("Instance.Overall.Unfavorite") : Lang.Text("Instance.Overall.Favorite");

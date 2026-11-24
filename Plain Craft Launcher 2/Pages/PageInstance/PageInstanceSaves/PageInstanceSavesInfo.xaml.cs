@@ -267,7 +267,11 @@ public partial class PageInstanceSavesInfo : IRefreshable
     private void AddInfoRow(string head, string content, bool isSeed = false, string? versionName = null)
     {
         var headBlock = new TextBlock { Text = head, Margin = new Thickness(0d, 3d, 0d, 3d) };
-        var contentStack = new StackPanel { Orientation = Orientation.Horizontal };
+        var contentStack = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+        };
 
         if (isSeed && content != Lang.Text("Instance.Saves.Info.GetFailed"))
         {

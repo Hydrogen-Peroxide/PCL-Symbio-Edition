@@ -22,7 +22,19 @@ public partial class PageToolsSchematic
 {
     private readonly List<McInstance> _instances = [];
     private MyListItem? _checkedInstanceItem;
-    private List<string> _files = [];
+
+    /// <summary>一行投影的元数据。扫描时一次性取好大小与时间，渲染时不再逐个打盘。</summary>
+    private sealed record SchematicEntry(string Path, long Length, DateTime Modified, string Relative);
+
+    // 投影可能有上千个：首次只建少量行，滚动到底再追加，避免一次性创建大量控件导致界面假死
+    private const int FirstPageRows = 80;
+    private const int MoreRowsPerScroll = 80;
+
+    private List<SchematicEntry> _all = [];
+    private List<SchematicEntry> _filtered = [];
+    private int _renderedRows;
+    private int _reloadVersion;
+
     private McInstance? _instance;
     private bool _initializing;
     private bool _loadingPreview;
@@ -40,9 +52,20 @@ public partial class PageToolsSchematic
             Reload();
         };
         SearchBox.TextChanged += (_, _) => ApplyFilter();
+        PanBack.ScrollChanged += PanBack_ScrollChanged;
         Loaded += (_, _) => Initialize();
         Unloaded += (_, _) => ClosePreview();
         UpdateSortButton();
+    }
+
+    /// <summary>滚动接近底部时追加下一批行，避免一次创建上千个控件。</summary>
+    private void PanBack_ScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+        if (_renderedRows >= _filtered.Count) return;
+        if (e.ExtentHeight <= 0) return;
+        // 距离底部不足一屏时继续追加
+        if (e.VerticalOffset + e.ViewportHeight < e.ExtentHeight - e.ViewportHeight) return;
+        RenderMoreRows();
     }
 
     private static bool IsSchematicFile(string path)
@@ -59,6 +82,7 @@ public partial class PageToolsSchematic
         {
             _initializing = true;
             _instances.Clear();
+            _schematicCounts.Clear();
             var versionsPath = Path.Combine(ModFolder.mcFolderSelected ?? "", "versions");
             if (Directory.Exists(versionsPath))
                 foreach (var dir in Directory.GetDirectories(versionsPath).OrderBy(Path.GetFileName))
@@ -66,9 +90,19 @@ public partial class PageToolsSchematic
 
             var target = PageInstanceLeft.McInstance?.Name ?? ModInstanceList.McMcInstanceSelected?.Name ??
                          States.Game.SelectedInstance;
-            // 优先当前实例；当前实例没有投影时退回第一个有投影的实例
-            var instance = _instances.FirstOrDefault(item => item.Name == target && GetSchematicCount(item) > 0)
-                           ?? _instances.FirstOrDefault(item => GetSchematicCount(item) > 0)
+            // 优先当前实例；当前实例没有投影时退回第一个有投影的实例。
+            // HasSchematic 用 Any() 短路且带缓存，避免每个实例都做一次全递归枚举。
+            var hasSchematic = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+            bool HasAny(McInstance item)
+            {
+                if (hasSchematic.TryGetValue(item.Name, out var cached)) return cached;
+                var value = HasSchematic(item);
+                hasSchematic[item.Name] = value;
+                return value;
+            }
+
+            var instance = _instances.FirstOrDefault(item => item.Name == target && HasAny(item))
+                           ?? _instances.FirstOrDefault(HasAny)
                            ?? _instances.FirstOrDefault(item => item.Name == target)
                            ?? _instances.FirstOrDefault();
             _initializing = false;
@@ -135,12 +169,38 @@ public partial class PageToolsSchematic
         }
     }
 
-    private static int GetSchematicCount(McInstance instance)
+    /// <summary>该实例下是否至少有一个投影文件；用 EnumerateFiles + Any 短路，不扫完整棵树。</summary>
+    private static bool HasSchematic(McInstance instance)
     {
-        var folder = Path.Combine(instance.PathIndie, "schematics");
-        if (!Directory.Exists(folder)) return 0;
         try
         {
+            var folder = Path.Combine(instance.PathIndie, "schematics");
+            if (!Directory.Exists(folder)) return false;
+            return Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories).Any(IsSchematicFile);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private readonly Dictionary<string, int> _schematicCounts = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>实例的投影数量，结果缓存；实例列表变化时清空。</summary>
+    private int GetSchematicCountCached(McInstance instance)
+    {
+        if (_schematicCounts.TryGetValue(instance.Name, out var cached)) return cached;
+        var count = GetSchematicCount(instance);
+        _schematicCounts[instance.Name] = count;
+        return count;
+    }
+
+    private static int GetSchematicCount(McInstance instance)
+    {
+        try
+        {
+            var folder = Path.Combine(instance.PathIndie, "schematics");
+            if (!Directory.Exists(folder)) return 0;
             return Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories).Count(IsSchematicFile);
         }
         catch
@@ -156,35 +216,76 @@ public partial class PageToolsSchematic
     private void ApplyFilter()
     {
         var query = SearchBox.Text.Trim();
-        var files = string.IsNullOrEmpty(query)
-            ? _files
-            : _files.Where(path => Path.GetFileName(path).Contains(query, StringComparison.OrdinalIgnoreCase))
+        _filtered = string.IsNullOrEmpty(query)
+            ? _all
+            : _all.Where(entry => Path.GetFileName(entry.Path)
+                    .Contains(query, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
         PanList.Children.Clear();
-        foreach (var file in files) PanList.Children.Add(BuildRow(file));
+        _renderedRows = 0;
+        RenderMoreRows();
 
-        PanListBack.Title = Lang.Text("Tools.Schematic.Count", files.Count);
-        LabEmpty.Visibility = files.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        PanListBack.Title = Lang.Text("Tools.Schematic.Count", _filtered.Count);
+        LabEmpty.Visibility = _filtered.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>按批追加行；首批给一屏多，之后滚动到底再追加。</summary>
+    private void RenderMoreRows()
+    {
+        if (_renderedRows >= _filtered.Count) return;
+        var target = _renderedRows == 0
+            ? Math.Min(FirstPageRows, _filtered.Count)
+            : Math.Min(_renderedRows + MoreRowsPerScroll, _filtered.Count);
+
+        for (var index = _renderedRows; index < target; index++)
+            PanList.Children.Add(BuildRow(_filtered[index]));
+        _renderedRows = target;
     }
 
     private void Reload()
     {
-        _files = GetFiles();
+        // 目录枚举与排序放到后台线程：投影数量多时这一步会明显阻塞 UI
+        var folder = SchematicFolder;
+        var byTime = _sortByTime;
+        var version = ++_reloadVersion;
+
+        _all = [];
         ApplyFilter();
+
+        if (string.IsNullOrEmpty(folder)) return;
+        Task.Run(() =>
+        {
+            var entries = ScanSchematicFolder(folder, byTime);
+            ModBase.RunInUi(() =>
+            {
+                // 期间用户又切换了实例或点了刷新，丢弃这次结果
+                if (version != _reloadVersion) return;
+                _all = entries;
+                ApplyFilter();
+            });
+        });
     }
 
-    private List<string> GetFiles()
+    private static List<SchematicEntry> ScanSchematicFolder(string folder, bool byTime)
     {
         try
         {
-            var folder = SchematicFolder;
-            if (string.IsNullOrEmpty(folder) || !Directory.Exists(folder)) return [];
-            var files = Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories).Where(IsSchematicFile);
-            return (_sortByTime
-                    ? files.OrderByDescending(File.GetLastWriteTime)
-                    : files.OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase))
-                .ToList();
+            if (!Directory.Exists(folder)) return [];
+            var entries = new List<SchematicEntry>();
+            foreach (var path in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories))
+            {
+                if (!IsSchematicFile(path)) continue;
+                var info = new FileInfo(path);
+                var relative = path.Length > folder.Length
+                    ? path[folder.Length..].TrimStart('\\', '/')
+                    : info.Name;
+                entries.Add(new SchematicEntry(path, info.Length, info.LastWriteTime, relative));
+            }
+
+            return byTime
+                ? entries.OrderByDescending(entry => entry.Modified).ToList()
+                : entries.OrderBy(entry => Path.GetFileName(entry.Path), StringComparer.OrdinalIgnoreCase).ToList();
         }
         catch (Exception ex)
         {
@@ -194,28 +295,31 @@ public partial class PageToolsSchematic
     }
 
     /// <summary>紧凑的投影行：图标 + 名称/信息 + 预览按钮，行距与存档列表接近。</summary>
-    private Border BuildRow(string path)
+    private Border BuildRow(SchematicEntry entry)
     {
+        var path = entry.Path;
         var border = new Border
         {
             Height = 48, Margin = new Thickness(0, 1, 0, 1), CornerRadius = new CornerRadius(6),
             Cursor = Cursors.Hand, Background = new SolidColorBrush(Colors.Transparent),
             RenderTransformOrigin = new Point(0.5d, 0.5d), RenderTransform = new ScaleTransform(1d, 1d)
         };
+        // 动画组名按行唯一即可，不必每次算 MD5（大列表下这一步本身就不便宜）
+        var animKey = "SchematicRow " + path.GetHashCode();
         border.MouseEnter += (_, _) =>
             ModAnimation.AniStart(new[]
             {
                 ModAnimation.AaColor(border, Border.BackgroundProperty, "ColorBrushGray7", 120),
                 ModAnimation.AaScaleTransform(border, 1.005d - ((ScaleTransform)border.RenderTransform).ScaleX, 140,
                     ease: new ModAnimation.AniEaseOutFluent())
-            }, "SchematicRow " + ModBase.GetStringMD5(path));
+            }, animKey);
         border.MouseLeave += (_, _) =>
             ModAnimation.AniStart(new[]
             {
                 ModAnimation.AaColor(border, Border.BackgroundProperty, "ColorBrushTransparent", 160),
                 ModAnimation.AaScaleTransform(border, 1d - ((ScaleTransform)border.RenderTransform).ScaleX, 160,
                     ease: new ModAnimation.AniEaseOutFluent())
-            }, "SchematicRow " + ModBase.GetStringMD5(path));
+            }, animKey);
         border.MouseLeftButtonUp += (_, _) => OpenPreview(path);
 
         var grid = new Grid { Margin = new Thickness(12, 5, 10, 5) };
@@ -240,7 +344,8 @@ public partial class PageToolsSchematic
         name.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush1");
         var info = new TextBlock
         {
-            Text = BuildRowInfo(path), FontSize = 10.5, Margin = new Thickness(0, 2, 0, 0),
+            Text = $"{ModBase.GetString(entry.Length)} · {entry.Modified:g} · {entry.Relative}",
+            FontSize = 10.5, Margin = new Thickness(0, 2, 0, 0),
             TextTrimming = TextTrimming.CharacterEllipsis
         };
         info.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray3");
@@ -261,16 +366,6 @@ public partial class PageToolsSchematic
 
         border.Child = grid;
         return border;
-    }
-
-    private string BuildRowInfo(string path)
-    {
-        var file = new FileInfo(path);
-        var relative = !string.IsNullOrEmpty(SchematicFolder) &&
-                       path.StartsWith(SchematicFolder, StringComparison.OrdinalIgnoreCase)
-            ? path[SchematicFolder.Length..].TrimStart('\\', '/')
-            : file.Name;
-        return $"{ModBase.GetString(file.Length)} · {file.LastWriteTime:g} · {relative}";
     }
 
     private void OpenFolder()
@@ -310,9 +405,10 @@ public partial class PageToolsSchematic
     {
         PanVersionList.Children.Clear();
         _checkedInstanceItem = null;
-        // 投影多的实例排在前面；没有投影的实例置底并禁用
+        // 投影多的实例排在前面；没有投影的实例置底并禁用。
+        // 列表每次打开都会重建，因此计数缓存在字段里，避免反复递归枚举磁盘。
         var entries = _instances
-            .Select(instance => (Instance: instance, Count: GetSchematicCount(instance)))
+            .Select(instance => (Instance: instance, Count: GetSchematicCountCached(instance)))
             .OrderByDescending(entry => entry.Count)
             .ThenBy(entry => entry.Instance.Name, StringComparer.Ordinal)
             .ToList();

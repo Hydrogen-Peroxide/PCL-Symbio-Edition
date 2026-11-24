@@ -9,7 +9,7 @@
     mc:Ignorable="d" x:Class="PCL.PageSetupLaunch"
     PanScroll="{Binding ElementName=PanBack, Mode=OneWay}">
     <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
-        <StackPanel x:Name="PanMain" Margin="25,25,25,10">
+        <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}">
             <local:MyCard x:Name="CardArgument" Margin="0,0,0,15" Title="{DynamicResource Setup.Launch.Options.Title}">
                 <StackPanel Margin="25,40,25,15">
                     <Grid>

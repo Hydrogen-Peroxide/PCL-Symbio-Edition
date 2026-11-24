@@ -29,12 +29,12 @@ public partial class PageToolsSkinLibrary
     {
         InitializeComponent();
         // 模型是按皮肤单独记录的，选中皮肤时再读，这里先按经典模型显示账号皮肤
-        UpdateSlimSwitch(false, false);
+        UpdateModelSelection(false);
         Loaded += (_, _) => Reload();
     }
 
     /// <summary>皮肤库文件夹，存放导入的 PNG 皮肤。</summary>
-    private static string LibraryFolder => Path.Combine(ModBase.pathAppdataConfig, "SkinLibrary");
+    internal static string LibraryFolder => Path.Combine(ModBase.pathAppdataConfig, "SkinLibrary");
 
     /// <summary>皮肤对应的模型记录文件，与皮肤同名，内容为 slim 或 classic。</summary>
     private static string ModelFile(string skinPath) => skinPath + ".model";
@@ -98,12 +98,12 @@ public partial class PageToolsSkinLibrary
 
     #region 卡片
 
-    private const double CellWidth = 124d;
-    private const double CellHeight = 200d;
+    private const double CellWidth = 150d;
+    private const double CellHeight = 216d;
 
     private FrameworkElement CreateAddCell()
     {
-        var border = CreateCellBase("SkinCell Add", out var content, out _);
+        var border = CreateCellBase(out var content, out _);
         border.ToolTip = Lang.Text("Tools.SkinLibrary.AddNew");
         var panel = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
         var circle = new Border
@@ -134,15 +134,15 @@ public partial class PageToolsSkinLibrary
 
     private FrameworkElement CreateSkinCell(string file)
     {
-        var key = "SkinCell " + ModBase.GetStringMD5(file);
-        var border = CreateCellBase(key, out var content, out var highlight);
+        var border = CreateCellBase(out var content, out var highlight);
         border.Tag = file;
         _cellHighlights[file] = highlight;
         var panel = new StackPanel();
         var label = new TextBlock
         {
             Text = Path.GetFileNameWithoutExtension(file), HorizontalAlignment = HorizontalAlignment.Center,
-            FontSize = 12, TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 108
+            FontSize = 14, FontWeight = FontWeights.SemiBold,
+            Margin = new Thickness(0, 14, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 140
         };
         label.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush1");
         var image = new MyImage
@@ -151,57 +151,42 @@ public partial class PageToolsSkinLibrary
             ActualSource = GetFigureImage(file, IsSlimSkin(file))
         };
         RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.NearestNeighbor);
-        panel.Children.Add(label);
         panel.Children.Add(image);
+        panel.Children.Add(label);
         content.Children.Add(panel);
         border.MouseLeftButtonUp += (_, _) => SelectSkin(file);
         return border;
     }
 
-    private Border CreateCellBase(string animationKey, out Grid content, out Border highlight)
+    private Border CreateCellBase(out Grid content, out Border highlight)
     {
         // 选中高亮单独作为一层叠在卡片内，用透明度动画淡入淡出，避免直接改边框粗细造成跳动
         highlight = new Border
         {
-            CornerRadius = new CornerRadius(8), BorderThickness = new Thickness(1.5d),
+            CornerRadius = new CornerRadius(20), BorderThickness = new Thickness(1.5d),
             Opacity = 0d, IsHitTestVisible = false
         };
-        highlight.SetResourceReference(Border.BorderBrushProperty, "ColorBrush4");
-        highlight.SetResourceReference(Border.BackgroundProperty, "ColorBrushGray7");
+        highlight.SetResourceReference(Border.BorderBrushProperty, "SeWallpaperAccent");
 
         content = new Grid { Margin = new Thickness(8) };
-        var root = new Grid();
+        // The outer border owns hover translation. Scale the inner surface independently.
+        var root = new Grid
+        {
+            RenderTransformOrigin = new System.Windows.Point(0.5, 0.5),
+            RenderTransform = new ScaleTransform()
+        };
         root.Children.Add(highlight);
         root.Children.Add(content);
 
         var border = new Border
         {
-            Width = CellWidth, Height = CellHeight, Margin = new Thickness(4),
-            CornerRadius = new CornerRadius(8), Cursor = Cursors.Hand,
-            RenderTransformOrigin = new System.Windows.Point(0.5d, 0.5d),
-            RenderTransform = new ScaleTransform(1d, 1d),
-            Background = new SolidColorBrush(Colors.Transparent),
+            Width = CellWidth, Height = CellHeight, Margin = new Thickness(0, 0, 12, 12),
+            CornerRadius = new CornerRadius(20), Cursor = Cursors.Hand,
+            BorderThickness = new Thickness(1),
             VerticalAlignment = VerticalAlignment.Top,
             Child = root
         };
-        border.MouseEnter += (_, _) =>
-        {
-            ModAnimation.AniStart(new[]
-            {
-                ModAnimation.AaColor(border, Border.BackgroundProperty, "ColorBrushGray7", 120),
-                ModAnimation.AaScaleTransform(border, 1.04d - ((ScaleTransform)border.RenderTransform).ScaleX, 160,
-                    ease: new ModAnimation.AniEaseOutFluent())
-            }, animationKey + " Hover");
-        };
-        border.MouseLeave += (_, _) =>
-        {
-            ModAnimation.AniStart(new[]
-            {
-                ModAnimation.AaColor(border, Border.BackgroundProperty, "ColorBrushTransparent", 160),
-                ModAnimation.AaScaleTransform(border, 1d - ((ScaleTransform)border.RenderTransform).ScaleX, 160,
-                    ease: new ModAnimation.AniEaseOutFluent())
-            }, animationKey + " Hover");
-        };
+        border.SetResourceReference(StyleProperty, "SeSkinTile");
         return border;
     }
 
@@ -234,14 +219,21 @@ public partial class PageToolsSkinLibrary
     {
         var cell = PanSkinList.Children.OfType<Border>()
             .FirstOrDefault(border => border.Tag is string path && path == file);
-        if (cell is null) return;
-        var scale = ((ScaleTransform)cell.RenderTransform).ScaleX;
-        ModAnimation.AniStart(new[]
-        {
-            ModAnimation.AaScaleTransform(cell, 0.95d - scale, 90, ease: new ModAnimation.AniEaseOutFluent()),
-            ModAnimation.AaScaleTransform(cell, 0.05d, 220, 90,
-                new ModAnimation.AniEaseOutBack(ModAnimation.AniEasePower.Weak))
-        }, "SkinCell Pop " + ModBase.GetStringMD5(file));
+        if (cell?.Child is not Grid { RenderTransform: ScaleTransform scale } ||
+            !SystemParameters.ClientAreaAnimation || ModAnimation.aniSpeed is <= 0 or >= 200)
+            return;
+
+        var speed = ModAnimation.aniSpeed;
+        var animation = new DoubleAnimationUsingKeyFrames { FillBehavior = FillBehavior.Stop };
+        animation.KeyFrames.Add(new LinearDoubleKeyFrame(scale.ScaleX, KeyTime.FromTimeSpan(TimeSpan.Zero)));
+        animation.KeyFrames.Add(new EasingDoubleKeyFrame(0.95,
+            KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(90 / speed)),
+            new CubicEase { EasingMode = EasingMode.EaseOut }));
+        animation.KeyFrames.Add(new EasingDoubleKeyFrame(1,
+            KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(310 / speed)),
+            new CubicEase { EasingMode = EasingMode.EaseOut }));
+        scale.BeginAnimation(ScaleTransform.ScaleXProperty, animation);
+        scale.BeginAnimation(ScaleTransform.ScaleYProperty, animation);
     }
 
     /// <summary>刷新左侧的当前皮肤预览。</summary>
@@ -251,7 +243,7 @@ public partial class PageToolsSkinLibrary
         {
             // 模型按皮肤单独记录，选中哪张就按哪张的设置预览
             ViewerCurrent.SlimModel = IsSlimSkin(selectedFile);
-            UpdateSlimSwitch(ViewerCurrent.SlimModel, false);
+            UpdateModelSelection(ViewerCurrent.SlimModel);
             ViewerCurrent.SetSkin(selectedFile);
             LabCurrentName.Text = Path.GetFileNameWithoutExtension(selectedFile);
             BtnPrimary.Text = Lang.Text("Tools.SkinLibrary.ApplyToAccount");
@@ -268,7 +260,7 @@ public partial class PageToolsSkinLibrary
                        File.Exists(ModProfile.selectedProfile.LocalSkin) &&
                        ModProfile.selectedProfile.LocalSkinSlim;
             ViewerCurrent.SlimModel = slim;
-            UpdateSlimSwitch(slim, false);
+            UpdateModelSelection(slim);
             ViewerCurrent.SetSkin(GetAccountSkinSource());
             LabCurrentName.Text = ModProfile.selectedProfile?.Username ??
                                   Lang.Text("Tools.SkinLibrary.CurrentSkin");
@@ -278,15 +270,16 @@ public partial class PageToolsSkinLibrary
             BtnRemove.Visibility = Visibility.Collapsed;
         }
 
-        BtnChangeCape.Visibility = ModProfile.selectedProfile is null ? Visibility.Collapsed : Visibility.Visible;
     }
 
     /// <summary>切换当前皮肤使用经典（手臂 4 像素）还是纤细（手臂 3 像素）模型，按皮肤单独保存。</summary>
-    private void BtnSlimModel_Click(object sender, MouseButtonEventArgs e)
+    private void BtnModel_Click(object sender, MouseButtonEventArgs e)
     {
-        var slim = !ViewerCurrent.SlimModel;
+        var slim = ReferenceEquals(sender, BtnSlimModel);
+        if (slim == ViewerCurrent.SlimModel)
+            return;
         ViewerCurrent.SlimModel = slim;
-        UpdateSlimSwitch(slim, true);
+        UpdateModelSelection(slim);
         // 只记录到当前选中的皮肤；未选中皮肤时仅临时预览
         if (selectedFile is not null)
         {
@@ -306,25 +299,10 @@ public partial class PageToolsSkinLibrary
         Reload();
     }
 
-    /// <summary>更新开关的外观：滑块的位移与轨道配色。</summary>
-    private void UpdateSlimSwitch(bool slim, bool animate)
+    private void UpdateModelSelection(bool slim)
     {
-        var target = slim ? 20d : 0d;
-        if (animate)
-        {
-            var animation = new DoubleAnimation(target, new Duration(TimeSpan.FromMilliseconds(160)))
-            {
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-            };
-            SlimKnobOffset.BeginAnimation(TranslateTransform.XProperty, animation);
-        }
-        else
-        {
-            SlimKnobOffset.BeginAnimation(TranslateTransform.XProperty, null);
-            SlimKnobOffset.X = target;
-        }
-
-        SlimTrack.SetResourceReference(Border.BackgroundProperty, slim ? "ColorBrush4" : "ColorBrushGray6");
+        BtnClassicModel.ColorType = slim ? MyButton.ColorState.Normal : MyButton.ColorState.Highlight;
+        BtnSlimModel.ColorType = slim ? MyButton.ColorState.Highlight : MyButton.ColorState.Normal;
     }
 
     #endregion
@@ -438,7 +416,7 @@ public partial class PageToolsSkinLibrary
         }
     }
 
-    private static string GetUniquePath(string path)
+    internal static string GetUniquePath(string path)
     {
         if (!File.Exists(path)) return path;
         var folder = Path.GetDirectoryName(path);
@@ -531,104 +509,6 @@ public partial class PageToolsSkinLibrary
         }
     }
 
-    /// <summary>更换当前账号的披风。</summary>
-    private void BtnChangeCape_Click(object sender, EventArgs e)
-    {
-        var profile = ModProfile.SyncSelectedProfile();
-        if (profile is null)
-        {
-            HintService.Hint(Lang.Text("Tools.SkinLibrary.Apply.NoProfile"), HintType.Error);
-            return;
-        }
-
-        if (profile.Type == ModLaunch.McLoginType.Ms)
-        {
-            MySkin.ChangeCape();
-        }
-        else if (profile.Type == ModLaunch.McLoginType.Auth)
-        {
-            ModBase.OpenWebsite(profile.Server.BeforeFirst("api/yggdrasil/authserver") + "user/closet");
-            HintService.Hint(Lang.Text("Tools.SkinLibrary.Apply.AuthHint"));
-        }
-        else
-        {
-            ChangeLocalCape(profile);
-        }
-    }
-
-    /// <summary>离线档案的本地披风：选择文件，或在已应用时提供移除入口。</summary>
-    private void ChangeLocalCape(ModProfile.McProfile profile)
-    {
-        if (string.IsNullOrWhiteSpace(profile.LocalCape) || !File.Exists(profile.LocalCape))
-        {
-            PickCapeFile(profile);
-            return;
-        }
-
-        var options = new List<IMyRadio>
-        {
-            new MyRadioBox { Text = Lang.Text("Tools.SkinLibrary.Cape.Pick") },
-            new MyRadioBox { Text = Lang.Text("Tools.SkinLibrary.Cape.Remove") }
-        };
-        var choice = ModMain.MyMsgBoxSelect(options, Lang.Text("Tools.SkinLibrary.Cape.Title"),
-            Lang.Text("Common.Action.Continue"), Lang.Text("Common.Action.Cancel"));
-        if (choice is null) return;
-
-        if (choice == 1)
-        {
-            profile.LocalCape = null;
-            ModProfile.SaveProfile();
-            ModLocalSkin.Register(profile);
-            HintService.Hint(Lang.Text("Tools.SkinLibrary.Cape.Removed"), HintType.Success);
-            return;
-        }
-
-        PickCapeFile(profile);
-    }
-
-    /// <summary>选择披风文件并应用；文件会复制进皮肤库的 Capes 目录，避免原文件被挪走后失效。</summary>
-    private void PickCapeFile(ModProfile.McProfile profile)
-    {
-        var folder = Path.Combine(LibraryFolder, "Capes");
-        try
-        {
-            Directory.CreateDirectory(folder);
-        }
-        catch (Exception ex)
-        {
-            ModBase.Log(ex, "[SkinLibrary] 创建披风目录失败", ModBase.LogLevel.Developer);
-        }
-
-        var files = SystemDialogs.SelectFiles(Lang.Text("Tools.SkinLibrary.ImportFilter"),
-            Lang.Text("Tools.SkinLibrary.Cape.PickTitle"), folder, false);
-        if (files.Length == 0) return;
-
-        try
-        {
-            var file = files[0];
-            var size = ReadSkinSize(file);
-            if (size.Width < 64 || size.Height < 32 || size.Width % 64 != 0 || size.Height % 32 != 0)
-            {
-                HintService.Hint(Lang.Text("Tools.SkinLibrary.Cape.Invalid", $"{size.Width}×{size.Height}"),
-                    HintType.Error);
-                return;
-            }
-
-            var target = GetUniquePath(Path.Combine(folder, Path.GetFileName(file)));
-            File.Copy(file, target);
-            profile.LocalCape = target;
-            ModProfile.SaveProfile();
-            ModLocalSkin.Register(profile);
-            HintService.Hint(Lang.Text("Tools.SkinLibrary.Cape.Applied", Path.GetFileNameWithoutExtension(target)),
-                HintType.Success);
-        }
-        catch (Exception ex)
-        {
-            ModBase.Log(ex, "[SkinLibrary] 导入披风失败", ModBase.LogLevel.Hint,
-                userSummary: Lang.Text("Tools.SkinLibrary.Cape.ImportFailed", ex.Message));
-        }
-    }
-
     /// <summary>获取账号当前皮肤的文件路径，未加载时回退到默认皮肤。</summary>
     private static string GetAccountSkinSource()
     {
@@ -671,7 +551,7 @@ public partial class PageToolsSkinLibrary
     #region 图片处理
 
     /// <summary>读取皮肤分辨率，无法解析时抛出异常。</summary>
-    private static System.Drawing.Size ReadSkinSize(string file)
+    internal static System.Drawing.Size ReadSkinSize(string file)
     {
         var image = new MyBitmap(file);
         return new System.Drawing.Size(image.pic.Width, image.pic.Height);
@@ -708,3 +588,4 @@ public partial class PageToolsSkinLibrary
 
     #endregion
 }
+

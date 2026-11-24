@@ -34,6 +34,7 @@ public static class ThemeManager
         {
             if (!ModMain.frmMain.IsLoaded) return;
             RefreshBackground();
+            ModMain.frmMain.RefreshUpstreamGlass();
             RefreshAllContextMenuThemes();
         });
     }
@@ -41,6 +42,31 @@ public static class ThemeManager
     // 主页面背景
     private static void RefreshBackground()
     {
+        var window = ModMain.frmMain;
+        var highContrast = SystemParameters.HighContrast;
+        AppResources["SeWallpaperScrim"] = IsDarkMode && !window.HasUpstreamGlass
+            ? AppResources["SeDarkScrim"]
+            : Brushes.Transparent;
+        AppResources["SeCardFill"] = AppResources[IsDarkMode ? "SeDarkCard" : "ColorBrushTransparentBackground"];
+        AppResources["SeCardStroke"] = AppResources[IsDarkMode ? "SeDarkStroke" : "ColorBrushGray6"];
+        AppResources["SeCaptionFill"] = AppResources[IsDarkMode ? "SeDarkCard" : "ColorBrushGray7"];
+
+        if (highContrast)
+        {
+            AppResources["SeWallpaperScrim"] = SystemColors.WindowBrush;
+            AppResources["SeCardFill"] = SystemColors.WindowBrush;
+            AppResources["SeCardStroke"] = SystemColors.WindowTextBrush;
+            AppResources["SeCaptionFill"] = SystemColors.WindowBrush;
+            window.PanForm.Background = SystemColors.WindowBrush;
+            return;
+        }
+
+        if (window.HasUpstreamGlass)
+        {
+            window.PanForm.Background = null;
+            return;
+        }
+
         if (Config.Preference.Background.BackgroundColorful)
         {
             var brush = new LinearGradientBrush

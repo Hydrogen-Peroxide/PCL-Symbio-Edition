@@ -133,7 +133,7 @@
                             <RowDefinition Height="1*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
-                        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto"
+                        <ScrollViewer Style="{StaticResource ScrollViewerNoMargin}" Grid.Row="0" VerticalScrollBarVisibility="Auto"
                                       HorizontalScrollBarVisibility="Disabled">
                             <StackPanel>
                                 <!-- 实例详情 -->
@@ -219,6 +219,9 @@
                                             <local:MyListItem Height="34" Type="Clickable"
                                                               Title="{DynamicResource Bedrock.Shortcuts.OpenPackages}"
                                                               SvgIcon="lucide/box" Click="OpenPackageFolder_Click" />
+                                            <local:MyListItem Height="34" Type="Clickable"
+                                                              Title="{DynamicResource Bedrock.Shortcuts.ExternalFolder}"
+                                                              SvgIcon="lucide/folder-plus" Click="AddExternalFolder_Click" />
                                         </StackPanel>
                                     </Border>
                                 </StackPanel>

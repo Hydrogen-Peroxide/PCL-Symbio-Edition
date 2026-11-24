@@ -625,7 +625,9 @@ public partial class MyListItem : IMyRadio
 
         if (pathLogo is not null)
         {
-            SetColumn(pathLogo, 2);
+            SetColumn(pathLogo, IsFluentNavigation ? 0 : 2);
+            if (IsFluentNavigation)
+                SetColumnSpan(pathLogo, ColumnDefinitions.Count);
             SetRowSpan(pathLogo, 4);
             OnSizeChanged(); // 设置边距
             Children.Add(pathLogo);
@@ -741,7 +743,15 @@ public partial class MyListItem : IMyRadio
 
         if (pathLogo is not null)
         {
-            if (!IsUsingSvgIcon && (logo.EndsWithF(".png", true) ||
+            if (IsFluentNavigation)
+            {
+                pathLogo.Width = pathLogo.Height = 24;
+                pathLogo.HorizontalAlignment = HorizontalAlignment.Center;
+                pathLogo.VerticalAlignment = VerticalAlignment.Center;
+                pathLogo.Margin = new Thickness();
+                pathLogo.Opacity = 0.8;
+            }
+            else if (!IsUsingSvgIcon && (logo.EndsWithF(".png", true) ||
                                     logo.EndsWithF(".jpg", true) ||
                                     logo.EndsWithF(".webp", true)))
                 pathLogo.Margin = new Thickness(4d, 5d, 3d, 5d);
@@ -754,6 +764,9 @@ public partial class MyListItem : IMyRadio
 
     // 勾选状态
     private bool _Checked;
+    private Border? fluentSelection;
+
+    public bool IsFluentNavigation { get; set; }
 
     public bool Checked
     {
@@ -870,6 +883,24 @@ public partial class MyListItem : IMyRadio
                         break;
                     }
                 }
+            }
+
+            if (IsFluentNavigation)
+            {
+                if (fluentSelection is null)
+                {
+                    fluentSelection = new Border
+                    {
+                        CornerRadius = new CornerRadius(20),
+                        IsHitTestVisible = false,
+                        Opacity = 0.48
+                    };
+                    fluentSelection.SetResourceReference(Border.BackgroundProperty, "SeWallpaperAccent");
+                    SetColumnSpan(fluentSelection, ColumnDefinitions.Count);
+                    SetRowSpan(fluentSelection, RowDefinitions.Count);
+                    Children.Insert(0, fluentSelection);
+                }
+                fluentSelection.Visibility = Checked ? Visibility.Visible : Visibility.Collapsed;
             }
 
             var customHeight = 20d; // 修改左侧神秘动画条的高度

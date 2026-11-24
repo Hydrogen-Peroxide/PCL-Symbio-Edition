@@ -6,7 +6,7 @@
     mc:Ignorable="d" x:Class="PCL.PageInstanceOverall"
     PanScroll="{Binding ElementName=PanBack}" Grid.IsSharedSizeScope="True">
     <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
-        <StackPanel x:Name="PanMain" Margin="25,10">
+        <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}">
             <local:MyCard Margin="0,15" Title="">
                 <Grid Margin="10,7" Name="PanDisplayItem" />
             </local:MyCard>

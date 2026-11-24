@@ -24,11 +24,11 @@
         <Grid.RenderTransform>
             <ScaleTransform />
         </Grid.RenderTransform>
-        <local:MyButton Grid.Row="3" Grid.Column="2" x:Name="BtnInstance" Height="35" Margin="0,10,10,0" Text="{DynamicResource Launch.Home.SelectInstance}"
-                        IsEnabled="False" Click="BtnInstance_Click" />
-        <local:MyButton Grid.Row="3" Grid.Column="3" x:Name="BtnMore" Visibility="Collapsed" Height="35"
-                        Click="BtnMore_Click"
-                        Margin="0,10,10,0" TextPadding="36" Text="{DynamicResource Launch.Home.InstanceSettings}" />
+        <local:MyButton Grid.Row="3" Grid.Column="2" x:Name="BtnInstance" Height="32" Margin="0,8,8,0" Text="{DynamicResource Launch.Home.SelectInstance}"
+                        IsEnabled="False" Click="BtnInstance_Click" Style="{StaticResource SePillButton}" />
+        <local:MyButton Grid.Row="3" Grid.Column="3" x:Name="BtnMore" Visibility="Collapsed" Height="32"
+                        Click="BtnMore_Click" Style="{StaticResource SePillButton}"
+                        Margin="0,8,8,0" TextPadding="36" Text="{DynamicResource Launch.Home.InstanceSettings}" />
         <Grid Grid.ColumnSpan="5" Grid.Row="1" Margin="20,0" VerticalAlignment="Center" x:Name="PanLogin" />
         <Grid Grid.ColumnSpan="5" Grid.Row="2" RenderTransformOrigin="0.5,0.5">
             <Grid.RenderTransform>
@@ -37,9 +37,9 @@
                     <TranslateTransform x:Name="AprilPosTrans" />
                 </TransformGroup>
             </Grid.RenderTransform>
-            <local:MyButton x:Name="BtnLaunch" Height="54" Margin="20,0" Text="{DynamicResource Launch.Home.Button.Loading}" ColorType="Highlight"
+        <local:MyButton x:Name="BtnLaunch" Height="48" Margin="20,0" Text="{DynamicResource Launch.Home.Button.Loading}" ColorType="Highlight" Style="{StaticResource SePrimaryButton}"
                             Click="BtnLaunch_Click"
-                            Padding="30,0,30,15" IsEnabled="False" />
+                            Padding="30,0,30,15" IsEnabled="False" CornerRadius="{StaticResource SeRadiusMd}" />
             <TextBlock x:Name="LabVersion" Text="{DynamicResource Launch.Home.VersionList.Loading}" Margin="35,0,35,10" IsHitTestVisible="False"
                        VerticalAlignment="Bottom" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis"
                        FontSize="11" Foreground="{DynamicResource ColorBrushGray3}" RenderTransformOrigin="0.5,-0.2">

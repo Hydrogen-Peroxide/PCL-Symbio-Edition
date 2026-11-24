@@ -7,6 +7,6 @@
     mc:Ignorable="d" x:Class="PCL.PageSpeedRight"
     PanScroll="{Binding ElementName=PanBack}">
     <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
-        <StackPanel x:Name="PanMain" Margin="25,25,25,10" Grid.IsSharedSizeScope="True" />
+        <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}" Grid.IsSharedSizeScope="True" />
     </local:MyScrollViewer>
 </local:MyPageRight>

@@ -41,6 +41,24 @@ public partial class PageGameLeft
     /// </summary>
     public void SwitchEdition(bool bedrock, bool animate = true) => ApplyMode(bedrock, animate);
 
+    /// <summary>
+    ///     将版本切换开关交给新版启动器标题栏承载。
+    /// </summary>
+    public UIElement TakeEditionSwitch()
+    {
+        if (PanSwitch.Parent is Panel parent)
+            parent.Children.Remove(PanSwitch);
+
+        Grid.SetRow(PanHost, 0);
+        // 标题栏可用宽度会随窗口和页面标题变化，保持切换器紧凑可以避免基岩版一侧被裁切。
+        PanSwitch.Width = 174;
+        PanSwitch.Height = 40;
+        PanSwitch.Margin = new Thickness(0);
+        PanSwitch.HorizontalAlignment = HorizontalAlignment.Left;
+        PanSwitch.VerticalAlignment = VerticalAlignment.Center;
+        return PanSwitch;
+    }
+
     private void JavaArea_Click(object sender, MouseButtonEventArgs e) => ApplyMode(false, true);
 
     private void BedrockArea_Click(object sender, MouseButtonEventArgs e) => ApplyMode(true, true);
@@ -92,6 +110,9 @@ public partial class PageGameLeft
         FrameworkElement show = bedrock ? ModMain.frmBedrockLeft : ModMain.frmLaunchLeft;
         FrameworkElement? hide = bedrock ? ModMain.frmLaunchLeft : ModMain.frmBedrockLeft;
         ModMain.frmGameRight?.SwitchEdition(bedrock, animate || !_applied);
+        // The modern shell owns the visible home deck, so it must receive the edition change
+        // immediately instead of waiting for a later page navigation to rebuild its state.
+        ModMain.frmMain?.RefreshUpstreamGlass();
 
         if (show.Visibility == Visibility.Visible && _applied)
             return;
@@ -142,15 +163,19 @@ public partial class PageGameLeft
 
     private static void SetLabelState(bool active, TextBlock text, SvgIconControl icon)
     {
+        var owner = text as FrameworkElement;
+        var activeBrush = owner?.TryFindResource("GlassTextBrush") as Brush ?? Brushes.White;
+        var inactiveBrush = owner?.TryFindResource("GlassSecondaryTextBrush") as Brush ??
+                            owner?.TryFindResource("ColorBrush3") as Brush ?? Brushes.Gray;
         if (active)
         {
-            text.Foreground = Brushes.White;
-            icon.IconBrush = Brushes.White;
+            text.Foreground = activeBrush;
+            icon.IconBrush = activeBrush;
         }
         else
         {
-            text.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush3");
-            icon.SetResourceReference(SvgIconControl.IconBrushProperty, "ColorBrush3");
+            text.Foreground = inactiveBrush;
+            icon.IconBrush = inactiveBrush;
         }
     }
 }

@@ -7,7 +7,7 @@
                    mc:Ignorable="d" PanScroll="{Binding ElementName=PanBack}">
     <Grid>
         <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
-            <StackPanel x:Name="PanMain" Margin="20,20,20,10" />
+            <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}" />
         </local:MyScrollViewer>
         <local:MyCard HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40,0" x:Name="PanLoad"
                       UseAnimation="False" Visibility="Collapsed">

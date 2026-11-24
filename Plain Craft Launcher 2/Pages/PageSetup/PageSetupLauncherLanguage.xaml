@@ -15,7 +15,7 @@
         VerticalScrollBarVisibility="Auto"
         HorizontalScrollBarVisibility="Disabled">
 
-        <StackPanel x:Name="PanMain" Margin="25,10">
+        <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}">
             <local:MyCard
                 Margin="0,15,0,10"
                 Title="{DynamicResource Setup.Language.CardTitle}">

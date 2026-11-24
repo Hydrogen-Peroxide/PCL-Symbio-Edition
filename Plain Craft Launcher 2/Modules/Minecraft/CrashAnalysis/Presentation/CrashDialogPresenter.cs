@@ -43,14 +43,15 @@ internal sealed class CrashDialogPresenter(CrashAnalysisContext context)
             directFile,
             openInstanceSettings);
 
-        var selectedButton = MsgBoxWrapper.ShowWithCustomButtons(
+        var selectedButton = ModMain.MyMsgBox(
             resultText,
             title,
-            MsgBoxTheme.Info,
-            true,
-            new MsgBoxButtonInfo(Lang.Text("Common.Action.Confirm"), 1),
-            new MsgBoxButtonInfo(secondButtonText, 2, secondButtonAction),
-            new MsgBoxButtonInfo(thirdButtonText, 3));
+            Lang.Text("Common.Action.Confirm"),
+            secondButtonText,
+            thirdButtonText,
+            forceWait: true,
+            button2Action: secondButtonAction,
+            showCrashBanner: true);
 
         switch (selectedButton)
         {

@@ -583,7 +583,7 @@ public class MyPageRight : AdornerDecorator
                     aniList.Add(ModAnimation.AaTranslateY(Control, 5d, 250, delay,
                         new ModAnimation.AniEaseOutFluent()));
                     aniList.Add(ModAnimation.AaTranslateY(Control, 11d, 350, delay, new ModAnimation.AniEaseOutBack()));
-                    delay += 25;
+                    delay += 35;
                 }
         }
 

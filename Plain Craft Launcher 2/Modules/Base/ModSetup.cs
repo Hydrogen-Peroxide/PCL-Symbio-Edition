@@ -216,6 +216,11 @@ public class ModSetup
     // 启动器
     public static void UiLauncherTransparent(int value)
     {
+        if (ModMain.frmMain.HasUpstreamGlass)
+        {
+            ModMain.frmMain.Opacity = 1;
+            return;
+        }
         ModMain.frmMain.Opacity = value / 1000d + 0.4d;
     }
 
@@ -256,7 +261,9 @@ public class ModSetup
     // 背景图片
     public static void UiBackgroundOpacity(int value)
     {
-        ModMain.frmMain.ImgBack.Opacity = value / 1000d;
+        var window = ModMain.frmMain;
+        window.ImgBack.Opacity = window.HasUpstreamGlass && window.ImgBack.Background is ImageBrush ? 0 : value / 1000d;
+        window.RefreshUpstreamGlass();
     }
 
     public static void UiBackgroundBlur(int value)
@@ -443,11 +450,11 @@ public class ModSetup
     // 高级材质
     public static void UiBlur(bool value)
     {
-        if (ModMain.frmSetupUI is null)
-            return;
-
-        ModMain.frmSetupUI.PanBlurValue.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
+        if (ModMain.frmSetupUI is not null)
+            ModMain.frmSetupUI.PanBlurValue.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
         UiBlurValue(value ? Config.Preference.Blur.Radius : 0);
+        if (ModMain.frmMain is not null)
+            ThemeManager.ThemeRefreshMain();
     }
 
     public static void UiBlurValue(int value)

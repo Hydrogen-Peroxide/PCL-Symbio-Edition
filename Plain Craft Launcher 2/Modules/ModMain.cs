@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -37,6 +37,8 @@ public static class ModMain
     public static PageSpeedRight? frmSpeedRight;
     public static PageToolsLeft? frmToolsLeft;
     public static PageToolsTest? frmToolsTest;
+    public static PageLanLeft? frmLanLeft;
+    public static PageLanRight? frmLanRight;
     public static PageDownloadLeft? frmDownloadLeft;
     public static PageDownloadInstall? frmDownloadInstall;
     public static PageDownloadClient? frmDownloadClient;
@@ -311,6 +313,7 @@ public static class ModMain
         public bool IsExited = false;
 
         public bool IsWarn;
+        internal bool ShowCrashBanner;
 
         /// <summary>
         ///     输入模式：输入的文本。若点击了 非 第一个按钮，则为 Nothing。
@@ -359,9 +362,11 @@ public static class ModMain
     /// <param name="button2Action">点击第二个按钮将执行该方法，不关闭弹窗。</param>
     /// <param name="button3Action">点击第三个按钮将执行该方法，不关闭弹窗。</param>
     /// <param name="isWarn">是否为警告弹窗，若为 True，弹窗配色和背景会变为红色。</param>
+    /// <param name="showCrashBanner">是否在标题区域显示游戏崩溃报告横幅。</param>
     public static int MyMsgBox(string caption, string? title = null, string? button1 = null, string? button2 = "",
         string? button3 = "", bool isWarn = false, bool highLight = true, bool forceWait = false,
-        Action button1Action = null, Action button2Action = null, Action button3Action = null)
+        Action button1Action = null, Action button2Action = null, Action button3Action = null,
+        bool showCrashBanner = false)
     {
         title ??= GetDefaultDialogTitle();
         button1 ??= GetDefaultConfirmText();
@@ -372,7 +377,7 @@ public static class ModMain
         {
             Type = MyMsgBoxType.Text, Button1 = button1, Button2 = button2, Button3 = button3, Text = caption,
             IsWarn = isWarn, Title = title, HighLight = highLight, ForceWait = true, Button1Action = button1Action,
-            Button2Action = button2Action, Button3Action = button3Action
+            Button2Action = button2Action, Button3Action = button3Action, ShowCrashBanner = showCrashBanner
         };
         WaitingMyMsgBox.Add(converter);
         if (ModBase.RunInUi())

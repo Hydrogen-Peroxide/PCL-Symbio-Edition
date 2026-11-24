@@ -17,14 +17,6 @@
                           Title="{DynamicResource Tools.Left.Utilities.Title}" Check="PageCheck"
                           LogoScale="0.9"
                           SvgIcon="lucide/tool-case" />
-        <local:MyListItem x:Name="ItemSkins"
-                          IsScaleAnimationEnabled="False"
-                          Type="RadioBox" Tag="5"
-                          MinPaddingRight="35" Height="36"
-                          VerticalAlignment="Top"
-                          Title="{DynamicResource Tools.Left.SkinLibrary.Title}" Check="PageCheck"
-                          LogoScale="0.9"
-                          SvgIcon="lucide/shirt" />
         <local:MyListItem x:Name="ItemSaves"
                           IsScaleAnimationEnabled="False"
                           Type="RadioBox" Tag="4"

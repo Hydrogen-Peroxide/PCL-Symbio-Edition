@@ -123,7 +123,7 @@ public partial class PageLoginProfileSkin
     // 跳转到皮肤库
     private void BtnSkinLibrary_Click(object sender, EventArgs e)
     {
-        ModMain.frmMain.PageChange(FormMain.PageType.Tools, FormMain.PageSubType.ToolsSkins);
+        ModMain.frmMain.PageChange(FormMain.PageType.SkinLibrary);
     }
 
     #endregion

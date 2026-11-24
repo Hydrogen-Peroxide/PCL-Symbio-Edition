@@ -4,7 +4,7 @@
                    xmlns:local="clr-namespace:PCL" PanScroll="{Binding ElementName=PanBack}">
     <local:MyScrollViewer x:Name="PanBack" VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
-        <StackPanel x:Name="PanMain" Margin="25,10">
+        <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}">
 
             <!-- 实例摘要：图标 + 名称 + 通道，右侧直接启动 -->
             <local:MyCard Margin="0,15" Title="" UseAnimation="False">

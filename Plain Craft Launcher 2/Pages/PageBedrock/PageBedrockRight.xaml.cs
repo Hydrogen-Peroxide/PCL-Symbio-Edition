@@ -217,6 +217,7 @@ public partial class PageBedrockRight
         RefreshLocalVersions();
         LoadVersionList();
         RefreshCurrentInstanceCard();
+        ModMain.frmMain?.RefreshUpstreamGlass();
     }
 
     /// <summary>刷新右侧「当前实例」卡片，切换实例后立刻能看到变化。</summary>
@@ -251,7 +252,11 @@ public partial class PageBedrockRight
     }
 
     /// <summary>只刷新「当前实例」卡片，供实例选择浮层实时联动，不做检测与联网。</summary>
-    public void RefreshInstanceCard() => RefreshCurrentInstanceCard();
+    public void RefreshInstanceCard()
+    {
+        RefreshCurrentInstanceCard();
+        ModMain.frmMain?.RefreshUpstreamGlass();
+    }
 
     private static string ChannelLabel(string versionId) => ModBedrockInstance.GetChannel(versionId) switch
     {
@@ -572,27 +577,47 @@ public partial class PageBedrockRight
     /// </summary>
     private static bool IsGdkVersion(string versionId)
     {
-        var dir = ModBedrockUwp.GetVersionDirectory(BedrockVersionsDir, versionId);
-        return GetPackageFiles(dir).Any(ModBedrockGdk.IsGdkPackage);
+        // 外部登记的版本目录也要参与判断，否则外部 GDK 版本会被当成普通 UWP 版本
+        var roots = new List<string> { BedrockVersionsDir };
+        roots.AddRange(ModBedrockInstance.ExternalDirectories);
+        foreach (var root in roots)
+        {
+            var dir = ModBedrockUwp.GetVersionDirectory(root, versionId);
+            if (GetPackageFiles(dir).Any(ModBedrockGdk.IsGdkPackage)) return true;
+            // 已解包的 GDK 版本没有安装包，目录本身就是 GDK 构建
+            if (ModBedrockGdk.IsGdkBuild(dir)) return true;
+        }
+
+        return false;
     }
+
+    /// <summary>该版本的 GDK 便携目录（已解包、可直接运行），找不到返回 null。</summary>
+    private static string? FindGdkReadyDirectory(string versionId) => FindPortableGdkDirectory(versionId);
 
     /// <summary>
     ///     路径是否为可直接运行的 GDK 便携版目录：extracted\&lt;版本号&gt; 或版本目录本身。
+    ///     系统注册包的 InstallLocation 只要本身是 GDK 构建（带 MicrosoftGame.Config）同样算：
+    ///     那样可以直接跑主程序完成 XUser 注入，而不是用 explorer 拉起包、把账号注入整个丢掉。
     /// </summary>
     private static bool IsPortableGdkPath(string path)
     {
         try
         {
+            if (string.IsNullOrWhiteSpace(path)) return false;
+
             var root = Path.GetFullPath(BedrockVersionsDir).TrimEnd(Path.DirectorySeparatorChar);
             var full = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar);
-            if (!full.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
-                return false;
+            if (full.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            {
+                var segments = full[(root.Length + 1)..].Split(Path.DirectorySeparatorChar);
+                var versionIndex = segments[0].Equals("extracted", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+                if (segments.Length > versionIndex && !string.IsNullOrEmpty(segments[versionIndex]))
+                    // UWP 版虽然也有 Minecraft.Windows.exe，但必须注册成系统包才能启动，不能当便携版直接跑
+                    return ModBedrockGdk.IsGdkBuild(full);
+            }
 
-            var segments = full[(root.Length + 1)..].Split(Path.DirectorySeparatorChar);
-            var versionIndex = segments[0].Equals("extracted", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
-            if (segments.Length <= versionIndex || string.IsNullOrEmpty(segments[versionIndex])) return false;
-
-            // UWP 版虽然也有 Minecraft.Windows.exe，但必须注册成系统包才能启动，不能当便携版直接跑
+            // 启动器目录之外的注册安装位置（例如用户手动注册到别处的 GDK 版）：
+            // 只要它本身就是 GDK 构建，就直接跑主程序，否则注入链路永远走不到
             return ModBedrockGdk.IsGdkBuild(full);
         }
         catch
@@ -603,14 +628,21 @@ public partial class PageBedrockRight
 
     /// <summary>
     ///     查找某个版本可直接运行的 GDK 目录：优先 extracted\&lt;版本号&gt;，其次是版本目录本身。
-    ///     不是 GDK 构建或还没解包时返回 null，由调用方继续走 UWP 的包注册流程。
+    ///     会同时搜索已登记的外部版本目录；不是 GDK 构建或还没解包时返回 null，
+    ///     由调用方继续走 UWP 的包注册流程。
     /// </summary>
     private static string? FindPortableGdkDirectory(string versionId)
     {
-        foreach (var root in new[] { Path.Combine(BedrockVersionsDir, "extracted"), BedrockVersionsDir })
+        var roots = new List<string> { BedrockVersionsDir };
+        roots.AddRange(ModBedrockInstance.ExternalDirectories);
+
+        foreach (var root in roots)
         {
-            var directory = ModBedrockUwp.GetVersionDirectory(root, versionId);
-            if (ModBedrockGdk.IsGdkBuild(directory)) return directory;
+            foreach (var candidate in new[] { Path.Combine(root, "extracted"), root })
+            {
+                var directory = ModBedrockUwp.GetVersionDirectory(candidate, versionId);
+                if (ModBedrockGdk.IsGdkBuild(directory)) return directory;
+            }
         }
 
         return null;
@@ -647,7 +679,7 @@ public partial class PageBedrockRight
         }
     }
 
-    public void BtnLaunch_Click(object sender, MouseButtonEventArgs e)
+    public void LaunchButtonClick()
     {
         ModBase.Log(
             $"[Bedrock] 启动请求：选中={Config.Launch.BedrockSelectedVersion}，已安装={IsBedrockInstalled}，本地版本={(string.Join(",", ModBedrockInstance.GetLocalVersions()))}",
@@ -681,6 +713,9 @@ public partial class PageBedrockRight
 
         LaunchBedrock();
     }
+
+    // Keep the existing page-to-page click entry point for instance pages.
+    public void BtnLaunch_Click(object sender, MouseButtonEventArgs e) => LaunchButtonClick();
 
     #region 启动进度
 
@@ -1052,8 +1087,27 @@ public partial class PageBedrockRight
                         }
                     }
 
-                    // BLoader 按需释放并校验 DLL；失败时退回原版启动，不阻断游戏
-                    if (loader == ModBedrockLoader.BLoader)
+                    // 启动前按「已选中的基岩版账号」准备会话。内存里的会话只在本次运行有效，
+                    // 重启启动器后会为空，必须用保存的 refresh_token 续期；
+                    // 否则注入链路不会启用，游戏会退回系统登录的 Xbox 账号。
+                    SetLaunchStage(0.14, Lang.Text("Bedrock.Account.Preparing"));
+                    BLoaderXUserBridge.Session? xuserSession;
+                    try
+                    {
+                        xuserSession = ModBedrockAccounts.EnsureActiveSessionAsync().GetAwaiter().GetResult();
+                    }
+                    catch (Exception ex)
+                    {
+                        // 明确失败，而不是悄悄用系统账号启动——那正是「进游戏还是本机账号」的成因
+                        ModBase.Log(ex, "准备基岩版账号会话失败", ModBase.LogLevel.Hint,
+                            userSummary: Lang.Text("Bedrock.Account.SessionExpired"));
+                        throw new InvalidOperationException(Lang.Text("Bedrock.Account.SessionExpired"), ex);
+                    }
+
+                    var useBLoader = loader == ModBedrockLoader.BLoader || xuserSession is not null;
+
+                    // BLoader 按需释放并校验 DLL；登录会话存在时即使用户选的是原版加载器也必须启用。
+                    if (useBLoader)
                     {
                         SetLaunchStage(0.18, Lang.Text("Bedrock.Loader.BLoader.Preparing"));
                         try
@@ -1070,13 +1124,14 @@ public partial class PageBedrockRight
 
                     var hasPreload = ModBedrockMods.GetPreloadFiles(installPath).Length > 0;
                     if (!hasPreload && loader == ModBedrockLoader.Vanilla &&
+                        xuserSession is null &&
                         TryLaunchGdkRegistered(installPath, BedrockVersion))
                     {
                         SetLaunchStage(0.6, Lang.Text("Bedrock.Launch.Stage.WaitingWindow"));
                     }
                     else
                     {
-                        process = ModBedrockGdk.Launch(installPath, null, BedrockVersion)
+                        process = ModBedrockGdk.Launch(installPath, null, BedrockVersion, xuserSession)
                                   ?? throw new FileNotFoundException(Lang.Text("Bedrock.Gdk.ExecutableMissing"));
                         SetLaunchStage(0.55, Lang.Text("Bedrock.Launch.Stage.WaitingWindow"));
                     }
@@ -1338,24 +1393,93 @@ public partial class PageBedrockRight
 
     #region 本地版本管理
 
-    private void RefreshLocalVersions()
+    /// <summary>
+    ///     把本地版本列表滚到可视区域。基岩版没有独立的「实例选择」页，
+    ///     外壳上的「选择实例」按钮就是定位到这块列表。
+    /// </summary>
+    internal void BringLocalVersionsIntoView()
     {
+        try
+        {
+            if (PanLocalVersions.Children.Count == 0) RefreshLocalVersions();
+            PanLocalVersions.BringIntoView();
+            ModBase.Log("[Bedrock] 已定位到本地版本列表", ModBase.LogLevel.Debug);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[Bedrock] 定位本地版本列表失败", ModBase.LogLevel.Debug);
+        }
+    }
+
+    /// <summary>
+    ///     首次使用时在常见位置探测其它启动器的基岩版版本目录（例如 &lt;盘符&gt;:\PCL2CE\bedrock_versions），
+    ///     只在确实含基岩版版本时才登记，避免把无关目录写进配置。返回是否新登记了目录。
+    /// </summary>
+    private static bool EnsureExternalDirectoriesDiscovered()
+    {
+        if (ModBedrockInstance.ExternalDirectories.Count > 0) return false;
+
+        var candidates = new List<string>();
+        foreach (var drive in new[] { "C", "D", "E", "F" })
+        {
+            foreach (var folder in new[] { "PCL2CE\\bedrock_versions", "PCL2\\bedrock_versions", "PCL\\bedrock_versions" })
+                candidates.Add($@"{drive}:\{folder}");
+        }
+
+        foreach (var candidate in candidates)
+        {
+            try
+            {
+                if (!Directory.Exists(candidate)) continue;
+                // 至少要有一个子目录带 MicrosoftGame.Config 或 Minecraft.Windows.exe，才算基岩版版本目录
+                var looksLikeBedrock = Directory.EnumerateDirectories(candidate).Any(dir =>
+                    ModBedrockGdk.IsGdkBuild(dir) ||
+                    File.Exists(Path.Combine(dir, "Minecraft.Windows.exe")));
+                if (!looksLikeBedrock) continue;
+
+                ModBedrockInstance.AddExternalDirectory(candidate);
+                ModBase.Log($"[Bedrock] 已自动识别外部版本目录：{candidate}", ModBase.LogLevel.Normal);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                ModBase.Log(ex, $"[Bedrock] 探测外部版本目录失败（{candidate}）", ModBase.LogLevel.Debug);
+            }
+        }
+
+        return false;
+    }
+
+    internal void RefreshLocalVersions()
+    {
+        EnsureExternalDirectoriesDiscovered();
         PanLocalVersions.Children.Clear();
         _localVersionIds.Clear();
         UpdateInstalledVersionId();
 
         var items = new List<(string Id, string FilePath)>();
-        if (Directory.Exists(BedrockVersionsDir))
+        // 主版本目录 + 已登记的外部版本目录都要列出
+        var roots = new List<string> { BedrockVersionsDir };
+        roots.AddRange(ModBedrockInstance.ExternalDirectories);
+
+        foreach (var root in roots)
         {
-            foreach (var dir in Directory.GetDirectories(BedrockVersionsDir))
+            if (!Directory.Exists(root)) continue;
+            foreach (var dir in Directory.GetDirectories(root))
             {
-                // 跳过安装时的临时解压目录
-                if (Path.GetFileName(dir).Equals("extracted", StringComparison.OrdinalIgnoreCase)) continue;
+                // 跳过安装时的临时解压目录与 cache/loaders 等辅助目录
+                var name = Path.GetFileName(dir);
+                if (name.Equals("extracted", StringComparison.OrdinalIgnoreCase)) continue;
+                if (name.Equals("cache", StringComparison.OrdinalIgnoreCase)) continue;
+                if (name.Equals("loaders", StringComparison.OrdinalIgnoreCase)) continue;
 
                 var files = GetPackageFiles(dir);
-                if (files.Count == 0) continue;
+                // 外部目录多为已解包的 GDK 版本（没有 .msixvc），这类也要列出来
+                if (files.Count == 0 && !ModBedrockGdk.IsGdkBuild(dir)) continue;
 
-                items.Add((Path.GetFileName(dir), files[0]));
+                if (items.Any(item => string.Equals(item.Id, name, StringComparison.OrdinalIgnoreCase)))
+                    continue;
+                items.Add((name, files.Count > 0 ? files[0] : dir));
             }
         }
 
@@ -1421,10 +1545,10 @@ public partial class PageBedrockRight
         }
 
         var isInstalling = _installingVersions.Contains(versionId);
-        // GDK 便携版只要解包完成就可以直接运行，不需要注册系统包
+        // GDK 便携版只要解包完成就可以直接运行，不需要注册系统包。
+        // 用统一的目录解析，外部登记的版本目录同样能被识别为「已就绪」。
         var isGdk = IsGdkVersion(versionId);
-        var gdkReady = isGdk && ModBedrockGdk.IsInstalled(
-            ModBedrockUwp.GetVersionDirectory(Path.Combine(BedrockVersionsDir, "extracted"), versionId));
+        var gdkReady = isGdk && FindGdkReadyDirectory(versionId) is not null;
         var isRegistered = string.Equals(_registeredVersionId, versionId, StringComparison.OrdinalIgnoreCase);
         var isInstalled = !isInstalling && (gdkReady || isRegistered);
         var isSelected = string.Equals(Config.Launch.BedrockSelectedVersion, versionId, StringComparison.OrdinalIgnoreCase);
@@ -1657,9 +1781,39 @@ public partial class PageBedrockRight
         card.SetResourceReference(Border.BackgroundProperty, "ColorBrush8");
         card.MouseEnter += (_, _) => card.SetResourceReference(Border.BackgroundProperty, "ColorBrush7");
         card.MouseLeave += (_, _) => card.SetResourceReference(Border.BackgroundProperty, "ColorBrush8");
-        // 与旧版一致：点击版本实例的空白处直接安装（已安装时为重新安装）
-        card.MouseLeftButtonUp += (_, _) => LocalInstall_Click(installBtn, EventArgs.Empty);
+        // 点卡片的空白处 = 选中这个实例（切换当前使用的基岩版版本）。
+        // 以前这里绑的是「安装/重新安装」，导致点卡片既不会切换版本、还容易误触发重装，
+        // 表现就是「切换实例按不动」。安装仍由右侧的安装按钮负责。
+        card.MouseLeftButtonUp += (_, _) => SelectLocalVersion(versionId);
         return card;
+    }
+
+    /// <summary>
+    ///     选中一个本地版本作为当前实例：记住选择、刷新卡片高亮，并把版本应用到左侧状态。
+    ///     已解包的 GDK 版本会同时把安装路径指向它，这样「启动基岩版」直接跑该实例。
+    /// </summary>
+    private void SelectLocalVersion(string versionId)
+    {
+        if (_installingVersions.Contains(versionId))
+        {
+            HintService.Hint(Lang.Text("Bedrock.Local.Installing"), HintType.Info);
+            return;
+        }
+
+        var dir = FindPortableGdkDirectory(versionId);
+        if (dir is not null)
+        {
+            // 已解包的 GDK 版本：直接把它设为当前实例，注入与会话都基于该目录
+            ActivateGdkVersion(versionId, dir, launchAfterActivate: false);
+        }
+        else
+        {
+            // 只有安装包、还没解包：仅记住选择，启动时再解包
+            SelectVersion(versionId);
+            RefreshLocalVersions();
+            ModMain.frmBedrockLeft?.RefreshStatus();
+            HintService.Hint(Lang.Text("Bedrock.Local.Selected", versionId), HintType.Success);
+        }
     }
 
     /// <summary>
@@ -2012,7 +2166,7 @@ public partial class PageBedrockRight
     /// <summary>
     ///     将启动目标切换为 GDK 便携版并直接启动。不触碰系统包注册，因此其他版本仍可继续运行。
     /// </summary>
-    private void ActivateGdkVersion(string versionId, string extractDir)
+    private void ActivateGdkVersion(string versionId, string extractDir, bool launchAfterActivate = true)
     {
         IsBedrockInstalled = true;
         BedrockInstallPath = extractDir;
@@ -2026,13 +2180,15 @@ public partial class PageBedrockRight
         RefreshLocalVersions();
         ModMain.frmBedrockLeft?.RefreshStatus();
         ReleaseLaunchGate();
-        LaunchBedrock();
+        // 切换实例时只应用选择，不立刻启动
+        if (launchAfterActivate) LaunchBedrock();
     }
 
     /// <summary>记住选中的版本，重启启动器后「启动基岩版」仍会跟随它。</summary>
     private void SelectVersion(string versionId)
     {
         Config.Launch.BedrockSelectedVersion = versionId;
+        ModMain.frmMain?.RefreshUpstreamGlass();
     }
 
     private void LocalInstall_Click(object sender, EventArgs e)

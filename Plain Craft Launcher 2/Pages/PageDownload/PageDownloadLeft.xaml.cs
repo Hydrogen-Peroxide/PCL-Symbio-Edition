@@ -493,6 +493,7 @@ public partial class PageDownloadLeft : IRefreshable
         {
             PageChangeRun((MyPageRight)PageGet(id));
             pageID = id;
+            ModMain.frmMain.RefreshUpstreamGlass();
         }
         catch (Exception ex)
         {

@@ -19,6 +19,7 @@
         <BootstrapperEnabled>true</BootstrapperEnabled>
         <LangVersion>14</LangVersion>
         <UseWPF>true</UseWPF>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Configurations>Beta;Debug;Release;CI</Configurations>
         <Platforms>AnyCPU;x64;ARM64</Platforms>
         <ImplicitUsings>enable</ImplicitUsings>

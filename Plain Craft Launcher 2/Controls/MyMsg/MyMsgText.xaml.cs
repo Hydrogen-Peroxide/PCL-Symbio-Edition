@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 using PCL.Core.UI.Controls;
 
 using PCL.Core.App.Localization;
@@ -23,6 +24,8 @@ public partial class MyMsgText
             myConverter = converter;
             LabTitle.Text = converter.Title;
             LabCaption.Text = converter.Text;
+            if (converter.ShowCrashBanner)
+                LoadCrashBanner();
             ConfigurePrimaryButton(converter.Button1, converter.IsWarn);
             ConfigureSecondaryButton(Btn2, converter.Button2);
             ConfigureSecondaryButton(Btn3, converter.Button3);
@@ -39,6 +42,36 @@ public partial class MyMsgText
         }
 
         Loaded += Load;
+    }
+
+    private void LoadCrashBanner()
+    {
+        var variant = LocalizationService.CurrentLanguage.Code.StartsWith("zh-", StringComparison.OrdinalIgnoreCase)
+            ? "zh" : "en";
+        try
+        {
+            CrashBannerIcon.Source = LoadBannerLayer(variant, "Icon");
+            CrashBannerKicker.Source = LoadBannerLayer(variant, "Kicker");
+            CrashBannerHeadline.Source = LoadBannerLayer(variant, "Headline");
+            LabTitle.Visibility = Visibility.Collapsed;
+            ShapeLine.Visibility = Visibility.Collapsed;
+            CrashBanner.Visibility = Visibility.Visible;
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "加载游戏崩溃横幅失败", ModBase.LogLevel.Debug);
+        }
+    }
+
+    private static BitmapImage LoadBannerLayer(string variant, string layer)
+    {
+        var bitmap = new BitmapImage();
+        bitmap.BeginInit();
+        bitmap.UriSource = new Uri($"pack://application:,,,/Images/Crash/Banner-{variant}-{layer}.png");
+        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+        bitmap.EndInit();
+        bitmap.Freeze();
+        return bitmap;
     }
 
     private void AppendUniqueNameSuffix(FrameworkElement element)

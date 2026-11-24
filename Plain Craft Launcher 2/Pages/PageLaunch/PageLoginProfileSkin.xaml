@@ -6,29 +6,29 @@
       xmlns:local="clr-namespace:PCL"
       mc:Ignorable="d"
       d:DesignHeight="450" d:DesignWidth="800">
-    <Grid Margin="0,0,0,0" Background="{StaticResource ColorBrushTransparent}" Name="PanData">
+    <Grid Margin="0,34,0,12" Background="{StaticResource ColorBrushTransparent}" Name="PanData">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="34" />
+            <ColumnDefinition Width="16" />
             <ColumnDefinition />
-            <ColumnDefinition Width="34" />
+            <ColumnDefinition Width="16" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="80" />
-            <RowDefinition Height="Auto" MinHeight="30" />
-            <RowDefinition />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <StackPanel Grid.Column="1" Grid.Row="1" VerticalAlignment="Top">
+        <StackPanel Grid.Column="1" Grid.Row="0" VerticalAlignment="Top">
             <local:MySkin HorizontalAlignment="Center" VerticalAlignment="Top" x:Name="Skin"
-                          Margin="0,0,0,10" IsHitTestVisible="False" />
-            <TextBlock Name="TextName" Text="Username" Margin="8,0" FontSize="16" HorizontalAlignment="Center"
+                          Margin="0,0,0,16" IsHitTestVisible="False" />
+            <TextBlock Name="TextName" Text="Username" Margin="8,0" FontSize="17" FontWeight="SemiBold" HorizontalAlignment="Center"
                        TextTrimming="CharacterEllipsis" />
-            <TextBlock Name="TextType" Text="AuthType" Margin="8,4,8,5" FontSize="12" HorizontalAlignment="Center"
+            <TextBlock Name="TextType" Text="AuthType" Margin="8,5,8,0" FontSize="13" HorizontalAlignment="Center"
                        TextTrimming="CharacterEllipsis" Foreground="{DynamicResource ColorBrushGray4}" />
         </StackPanel>
-        <local:MyCard Grid.Column="1" Grid.Row="2" HorizontalAlignment="Center" x:Name="PanButtons" Opacity="0"
-                      CornerRadius="5" Margin="0,8,0,0">
-            <StackPanel Orientation="Horizontal" Margin="10,3,9,3">
-                <local:MyIconButton Height="24" Margin="0,0.5,9,0" x:Name="BtnSkinLibrary"
+        <local:MyCard Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center" x:Name="PanButtons" Opacity="0"
+                      CornerRadius="8" Margin="0,14,0,0">
+            <StackPanel Orientation="Horizontal" Margin="8,6">
+                <local:MyIconButton Height="30" Width="30" Margin="0,0,8,0" x:Name="BtnSkinLibrary"
                                     ToolTip="{DynamicResource Tools.SkinLibrary.Title}"
                                     ToolTipService.Placement="Center"
                                     ToolTipService.VerticalOffset="35" ToolTipService.HorizontalOffset="1"
@@ -36,14 +36,14 @@
                                     LogoScale="1.08"
                                     SvgIcon="lucide/shirt"
                                     Click="BtnSkinLibrary_Click" />
-                <local:MyIconButton Height="24" Margin="0,0.5,9,0" x:Name="BtnSkinRefresh"
+                <local:MyIconButton Height="30" Width="30" Margin="0,0,8,0" x:Name="BtnSkinRefresh"
                                     ToolTip="{DynamicResource Launch.Account.ProfileSkin.RefreshSkin}"
                                     ToolTipService.Placement="Center"
                                     ToolTipService.VerticalOffset="35" ToolTipService.HorizontalOffset="1"
                                     ToolTipService.InitialShowDelay="50"
                                     LogoScale="1.08"
                                     SvgIcon="lucide/refresh-cw" />
-                <local:MyIconButton Height="24" Margin="0,0,9,0" x:Name="BtnEdit"
+                <local:MyIconButton Height="30" Width="30" Margin="0,0,8,0" x:Name="BtnEdit"
                                     ToolTip="{DynamicResource Launch.Account.ProfileSkin.EditProfile}"
                                     ToolTipService.Placement="Center" ToolTipService.VerticalOffset="35"
                                     ToolTipService.HorizontalOffset="1" ToolTipService.InitialShowDelay="50"
@@ -58,7 +58,7 @@
                         </ContextMenu>
                     </local:MyIconButton.ContextMenu>
                 </local:MyIconButton>
-                <local:MyIconButton Height="24" x:Name="BtnSelect" Margin="0,0,0,0" Click="ChangeProfile"
+                <local:MyIconButton Height="30" Width="30" x:Name="BtnSelect" Margin="0"
                                     ToolTip="{DynamicResource Launch.Account.ProfileSkin.SwitchProfile}"
                                     ToolTipService.Placement="Center" ToolTipService.VerticalOffset="35"
                                     ToolTipService.HorizontalOffset="1" ToolTipService.InitialShowDelay="50"
@@ -68,3 +68,4 @@
         </local:MyCard>
     </Grid>
 </Grid>
+

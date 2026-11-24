@@ -107,7 +107,8 @@
 
         <Grid Grid.Row="0" Margin="0,8,0,8">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
+                <!-- 文字区保底宽度：窗口变窄时先压缩按钮区，避免标题与按钮叠在一起 -->
+                <ColumnDefinition Width="*" MinWidth="220" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" VerticalAlignment="Center">
@@ -128,7 +129,9 @@
                                           Tag="DIM1" />
                 </local:MyComboBox>
             </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+            <ScrollViewer Style="{StaticResource ScrollViewerNoMargin}" Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
+                          MaxWidth="520" VerticalAlignment="Center" Focusable="False">
+                <StackPanel Orientation="Horizontal">
                 <local:MyIconButton x:Name="BtnGrid" SvgIcon="lucide/grid-2x2" Opacity="0.55"
                                     ToolTip="{DynamicResource Instance.Saves.MapEditor.Grid}"
                                     Click="BtnGrid_Click" />
@@ -156,25 +159,27 @@
                 <local:MyButton x:Name="BtnDelete" Text="{DynamicResource Instance.Saves.MapEditor.DeleteSelected}"
                                 ColorType="Red" Height="32" MinWidth="120" Margin="14,0,0,0" Padding="12,0"
                                 Click="BtnDelete_Click" IsEnabled="False" />
-            </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
 
         <Grid Grid.Row="1" Margin="0,0,0,8">
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <!-- 用 WrapPanel 而不是横向 ScrollViewer：窄窗口下换行，避免右侧控件被截在可视区外 -->
+            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock Text="{DynamicResource Instance.Saves.MapEditor.SelectionMode}" FontSize="11"
-                           VerticalAlignment="Center" Foreground="{DynamicResource ColorBrushGray3}" />
+                           VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource ColorBrushGray3}" />
                 <local:MyButton x:Name="BtnSelectRect" Text="{DynamicResource Instance.Saves.MapEditor.RectSelect}"
-                                ColorType="Highlight" Height="26" Padding="10,0" Margin="8,0,0,0"
+                                ColorType="Highlight" Height="26" Padding="10,0" Margin="0,2,0,2"
                                 Click="BtnSelectRect_Click" />
                 <local:MyButton x:Name="BtnSelectBrush" Text="{DynamicResource Instance.Saves.MapEditor.BrushSelect}"
-                                Height="26" Padding="10,0" Margin="6,0,0,0"
+                                Height="26" Padding="10,0" Margin="6,2,0,2"
                                 ToolTip="{DynamicResource Instance.Saves.MapEditor.BrushToolTip}"
                                 Click="BtnSelectBrush_Click" />
 
                 <TextBlock Text="{DynamicResource Instance.Saves.MapEditor.Filter}" FontSize="11"
-                           VerticalAlignment="Center" Margin="20,0,0,0"
+                           VerticalAlignment="Center" Margin="20,0,8,0"
                            Foreground="{DynamicResource ColorBrushGray3}" />
-                <local:MyComboBox x:Name="ComboFilter" Width="118" Height="26" Margin="8,0,0,0"
+                <local:MyComboBox x:Name="ComboFilter" Width="118" Height="26" Margin="0,2,0,2"
                                   VerticalAlignment="Center" SelectionChanged="ComboFilter_SelectionChanged">
                     <local:MyComboBoxItem Content="{DynamicResource Instance.Saves.MapEditor.Filter.None}"
                                           Tag="0" IsSelected="True" />
@@ -186,19 +191,19 @@
                                           Tag="3" />
                 </local:MyComboBox>
                 <local:MyButton x:Name="BtnFilterSelect" Text="{DynamicResource Instance.Saves.MapEditor.Filter.SelectMatching}"
-                                Height="26" Padding="10,0" Margin="6,0,0,0" IsEnabled="False"
+                                Height="26" Padding="10,0" Margin="6,2,0,2" IsEnabled="False"
                                 Click="BtnFilterSelect_Click" />
 
                 <TextBlock Text="{DynamicResource Instance.Saves.MapEditor.MoveOffset}" FontSize="11"
-                           VerticalAlignment="Center" Margin="20,0,0,0"
+                           VerticalAlignment="Center" Margin="20,0,8,0"
                            Foreground="{DynamicResource ColorBrushGray3}" />
-                <local:MyTextBox x:Name="TextMoveX" Width="56" Height="26" Margin="8,0,0,0" HintText="X"
+                <local:MyTextBox x:Name="TextMoveX" Width="56" Height="26" Margin="0,2,0,2" HintText="X"
                                  ToolTip="{DynamicResource Instance.Saves.MapEditor.MoveXToolTip}" />
-                <local:MyTextBox x:Name="TextMoveZ" Width="56" Height="26" Margin="6,0,0,0" HintText="Z"
+                <local:MyTextBox x:Name="TextMoveZ" Width="56" Height="26" Margin="6,2,0,2" HintText="Z"
                                  ToolTip="{DynamicResource Instance.Saves.MapEditor.MoveZToolTip}" />
                 <local:MyButton x:Name="BtnMove" Text="{DynamicResource Instance.Saves.MapEditor.Move}"
-                                Height="26" Padding="10,0" Margin="6,0,0,0" Click="BtnMove_Click" />
-            </StackPanel>
+                                Height="26" Padding="10,0" Margin="6,2,0,2" Click="BtnMove_Click" />
+            </WrapPanel>
         </Grid>
 
         <Border Grid.Row="2" Background="{DynamicResource ColorBrushGray7}" CornerRadius="8" ClipToBounds="True">

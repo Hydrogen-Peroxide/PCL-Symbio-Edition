@@ -4,7 +4,7 @@
                    xmlns:local="clr-namespace:PCL"
                    PanScroll="{Binding ElementName=PanBack}">
     <local:MyScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
-        <StackPanel x:Name="PanMain" Margin="25,25,25,25">
+        <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}">
             <local:MyCard Title="{DynamicResource Setup.Feedback.Submit.Title}" x:Name="PanInfo">
                 <StackPanel Orientation="Vertical" Margin="20,40,18,22">
                     <TextBlock

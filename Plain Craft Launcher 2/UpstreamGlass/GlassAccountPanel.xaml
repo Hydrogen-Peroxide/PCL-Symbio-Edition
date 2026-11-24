@@ -1,0 +1,85 @@
+<UserControl x:Class="PCL.GlassAccountPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:glass="clr-namespace:PCLLF.Wpf.Glass"
+             MinWidth="0" MinHeight="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <Grid Margin="24,18,24,24">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="240" />
+            <ColumnDefinition Width="1" />
+            <ColumnDefinition Width="*" MinWidth="260" />
+        </Grid.ColumnDefinitions>
+        <Border Grid.Column="0" Margin="0,0,14,0" Padding="14" CornerRadius="12"
+                Background="{DynamicResource GlassMainBrush}" BorderBrush="{DynamicResource GlassOutlineBrush}" BorderThickness="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <TextBlock Text="游戏账号" Style="{DynamicResource GlassText}" FontSize="20" FontWeight="SemiBold" />
+                <!-- 四个类型按钮等宽等距：逐个写 Margin 会让中缝变成两端的两倍，看着就是没对齐 -->
+                <UniformGrid Grid.Row="1" Columns="4" Height="36" Margin="0,10,0,0">
+                    <Button x:Name="BtnMicrosoft" Content="正版" FontSize="12" Padding="2,0" Style="{DynamicResource GlassPillButton}" Margin="0,0,4,0" Click="TypeButton_Click" Tag="Ms" />
+                    <Button x:Name="BtnOffline" Content="离线" FontSize="12" Padding="2,0" Style="{DynamicResource GlassPillButton}" Margin="0,0,4,0" Click="TypeButton_Click" Tag="Legacy" />
+                    <Button x:Name="BtnAuth" Content="外置" FontSize="12" Padding="2,0" Style="{DynamicResource GlassPillButton}" Margin="0,0,4,0" Click="TypeButton_Click" Tag="Auth" />
+                    <Button x:Name="BtnBedrock" Content="基岩" FontSize="12" Padding="2,0" Style="{DynamicResource GlassPillButton}" Margin="0" Click="TypeButton_Click" Tag="Bedrock" />
+                </UniformGrid>
+                <Button Grid.Row="2" x:Name="BtnCurrent" Margin="0,12,0,0" Padding="12" Background="Transparent" BorderThickness="0" Click="Current_Click">
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Border Width="70" Height="70" CornerRadius="14" Background="{DynamicResource GlassControlBrush}">
+                            <TextBlock x:Name="CurrentGlyph" Text="?" Style="{DynamicResource GlassText}" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <TextBlock x:Name="CurrentName" Text="未登录" Style="{DynamicResource GlassText}" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,10,0,0" />
+                        <TextBlock x:Name="CurrentInfo" Text="正版账号 · 未登录" Style="{DynamicResource GlassText}" FontSize="11" Foreground="{DynamicResource GlassSecondaryTextBrush}" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                    </StackPanel>
+                </Button>
+                <Button Grid.Row="3" x:Name="BtnSkin" Width="36" Height="36" HorizontalAlignment="Center" Style="{DynamicResource GlassCircleButton}" Click="Skin_Click" ToolTip="皮肤库">
+                    <TextBlock Text="♧" FontSize="18" Style="{DynamicResource GlassText}" />
+                </Button>
+            </Grid>
+        </Border>
+        <Border Grid.Column="1" Background="{DynamicResource GlassOutlineBrush}" Opacity="0.5" />
+        <Grid Grid.Column="2" Margin="14,0,0,0" MinWidth="240">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Text="切换账号" Style="{DynamicResource GlassText}" FontSize="20" FontWeight="SemiBold" />
+            <Grid Grid.Row="1" x:Name="DeckHost">
+                <!-- 装饰背卡不允许负边距：原来 -24 会越过中间的分区线，看起来像错位 -->
+                <Border x:Name="DeckBackCard" Margin="8,24,24,14" CornerRadius="12"
+                        Background="{DynamicResource GlassMainBrush}" BorderBrush="{DynamicResource GlassOutlineBrush}"
+                        BorderThickness="1" Opacity="0.48" Panel.ZIndex="0" />
+                <ScrollViewer Style="{StaticResource ScrollViewerNoMargin}" x:Name="AccountListScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Margin="0,14,0,8">
+                    <ItemsControl x:Name="AccountItems" HorizontalAlignment="Left">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><StackPanel Orientation="Horizontal" /></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </ScrollViewer>
+                <Border x:Name="LoginHost" Visibility="Collapsed" Margin="0,14,0,8" Panel.ZIndex="2"
+                        CornerRadius="12" Background="{DynamicResource GlassMainBrush}"
+                        BorderBrush="{DynamicResource GlassOutlineBrush}" BorderThickness="1">
+                    <StackPanel Margin="18" VerticalAlignment="Center">
+                        <TextBlock x:Name="LoginTitle" Text="登录账号" Style="{DynamicResource GlassText}" FontSize="20" FontWeight="SemiBold" />
+                        <TextBlock x:Name="LoginDetail" Text="" Style="{DynamicResource GlassText}" Foreground="{DynamicResource GlassSecondaryTextBrush}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                        <TextBox x:Name="LoginInput" Visibility="Collapsed" Height="36" Margin="0,14,0,0"
+                                 Background="{DynamicResource GlassControlBrush}" Foreground="{DynamicResource GlassTextBrush}"
+                                 BorderBrush="{DynamicResource GlassOutlineBrush}" BorderThickness="1"
+                                 Padding="12,8" ToolTip="玩家名" />
+                        <Button x:Name="BtnLoginStart" Content="开始登录" Style="{DynamicResource GlassPillButton}" HorizontalAlignment="Left" Margin="0,18,0,0" Padding="14,6" Click="LoginStart_Click" />
+                        <Button x:Name="BtnLoginBack" Content="返回账号列表" Style="{DynamicResource GlassPillButton}" HorizontalAlignment="Left" Margin="0,8,0,0" Padding="14,6" Click="LoginBack_Click" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="BtnPrevious" Content="‹" Width="36" Height="36" Style="{DynamicResource GlassCircleButton}" Click="Previous_Click" />
+                <TextBlock x:Name="PageText" Text="1 / 1" Style="{DynamicResource GlassText}" VerticalAlignment="Center" Margin="15,0" />
+                <Button x:Name="BtnNext" Content="›" Width="36" Height="36" Style="{DynamicResource GlassCircleButton}" Click="Next_Click" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>

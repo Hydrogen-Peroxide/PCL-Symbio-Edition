@@ -30,7 +30,7 @@
     x64（默认）或 ARM64。
 
 .PARAMETER OutputDir
-    输出目录，默认为仓库根目录下的 artifact。
+    输出目录，默认为仓库根目录下的 releases/latest。
 
 .PARAMETER RequireBedrockCik
     缺少 CIK 时直接报错退出，而不是仅警告。
@@ -53,7 +53,7 @@ param(
     [ValidateSet('x64', 'ARM64')]
     [string]$Platform = 'x64',
 
-    [string]$OutputDir = './artifact',
+    [string]$OutputDir = './releases/latest',
 
     [switch]$RequireBedrockCik,
 
@@ -191,3 +191,13 @@ if ((Test-Path $builtExe) -and $probeName) {
 }
 
 Write-Host "构建完成：$outPath"
+
+# 固定输出一个容易找到的最新版本入口。保留 dotnet publish 生成的原始文件，
+# 仅额外复制一个稳定文件名，方便脚本、快捷方式和手动测试直接引用。
+$latestExe = Join-Path $outPath ("PCL-Symbio-Edition-latest-{0}.exe" -f $Platform.ToLowerInvariant())
+if (Test-Path $builtExe) {
+    Copy-Item -LiteralPath $builtExe -Destination $latestExe -Force
+    $hash = (Get-FileHash -LiteralPath $latestExe -Algorithm SHA256).Hash.ToLowerInvariant()
+    Set-Content -LiteralPath ("$latestExe.sha256") -Value ("{0} *{1}" -f $hash, (Split-Path $latestExe -Leaf)) -Encoding ascii
+    Write-Host "最新 EXE：$latestExe"
+}

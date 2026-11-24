@@ -113,7 +113,8 @@ public static class ModBedrockGdk
     ///     LeviLamina 通过 lip 给 exe 打补丁后自行加载，这里不再重复注入 mods 目录，否则会重复装载。
     ///     返回游戏进程，供调用方在游戏退出后做清理（例如还原版本隔离）；找不到主程序时返回 null。
     /// </summary>
-    public static Process? Launch(string gameDirectory, string? arguments = null, string? versionId = null)
+    public static Process? Launch(string gameDirectory, string? arguments = null, string? versionId = null,
+        BLoaderXUserBridge.Session? xuserSession = null)
     {
         var exePath = FindExecutable(gameDirectory);
         if (exePath is null) return null;
@@ -122,14 +123,19 @@ public static class ModBedrockGdk
         var loader = ModBedrockLoader.GetLoader(versionId);
         var mods = new List<string>();
 
-        // BLoader 需要最先进入进程，后续原生 Mod 由它接管装载
-        if (loader == ModBedrockLoader.BLoader)
+        // 有效的 Xbox 会话必须由 BLoader 接管官方 XUser Runtime。
+        // 即使用户没有手动选择 BLoader，登录会话存在时也要启用它，
+        // 否则原版注册启动会完全绕过一次性 XUser 管道。
+        var useBLoader = loader == ModBedrockLoader.BLoader || xuserSession is not null;
+        if (useBLoader)
         {
             var bLoaderPath = ModBedrockBLoader.GetDllPath();
             if (File.Exists(bLoaderPath))
                 mods.Add(bLoaderPath);
+            else if (xuserSession is not null)
+                throw new FileNotFoundException("基岩版登录会话需要 BLoader.dll，但文件尚未准备完成。", bLoaderPath);
             else
-                ModBase.Log($"[Bedrock] 版本 {versionId} 已选择 BLoader，但 BLoader.dll 尚未就绪，本次按原版启动",
+                ModBase.Log($"[Bedrock] 版本 {versionId} 需要 BLoader，但 BLoader.dll 尚未就绪，本次按原版启动",
                     ModBase.LogLevel.Hint, userSummary: Lang.Text("Bedrock.Loader.BLoader.Missing"));
         }
 
@@ -141,7 +147,7 @@ public static class ModBedrockGdk
                 $"[Bedrock] 检测到 {mods.Count} 个待注入 DLL（preload {preloads.Length} 个，加载器 {loader}）: {ModBedrockMods.GetPreloadDirectory(gameDirectory)}",
                 ModBase.LogLevel.Normal);
 
-        return ModBedrockMods.Launch(exePath, workingDirectory, arguments, mods);
+        return ModBedrockMods.Launch(exePath, workingDirectory, arguments, mods, xuserSession);
     }
 
     /// <summary>结束正在运行的 GDK 版进程（解包前释放文件占用）。</summary>

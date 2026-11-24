@@ -106,11 +106,13 @@ public partial class PageBedrockLeft
         if (_hostWindow is not null) _hostWindow.Activated += HostWindow_Activated;
     }
 
-    private void BtnLaunch_Click(object sender, MouseButtonEventArgs e)
+    public void LaunchButtonClick()
     {
         if (ModMain.frmBedrockRight is not null)
-            ModMain.frmBedrockRight.BtnLaunch_Click(sender, e);
+            ModMain.frmBedrockRight.LaunchButtonClick();
     }
+
+    private void BtnLaunch_Click(object sender, MouseButtonEventArgs e) => LaunchButtonClick();
 
     #region 账号
 
@@ -128,6 +130,19 @@ public partial class PageBedrockLeft
     /// </summary>
     private void RefreshAccount()
     {
+        // 启动器里登录并选中的基岩版账号优先：启动时注入游戏的就是它，
+        // 这里若继续显示系统 Xbox 账号，会让人以为切换压根没生效。
+        var launcherAccount = ModBedrockAccounts.Active;
+        if (launcherAccount is not null)
+        {
+            ApplyAvatar(launcherAccount.Gamertag);
+            LabGamertag.Text = launcherAccount.Gamertag;
+            LabAccountMail.Text = $"XUID {launcherAccount.Xuid}";
+            BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.SwitchShort");
+            LabAccountHint.Text = Lang.Text("Bedrock.Account.LauncherSelectedHint");
+            return;
+        }
+
         var account = DetectXboxAccount();
         ApplyAvatar(account?.Gamertag ?? account?.Xuid);
         if (account is null)
@@ -439,9 +454,11 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         ShowSettingsTab(nav.Children.IndexOf(item) - 1);
     }
 
+    /// <summary>供外壳切换左侧标签页：0 详情 / 1 加载器 / 2 数据 / 3 快捷操作。</summary>
+    internal void SelectTab(int tab) => ShowSettingsTab(tab);
+
     private void ShowSettingsTab(int tab)
-    {
-        PanSettingsDetail.Visibility = tab == 0 ? Visibility.Visible : Visibility.Collapsed;
+    {        PanSettingsDetail.Visibility = tab == 0 ? Visibility.Visible : Visibility.Collapsed;
         PanSettingsLoader.Visibility = tab == 1 ? Visibility.Visible : Visibility.Collapsed;
         PanSettingsData.Visibility = tab == 2 ? Visibility.Visible : Visibility.Collapsed;
         PanSettingsShortcuts.Visibility = tab == 3 ? Visibility.Visible : Visibility.Collapsed;
@@ -569,6 +586,14 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
 
     private void BtnSwitchAccount_Click(object sender, ModBase.RouteEventArgs e)
     {
+        // 启动器已经接管基岩版账号时，切换要发生在启动器的账号页，
+        // 而不是去系统 Xbox 应用里换账号（那样只影响本机账号，不影响注入的会话）。
+        if (ModBedrockAccounts.Active is not null)
+        {
+            ModMain.frmMain?.ShowAccountPage();
+            return;
+        }
+
         // 打开应用前先记下当前账号，避免 Xbox 应用瞬间完成登录时被当成“没有变化”
         var baseline = AccountSignature(DetectXboxAccount());
 
@@ -875,6 +900,31 @@ ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug)
         }
 
         ModBase.OpenExplorer(path.TrimEnd('\\') + "\\");
+    }
+
+    /// <summary>
+    ///     登记一个外部基岩版版本目录（例如其它启动器的 bedrock_versions）。
+    ///     没有现成的目录选择器，改为输入路径后校验；登记成功立刻刷新版本列表。
+    /// </summary>
+    private void AddExternalFolder_Click(object sender, MouseButtonEventArgs e)
+    {
+        var input = ModMain.MyMsgBoxInput(
+            Lang.Text("Bedrock.ExternalFolder.Title"),
+            Lang.Text("Bedrock.ExternalFolder.Message"),
+            "");
+        if (string.IsNullOrWhiteSpace(input)) return;
+
+        var path = input.Trim().Trim('"');
+        if (!Directory.Exists(path))
+        {
+            ModMain.MyMsgBox(Lang.Text("Bedrock.ExternalFolder.NotFound", path),
+                Lang.Text("Bedrock.ExternalFolder.Title"), isWarn: true);
+            return;
+        }
+
+        ModBedrockInstance.AddExternalDirectory(path);
+        ModMain.frmBedrockRight?.RefreshLocalVersions();
+        HintService.Hint(Lang.Text("Bedrock.ExternalFolder.Added", path), HintType.Success);
     }
 
     #endregion
