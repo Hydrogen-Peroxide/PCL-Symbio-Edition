@@ -1,0 +1,110 @@
+<local:WorkspacePage x:Class="PCL.PaperConnectWorkspaceView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PCL" PanScroll="{Binding ElementName=PanBack}">
+    <Grid Margin="{StaticResource SePageScrollMargin}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <!-- 左侧：状态与操作 -->
+        <Border Margin="0,0,12,0" CornerRadius="{StaticResource SyRadiusOverlay}"
+                Background="{DynamicResource SyFrostFill}" BorderBrush="{DynamicResource SyFrostEdge}" BorderThickness="1">
+            <Grid Margin="0,10,0,14">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="1*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Grid.Row="0" Margin="13,6,13,0">
+                    <TextBlock Text="联机状态" Opacity="0.6" FontSize="12" Margin="0,0,0,6" />
+                    <TextBlock x:Name="LabState" FontSize="15" FontWeight="Bold" TextWrapping="Wrap" Text="未联机" />
+                    <TextBlock x:Name="LabDetail" Margin="0,6,0,0" FontSize="11.5" Opacity="0.7" TextWrapping="Wrap"
+                               Text="创建房间后把联机码发给朋友，双方运行基岩版即可互连。" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Margin="13,14,13,0">
+                    <local:SymbioButton x:Name="BtnHost" Height="34" ColorType="Highlight" HorizontalAlignment="Stretch"
+                                        Text="创建房间" Click="BtnHost_Click" />
+                    <local:SymbioButton x:Name="BtnJoin" Height="32" Margin="0,8,0,0" HorizontalAlignment="Stretch"
+                                        Text="加入房间" Click="BtnJoin_Click" />
+                    <local:SymbioButton x:Name="BtnStop" Height="32" Margin="0,8,0,0" HorizontalAlignment="Stretch"
+                                        Text="断开联机" Click="BtnStop_Click" IsEnabled="False" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Margin="13,18,13,0" VerticalAlignment="Top">
+                    <TextBlock Text="联机码" Opacity="0.6" FontSize="12" Margin="0,0,0,6" />
+                    <local:SymbioTextField x:Name="TextRoom" Height="32" HintText="P/NNNN-NNNN-SSSS-SSSS" />
+                    <TextBlock Text="游戏端口" Opacity="0.6" FontSize="12" Margin="0,12,0,6" />
+                    <local:SymbioTextField x:Name="TextPort" Height="32" HintText="19132" Text="19132" />
+                    <TextBlock Margin="0,8,0,0" FontSize="11" Opacity="0.6" TextWrapping="Wrap"
+                               Text="房主填写基岩版「对局域网开放」的端口，默认 19132。" />
+                </StackPanel>
+
+                <TextBlock x:Name="LabRoom" Grid.Row="3" Margin="13,10,13,6" FontSize="12.5" FontWeight="Bold"
+                           TextWrapping="Wrap" Visibility="Collapsed" />
+            </Grid>
+        </Border>
+
+        <!-- 右侧：房间信息、玩家、说明 -->
+        <ScrollViewer Grid.Column="1" x:Name="PanBack" local:ScrollInput.Enabled="True"
+                      Style="{StaticResource SyScrollViewer}" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+
+                <local:WorkspaceCard Margin="0,0,0,15" Title="当前房间">
+                    <StackPanel Margin="21,36,21,18">
+                        <TextBlock x:Name="LabRoomCode" FontSize="26" FontWeight="Bold" TextWrapping="Wrap"
+                                   Text="还没有加入或创建房间" />
+                        <TextBlock x:Name="LabRoomHint" Margin="0,8,0,0" FontSize="12.5" Opacity="0.75"
+                                   TextWrapping="Wrap"
+                                   Text="创建房间 → 复制联机码发给朋友 → 朋友填入联机码加入。" />
+
+                        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                            <local:SymbioButton x:Name="BtnCopyCode" Height="30" Padding="14,0" Text="复制联机码"
+                                                Click="BtnCopyCode_Click" IsEnabled="False" />
+                            <local:SymbioButton x:Name="BtnCopyAddress" Height="30" Padding="14,0" Margin="10,0,0,0"
+                                                Text="复制连接地址" Click="BtnCopyAddress_Click" IsEnabled="False" />
+                        </StackPanel>
+                    </StackPanel>
+                </local:WorkspaceCard>
+
+                <local:WorkspaceCard Margin="0,0,0,15" Title="房间成员">
+                    <StackPanel Margin="21,36,21,18">
+                        <TextBlock x:Name="LabPlayerCount" FontSize="12.5" Opacity="0.75" Margin="0,0,0,8"
+                                   Text="还没有成员" />
+                        <StackPanel x:Name="PanelPlayers" />
+                    </StackPanel>
+                </local:WorkspaceCard>
+
+                <!-- 缺少 EasyTier 时的引导，默认隐藏 -->
+                <local:WorkspaceCard x:Name="CardRuntime" Margin="0,0,0,15" Title="缺少联机运行文件" Visibility="Collapsed">
+                    <StackPanel Margin="21,36,21,18">
+                        <TextBlock FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
+                                   Text="PaperConnect 需要 EasyTier 运行文件（easytier-core.exe / easytier-cli.exe）。可以把官方 EasyTier 发行包解压到启动器缓存目录，或前往发行页下载。" />
+                        <local:SymbioButton Height="30" Padding="14,0" Margin="0,12,0,0" HorizontalAlignment="Left"
+                                            ColorType="Highlight" Text="打开 EasyTier 发行页"
+                                            Click="BtnRuntime_Click" />
+                    </StackPanel>
+                </local:WorkspaceCard>
+
+                <local:WorkspaceCard Margin="0,0,0,15" Title="使用说明">
+                    <StackPanel Margin="21,36,21,18">
+                        <TextBlock FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
+                                   Text="房主：先在基岩版里进入世界并「对局域网开放」，记住端口，回到这里创建房间，把联机码发给朋友。" />
+                        <TextBlock Margin="0,10,0,0" FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
+                                   Text="房客：填入联机码加入，连接成功后基岩版直接连接 127.0.0.1:游戏端口 即可，隧道已把房主的端口转发到本机。" />
+                        <TextBlock Margin="0,10,0,0" FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
+                                   Text="同一局域网内也可以直接互连；跨公网时依赖 EasyTier 公共中继，首次连接可能需要十几秒。" />
+                    </StackPanel>
+                </local:WorkspaceCard>
+
+                <TextBlock Margin="6,0,6,20" FontSize="11" Opacity="0.65" TextWrapping="Wrap"
+                           Text="联机协议：PaperConnect（Round-Studio，协议规范见 docs.roundstudio.top）· 组网：EasyTier（MIT）· 本启动器自行实现协议，不内置第三方程序集。" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</local:WorkspacePage>

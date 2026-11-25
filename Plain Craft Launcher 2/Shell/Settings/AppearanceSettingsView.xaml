@@ -70,11 +70,14 @@
                                             ColorType="Highlight" Click="BtnLauncherDonate_Click" />
                     </StackPanel>
                 </Border>
-                <local:SettingsCard Icon="lucide/layout-dashboard" Header="{DynamicResource Setup.Ui.Dock.Placement}"
+                <!-- Dock 位置开关：暂时关掉。Dock 固定为「窗口外悬浮」（见 FormMain.SymbioShell.cs 的 DockPlacementLocked），
+                     窗口内模式会把右下角悬浮按钮压进被裁掉的透明带里，联动动效也未稳定。 -->
+                <local:SettingsCard x:Name="CardDockPlacement" Visibility="Collapsed"
+                                    Icon="lucide/layout-dashboard" Header="{DynamicResource Setup.Ui.Dock.Placement}"
                                     Description="{DynamicResource Setup.Ui.Dock.Placement.Description}" ActionWidth="220">
                     <local:SymbioSelect x:Name="ComboDockPlacement" SelectionChanged="ComboDockPlacement_SelectionChanged">
-                        <local:SelectOption Content="{DynamicResource Setup.Ui.Dock.Placement.Inside}" IsSelected="True" />
-                        <local:SelectOption Content="{DynamicResource Setup.Ui.Dock.Placement.Detached}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Dock.Placement.Inside}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Dock.Placement.Detached}" IsSelected="True" />
                     </local:SymbioSelect>
                 </local:SettingsCard>
                 <local:SettingsCard Icon="lucide/image" Header="{DynamicResource Setup.Ui.Basic.ShowLogo}">

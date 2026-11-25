@@ -70,6 +70,8 @@ public partial class Application
             // 退出时收尾：陶瓦联机在 --hmcl 模式下会把服务进程分离出去，
             // 必须显式请求它退出，否则关掉启动器后还会残留后台服务。
             Current.Exit += (_, _) => ModTerracotta.Shutdown();
+            // PaperConnect 自带 EasyTier 子进程，退出时必须一并结束，避免留下虚拟网卡服务。
+            Current.Exit += (_, _) => ModPaperConnect.Shutdown();
 
             // 设置初始窗口
             if (Config.Preference.ShowStartupLogo)

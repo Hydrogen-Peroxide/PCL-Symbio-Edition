@@ -22,6 +22,15 @@ public partial class SymbioShell
     /// <summary>Raised when the window shape must be recomputed (placement or dock size changed).</summary>
     public event EventHandler? WindowShapeChanged;
 
+    /// <summary>Dock height. Before the first layout pass <see cref="FrameworkElement.ActualHeight" /> is 0.</summary>
+    private double DockHeight => double.IsFinite(DockSurface.Height) ? DockSurface.Height : DockSurface.ActualHeight;
+
+    /// <summary>
+    ///     Bottom band the detached dock takes away from the main panel (dock + gap), measured from the window's bottom
+    ///     edge. 0 while the dock sits inside the panel, so callers can offset floating overlays by it unconditionally.
+    /// </summary>
+    internal double DetachedDockBand => DockDetached ? DockHeight + DetachedDockGap : 0;
+
     public bool DockDetached
     {
         get => field;
@@ -41,7 +50,7 @@ public partial class SymbioShell
 
     private void ApplyDockPlacement()
     {
-        var dockBand = DockSurface.Height + DetachedDockGap; // dock height + gap below the panel
+        var dockBand = DockHeight + DetachedDockGap; // dock height + gap below the panel
         DockLayer.Margin = new Thickness(0, 0, 0, DockDetached ? 0 : InsideDockMargin);
         SheetLayer.Margin = SheetLayer.Margin with { Bottom = DockDetached ? dockBand + 12 : InsideSheetBottom };
         HeroHost.Margin = HeroHost.Margin with { Bottom = DockDetached ? dockBand + 24 : InsideHeroBottom };

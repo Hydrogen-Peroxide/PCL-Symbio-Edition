@@ -20,6 +20,21 @@ public partial class FormMain
     private ImageSource? shellWallpaper;
     private SymbioShellState shellState = new();
 
+    /// <summary>
+    ///     Dock 位置暂时锁定为「窗口外悬浮」：窗口内模式下 Dock 会覆盖面板底部，联动动效也还没稳定，
+    ///     所以设置页里的「Dock 位置」开关一并关掉。想恢复可切换的开关，把这里改成 false 即可。
+    /// </summary>
+    private const bool DockPlacementLocked = true;
+
+    /// <summary>锁定时使用的 Dock 位置：1 = 窗口外悬浮。</summary>
+    private const int LockedDockPlacement = 1;
+
+    /// <summary>右下角悬浮按钮与面板边缘的间距（与 FormMain.xaml 里 PanExtraButtons 的 Margin 保持一致）。</summary>
+    private const double ExtraButtonMargin = 14;
+
+    private static bool IsDetachedDock(int placement) =>
+        (DockPlacementLocked ? LockedDockPlacement : placement) == 1;
+
     internal SymbioShell? Stage => shell;
     internal bool BedrockMode { get; private set; }
 
@@ -135,7 +150,7 @@ public partial class FormMain
 
         // Detached dock: the window shape becomes main panel + dock island (see SymbioShell.Dock.cs).
         view.WindowShapeChanged += (_, _) => UpdateWindowShape();
-        view.DockDetached = Config.Preference.DockPlacement == 1;
+        view.DockDetached = IsDetachedDock(Config.Preference.DockPlacement);
 
         // The left page frame becomes the sheet's secondary column; PanMain keeps only the right page.
         var sidebarFrame = (Border)PanMainLeft.Parent;
@@ -308,7 +323,7 @@ public partial class FormMain
     internal void ApplyDockPlacement(int placement)
     {
         if (shell is null) return;
-        shell.DockDetached = placement == 1;
+        shell.DockDetached = IsDetachedDock(placement);
         UpdateWindowShape();
     }
 
@@ -319,6 +334,11 @@ public partial class FormMain
         RectForm.Rect = new Rect(size);
         var shape = shell?.BuildWindowShape(PanBack, size);
         PanBack.Clip = shape ?? (Geometry)RectForm;
+
+        // 外置 Dock 时窗口被裁成「主面板 + Dock 岛」，主面板底部上方留出一条透明带；
+        // 右下角的悬浮按钮（启动器扩展按钮）必须整体上移到主面板以内，否则会落进被裁掉的区域，看起来就是消失了。
+        if (PanExtraButtons is not null)
+            PanExtraButtons.Margin = new Thickness(0, 0, ExtraButtonMargin, ExtraButtonMargin + (shell?.DetachedDockBand ?? 0));
     }
 
     private void RefreshShellBackdrop(SymbioShell view)

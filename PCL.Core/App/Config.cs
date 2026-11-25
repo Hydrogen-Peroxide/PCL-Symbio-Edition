@@ -165,8 +165,9 @@ public static partial class Config
 
         /// <summary>
         /// Dock 位置：0 = 窗口内底部，1 = 窗口外悬浮（与主面板分离的独立磨砂玻璃 Dock）。
+        /// 默认值改为 1（窗口外悬浮）：窗口内模式会把右下角悬浮按钮压进被裁掉的透明带里，联动动效也还不稳定。
         /// </summary>
-        [ConfigItem<int>("UiDockPlacement", 0, ConfigSource.Local)] public partial int DockPlacement { get; set; }
+        [ConfigItem<int>("UiDockPlacement", 1, ConfigSource.Local)] public partial int DockPlacement { get; set; }
 
         /// <summary>
         /// 全局字体。
