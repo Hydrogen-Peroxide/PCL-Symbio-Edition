@@ -27,10 +27,19 @@ public partial class PaperConnectWorkspaceView
         {
             runtimeFound = ModPaperConnect.LocateEasyTier();
             TextPeers.Text = Config.Preference.PaperConnectPeers ?? string.Empty;
+            CheckTun.Checked = Config.Preference.PaperConnectTunMode;
             timer.Start();
             Refresh();
         };
         Unloaded += (_, _) => timer.Stop();
+    }
+
+    /// <summary>增强模式（TUN）开关：只响应用户操作，避免加载配置时反复写盘。</summary>
+    private void Tun_Change(object sender, bool user)
+    {
+        if (!user) return;
+        Config.Preference.PaperConnectTunMode = CheckTun.Checked == true;
+        Refresh();
     }
 
     private void OnChanged() => ModBase.RunInUi(Refresh);
@@ -166,7 +175,9 @@ public partial class PaperConnectWorkspaceView
             ModPaperConnect.RoomRole.Host => string.IsNullOrEmpty(ModPaperConnect.DirectAddress)
                 ? "把联机码发给朋友；对方填入联机码加入即可。"
                 : $"把联机码发给朋友；同一局域网也可以把直连地址 {ModPaperConnect.DirectAddress} 填进对方的「共享节点」。",
-            ModPaperConnect.RoomRole.Guest => "在基岩版里添加服务器，地址填上面这一行（本机隧道地址）。",
+            ModPaperConnect.RoomRole.Guest => ModPaperConnect.UseTun
+                ? "增强模式：基岩版「好友 / 局域网」列表里应能看到房主的世界；也可以直接连上面这个地址。"
+                : "在基岩版里添加服务器，地址填上面这一行（本机隧道地址）。",
             _ => "创建房间 → 复制联机码发给朋友 → 朋友填入联机码加入。"
         };
 

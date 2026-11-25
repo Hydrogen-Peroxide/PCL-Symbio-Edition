@@ -113,11 +113,11 @@ internal static class ModPaperConnect
 
     /// <summary>
     ///     与 PaperConnect.Core 的 Manifest/EasyTierParameter.json 一致，仅去掉 <c>-c ./config.toml</c>
-    ///     （我们不生成 ACL 配置文件；私有网络本身已靠 network-secret 隔离）。
+    ///     （我们不生成 ACL 配置文件；私有网络本身已靠 network-secret 隔离）与 <c>--no-tun</c>
+    ///     （是否免 TUN 由「增强模式」开关决定，见 <see cref="UseTun" />）。
     /// </summary>
     private static readonly string[] EasyTierParameters =
     [
-        "--no-tun",
         "--multi-thread",
         "--enable-kcp-proxy",
         "--enable-quic-proxy",
@@ -129,6 +129,22 @@ internal static class ModPaperConnect
         "--p2p-only",
         "--console-log-level", "warn"
     ];
+
+    /// <summary>
+    ///     增强模式：不用 <c>--no-tun</c>，让 EasyTier 创建真实 TUN 虚拟网卡。
+    ///     这样基岩版的局域网广播（7551/19132）能穿过隧道，nethernet 房间才会出现在「好友/局域网」里；
+    ///     代价是需要管理员权限（创建网卡）。
+    /// </summary>
+    internal static bool UseTun => Config.Preference.PaperConnectTunMode;
+
+    private static string[] BuildParameters()
+    {
+        if (UseTun) return EasyTierParameters;
+        var parameters = new string[EasyTierParameters.Length + 1];
+        parameters[0] = "--no-tun";
+        EasyTierParameters.CopyTo(parameters, 1);
+        return parameters;
+    }
 
     #endregion
 
@@ -158,7 +174,9 @@ internal static class ModPaperConnect
     internal static bool IsRunning => Role != RoomRole.None;
 
     /// <summary>房客连接成功后游戏应连接的本机地址。</summary>
-    internal static string PlayAddress => Role == RoomRole.Guest && IsRunning ? $"127.0.0.1:{GamePort}" : string.Empty;
+    internal static string PlayAddress => Role == RoomRole.Guest && IsRunning
+        ? $"{(UseTun ? HostVip : "127.0.0.1")}:{GamePort}"
+        : string.Empty;
 
     internal static IReadOnlyList<AgreementEntry.PlayerEntry> Players
     {
@@ -426,7 +444,7 @@ internal static class ModPaperConnect
             var network = RoomCodeGenerator.ParseRoomCode(code);
             var args = $"-i {HostVip} --hostname {HostHostnamePrefix}{roomServer.ServerPort} " +
                        $"--network-name {network.NetworkName} --network-secret {network.NetworkKey} " +
-                       string.Join(" ", EasyTierParameters) + " " +
+                       string.Join(" ", BuildParameters()) + " " +
                        $"--listeners tcp://0.0.0.0:{DirectListenPort} " +
                        BuildPeerArgs();
             easyTier = StartEasyTier(args);
@@ -469,8 +487,13 @@ internal static class ModPaperConnect
         session = new CancellationTokenSource();
         var token = session.Token;
         var network = RoomCodeGenerator.ParseRoomCode(normalized);
-        var baseArgs = $"-d --network-name {network.NetworkName} --network-secret {network.NetworkKey} " +
-                       string.Join(" ", EasyTierParameters) + " " +
+        var tun = UseTun;
+        // TUN 模式：自己占一个 10.144.144.x，直连房主的 10.144.144.1，不再需要端口转发
+        var guestVip = $"10.144.144.{new Random().Next(2, 255)}";
+        var addressArgs = tun ? $"-i {guestVip}" : "-d";
+        var controlHost = tun ? HostVip : "127.0.0.1";
+        var baseArgs = $"{addressArgs} --network-name {network.NetworkName} --network-secret {network.NetworkKey} " +
+                       string.Join(" ", BuildParameters()) + " " +
                        BuildPeerArgs();
         try
         {
@@ -479,22 +502,43 @@ internal static class ModPaperConnect
             // 第一段：只入网，用于发现房主
             easyTier = StartEasyTier(baseArgs);
             var centerPort = await WaitForCenterAsync(token);
-            ModBase.Log($"[PaperConnect] 找到联机中心，控制面端口 {centerPort}", ModBase.LogLevel.Normal);
+            ModBase.Log($"[PaperConnect] 找到联机中心，控制面端口 {centerPort}，模式 {(tun ? "TUN" : "端口转发")}",
+                ModBase.LogLevel.Normal);
+
+            if (tun)
+            {
+                // TUN 模式：虚拟网卡已经能直达房主，控制面与游戏流量都走真实路由
+                var tunClient = new PaperConnectClient(controlHost, centerPort, playerName);
+                var ping = await PingWithRetryAsync(tunClient, token);
+                if (ping is null) throw new TimeoutException("连上了联机中心，但没有拿到游戏端口。");
+                GamePort = ping.GamePort > 1024 ? ping.GamePort : gamePort;
+
+                tunClient.OnPlayerInfoUpdated = ApplyPlayers;
+                client = tunClient;
+                Role = RoomRole.Guest;
+                RoomCode = normalized;
+                SetStatus("已加入房间，基岩版「好友 / 局域网」里应该能看到房主的世界。");
+                ModBase.Log($"[PaperConnect] 加入成功（TUN），联机码 {normalized}，游戏端口 {GamePort}，" +
+                            $"本机虚拟 IP {guestVip}", ModBase.LogLevel.Normal);
+                tunClient.StartHeartbeat();
+                return;
+            }
 
             // 第二段：转发控制面 TCP，问出游戏端口
             StopEasyTier();
             SetStatus("正在建立隧道…");
             easyTier = StartEasyTier(baseArgs + $" --port-forward tcp://0.0.0.0:{centerPort}/{HostVip}:{centerPort}");
             var roomClient = new PaperConnectClient("127.0.0.1", centerPort, playerName);
-            var ping = await PingWithRetryAsync(roomClient, token);
-            if (ping is null) throw new TimeoutException("连上了联机中心，但没有拿到游戏端口。");
-            GamePort = ping.GamePort > 1024 ? ping.GamePort : gamePort;
+            var ping2 = await PingWithRetryAsync(roomClient, token);
+            if (ping2 is null) throw new TimeoutException("连上了联机中心，但没有拿到游戏端口。");
+            GamePort = ping2.GamePort > 1024 ? ping2.GamePort : gamePort;
 
-            // 第三段：补上游戏流量的 UDP 转发
+            // 第三段：补上游戏流量的 UDP/TCP 转发（nethernet 房间可能走 TCP）
             StopEasyTier();
             easyTier = StartEasyTier(baseArgs +
                                      $" --port-forward tcp://0.0.0.0:{centerPort}/{HostVip}:{centerPort}" +
-                                     $" --port-forward udp://0.0.0.0:{GamePort}/{HostVip}:{GamePort}");
+                                     $" --port-forward udp://0.0.0.0:{GamePort}/{HostVip}:{GamePort}" +
+                                     $" --port-forward tcp://0.0.0.0:{GamePort}/{HostVip}:{GamePort}");
             roomClient = new PaperConnectClient("127.0.0.1", centerPort, playerName);
             if (await PingWithRetryAsync(roomClient, token) is null)
                 throw new TimeoutException("隧道建立后联机中心没有响应。");

@@ -44,6 +44,11 @@
                     <local:SymbioTextField x:Name="TextPeers" Height="32" HintText="留空 = et1.fuis.top / 225284.xyz / center.node.1tmc.top" />
                     <TextBlock Margin="0,8,0,0" FontSize="11" Opacity="0.6" TextWrapping="Wrap"
                                Text="房主填写基岩版「对局域网开放」的端口，默认 19132。共享节点留空时用内置公共节点；局域网直连可把房主页面上的 tcp:// 地址填进来。" />
+                    <local:SymbioCheck x:Name="CheckTun" Margin="0,14,0,0"
+                                       Style="{StaticResource SyToggleSwitch}" Text="增强模式（TUN）"
+                                       Change="Tun_Change" />
+                    <TextBlock Margin="0,6,0,0" FontSize="11" Opacity="0.6" TextWrapping="Wrap"
+                               Text="增强模式会创建虚拟网卡，基岩版的局域网广播才能穿过隧道——加入 nethernet 房间（例如 BedrockBoot 开的房）建议开启。需要以管理员身份运行启动器。" />
                 </StackPanel>
 
                 <TextBlock x:Name="LabRoom" Grid.Row="3" Margin="13,10,13,6" FontSize="12.5" FontWeight="Bold"

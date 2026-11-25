@@ -177,6 +177,14 @@ public static partial class Config
         public partial string PaperConnectPeers { get; set; }
 
         /// <summary>
+        /// PaperConnect 是否使用 TUN 模式组网（需以管理员身份运行启动器）。
+        /// 默认 false（--no-tun + 端口转发，只能连本机转发端口）；开启后虚拟网卡真实存在，
+        /// 基岩版的局域网广播可以穿过隧道，nethernet 房间才能在「好友/局域网」列表里被发现。
+        /// </summary>
+        [ConfigItem<bool>("UiPaperConnectTunMode", false, ConfigSource.Local)]
+        public partial bool PaperConnectTunMode { get; set; }
+
+        /// <summary>
         /// 全局字体。
         /// </summary>
         [ConfigItem<string>("UiFont", "", ConfigSource.Local)] public partial string Font { get; set; }
