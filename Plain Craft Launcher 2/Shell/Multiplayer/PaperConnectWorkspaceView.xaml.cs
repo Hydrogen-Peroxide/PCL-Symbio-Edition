@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using PaperConnect.Core.Entry;
 
 namespace PCL;
 
@@ -186,6 +187,6 @@ public partial class PaperConnectWorkspaceView
         foreach (var player in players) PanelPlayers.Children.Add(new TextBlock { Text = Describe(player) });
     }
 
-    private static string Describe(ModPaperConnect.PlayerInfo player) =>
-        player.IsRoomHost ? $"★ {player.Player}（房主）" : $"· {player.Player}";
+    private static string Describe(AgreementEntry.PlayerEntry player) =>
+        player.IsRoomHost ? $"★ {player.PlayerName}（房主）" : $"· {player.PlayerName}";
 }
