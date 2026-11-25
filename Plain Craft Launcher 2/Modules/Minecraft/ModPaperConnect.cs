@@ -65,6 +65,22 @@ internal static class ModPaperConnect
     private static string BuildPeerArgs() =>
         string.Join(" ", ReadRelays().Select(relay => $"-p {relay}"));
 
+    /// <summary>
+    ///     房主在 EasyTier 里的 hostname 前缀。规范文档写的是 <c>paper-connect-server-</c>，
+    ///     但 BedrockBoot 的 PaperConnect 实际按 <c>pcs-</c> 前缀找联机中心（报错原文：
+    ///     「未找到主机（前缀 pcs-）」），所以这里跟随实际生态用 <c>pcs-</c>；
+    ///     房客侧则同时兼容三种前缀。
+    /// </summary>
+    private const string HostHostnamePrefix = "pcs-";
+
+    /// <summary>房客识别联机中心时接受的前缀，按优先级排列。</summary>
+    private static readonly string[] CenterHostnamePrefixes =
+    [
+        "pcs-",
+        $"{RoomCodeGenerator.ROOM_NAME}-server-",
+        "scaffolding-mc-server-"
+    ];
+
     /// <summary>房主的局域网直连地址，房客可以把它填进「共享节点」里直接连过来。</summary>
     internal static string DirectAddress
     {
@@ -344,7 +360,6 @@ internal static class ModPaperConnect
     /// <summary>轮询对端列表，按 hostname 发现联机中心并解析它的控制面端口。</summary>
     private static async Task<int> WaitForCenterAsync(CancellationToken token)
     {
-        var prefix = $"{RoomCodeGenerator.ROOM_NAME}-server-";
         var deadline = Environment.TickCount64 + 90_000;
         var sawPeer = false;
         while (Environment.TickCount64 < deadline)
@@ -354,10 +369,14 @@ internal static class ModPaperConnect
             {
                 sawPeer = true;
                 var hostname = peer.Hostname ?? string.Empty;
-                var index = hostname.IndexOf(prefix, StringComparison.OrdinalIgnoreCase);
-                if (index < 0) continue;
-                if (int.TryParse(hostname[(index + prefix.Length)..], out var port) && port > 1024 && port <= 65535)
-                    return port;
+                foreach (var prefix in CenterHostnamePrefixes)
+                {
+                    var index = hostname.IndexOf(prefix, StringComparison.OrdinalIgnoreCase);
+                    if (index < 0) continue;
+                    var rest = hostname[(index + prefix.Length)..];
+                    var digits = new string(rest.TakeWhile(char.IsDigit).ToArray());
+                    if (int.TryParse(digits, out var port) && port > 1024 && port <= 65535) return port;
+                }
             }
 
             SetStatus("正在寻找联机中心…");
@@ -365,7 +384,7 @@ internal static class ModPaperConnect
         }
 
         throw new TimeoutException(sawPeer
-            ? "联机中心发现失败：对端列表里没有 paper-connect-server，房间可能已经关闭。"
+            ? "联机中心发现失败：对端列表里没有 pcs-（或 paper-connect-server-）开头的主机，房间可能已经关闭。"
             : "没有连上任何共享节点：请在「共享节点」里填一个可用的 EasyTier 共享节点，或填房主的局域网直连地址。");
     }
 
@@ -405,7 +424,7 @@ internal static class ModPaperConnect
 
             var code = GenerateRoomCode();
             var network = RoomCodeGenerator.ParseRoomCode(code);
-            var args = $"-i {HostVip} --hostname {RoomCodeGenerator.ROOM_NAME}-server-{roomServer.ServerPort} " +
+            var args = $"-i {HostVip} --hostname {HostHostnamePrefix}{roomServer.ServerPort} " +
                        $"--network-name {network.NetworkName} --network-secret {network.NetworkKey} " +
                        string.Join(" ", EasyTierParameters) + " " +
                        $"--listeners tcp://0.0.0.0:{DirectListenPort} " +
