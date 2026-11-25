@@ -40,10 +40,10 @@
                     <local:SymbioTextField x:Name="TextRoom" Height="32" HintText="P/NNNN-NNNN-SSSS-SSSS" />
                     <TextBlock Text="游戏端口" Opacity="0.6" FontSize="12" Margin="0,12,0,6" />
                     <local:SymbioTextField x:Name="TextPort" Height="32" HintText="19132" Text="19132" />
-                    <TextBlock Text="共享节点（可留空）" Opacity="0.6" FontSize="12" Margin="0,12,0,6" />
-                    <local:SymbioTextField x:Name="TextPeers" Height="32" HintText="tcp://共享节点:11010" />
+                    <TextBlock Text="共享节点（留空用默认）" Opacity="0.6" FontSize="12" Margin="0,12,0,6" />
+                    <local:SymbioTextField x:Name="TextPeers" Height="32" HintText="留空 = et1.fuis.top / 225284.xyz / center.node.1tmc.top" />
                     <TextBlock Margin="0,8,0,0" FontSize="11" Opacity="0.6" TextWrapping="Wrap"
-                               Text="房主填写基岩版「对局域网开放」的端口，默认 19132。共享节点留空时只能局域网直连：把房主页面上的直连地址填进来即可。" />
+                               Text="房主填写基岩版「对局域网开放」的端口，默认 19132。共享节点留空时用内置公共节点；局域网直连可把房主页面上的 tcp:// 地址填进来。" />
                 </StackPanel>
 
                 <TextBlock x:Name="LabRoom" Grid.Row="3" Margin="13,10,13,6" FontSize="12.5" FontWeight="Bold"

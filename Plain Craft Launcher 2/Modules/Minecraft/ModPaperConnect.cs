@@ -39,11 +39,27 @@ internal static class ModPaperConnect
     ///     官方 PaperConnect 没有内置节点清单，EasyTier 文档也只给 <c>&lt;共享节点 IP或域名&gt;</c> 占位，
     ///     所以这里不做硬编码 —— 填一个能连上的共享节点即可跨公网组网。
     /// </summary>
-    private static string[] ReadRelays() =>
-        (Config.Preference.PaperConnectPeers ?? string.Empty)
-        .Split(new[] { ' ', '\t', ',', ';', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
-        .Where(peer => peer.Contains("://"))
-        .ToArray();
+    /// <summary>
+    ///     默认共享节点（EasyTier 公共节点），取自 BedrockBoot 的 PaperConnect 实际使用的节点清单
+    ///     （GravityCone 日志里的 <c>[[peer]] uri</c>），本机实测 225284.xyz / et1.fuis.top / center.node.1tmc.top 可达。
+    ///     配置里填了地址就用配置的，留空时回落到这里。
+    /// </summary>
+    private static readonly string[] DefaultRelays =
+    [
+        "tcp://et1.fuis.top:11010",
+        "tcp://225284.xyz:11010",
+        "wss://center.node.1tmc.top/",
+        "tcp://public.easytier.bmcbl.com:54321"
+    ];
+
+    private static string[] ReadRelays()
+    {
+        var configured = (Config.Preference.PaperConnectPeers ?? string.Empty)
+            .Split(new[] { ' ', '\t', ',', ';', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Where(peer => peer.Contains("://"))
+            .ToArray();
+        return configured.Length > 0 ? configured : DefaultRelays;
+    }
 
     /// <summary>把共享节点列表拼成 EasyTier 的 <c>-p</c> 参数。</summary>
     private static string BuildPeerArgs() =>
