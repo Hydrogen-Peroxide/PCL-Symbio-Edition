@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using PCL.Core.App;
 using PaperConnect.Core;
 using PaperConnect.Core.Entry;
 using PaperConnect.Core.Entry.Easytier;
@@ -30,12 +31,53 @@ internal static class ModPaperConnect
 
     internal const int DefaultGamePort = 19132;
 
-    /// <summary>EasyTier 公共中继（官方仓库未内置节点清单，这里用 EasyTier 官方公共节点）。</summary>
-    private static readonly string[] PublicRelays =
-    [
-        "tcp://public.easytier.top:11010",
-        "udp://public.easytier.top:11010"
-    ];
+    /// <summary>局域网直连时的监听端口（房主在这里等直连的房客）。</summary>
+    internal const int DirectListenPort = 11010;
+
+    /// <summary>
+    ///     共享节点（EasyTier peer）地址来自配置，空格/逗号分隔；留空则不用公共中继。
+    ///     官方 PaperConnect 没有内置节点清单，EasyTier 文档也只给 <c>&lt;共享节点 IP或域名&gt;</c> 占位，
+    ///     所以这里不做硬编码 —— 填一个能连上的共享节点即可跨公网组网。
+    /// </summary>
+    private static string[] ReadRelays() =>
+        (Config.Preference.PaperConnectPeers ?? string.Empty)
+        .Split(new[] { ' ', '\t', ',', ';', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+        .Where(peer => peer.Contains("://"))
+        .ToArray();
+
+    /// <summary>把共享节点列表拼成 EasyTier 的 <c>-p</c> 参数。</summary>
+    private static string BuildPeerArgs() =>
+        string.Join(" ", ReadRelays().Select(relay => $"-p {relay}"));
+
+    /// <summary>房主的局域网直连地址，房客可以把它填进「共享节点」里直接连过来。</summary>
+    internal static string DirectAddress
+    {
+        get
+        {
+            var address = LocalIPv4();
+            return string.IsNullOrEmpty(address) ? string.Empty : $"tcp://{address}:{DirectListenPort}";
+        }
+    }
+
+    private static string LocalIPv4()
+    {
+        try
+        {
+            return System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()
+                .Where(nic => nic.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up &&
+                              nic.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
+                .SelectMany(nic => nic.GetIPProperties().UnicastAddresses)
+                .Select(address => address.Address)
+                .Where(address => address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork &&
+                                  !System.Net.IPAddress.IsLoopback(address))
+                .Select(address => address.ToString())
+                .FirstOrDefault() ?? string.Empty;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
 
     /// <summary>
     ///     与 PaperConnect.Core 的 Manifest/EasyTierParameter.json 一致，仅去掉 <c>-c ./config.toml</c>
@@ -288,11 +330,13 @@ internal static class ModPaperConnect
     {
         var prefix = $"{RoomCodeGenerator.ROOM_NAME}-server-";
         var deadline = Environment.TickCount64 + 90_000;
+        var sawPeer = false;
         while (Environment.TickCount64 < deadline)
         {
             token.ThrowIfCancellationRequested();
             foreach (var peer in ReadPeers())
             {
+                sawPeer = true;
                 var hostname = peer.Hostname ?? string.Empty;
                 var index = hostname.IndexOf(prefix, StringComparison.OrdinalIgnoreCase);
                 if (index < 0) continue;
@@ -304,7 +348,9 @@ internal static class ModPaperConnect
             await Task.Delay(1500, token);
         }
 
-        throw new TimeoutException("联机中心发现失败：90 秒内没有在对端列表里找到 paper-connect-server。");
+        throw new TimeoutException(sawPeer
+            ? "联机中心发现失败：对端列表里没有 paper-connect-server，房间可能已经关闭。"
+            : "没有连上任何共享节点：请在「共享节点」里填一个可用的 EasyTier 共享节点，或填房主的局域网直连地址。");
     }
 
     #endregion
@@ -346,13 +392,15 @@ internal static class ModPaperConnect
             var args = $"-i {HostVip} --hostname {RoomCodeGenerator.ROOM_NAME}-server-{roomServer.ServerPort} " +
                        $"--network-name {network.NetworkName} --network-secret {network.NetworkKey} " +
                        string.Join(" ", EasyTierParameters) + " " +
-                       string.Join(" ", PublicRelays.Select(relay => $"-p {relay}"));
+                       $"--listeners tcp://0.0.0.0:{DirectListenPort} " +
+                       BuildPeerArgs();
             easyTier = StartEasyTier(args);
 
             Role = RoomRole.Host;
             RoomCode = code;
             SetStatus("房间已创建，等待其他玩家加入…");
-            ModBase.Log($"[PaperConnect] 开房成功，联机码 {code}，控制面端口 {roomServer.ServerPort}，游戏端口 {gamePort}",
+            ModBase.Log($"[PaperConnect] 开房成功，联机码 {code}，控制面端口 {roomServer.ServerPort}，游戏端口 {gamePort}，" +
+                        $"直连地址 {DirectAddress}，共享节点 {(ReadRelays().Length == 0 ? "无" : string.Join(" ", ReadRelays()))}",
                 ModBase.LogLevel.Normal);
             return code;
         }
@@ -388,7 +436,7 @@ internal static class ModPaperConnect
         var network = RoomCodeGenerator.ParseRoomCode(normalized);
         var baseArgs = $"-d --network-name {network.NetworkName} --network-secret {network.NetworkKey} " +
                        string.Join(" ", EasyTierParameters) + " " +
-                       string.Join(" ", PublicRelays.Select(relay => $"-p {relay}"));
+                       BuildPeerArgs();
         try
         {
             SetStatus("正在寻找联机中心…");

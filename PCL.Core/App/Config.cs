@@ -170,6 +170,13 @@ public static partial class Config
         [ConfigItem<int>("UiDockPlacement", 1, ConfigSource.Local)] public partial int DockPlacement { get; set; }
 
         /// <summary>
+        /// PaperConnect 基岩版联机使用的共享节点（EasyTier peer）地址，空格或逗号分隔。
+        /// 留空表示不连公共中继，只靠局域网直连；例：tcp://192.168.1.5:11010。
+        /// </summary>
+        [ConfigItem<string>("UiPaperConnectPeers", "", ConfigSource.Local)]
+        public partial string PaperConnectPeers { get; set; }
+
+        /// <summary>
         /// 全局字体。
         /// </summary>
         [ConfigItem<string>("UiFont", "", ConfigSource.Local)] public partial string Font { get; set; }

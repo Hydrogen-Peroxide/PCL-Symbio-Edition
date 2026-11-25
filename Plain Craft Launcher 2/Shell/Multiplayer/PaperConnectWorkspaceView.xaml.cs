@@ -3,6 +3,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using PCL.Core.App;
 using PaperConnect.Core.Entry;
 
 namespace PCL;
@@ -25,6 +26,7 @@ public partial class PaperConnectWorkspaceView
         Loaded += (_, _) =>
         {
             runtimeFound = ModPaperConnect.LocateEasyTier();
+            TextPeers.Text = Config.Preference.PaperConnectPeers ?? string.Empty;
             timer.Start();
             Refresh();
         };
@@ -42,6 +44,9 @@ public partial class PaperConnectWorkspaceView
             ? port
             : ModPaperConnect.DefaultGamePort;
 
+    /// <summary>共享节点地址随用随存，下次打开页面还在。</summary>
+    private void SavePeers() => Config.Preference.PaperConnectPeers = (TextPeers.Text ?? string.Empty).Trim();
+
     private async void BtnHost_Click(object sender, RoutedEventArgs e)
     {
         if (busy) return;
@@ -49,6 +54,7 @@ public partial class PaperConnectWorkspaceView
         Refresh();
         try
         {
+            SavePeers();
             var code = await ModPaperConnect.HostAsync(PlayerName, ReadGamePort());
             HintService.Hint($"房间已创建，联机码：{code}", HintType.Success);
         }
@@ -78,6 +84,7 @@ public partial class PaperConnectWorkspaceView
         Refresh();
         try
         {
+            SavePeers();
             await ModPaperConnect.JoinAsync(code, PlayerName, ReadGamePort());
             HintService.Hint("已加入房间，打开基岩版即可加入游戏", HintType.Success);
         }
@@ -156,7 +163,9 @@ public partial class PaperConnectWorkspaceView
         };
         LabRoomHint.Text = role switch
         {
-            ModPaperConnect.RoomRole.Host => "把联机码发给朋友；朋友在基岩版里「对局域网开放」之外无需其它设置。",
+            ModPaperConnect.RoomRole.Host => string.IsNullOrEmpty(ModPaperConnect.DirectAddress)
+                ? "把联机码发给朋友；对方填入联机码加入即可。"
+                : $"把联机码发给朋友；同一局域网也可以把直连地址 {ModPaperConnect.DirectAddress} 填进对方的「共享节点」。",
             ModPaperConnect.RoomRole.Guest => "在基岩版里添加服务器，地址填上面这一行（本机隧道地址）。",
             _ => "创建房间 → 复制联机码发给朋友 → 朋友填入联机码加入。"
         };
