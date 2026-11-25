@@ -25,87 +25,15 @@ public static class ModMain
 {
     public static FormMain? frmMain;
     public static StartupSplash? frmStart;
-    public static PageLaunchLeft? frmLaunchLeft;
-    public static PageLaunchRight? frmLaunchRight;
-    public static PageGameLeft? frmGameLeft;
-    public static PageGameRight? frmGameRight;
-    public static PageLogLeft? frmLogLeft;
-    public static PageLogRight? frmLogRight;
-    public static PageSelectLeft? frmSelectLeft;
-    public static PageSelectRight? frmSelectRight;
-    public static PageSpeedLeft? frmSpeedLeft;
-    public static PageSpeedRight? frmSpeedRight;
-    public static PageToolsLeft? frmToolsLeft;
-    public static PageToolsTest? frmToolsTest;
-    public static PageLanLeft? frmLanLeft;
-    public static PageLanRight? frmLanRight;
-    public static PageDownloadLeft? frmDownloadLeft;
-    public static PageDownloadInstall? frmDownloadInstall;
-    public static PageDownloadClient? frmDownloadClient;
-    public static PageDownloadOptiFine? frmDownloadOptiFine;
-    public static PageDownloadLiteLoader? frmDownloadLiteLoader;
-    public static PageDownloadForge? frmDownloadForge;
-    public static PageDownloadNeoForge? frmDownloadNeoForge;
-    public static PageDownloadCleanroom? frmDownloadCleanroom;
-    public static PageDownloadFabric? frmDownloadFabric;
-    public static PageDownloadLabyMod? frmDownloadLabyMod;
-    public static PageDownloadLegacyFabric? frmDownloadLegacyFabric;
-    public static PageDownloadMod? frmDownloadMod;
-    public static PageDownloadPack? frmDownloadPack;
-    public static PageDownloadDataPack? frmDownloadDataPack;
-    public static PageDownloadShader? frmDownloadShader;
-    public static PageDownloadResourcePack? frmDownloadResourcePack;
-    public static PageDownloadWorld? frmDownloadWorld;
-    public static PageDownloadCompFavorites? frmDownloadCompFavorites;
-    public static PageDownloadBedrockAddon? frmDownloadBedrockAddon;
-    public static PageDownloadBedrockMap? frmDownloadBedrockMap;
-    public static PageDownloadBedrockMaterial? frmDownloadBedrockMaterial;
-    public static PageDownloadBedrockScript? frmDownloadBedrockScript;
-    public static PageDownloadBedrockSkin? frmDownloadBedrockSkin;
-    public static PageDownloadBedrockLip? frmDownloadBedrockLip;
-    public static PageDownloadBedrock? frmDownloadBedrock;
-    public static PageSetupLeft? frmSetupLeft;
-    public static PageSetupLaunch? frmSetupLaunch;
-    public static PageSetupUI? frmSetupUI;
-    public static PageSetupGameManage? frmSetupGameManage;
-    public static PageSetupJava? frmSetupJava;
-    public static PageSetupAbout? frmSetupAbout;
-    public static PageSetupLog? frmSetupLog;
-    public static PageSetupFeedback? frmSetupFeedback;
-    public static PageSetupUpdate? frmSetupUpdate;
-    public static PageSetupLauncherLanguage? frmSetupLauncherLanguage;
-    public static PageSetupLauncherMisc? frmSetupLauncherMisc;
-    public static PageLoginAuth? frmLoginAuth;
-    public static PageLoginMs? frmLoginMs;
-    public static PageLoginProfile? frmLoginProfile;
-    public static PageLoginProfileSkin? frmLoginProfileSkin;
-    public static PageLoginOffline? frmLoginOffline;
-    public static PageInstanceLeft? frmInstanceLeft;
-    public static PageBedrockSelectLeft? frmBedrockSelectLeft;
-    public static PageBedrockInstanceSelect? frmBedrockSelect;
-    public static PageBedrockInstanceLeft? frmBedrockInstanceLeft;
-    public static PageInstanceOverall? frmInstanceOverall;
-    public static PageInstanceCompResource? frmInstanceMod;
-    public static PageInstanceModDisabled? frmInstanceModDisabled;
-    public static PageInstanceCompJarInJar? frmInstanceModJarInJar;
-    public static PageInstanceScreenshot? frmInstanceScreenshot;
-    public static PageInstanceSaves? frmInstanceSaves;
-    public static PageInstanceCompResource? frmInstanceShader;
-    public static PageInstanceCompResource? frmInstanceSchematic;
-    public static PageInstanceCompResource? frmInstanceResourcePack;
-    public static PageInstanceSetup? frmInstanceSetup;
-    public static PageInstanceInstall? frmInstanceInstall;
-    public static PageInstanceExport? frmInstanceExport;
-    public static PageInstanceServer? frmInstanceServer;
-    public static PageInstanceSavesLeft? frmInstanceSavesLeft;
-    public static PageInstanceSavesInfo? frmInstanceSavesInfo;
-    public static PageInstanceSavesDatapack? frmInstanceSavesDatapack;
-    public static PageDownloadCompDetail? frmDownloadCompDetail;
-    public static PageHomepageNewsView? frmHomepageNews;
-    public static PageBedrockLeft? frmBedrockLeft;
-    public static PageBedrockRight? frmBedrockRight;
+    public static ToolsNavigation? frmToolsLeft;
+    public static DownloadNavigation? frmDownloadLeft;
+    public static SettingsNavigation? frmSetupLeft;
+    public static LogSettingsView? frmSetupLog;
+    public static LanguageSettingsView? frmSetupLauncherLanguage;
+    public static InstanceNavigation? frmInstanceLeft;
+    public static BedrockInstanceNavigation? frmBedrockInstanceLeft;
+    public static SaveNavigation? frmInstanceSavesLeft;
 
-    public static MySlider? dragControl = null;
     private static int timer4Count;
     private static int timer150Count;
 
@@ -122,8 +50,8 @@ public static class ModMain
 
             HintService.Tick();
             MyMsgBoxTick();
-            frmMain!.DragTick();
-            ModLoader.LoaderTaskbarProgressRefresh();
+
+            frmMain.UpdateDownloadProgress(DownloadTasks.Update());
         }
 
         #endregion
@@ -163,7 +91,7 @@ public static class ModMain
                 #region 每 7.5s 执行一次的代码
 
                 if (frmMain!.BtnExtraApril_ShowCheck() && aprilDistance != 0)
-                    frmMain.BtnExtraApril.Ribble();
+                    frmMain.BtnExtraApril.Pulse();
                 // 以未知原因窗口被丢到一边去的修复（Top、Left = -25600），还有 #745
                 ModBase.RunInUi(() =>
                 {
@@ -270,7 +198,7 @@ public static class ModMain
 
         /// <summary>
         ///     输入模式：文本框的文本。
-        ///     选择模式：需要放进去的 List(Of MyListItem)。
+        ///     选择模式：需要放进去的 List(Of SelectionRow)。
         ///     登录模式：登录步骤 1 中返回的 JSON。
         /// </summary>
         public object Content;
@@ -667,7 +595,7 @@ public static class ModMain
     /// <param name="button1">显示的第一个按钮，默认为 “确定”。</param>
     /// <param name="button2">显示的第二个按钮，默认为空。</param>
     /// <param name="isWarn">是否为警告弹窗，若为 True，弹窗配色和背景会变为红色。</param>
-    public static List<int>? MyMsgBoxMultiSelect(List<MyListItem> selections, string? title = null,
+    public static List<int>? MyMsgBoxMultiSelect(List<SelectionRow> selections, string? title = null,
         string? button1 = null, string? button2 = "", bool isWarn = false)
     {
         title ??= GetDefaultDialogTitle();
@@ -706,42 +634,42 @@ public static class ModMain
             if (frmMain.PanMsg.Children.Count > 0)
             {
                 // 弹窗中
-                frmMain.PanMsgBackground.Visibility = Visibility.Visible;
+                frmMain.DialogLayer.Visibility = Visibility.Visible;
             }
             else if (WaitingMyMsgBox.Any())
             {
                 // 没有弹窗，显示一个等待的弹窗
-                frmMain.PanMsgBackground.Visibility = Visibility.Visible;
+                frmMain.DialogLayer.Visibility = Visibility.Visible;
                 switch (WaitingMyMsgBox[0].Type)
                 {
                     case MyMsgBoxType.Input:
                     {
-                        frmMain.PanMsg.Children.Add(new MyMsgInput(WaitingMyMsgBox[0]));
+                        frmMain.PanMsg.Children.Add(new InputDialog(WaitingMyMsgBox[0]));
                         break;
                     }
                     case MyMsgBoxType.Select:
                     {
-                        frmMain.PanMsg.Children.Add(new MyMsgSelect(WaitingMyMsgBox[0]));
+                        frmMain.PanMsg.Children.Add(new SelectionDialog(WaitingMyMsgBox[0]));
                         break;
                     }
                     case MyMsgBoxType.Text:
                     {
-                        frmMain.PanMsg.Children.Add(new MyMsgText(WaitingMyMsgBox[0]));
+                        frmMain.PanMsg.Children.Add(new TextDialog(WaitingMyMsgBox[0]));
                         break;
                     }
                     case MyMsgBoxType.Login:
                     {
-                        frmMain.PanMsg.Children.Add(new MyMsgLogin(WaitingMyMsgBox[0]));
+                        frmMain.PanMsg.Children.Add(new AuthenticationDialog(WaitingMyMsgBox[0]));
                         break;
                     }
                     case MyMsgBoxType.Markdown:
                     {
-                        frmMain.PanMsg.Children.Add(new MyMsgMarkdown(WaitingMyMsgBox[0]));
+                        frmMain.PanMsg.Children.Add(new MarkdownDialog(WaitingMyMsgBox[0]));
                         break;
                     }
                     case MyMsgBoxType.CardSelect:
                     {
-                        frmMain.PanMsg.Children.Add(new MyMsgCardSelect(WaitingMyMsgBox[0]));
+                        frmMain.PanMsg.Children.Add(new CardSelectionDialog(WaitingMyMsgBox[0]));
                         break;
                     }
                 }
@@ -749,9 +677,9 @@ public static class ModMain
                 WaitingMyMsgBox.RemoveAt(0);
             }
             // 没有弹窗，没有等待的弹窗
-            else if (!(frmMain.PanMsgBackground.Visibility == Visibility.Collapsed))
+            else if (!(frmMain.DialogLayer.Visibility == Visibility.Collapsed))
             {
-                frmMain.PanMsgBackground.Visibility = Visibility.Collapsed;
+                frmMain.DialogLayer.Visibility = Visibility.Collapsed;
             }
         }
         catch (Exception ex)
@@ -795,10 +723,10 @@ public static class ModMain
     {
         try
         {
-            if (frmLaunchLeft is null || frmLaunchLeft.AprilPosTrans is null || frmMain.lastMouseArg is null)
+            if (frmMain?.Stage is not { } stage || frmMain.lastMouseArg is null)
                 return;
             if (isAprilGiveup || frmMain.pageCurrent != FormMain.PageType.Launch ||
-                ModAnimation.AniExitsAnyControl() || !frmLaunchLeft.BtnLaunch.IsLoaded)
+                ModAnimation.AniExitsAnyControl() || !stage.LaunchButton.IsLoaded)
                 return;
 
             // 计算是否空闲
@@ -816,9 +744,9 @@ public static class ModMain
             // 计算躲避移动
             Vector direction;
             double distance;
-            var buttonWidth = frmLaunchLeft.BtnLaunch.ActualWidth / 2d;
-            var buttonHeight = frmLaunchLeft.BtnLaunch.ActualHeight / 2d;
-            var vec = (Vector)(frmMain.lastMouseArg.GetPosition(frmLaunchLeft.BtnLaunch) -
+            var buttonWidth = stage.LaunchButton.ActualWidth / 2d;
+            var buttonHeight = stage.LaunchButton.ActualHeight / 2d;
+            var vec = (Vector)(frmMain.lastMouseArg.GetPosition(stage.LaunchButton) -
                                new Vector(buttonWidth, buttonHeight));
             var dir = new Vector(vec.X, vec.Y);
             dir.Normalize();
@@ -832,7 +760,7 @@ public static class ModMain
             {
                 var safeDist = (Vector)(frmMain.lastMouseArg.GetPosition(frmMain.PanMain) -
                                         new Vector(buttonWidth, frmMain.PanMain.ActualHeight - buttonHeight * 3d));
-                var back = new Vector(frmLaunchLeft.AprilPosTrans.X, frmLaunchLeft.AprilPosTrans.Y);
+                var back = new Vector(stage.AprilPosTrans.X, stage.AprilPosTrans.Y);
                 if (safeDist.Length > 250d && back.Length > 0.4d)
                 {
                     acc -= back * 0.0005d;
@@ -842,42 +770,42 @@ public static class ModMain
             }
 
             // 回到边界
-            var relative = frmLaunchLeft.BtnLaunch.TranslatePoint(new Point(0d, 0d), frmMain.PanForm);
+            var relative = stage.LaunchButton.TranslatePoint(new Point(0d, 0d), frmMain.PanForm);
             if (relative.X < -buttonWidth * 2d)
             {
-                frmLaunchLeft.AprilPosTrans.X += frmMain.PanForm.ActualWidth + buttonWidth * 2d; // 离开左边界
+                stage.AprilPosTrans.X += frmMain.PanForm.ActualWidth + buttonWidth * 2d; // 离开左边界
                 aprilSpeed.X -= 80d;
                 if (relative.Y < 0d)
-                    frmLaunchLeft.AprilPosTrans.Y += buttonHeight * 2.5d;
+                    stage.AprilPosTrans.Y += buttonHeight * 2.5d;
                 else if (relative.Y > frmMain.PanForm.ActualHeight - buttonHeight * 2d)
-                    frmLaunchLeft.AprilPosTrans.Y -= buttonHeight * 2.5d;
+                    stage.AprilPosTrans.Y -= buttonHeight * 2.5d;
             }
             else if (relative.X > frmMain.PanForm.ActualWidth)
             {
-                frmLaunchLeft.AprilPosTrans.X -= frmMain.PanForm.ActualWidth + buttonWidth * 2d; // 离开右边界
+                stage.AprilPosTrans.X -= frmMain.PanForm.ActualWidth + buttonWidth * 2d; // 离开右边界
                 aprilSpeed.X += 80d;
                 if (relative.Y < 0d)
-                    frmLaunchLeft.AprilPosTrans.Y += buttonHeight * 2.5d;
+                    stage.AprilPosTrans.Y += buttonHeight * 2.5d;
                 else if (relative.Y > frmMain.PanForm.ActualHeight - buttonHeight * 2d)
-                    frmLaunchLeft.AprilPosTrans.Y -= buttonHeight * 2.5d;
+                    stage.AprilPosTrans.Y -= buttonHeight * 2.5d;
             }
             else if (relative.Y < -buttonHeight * 2d)
             {
-                frmLaunchLeft.AprilPosTrans.Y += frmMain.PanForm.ActualHeight + buttonHeight * 2d; // 离开上边界
+                stage.AprilPosTrans.Y += frmMain.PanForm.ActualHeight + buttonHeight * 2d; // 离开上边界
                 aprilSpeed.Y -= 25d;
                 if (relative.X < 0d)
-                    frmLaunchLeft.AprilPosTrans.X += buttonWidth * 2d;
+                    stage.AprilPosTrans.X += buttonWidth * 2d;
                 else if (relative.X > frmMain.PanForm.ActualWidth - buttonWidth * 2d)
-                    frmLaunchLeft.AprilPosTrans.X -= buttonWidth * 2d;
+                    stage.AprilPosTrans.X -= buttonWidth * 2d;
             }
             else if (relative.Y > frmMain.PanForm.ActualHeight)
             {
-                frmLaunchLeft.AprilPosTrans.Y -= frmMain.PanForm.ActualHeight + buttonHeight * 2d; // 离开下边界
+                stage.AprilPosTrans.Y -= frmMain.PanForm.ActualHeight + buttonHeight * 2d; // 离开下边界
                 aprilSpeed.Y += 25d;
                 if (relative.X < 0d)
-                    frmLaunchLeft.AprilPosTrans.X += buttonWidth * 2d;
+                    stage.AprilPosTrans.X += buttonWidth * 2d;
                 else if (relative.X > frmMain.PanForm.ActualWidth - buttonWidth * 2d)
-                    frmLaunchLeft.AprilPosTrans.X -= buttonWidth * 2d;
+                    stage.AprilPosTrans.X -= buttonWidth * 2d;
             }
 
             // 移动
@@ -888,13 +816,13 @@ public static class ModMain
             aprilSpeed.Normalize();
             aprilSpeed *= speedValue;
             aprilDistance = (int)Math.Round(aprilDistance + speedValue);
-            frmLaunchLeft.AprilPosTrans.X += aprilSpeed.X;
-            frmLaunchLeft.AprilPosTrans.Y += aprilSpeed.Y;
+            stage.AprilPosTrans.X += aprilSpeed.X;
+            stage.AprilPosTrans.Y += aprilSpeed.Y;
             // 大小改变
-            frmLaunchLeft.AprilScaleTrans.ScaleX =
+            stage.AprilScaleTrans.ScaleX =
                 ModBase.MathClamp(1d - (Math.Abs(direction.X) - Math.Abs(direction.Y)) * (speedValue / 160d), 0.2d,
                     1.8d);
-            frmLaunchLeft.AprilScaleTrans.ScaleY =
+            stage.AprilScaleTrans.ScaleY =
                 ModBase.MathClamp(1d - (Math.Abs(direction.Y) - Math.Abs(direction.X)) * (speedValue / 100d), 0.2d,
                     1.8d);
             // 放弃提示
@@ -1101,8 +1029,8 @@ public static class ModMain
     }
     
     // 高级
-    text = ModBase.RegexReplaceEach(text, @"\{hint\}", m => replacer(PageToolsTest.GetRandomHint()));
-    text = ModBase.RegexReplaceEach(text, @"\{cave\}", m => replacer(PageToolsTest.GetRandomCave()));
+    text = ModBase.RegexReplaceEach(text, @"\{hint\}", m => replacer(LauncherTools.GetRandomHint()));
+    text = ModBase.RegexReplaceEach(text, @"\{cave\}", m => replacer(LauncherTools.GetRandomCave()));
     text = ModBase.RegexReplaceEach(text, @"\{setup:([a-zA-Z0-9]+)\}", m =>
     {
         if (ConfigService.TryGetConfigItemNoType(m.Groups[1].Value, out var item) && item.Source != ConfigSource.SharedEncrypt)

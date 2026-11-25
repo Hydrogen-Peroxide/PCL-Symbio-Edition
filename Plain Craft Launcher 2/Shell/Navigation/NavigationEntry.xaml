@@ -1,0 +1,19 @@
+<UserControl x:Class="PCL.NavigationEntry" x:Name="Row"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:svg="clr-namespace:PCL.Core.UI.Controls.SvgIcon;assembly=PCL.Core" Focusable="False">
+    <Grid>
+        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+        <Button x:Name="Primary" Style="{StaticResource SyNavItem}" Click="Choose" HorizontalContentAlignment="Stretch"
+                AutomationProperties.Name="{Binding Label, ElementName=Row}">
+            <StackPanel Orientation="Horizontal">
+                <svg:SvgIcon Icon="{Binding Icon, ElementName=Row}" Style="{StaticResource SyIcon}" />
+                <TextBlock Text="{Binding Label, ElementName=Row}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+            </StackPanel>
+        </Button>
+        <Button x:Name="Secondary" Grid.Column="1" Style="{StaticResource SyButton}" Padding="3" MinWidth="26"
+                MinHeight="24" VerticalAlignment="Center" Margin="3,0" Click="ExecuteSecondary" Visibility="Collapsed"
+                ToolTip="{Binding ActionHint, ElementName=Row}" AutomationProperties.Name="{Binding ActionHint, ElementName=Row}">
+            <svg:SvgIcon Icon="{Binding ActionIcon, ElementName=Row}" Style="{StaticResource SyIcon}"/>
+        </Button>
+    </Grid>
+</UserControl>

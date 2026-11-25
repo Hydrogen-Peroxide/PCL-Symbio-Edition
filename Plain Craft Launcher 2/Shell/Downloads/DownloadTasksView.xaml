@@ -1,0 +1,33 @@
+<local:WorkspacePage x:Class="PCL.DownloadTasksView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PCL" PanScroll="{Binding ElementName=TaskScroll}">
+    <Grid Margin="{StaticResource SePageScrollMargin}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <UniformGrid Rows="1" Margin="0,0,0,12">
+            <StackPanel Margin="0,0,8,0">
+                <TextBlock Text="{DynamicResource Speed.Progress.Total}" Foreground="{DynamicResource SyTextSecondary}" />
+                <TextBlock x:Name="TotalProgress" FontSize="{StaticResource SyFontSubtitle}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,8,0">
+                <TextBlock Text="{DynamicResource Speed.Progress.Speed}" Foreground="{DynamicResource SyTextSecondary}" />
+                <TextBlock x:Name="TransferRate" FontSize="{StaticResource SyFontSubtitle}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,8,0">
+                <TextBlock Text="{DynamicResource Speed.Progress.RemainingFiles}" Foreground="{DynamicResource SyTextSecondary}" />
+                <TextBlock x:Name="PendingFiles" FontSize="{StaticResource SyFontSubtitle}" />
+            </StackPanel>
+            <StackPanel x:Name="ThreadStats" Visibility="Collapsed">
+                <TextBlock Text="{DynamicResource Speed.Progress.RemainingThreads}" Foreground="{DynamicResource SyTextSecondary}" />
+                <TextBlock x:Name="TransferThreads" FontSize="{StaticResource SyFontSubtitle}" />
+            </StackPanel>
+        </UniformGrid>
+        <ScrollViewer Grid.Row="1" x:Name="TaskScroll" local:ScrollInput.Enabled="True" Style="{StaticResource SyScrollViewer}"
+                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel x:Name="Tasks" />
+        </ScrollViewer>
+    </Grid>
+</local:WorkspacePage>

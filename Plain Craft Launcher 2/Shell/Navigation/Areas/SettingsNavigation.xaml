@@ -1,0 +1,34 @@
+<local:WorkspaceSidebar
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PCL" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="PCL.SettingsNavigation"
+    Width="220" d:DesignWidth="152">
+    <ScrollViewer local:ScrollInput.Enabled="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
+                          Style="{StaticResource ScrollViewerFullMargin}">
+        <StackPanel Margin="0,12,0,0" x:Name="PanItem">
+            <TextBlock Text="{DynamicResource Setup.Left.Category.Game}" Margin="13,5,5,3" Opacity="0.6" FontSize="12" x:Name="TextGameCategory" />
+
+            <local:NavigationEntry x:Name="ItemLaunch" Label="{DynamicResource Setup.Left.Item.Launch}" Icon="lucide/rocket" Tag="0" Height="36" VerticalAlignment="Top" ActionIcon="lucide/rotate-ccw" ActionHint="{DynamicResource Common.Action.Initialize}" ActionTag="0" />
+
+            <local:NavigationEntry x:Name="ItemJava" Label="{DynamicResource Setup.Left.Item.Java}" Icon="lucide/coffee" Tag="9" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="9" />
+
+            <local:NavigationEntry x:Name="ItemGameManage" Label="{DynamicResource Setup.Left.Item.GameManage}" Icon="lucide/book-marked" Tag="2" Height="36" VerticalAlignment="Top" ActionIcon="lucide/rotate-ccw" ActionHint="{DynamicResource Common.Action.Initialize}" ActionTag="2" />
+
+            <TextBlock Text="{DynamicResource Setup.Left.Category.Launcher}" Margin="13,5,5,3" Opacity="0.6" FontSize="12" x:Name="TextLauncherCategory" />
+
+            <local:NavigationEntry x:Name="ItemUI" Label="{DynamicResource Setup.Left.Item.Ui}" Icon="lucide/palette" Tag="1" Height="36" VerticalAlignment="Top" ActionIcon="lucide/rotate-ccw" ActionHint="{DynamicResource Common.Action.Initialize}" ActionTag="1" />
+
+            <local:NavigationEntry x:Name="ItemLauncherLanguage" Label="{DynamicResource Setup.Language.Title}" Icon="lucide/earth" Tag="11" Height="36" VerticalAlignment="Top" ActionIcon="lucide/rotate-ccw" ActionHint="{DynamicResource Common.Action.Initialize}" ActionTag="11" />
+
+            <local:NavigationEntry x:Name="ItemLauncherMisc" Label="{DynamicResource Setup.Left.Item.Misc}" Icon="lucide/monitor-cog" Tag="10" Height="36" VerticalAlignment="Top" ActionIcon="lucide/rotate-ccw" ActionHint="{DynamicResource Common.Action.Initialize}" ActionTag="10" />
+
+            <TextBlock Text="{DynamicResource Setup.Left.Category.About}" Margin="13,5,5,3" Opacity="0.6" FontSize="12" x:Name="TextAboutCategory" />
+
+            <local:NavigationEntry x:Name="ItemAbout" Label="{DynamicResource Setup.Left.Item.About}" Icon="lucide/info" Tag="4" Height="36" VerticalAlignment="Top" />
+            <local:NavigationEntry x:Name="ItemUpdate" Label="{DynamicResource Setup.Left.Item.Update}" Icon="lucide/refresh-cw" Tag="7" Height="36" VerticalAlignment="Top" />
+            <local:NavigationEntry x:Name="ItemFeedback" Label="{DynamicResource Setup.Left.Item.Feedback}" Icon="lucide/message-circle" Tag="6" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="6" />
+            <local:NavigationEntry x:Name="ItemLog" Label="{DynamicResource Setup.Left.Item.Log}" Icon="lucide/scroll-text" Tag="5" Height="36" VerticalAlignment="Top" />
+        </StackPanel>
+    </ScrollViewer>
+</local:WorkspaceSidebar>

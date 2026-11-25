@@ -1,0 +1,108 @@
+<local:WorkspacePage
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PCL" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" x:Class="PCL.WorldDatapacksView"
+    PanScroll="{Binding ElementName=PanBack}">
+    <Grid>
+        <Grid x:Name="PanAllBack">
+            <ScrollViewer local:ScrollInput.Enabled="True" Style="{StaticResource SyScrollViewer}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                  x:Name="PanBack">
+                <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}" Grid.IsSharedSizeScope="True">
+                    <local:SymbioSearchField Margin="0,15" HintText="{DynamicResource Instance.Resource.Search.Hint}" x:Name="SearchBox" />
+                    <local:WorkspaceCard Margin="0,0,0,15" x:Name="PanManage">
+                        <WrapPanel Margin="15,8,0,15">
+                            <local:SymbioButton x:Name="BtnManageOpen" MinWidth="110" Text="{DynamicResource Common.Action.OpenFolder}" Padding="13,7"
+                                            Margin="0,7,15,0" HorizontalAlignment="Left" ColorType="Highlight" />
+                            <local:SymbioButton x:Name="BtnManageInstall" MinWidth="110" Text="{DynamicResource Instance.Resource.InstallFromFiles}" Padding="13,7"
+                                            Margin="0,7,15,0" HorizontalAlignment="Left" />
+                            <local:SymbioButton x:Name="BtnManageDownload" MinWidth="110" Text="{DynamicResource Instance.Resource.Datapack.DownloadNew}" Padding="13,7"
+                                            Margin="0,7,15,0" HorizontalAlignment="Left" />
+                            <local:SymbioButton x:Name="BtnManageSelectAll" MinWidth="110" Text="{DynamicResource Instance.Resource.SelectAll}" Padding="13,7"
+                                            Margin="0,7,15,0" HorizontalAlignment="Left" />
+                            <local:SymbioButton x:Name="BtnManageInfoExport" MinWidth="110" Text="{DynamicResource Instance.Resource.ExportInfo}" Padding="13,7"
+                                            Margin="0,7,15,0" HorizontalAlignment="Left" ToolTip="{DynamicResource Instance.Resource.Datapack.ExportInfo.ToolTip}" />
+                        </WrapPanel>
+                    </local:WorkspaceCard>
+                    <local:WorkspaceCard x:Name="PanListBack" VerticalAlignment="Top" Opacity="0" Margin="0,0,0,14" Title=" "
+                                  MinHeight="55">
+                        <StackPanel x:Name="PanFilter" Margin="15,13,0,0" Orientation="Horizontal"
+                                    VerticalAlignment="Top" HorizontalAlignment="Left" Height="28">
+                            <local:SymbioSegment Tag="0" ColorType="Highlight" VerticalAlignment="Center" Margin="2,0"
+                                                 Text="{DynamicResource Instance.Resource.Filter.All}" x:Name="BtnFilterAll" IsChecked="True" />
+                            <local:SymbioSegment Tag="1" ColorType="Highlight" VerticalAlignment="Center" Margin="2,0"
+                                                 Text="{DynamicResource Instance.Resource.Filter.Enabled}" x:Name="BtnFilterEnabled" />
+                            <local:SymbioSegment Tag="2" ColorType="Highlight" VerticalAlignment="Center" Margin="2,0"
+                                                 Text="{DynamicResource Instance.Resource.Filter.Disabled}" x:Name="BtnFilterDisabled" />
+                            <local:SymbioSegment Tag="3" ColorType="Highlight" VerticalAlignment="Center" Margin="2,0"
+                                                 Text="{DynamicResource Instance.Resource.Filter.Updatable}" x:Name="BtnFilterCanUpdate" />
+                            <local:SymbioSegment Tag="4" ColorType="Highlight" VerticalAlignment="Center" Margin="2,0"
+                                                 Text="{DynamicResource Instance.Resource.Filter.Error}" x:Name="BtnFilterError" />
+                        </StackPanel>
+                        <StackPanel Margin="0,13,15,0" Orientation="Horizontal" VerticalAlignment="Top"
+                                    HorizontalAlignment="Right" Height="28">
+                            <local:SymbioIconTextAction x:Name="BtnSort" Text="{DynamicResource Instance.Resource.Sort.Text}"
+                                                    SvgIcon="lucide/arrow-up-down" />
+                        </StackPanel>
+                        <StackPanel Margin="20,48,18,22" Name="PanList" VerticalAlignment="Top" />
+                    </local:WorkspaceCard>
+                </StackPanel>
+            </ScrollViewer>
+            <local:WorkspaceCard HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40" x:Name="PanEmpty">
+                <StackPanel Margin="20,17">
+                    <TextBlock x:Name="TxtEmptyTitle" Margin="0,0,0,9" HorizontalAlignment="Center" Text="{DynamicResource Instance.Resource.Datapack.Empty.Title}"
+                               FontSize="19" UseLayoutRounding="True" SnapsToDevicePixels="True"
+                               Foreground="{DynamicResource SyAccentText}" />
+                    <Rectangle HorizontalAlignment="Stretch" Height="2" Fill="{DynamicResource SyAccentText}" />
+                    <TextBlock x:Name="TxtEmptyDescription" Margin="10,10,10,0"
+                               Text="{DynamicResource Instance.Resource.Datapack.Empty.Description}" TextWrapping="Wrap" />
+                    <WrapPanel Margin="10,20,10,5" HorizontalAlignment="Center" Orientation="Horizontal">
+                        <local:SymbioButton Height="35" x:Name="BtnHintInstall" MinWidth="130" Text="{DynamicResource Instance.Resource.InstallFromFiles}" Margin="5,0"
+                                        Padding="12,0" ColorType="Highlight" />
+                        <local:SymbioButton Height="35" x:Name="BtnHintDownload" MinWidth="130" Text="{DynamicResource Instance.Resource.Datapack.DownloadNew}" Margin="5,0"
+                                        Padding="12,0" />
+                        <local:SymbioButton Height="35" x:Name="BtnHintOpen" MinWidth="130" Text="{DynamicResource Common.Action.OpenFolder}" Margin="5,0"
+                                        Padding="12,0" />
+                    </WrapPanel>
+                </StackPanel>
+            </local:WorkspaceCard>
+        </Grid>
+        <local:WorkspaceCard HorizontalAlignment="Center" VerticalAlignment="Center" Margin="40,0" SnapsToDevicePixels="True"
+                      x:Name="PanLoad" UseAnimation="False">
+            <local:LoadingIndicator Text="{DynamicResource Instance.Resource.Datapack.Loading}" Margin="20,20,20,17" x:Name="Load" HorizontalAlignment="Center"
+                             VerticalAlignment="Center" />
+        </local:WorkspaceCard>
+        <local:WorkspaceCard x:Name="CardSelect" Visibility="Collapsed" Opacity="0"
+                      HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="25,25,25,0" UseAnimation="False">
+            <local:WorkspaceCard.RenderTransform>
+                <TranslateTransform x:Name="TransSelect" Y="-10" />
+            </local:WorkspaceCard.RenderTransform>
+            <TextBlock x:Name="LabSelect" Text="" HorizontalAlignment="Center" VerticalAlignment="Top"
+                       Margin="9" Foreground="{DynamicResource SyAccentText}" />
+            <StackPanel Orientation="Horizontal" Margin="5,28,5,5">
+                <local:SymbioIconTextAction x:Name="BtnSelectUpdate" Text="{DynamicResource Instance.Resource.Update}"
+                                        LogoScale="1"
+                                        SvgIcon="lucide/upload" />
+                <local:SymbioIconTextAction x:Name="BtnSelectEnable" Text="{DynamicResource Instance.Resource.Enable}"
+                                        LogoScale="1.05"
+                                        SvgIcon="lucide/circle-check" />
+                <local:SymbioIconTextAction x:Name="BtnSelectDisable" Text="{DynamicResource Instance.Resource.Disable}"
+                                        LogoScale="1"
+                                        SvgIcon="lucide/circle-minus" />
+                <local:SymbioIconTextAction x:Name="BtnSelectFavorites" Text="{DynamicResource Instance.Resource.Favorite}"
+                                        LogoScale="1"
+                                        SvgIcon="lucide/heart" />
+                <local:SymbioIconTextAction x:Name="BtnSelectShare" Text="{DynamicResource Instance.Resource.ShareSelected}"
+                                        LogoScale="1"
+                                        SvgIcon="lucide/share-2" />
+                <local:SymbioIconTextAction x:Name="BtnSelectDelete" Text="{DynamicResource Common.Action.Delete}"
+                                        LogoScale="0.96"
+                                        SvgIcon="lucide/trash-2" />
+                <local:SymbioIconTextAction x:Name="BtnSelectCancel" Text="{DynamicResource Instance.Resource.CancelSelection}"
+                                        LogoScale="0.8"
+                                        SvgIcon="lucide/x" />
+            </StackPanel>
+        </local:WorkspaceCard>
+    </Grid>
+</local:WorkspacePage>

@@ -35,7 +35,7 @@ public static class ModInstanceList
             if (value is null)
                 return;
             // 重置缓存的 Mod 文件夹
-            PageDownloadCompDetail.cachedFolder.Clear();
+            ModComp.RecentDownloadFolders.Clear();
         }
     }
 
@@ -62,6 +62,8 @@ public static class ModInstanceList
     /// <summary>
     ///     加载 Minecraft 文件夹的实例列表。
     /// </summary>
+    internal static bool ShowHidden { get; set; }
+
     public static ModLoader.LoaderTask<string, int> mcInstanceListLoader =
         new("Minecraft Instance List", InitMcInstanceList) { reloadTimeout = 1 };
 

@@ -1,0 +1,392 @@
+<local:WorkspacePage
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PCL"
+    xmlns:val="https://ce.pclc.cc/core/utils/validate"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" x:Class="PCL.AppearanceSettingsView"
+    DataContext="{Binding RelativeSource={RelativeSource Self}}"
+    PanScroll="{Binding ElementName=PanBack}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <!-- Fixed page header: title and section jump links -->
+        <StackPanel Margin="36,24,36,4" MaxWidth="1000">
+            <TextBlock Style="{StaticResource SyPageTitle}" Margin="0,0,0,8" Text="{DynamicResource Setup.Left.Item.Ui}" />
+            <WrapPanel Margin="-8,0,0,0">
+                <local:SymbioButton Tag="CardLauncher" Text="{DynamicResource Setup.Ui.Basic.Title}"
+                                    IsTextAction="True" Margin="0,0,4,4" Padding="8,4" Click="JumpToSection" />
+                <local:SymbioButton Tag="CardFont" Text="{DynamicResource Setup.Ui.Font.Title}"
+                                    IsTextAction="True" Margin="0,0,4,4" Padding="8,4" Click="JumpToSection" />
+                <local:SymbioButton Tag="CardBackground" Text="{DynamicResource Setup.Ui.Background.TitleDefault}"
+                                    IsTextAction="True" Margin="0,0,4,4" Padding="8,4" Click="JumpToSection" />
+                <local:SymbioButton Tag="CardMusic" Text="{DynamicResource Setup.Ui.Music.Title}"
+                                    IsTextAction="True" Margin="0,0,4,4" Padding="8,4" Click="JumpToSection" />
+                <local:SymbioButton Tag="CardLogo" Text="{DynamicResource Setup.Ui.Logo.Title}"
+                                    IsTextAction="True" Margin="0,0,4,4" Padding="8,4" Click="JumpToSection" />
+                <local:SymbioButton Tag="CardCustom" Text="{DynamicResource Setup.Ui.Homepage.Title}"
+                                    IsTextAction="True" Margin="0,0,4,4" Padding="8,4" Click="JumpToSection" />
+                <local:SymbioButton x:Name="LinkVisibility" Tag="CardSwitch" Text="{DynamicResource Setup.Ui.FeatureHide.Title}"
+                                    IsTextAction="True" Margin="0,0,4,4" Padding="8,4" Click="JumpToSection" />
+            </WrapPanel>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" local:ScrollInput.Enabled="True" Style="{StaticResource SyScrollViewer}"
+                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
+        <StackPanel x:Name="PanMain" Margin="36,4,36,32" MaxWidth="1000">
+
+            <!-- ============ Basics ============ -->
+            <StackPanel x:Name="CardLauncher">
+                <TextBlock Style="{StaticResource SySectionHeader}" Margin="1,8,0,8" Text="{DynamicResource Setup.Ui.Basic.Title}" />
+                <local:SettingsCard Icon="lucide/palette" Header="{DynamicResource Setup.Ui.Theme.Title}" ActionWidth="220">
+                    <local:SymbioSelect x:Name="ComboDarkMode" Tag="UiDarkMode" SelectionChanged="ComboChange">
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Theme.Light}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Theme.Dark}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Theme.FollowSystem}" /> <!-- default -->
+                    </local:SymbioSelect>
+                </local:SettingsCard>
+                <local:SettingsExpander Icon="lucide/sparkles" Header="{DynamicResource Setup.Ui.Theme.LightColor}" IsExpanded="True">
+                    <local:SettingsExpander.HeaderAction>
+                        <local:SymbioSelect x:Name="ComboLightColor" Tag="UiLightColor" Width="220" Margin="0,0,4,0"
+                                            ItemsSource="{Binding ThemeColors}" SelectionChanged="ThemeColor_Change" />
+                    </local:SettingsExpander.HeaderAction>
+                    <local:SettingsRow Header="{DynamicResource Setup.Ui.Theme.DarkColor}" ActionWidth="220">
+                        <local:SymbioSelect x:Name="ComboDarkColor" Tag="UiDarkColor" ItemsSource="{Binding ThemeColors}" SelectionChanged="ThemeColor_Change" />
+                    </local:SettingsRow>
+                </local:SettingsExpander>
+                <local:SettingsCard Icon="lucide/layers" Header="{DynamicResource Setup.Ui.Basic.Opacity}" ActionWidth="260">
+                    <local:SymbioSlider x:Name="SliderLauncherOpacity" Tag="UiLauncherTransparent" MaxValue="600" ValueByKey="10"
+                                        Change="SliderChange" />
+                </local:SettingsCard>
+                <Border Name="PanLauncherHide" Visibility="Collapsed" Margin="0,0,0,4" Padding="20" CornerRadius="4" BorderThickness="1"
+                        Background="{DynamicResource SyFrostFill}" BorderBrush="{DynamicResource SyFrostEdge}">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="{DynamicResource Setup.Ui.Basic.BlueHint}" TextWrapping="Wrap" />
+                        <local:SymbioButton Height="32" x:Name="BtnLauncherDonate" MinWidth="140" Text="{DynamicResource Setup.Ui.Basic.GetSnapshot}"
+                                            Padding="13,0" HorizontalAlignment="Center" Margin="0,10,0,0"
+                                            ColorType="Highlight" Click="BtnLauncherDonate_Click" />
+                    </StackPanel>
+                </Border>
+                <local:SettingsCard Icon="lucide/layout-dashboard" Header="{DynamicResource Setup.Ui.Dock.Placement}"
+                                    Description="{DynamicResource Setup.Ui.Dock.Placement.Description}" ActionWidth="220">
+                    <local:SymbioSelect x:Name="ComboDockPlacement" SelectionChanged="ComboDockPlacement_SelectionChanged">
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Dock.Placement.Inside}" IsSelected="True" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Dock.Placement.Detached}" />
+                    </local:SymbioSelect>
+                </local:SettingsCard>
+                <local:SettingsCard Icon="lucide/image" Header="{DynamicResource Setup.Ui.Basic.ShowLogo}">
+                    <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckLauncherLogo" Tag="UiLauncherLogo" Change="CheckBoxChange" />
+                </local:SettingsCard>
+                <local:SettingsCard Icon="lucide/monitor" Header="{DynamicResource Setup.Ui.Basic.LockWindow}">
+                    <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckLockWindowSize" Tag="UiLockWindowSize" Change="CheckBoxChange" />
+                </local:SettingsCard>
+                <local:SettingsCard Icon="lucide/circle-help" Header="{DynamicResource Setup.Ui.Basic.ShowTriviaHint}">
+                    <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckShowLaunchingHint" Tag="UiShowLaunchingHint" Change="CheckBoxChange" />
+                </local:SettingsCard>
+                <StackPanel x:Name="PanelBlur">
+                    <local:SettingsCard Icon="lucide/flask-conical" Header="{DynamicResource Setup.Ui.Basic.AdvancedMaterial}"
+                                        Description="{DynamicResource Setup.Ui.Basic.AdvancedMaterial.ToolTip}">
+                        <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckBlur" Tag="UiBlur" Change="CheckBoxChange" />
+                    </local:SettingsCard>
+                    <StackPanel x:Name="PanBlurValue">
+                        <local:SettingsCard Padding="58,12,16,12" MinHeight="52" Header="{DynamicResource Setup.Ui.Basic.BlurRadius}"
+                                            Description="{DynamicResource Setup.Ui.Basic.BlurRadius.ToolTip}" ActionWidth="260">
+                            <local:SymbioSlider x:Name="SliderBlurValue" Tag="UiBlurValue" MaxValue="40" ValueByKey="10" Change="SliderChange" />
+                        </local:SettingsCard>
+                        <local:SettingsCard Padding="58,12,16,12" MinHeight="52" Header="{DynamicResource Setup.Ui.Basic.BlurMethod}"
+                                            Description="{DynamicResource Setup.Ui.Basic.BlurMethod.ToolTip}" ActionWidth="260">
+                            <local:SymbioSelect x:Name="ComboBlurType" Tag="UiBlurType" SelectionChanged="ComboChange">
+                                <local:SelectOption Content="{DynamicResource Setup.Ui.Basic.BlurMethod.Gaussian}"
+                                                    ToolTip="{DynamicResource Setup.Ui.Basic.BlurMethod.Gaussian.ToolTip}" />
+                                <local:SelectOption Content="{DynamicResource Setup.Ui.Basic.BlurMethod.Box}"
+                                                    ToolTip="{DynamicResource Setup.Ui.Basic.BlurMethod.Box.ToolTip}" />
+                            </local:SymbioSelect>
+                        </local:SettingsCard>
+                        <local:SettingsCard Padding="58,12,16,12" MinHeight="52" Header="{DynamicResource Setup.Ui.Basic.BlurSamplingRate}"
+                                            Description="{DynamicResource Setup.Ui.Basic.BlurSamplingRate.ToolTip}" ActionWidth="260">
+                            <local:SymbioSlider x:Name="SliderBlurSamplingRate" Tag="UiBlurSamplingRate" MaxValue="100" ValueByKey="5"
+                                                Change="SliderChange" />
+                        </local:SettingsCard>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- ============ Fonts ============ -->
+            <StackPanel x:Name="CardFont">
+                <TextBlock Style="{StaticResource SySectionHeader}" Text="{DynamicResource Setup.Ui.Font.Title}" />
+                <local:SettingsCard Icon="lucide/pencil" Header="{DynamicResource Setup.Ui.Font.Global}"
+                                    Description="{DynamicResource Setup.Ui.Font.Global.ToolTip}" ActionWidth="280">
+                    <local:FontPicker x:Name="ComboUiFont" Tooltip="{DynamicResource Setup.Ui.Font.Global.ToolTip}"
+                                      SelectionChanged="ComboFontChange" />
+                </local:SettingsCard>
+                <local:SettingsCard Icon="lucide/server" Header="{DynamicResource Setup.Ui.Font.Motd}"
+                                    Description="{DynamicResource Setup.Ui.Font.Motd.ToolTip}" ActionWidth="280">
+                    <local:FontPicker x:Name="ComboUiMotdFont" Tooltip="{DynamicResource Setup.Ui.Font.Motd.ToolTip}"
+                                      SelectionChanged="ComboMotdFontChange" />
+                </local:SettingsCard>
+            </StackPanel>
+
+            <!-- ============ Wallpaper ============ -->
+            <StackPanel x:Name="CardBackground">
+                <TextBlock x:Name="HeaderBackground" Style="{StaticResource SySectionHeader}" Text="{DynamicResource Setup.Ui.Background.TitleDefault}" />
+                <local:SettingsCard x:Name="PanBackgroundSuit" Visibility="Collapsed" Icon="lucide/image"
+                                    Header="{DynamicResource Setup.Ui.Background.ContentAdapt}" ActionWidth="220">
+                    <local:SymbioSelect x:Name="ComboBackgroundSuit" Tag="UiBackgroundSuit" SelectionChanged="ComboChange">
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Background.Suit.Smart}" IsSelected="True" ToolTip="{DynamicResource Setup.Ui.Background.Suit.Smart.ToolTip}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Background.Suit.Center}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Background.Suit.Fit}" ToolTip="{DynamicResource Setup.Ui.Background.Suit.Fit.ToolTip}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Background.Suit.Stretch}" ToolTip="{DynamicResource Setup.Ui.Background.Suit.Stretch.ToolTip}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Background.Suit.Tile}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Background.Suit.TopLeft}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Background.Suit.TopRight}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Background.Suit.BottomLeft}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Background.Suit.BottomRight}" />
+                    </local:SymbioSelect>
+                </local:SettingsCard>
+                <local:SettingsCard x:Name="PanBackgroundOpacity" Visibility="Collapsed" Icon="lucide/layers"
+                                    Header="{DynamicResource Setup.Ui.Basic.Opacity2}" ActionWidth="260">
+                    <local:SymbioSlider x:Name="SliderBackgroundOpacity" Tag="UiBackgroundOpacity" MaxValue="1000" ValueByKey="10" Change="SliderChange" />
+                </local:SettingsCard>
+                <local:SettingsCard x:Name="PanBackgroundBlur" Visibility="Collapsed" Icon="lucide/sparkles"
+                                    Header="{DynamicResource Setup.Ui.Background.Blur}" Description="{DynamicResource Setup.Ui.Background.Blur.ToolTip}" ActionWidth="260">
+                    <local:SymbioSlider x:Name="SliderBackgroundBlur" Tag="UiBackgroundBlur" MaxValue="40" Change="SliderChange" />
+                </local:SettingsCard>
+                <local:SettingsCard Icon="lucide/play" Header="{DynamicResource Setup.Ui.Background.PauseVideo}"
+                                    Description="{DynamicResource Setup.Ui.Background.PauseVideo.ToolTip}"
+                                    Visibility="{Binding Visibility, ElementName=CheckAutoPauseVideo}">
+                    <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckAutoPauseVideo" Tag="UiAutoPauseVideo" Change="CheckBoxChange" />
+                </local:SettingsCard>
+                <local:SettingsCard Icon="lucide/palette" Header="{DynamicResource Setup.Ui.Background.ColorOverlay}">
+                    <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckBackgroundColorful" Tag="UiBackgroundColorful" Change="CheckBoxChange" />
+                </local:SettingsCard>
+                <WrapPanel Margin="0,8,0,0">
+                    <local:SymbioButton x:Name="BtnBackgroundOpen" MinWidth="120" MinHeight="32" Text="{DynamicResource Common.Action.OpenFolder}" Padding="13,0"
+                                        Margin="0,0,8,8" Click="BtnUIBgOpen_Click" ToolTip="{DynamicResource Setup.Ui.Background.OpenFolder.ToolTip}" />
+                    <local:SymbioButton x:Name="BtnBackgroundRefresh" MinWidth="120" MinHeight="32" Text="{DynamicResource Setup.Ui.Background.Refresh}" Padding="13,0"
+                                        Margin="0,0,8,8" Click="BtnBackgroundRefresh_Click" ToolTip="{DynamicResource Setup.Ui.Background.Refresh.ToolTip}" />
+                    <local:SymbioButton x:Name="BtnBackgroundClear" MinWidth="120" MinHeight="32" Text="{DynamicResource Setup.Ui.Background.Clear}" Visibility="Collapsed"
+                                        Padding="13,0" Margin="0,0,8,8" ColorType="Red" Click="BtnBackgroundClear_Click" />
+                </WrapPanel>
+            </StackPanel>
+
+            <!-- ============ Music ============ -->
+            <StackPanel x:Name="CardMusic">
+                <TextBlock x:Name="HeaderMusic" Style="{StaticResource SySectionHeader}" Text="{DynamicResource Setup.Ui.Music.Title}" />
+                <local:SettingsCard x:Name="PanMusicVolume" Visibility="Collapsed" Icon="lucide/music"
+                                    Header="{DynamicResource Setup.Ui.Music.Volume}" ActionWidth="260">
+                    <local:SymbioSlider x:Name="SliderMusicVolume" Tag="UiMusicVolume" MaxValue="1000" ValueByKey="10" Change="SliderChange" />
+                </local:SettingsCard>
+                <StackPanel x:Name="PanMusicDetail" Visibility="Collapsed">
+                    <local:SettingsCard Icon="lucide/arrow-right-left" Header="{DynamicResource Setup.Ui.Music.Shuffle}">
+                        <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckMusicRandom" Tag="UiMusicRandom" Change="CheckBoxChange" />
+                    </local:SettingsCard>
+                    <local:SettingsCard Icon="lucide/play" Header="{DynamicResource Setup.Ui.Music.AutoStart}">
+                        <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckMusicAuto" Tag="UiMusicAuto" Change="CheckBoxChange" />
+                    </local:SettingsCard>
+                    <local:SettingsCard Icon="lucide/gamepad-2" Header="{DynamicResource Setup.Ui.Music.StartInGame}">
+                        <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckMusicStart" Tag="UiMusicStart" Change="CheckMusicStart_OnChange" />
+                    </local:SettingsCard>
+                    <local:SettingsCard Icon="lucide/gamepad-2" Header="{DynamicResource Setup.Ui.Music.StopInGame}">
+                        <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckMusicStop" Tag="UiMusicStop" Change="CheckMusicStop_OnChange" />
+                    </local:SettingsCard>
+                    <local:SettingsCard Icon="lucide/monitor-cog" Header="{DynamicResource Setup.Ui.Music.Smtc}"
+                                        Description="{DynamicResource Setup.Ui.Music.Smtc.ToolTip}">
+                        <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckMusicSMTC" Tag="UiMusicSMTC" Change="CheckBoxChange" />
+                    </local:SettingsCard>
+                </StackPanel>
+                <WrapPanel Margin="0,8,0,0">
+                    <local:SymbioButton x:Name="BtnMusicOpen" Text="{DynamicResource Common.Action.OpenFolder}" MinWidth="120" MinHeight="32" Padding="13,0"
+                                        Margin="0,0,8,8" Click="BtnMusicOpen_Click" ToolTip="{DynamicResource Setup.Ui.Music.OpenFolder.ToolTip}" />
+                    <local:SymbioButton x:Name="BtnMusicRefresh" Text="{DynamicResource Setup.Ui.Music.Refresh}" MinWidth="120" MinHeight="32" Padding="13,0"
+                                        Margin="0,0,8,8" Click="BtnMusicRefresh_Click" ToolTip="{DynamicResource Setup.Ui.Music.Refresh.ToolTip}" />
+                    <local:SymbioButton x:Name="BtnMusicClear" Text="{DynamicResource Setup.Ui.Music.Clear}" MinWidth="120" MinHeight="32" Visibility="Collapsed"
+                                        Padding="13,0" Margin="0,0,8,8" ColorType="Red" Click="BtnMusicClear_Click" />
+                </WrapPanel>
+            </StackPanel>
+
+            <!-- ============ Title bar logo ============ -->
+            <StackPanel x:Name="CardLogo">
+                <TextBlock Style="{StaticResource SySectionHeader}" Text="{DynamicResource Setup.Ui.Logo.Title}" />
+                <local:SettingsCard Icon="lucide/flag" Header="{DynamicResource Setup.Ui.Logo.Title}" Stacked="True">
+                    <WrapPanel>
+                        <local:SymbioRadio Text="{DynamicResource Setup.Ui.Logo.None}" x:Name="RadioLogoType0" Tag="UiLogoType/0"
+                                           Margin="0,0,24,0" Check="RadioBoxChange" />
+                        <local:SymbioRadio Text="{DynamicResource Common.Option.Default}" x:Name="RadioLogoType1" Tag="UiLogoType/1"
+                                           Margin="0,0,24,0" Check="RadioBoxChange" />
+                        <local:SymbioRadio Text="{DynamicResource Setup.Ui.Logo.Text}" x:Name="RadioLogoType2" Tag="UiLogoType/2"
+                                           Margin="0,0,24,0" Check="RadioBoxChange" />
+                        <local:SymbioRadio Text="{DynamicResource Setup.Ui.Logo.Image}" x:Name="RadioLogoType3" Tag="UiLogoType/3"
+                                           Check="RadioBoxChange" PreviewCheck="RadioLogoType3_Check" />
+                    </WrapPanel>
+                </local:SettingsCard>
+                <local:SettingsCard Padding="58,12,16,12" MinHeight="52" Header="{DynamicResource Setup.Ui.Logo.LeftAlign}"
+                                    Visibility="{Binding Visibility, ElementName=CheckLogoLeft}">
+                    <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckLogoLeft" Tag="UiLogoLeft" Visibility="Collapsed" Change="CheckBoxChange" />
+                </local:SettingsCard>
+                <local:SettingsCard x:Name="PanLogoText" Visibility="Collapsed" Padding="58,12,16,12" MinHeight="52"
+                                    Header="{DynamicResource Setup.Ui.Logo.TextLabel}" ActionWidth="280">
+                    <local:SymbioTextField x:Name="TextLogoText" Tag="UiLogoText" MaxLength="100" ValidatedTextChanged="TextBoxChange" />
+                </local:SettingsCard>
+                <local:SettingsCard x:Name="PanLogoChange" Visibility="Collapsed" Padding="58,12,16,12" MinHeight="52">
+                    <StackPanel Orientation="Horizontal">
+                        <local:SymbioButton x:Name="BtnLogoChange" Text="{DynamicResource Setup.Ui.Logo.ChangeImage}" MinWidth="120" MinHeight="32" Padding="13,0"
+                                            Margin="0,0,8,0" Click="BtnLogoChange_Click" />
+                        <local:SymbioButton x:Name="BtnLogoDelete" Text="{DynamicResource Setup.Ui.Logo.ClearImage}" MinWidth="120" MinHeight="32" Padding="13,0"
+                                            ColorType="Red" Click="BtnLogoDelete_Click" />
+                    </StackPanel>
+                </local:SettingsCard>
+            </StackPanel>
+
+            <!-- ============ Homepage ============ -->
+            <StackPanel x:Name="CardCustom">
+                <TextBlock Style="{StaticResource SySectionHeader}" Text="{DynamicResource Setup.Ui.Homepage.Title}" />
+                <local:SettingsCard Icon="lucide/layout-dashboard" Header="{DynamicResource Setup.Ui.Homepage.Title}" Stacked="True">
+                    <WrapPanel>
+                        <local:SymbioRadio Text="{DynamicResource Setup.Ui.Homepage.Blank}" x:Name="RadioCustomType0" Tag="UiCustomType/0"
+                                           Margin="0,0,24,0" Check="RadioBoxChange" />
+                        <local:SymbioRadio Text="{DynamicResource Setup.Ui.Homepage.Preset}" x:Name="RadioCustomType3" Tag="UiCustomType/3"
+                                           Margin="0,0,24,0" Check="RadioBoxChange" />
+                        <local:SymbioRadio Text="{DynamicResource Setup.Ui.Homepage.LocalFile}" x:Name="RadioCustomType1" Tag="UiCustomType/1"
+                                           Margin="0,0,24,0" Check="RadioBoxChange" />
+                        <local:SymbioRadio Text="{DynamicResource Setup.Ui.Homepage.NetUpdate}" x:Name="RadioCustomType2" Tag="UiCustomType/2"
+                                           Check="RadioBoxChange" />
+                    </WrapPanel>
+                </local:SettingsCard>
+                <local:SymbioNotice Margin="0,0,0,4" Text="{DynamicResource Setup.Ui.Homepage.HintReferToModSetup}" Theme="Blue" x:Name="HintCustom" />
+                <local:SymbioNotice Margin="0,0,0,4" Text="{DynamicResource Setup.Ui.Homepage.NetWarning}" Theme="Yellow"
+                                    x:Name="HintCustomWarn" CanClose="True" RelativeSetup="HintCustomWarn" />
+                <local:SettingsCard x:Name="PanCustomPreset" Visibility="Collapsed" Padding="58,12,16,12" MinHeight="52"
+                                    Header="{DynamicResource Setup.Ui.Homepage.PresetLabel}" ActionWidth="280">
+                    <local:SymbioSelect x:Name="ComboCustomPreset" Tag="UiCustomPreset" SelectionChanged="ComboChange">
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.Trivia}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.EchoCave}" Visibility="Collapsed" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.McNews}" />
+                        <!-- <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.SimpleHomepage}" /> -->
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.DailyModpack}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.McSkin}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.OpenBmclapi}" />
+                        <!-- <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.PclMarket}" /> -->
+                        <!-- <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.PclNews}" /> -->
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.PclManual}" />
+                        <!-- <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.OpenMcim}" Visibility="Collapsed" /> -->
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.Magazine}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.GitHub}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.McUpdateSummary}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.NewsToday}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.MinecraftKnowledge}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.ModpackRecommendation}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.Bangumi}" />
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.PclAnnouncement}"/>
+                        <local:SelectOption Content="{DynamicResource Setup.Ui.Homepage.Preset.McOfficialFeed}"/>
+                    </local:SymbioSelect>
+                </local:SettingsCard>
+                <local:SettingsCard x:Name="PanCustomNet" Visibility="Collapsed" Padding="58,12,16,12" MinHeight="52"
+                                    Header="{DynamicResource Setup.Ui.Homepage.DownloadUrl}" ActionWidth="360">
+                    <local:SymbioTextField x:Name="TextCustomNet" Tag="UiCustomNet" ValidatedTextChanged="TextBoxChange">
+                        <local:SymbioTextField.ValidateRules>
+                            <val:HttpValidator AllowsNullOrEmpty="True" />
+                        </local:SymbioTextField.ValidateRules>
+                    </local:SymbioTextField>
+                </local:SettingsCard>
+                <WrapPanel x:Name="PanCustomLocal" Visibility="Collapsed" Margin="0,8,0,0">
+                    <local:SymbioButton x:Name="BtnCustomRefresh" MinWidth="120" MinHeight="32" Text="{DynamicResource Setup.Ui.Homepage.Refresh}"
+                                        Padding="13,0" Margin="0,0,8,8" ColorType="Highlight" Click="BtnCustomRefresh_Click" />
+                    <local:SymbioButton x:Name="BtnCustomTutorial" MinWidth="120" MinHeight="32" Text="{DynamicResource Setup.Ui.Homepage.Tutorial}"
+                                        Padding="13,0" Margin="0,0,8,8" Click="BtnCustomTutorial_Click" />
+                </WrapPanel>
+            </StackPanel>
+
+            <!-- ============ Feature hiding: one expander per area, checkboxes inside ============ -->
+            <StackPanel x:Name="CardSwitch">
+                <TextBlock x:Name="HeaderSwitch" Style="{StaticResource SySectionHeader}" Text="{DynamicResource Setup.Ui.FeatureHide.Title}" />
+                <TextBlock Margin="1,0,0,8" Text="{DynamicResource Setup.Ui.FeatureHide.Description}" TextWrapping="Wrap"
+                           Foreground="{DynamicResource SyTextSecondary}" />
+                <local:SettingsExpander Icon="lucide/layout-dashboard" Header="{DynamicResource Setup.Ui.FeatureHide.MainPage}">
+                    <local:SettingsRow Stacked="True" Padding="58,10,16,12">
+                        <WrapPanel>
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Download}"
+                                               x:Name="CheckHiddenPageDownload" Tag="UiHiddenPageDownload" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Settings}"
+                                               x:Name="CheckHiddenPageSetup" Tag="UiHiddenPageSetup" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Tools}"
+                                               x:Name="CheckHiddenPageTools" Tag="UiHiddenPageTools" Change="CheckBoxChange" />
+                        </WrapPanel>
+                    </local:SettingsRow>
+                </local:SettingsExpander>
+                <local:SettingsExpander Icon="lucide/settings" Header="{DynamicResource Setup.Ui.FeatureHide.SubSetup}">
+                    <local:SettingsRow Stacked="True" Padding="58,10,16,12">
+                        <WrapPanel>
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Launch}"
+                                               x:Name="CheckHiddenSetupLaunch" Tag="UiHiddenSetupLaunch" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="Java" x:Name="CheckHiddenSetupJava" Tag="UiHiddenSetupJava" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.GameManage}"
+                                               x:Name="CheckHiddenSetupGameManage" Tag="UiHiddenSetupGameManage" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Ui}"
+                                               x:Name="CheckHiddenSetupUI" Tag="UiHiddenSetupUi" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Language}"
+                                               x:Name="CheckHiddenSetupLauncherLanguage" Tag="UiHiddenSetupLauncherLanguage" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Misc}"
+                                               x:Name="CheckHiddenLauncherMisc" Tag="UiHiddenSetupLauncherMisc" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.About}"
+                                               x:Name="CheckHiddenSetupAbout" Tag="UiHiddenSetupAbout" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Feedback}"
+                                               x:Name="CheckHiddenSetupFeedback" Tag="UiHiddenSetupFeedback" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Log}"
+                                               x:Name="CheckHiddenSetupLog" Tag="UiHiddenSetupLog" Change="CheckBoxChange" />
+                        </WrapPanel>
+                    </local:SettingsRow>
+                </local:SettingsExpander>
+                <local:SettingsExpander Icon="lucide/wrench" Header="{DynamicResource Setup.Ui.FeatureHide.SubTools}">
+                    <local:SettingsRow Stacked="True" Padding="58,10,16,12">
+                        <WrapPanel>
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Toolbox}"
+                                               x:Name="CheckHiddenToolsTest" Tag="UiHiddenToolsTest" Change="CheckBoxChange" />
+                        </WrapPanel>
+                    </local:SettingsRow>
+                </local:SettingsExpander>
+                <local:SettingsExpander Icon="lucide/box" Header="{DynamicResource Setup.Ui.FeatureHide.SubInstance}">
+                    <local:SettingsRow Stacked="True" Padding="58,10,16,12">
+                        <WrapPanel>
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Edit}"
+                                               x:Name="CheckHiddenVersionEdit" Tag="UiHiddenVersionEdit" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Export}"
+                                               x:Name="CheckHiddenVersionExport" Tag="UiHiddenVersionExport" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Save}"
+                                               x:Name="CheckHiddenVersionSave" Tag="UiHiddenVersionSave" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Screenshot}"
+                                               x:Name="CheckHiddenVersionScreenshot" Tag="UiHiddenVersionScreenshot" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="Mod" x:Name="CheckHiddenVersionMod" Tag="UiHiddenVersionMod" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.ResourcePack}"
+                                               x:Name="CheckHiddenVersionResourcePack" Tag="UiHiddenVersionResourcePack" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Shader}"
+                                               x:Name="CheckHiddenVersionShader" Tag="UiHiddenVersionShader" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Schematic}"
+                                               x:Name="CheckHiddenVersionSchematic" Tag="UiHiddenVersionSchematic" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.Server}"
+                                               x:Name="CheckHiddenVersionServer" Tag="UiHiddenVersionServer" Change="CheckBoxChange" />
+                        </WrapPanel>
+                    </local:SettingsRow>
+                </local:SettingsExpander>
+                <local:SettingsExpander Icon="lucide/list-x" Header="{DynamicResource Setup.Ui.FeatureHide.SpecificFeature}">
+                    <local:SettingsRow Stacked="True" Padding="58,10,16,12">
+                        <WrapPanel>
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.InstanceSelect}"
+                                               x:Name="CheckHiddenFunctionSelect" Tag="UiHiddenFunctionSelect"
+                                               ToolTip="{DynamicResource Setup.Ui.FeatureHide.Item.InstanceSelect.ToolTip}" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.ModUpdate}"
+                                               x:Name="CheckHiddenFunctionModUpdate" Tag="UiHiddenFunctionModUpdate"
+                                               ToolTip="{DynamicResource Setup.Ui.FeatureHide.Item.ModUpdate.ToolTip}" Change="CheckBoxChange" />
+                            <local:SymbioCheck Margin="0,0,24,6" Text="{DynamicResource Setup.Ui.FeatureHide.Item.FeatureHide}"
+                                               x:Name="CheckHiddenFunctionHidden" Tag="UiHiddenFunctionHidden"
+                                               ToolTip="{DynamicResource Setup.Ui.FeatureHide.Item.FeatureHide.ToolTip}" Change="CheckBoxChange" />
+                        </WrapPanel>
+                    </local:SettingsRow>
+                </local:SettingsExpander>
+            </StackPanel>
+        </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</local:WorkspacePage>

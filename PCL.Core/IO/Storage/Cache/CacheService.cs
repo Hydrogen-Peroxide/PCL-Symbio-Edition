@@ -147,7 +147,6 @@ public class CacheService : ICacheService, IAsyncDisposable
             return CacheResult<T>.Miss;
         }
 
-        Interlocked.Increment(ref _hits);
         byte[] data;
 
         // 读取数据
@@ -174,6 +173,7 @@ public class CacheService : ICacheService, IAsyncDisposable
         var value = _Deserialize<T>(data);
 
         // 更新访问时间
+        Interlocked.Increment(ref _hits);
         await _db.TouchAsync(key, ct).ConfigureAwait(false);
 
         return CacheResult<T>.Hit(value, entry.CachedAt);
@@ -184,8 +184,8 @@ public class CacheService : ICacheService, IAsyncDisposable
     {
         _ThrowIfNotReady();
         var entry = await _db.LookupAsync(key, CancellationToken.None).ConfigureAwait(false);
-        if (entry is null) return false;
-        return entry.ExpiresAt is null || (DateTime)entry.ExpiresAt >= DateTime.UtcNow;
+        if (entry is null || entry.ExpiresAt < DateTime.UtcNow) return false;
+        return entry.EntryType != EntryType.FileRef || (entry.FileHash is not null && _files.Exists(entry.FileHash));
     }
 
     /// <inheritdoc/>
@@ -228,13 +228,13 @@ public class CacheService : ICacheService, IAsyncDisposable
         _ThrowIfNotReady();
         policy ??= CachePolicy.Default;
 
-        var hash = await _files.StoreAsync(source).ConfigureAwait(false);
+        var (hash, length) = await _files.StoreWithLengthAsync(source).ConfigureAwait(false);
         var entry = new CacheEntry
         {
             CacheKey = key,
             EntryType = EntryType.FileRef,
             ContentType = "application/octet-stream",
-            DataSize = source.Length,
+            DataSize = length,
             FileHash = hash,
             ContentHash = hash,
             Tags = policy.Tags ?? "",

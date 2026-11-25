@@ -422,46 +422,46 @@ public static class ModProfile
         });
         if (selectedAuthTypeNum is null)
             return;
-        isCreatingProfile = true;
-        if (selectedAuthTypeNum.HasValue && selectedAuthTypeNum.Value == 0) // 正版验证
-            ModBase.RunInUi(() => ModMain.frmLaunchLeft.RefreshPage(true, ModLaunch.McLoginType.Ms));
-        else if (selectedAuthTypeNum.HasValue && selectedAuthTypeNum.Value == 1) // 第三方验证
-            ModBase.RunInUi(() => ModMain.frmLaunchLeft.RefreshPage(true, ModLaunch.McLoginType.Auth));
-        else // 离线验证
-            ModBase.RunInUi(() => ModMain.frmLaunchLeft.RefreshPage(true, ModLaunch.McLoginType.Legacy));
+        var type = selectedAuthTypeNum switch
+        {
+            0 => ModLaunch.McLoginType.Ms,
+            1 => ModLaunch.McLoginType.Auth,
+            _ => ModLaunch.McLoginType.Legacy
+        };
+        ModBase.RunInUi(() => ModMain.frmMain.ShowAccountLogin(type));
     }
 
     private static List<IMyRadio> _GetAvailableProfileSelection(bool includeOfflineAndThirdParty) => includeOfflineAndThirdParty switch
     {
         true =>
         [
-            new MyListItem
+            new SelectionRow
             {
                 Title = Lang.Text("Launch.Account.Type.Microsoft"),
-                Type = MyListItem.CheckType.RadioBox,
+                Type = SelectionRow.CheckType.RadioBox,
                 SvgIcon = "lucide/shield-check"
             },
 
-            new MyListItem
+            new SelectionRow
             {
                 Title = Lang.Text("Launch.Account.Type.ThirdParty"),
-                Type = MyListItem.CheckType.RadioBox,
+                Type = SelectionRow.CheckType.RadioBox,
                 SvgIcon = "lucide/network"
             },
 
-            new MyListItem
+            new SelectionRow
             {
                 Title = Lang.Text("Launch.Account.Type.Offline"),
-                Type = MyListItem.CheckType.RadioBox,
+                Type = SelectionRow.CheckType.RadioBox,
                 SvgIcon = "lucide/link-2-off"
             }
         ],
         _ =>
         [
-            new MyListItem
+            new SelectionRow
             {
                 Title = Lang.Text("Launch.Account.Type.Microsoft"),
-                Type = MyListItem.CheckType.RadioBox,
+                Type = SelectionRow.CheckType.RadioBox,
                 SvgIcon = "lucide/shield-check"
             }
         ]
@@ -536,8 +536,8 @@ public static class ModProfile
                     {
                         // 改名成功后正处于档案页(ProfileSkin)，此时 RefreshPage 因目标页与当前页相同会提前
                         // 返回、不刷新显示的玩家 ID，需显式 Reload 当前档案页，使新 ID 立即生效。
-                        ModMain.frmLoginProfileSkin?.Reload();
-                        ModMain.frmLaunchLeft.RefreshPage(true);
+                        ProfileSkins.LoadSelected(true);
+                        ModMain.frmMain.RefreshShell();
                     });
                     SaveProfile();
                 }
@@ -596,8 +596,8 @@ public static class ModProfile
         {
             var uuidTypeList = new List<IMyRadio>
             {
-                new MyRadioBox { Text = Lang.Text("Launch.Account.Profile.Uuid.Standard") }, new MyRadioBox { Text = Lang.Text("Launch.Account.Profile.Uuid.Legacy") },
-                new MyRadioBox { Text = Lang.Text("Common.Option.Customize") }
+                new SymbioRadio { Text = Lang.Text("Launch.Account.Profile.Uuid.Standard") }, new SymbioRadio { Text = Lang.Text("Launch.Account.Profile.Uuid.Legacy") },
+                new SymbioRadio { Text = Lang.Text("Common.Option.Customize") }
             };
             uuidTypeInput = ModMain.MyMsgBoxSelect(uuidTypeList, Lang.Text("Launch.Account.Profile.Uuid.SelectType.Title"), Lang.Text("Common.Action.Continue"), Lang.Text("Common.Action.Cancel"));
         });
@@ -746,7 +746,7 @@ public static class ModProfile
                 {
                     Description = "Authlib-Injector",
                     LoginType = ModLaunch.McLoginType.Auth,
-                    IsExist = ModMain.frmLoginAuth is null
+                    IsExist = false
                 };
 
             if (authType == ModLaunch.McLoginType.Ms) return new ModLaunch.McLoginMs();
@@ -764,7 +764,7 @@ public static class ModProfile
                 Password = selectedProfile.Password,
                 Description = "Authlib-Injector",
                 LoginType = ModLaunch.McLoginType.Auth,
-                IsExist = ModMain.frmLoginAuth is null
+                IsExist = true
             };
 
         if (authType == ModLaunch.McLoginType.Ms)
@@ -932,7 +932,7 @@ public static class ModProfile
                 foreach (var skinNode in resultJson["skins"].AsArray()) { var skin = skinNode.AsObject();
                     if (skin["state"].ToString() == "ACTIVE")
                     {
-                        MySkin.ReloadCache((string)skin["url"]);
+                        ProfileSkins.ReloadCache((string)skin["url"]);
                         return;
                     } }
 

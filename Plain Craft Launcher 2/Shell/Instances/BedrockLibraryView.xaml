@@ -1,0 +1,26 @@
+<local:WorkspacePage x:Class="PCL.BedrockLibraryView"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:local="clr-namespace:PCL" PanScroll="{Binding ElementName=LibraryScroll}">
+    <Grid Margin="{StaticResource SePageScrollMargin}">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="244" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Border Margin="0,0,12,0" CornerRadius="{StaticResource SyRadiusOverlay}"
+                Background="{DynamicResource SyFrostFill}" BorderBrush="{DynamicResource SyFrostEdge}" BorderThickness="1">
+            <local:BedrockFoldersView x:Name="Folders" />
+        </Border>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <local:SymbioSearchField x:Name="SearchBox" Grid.Row="0" Margin="0,0,0,12" VerticalAlignment="Top" />
+            <ScrollViewer x:Name="LibraryScroll" local:ScrollInput.Enabled="True" Style="{StaticResource SyScrollViewer}" Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled" local:ScrollInput.DeltaMultiplier="0.7">
+                <StackPanel x:Name="PanInstances" Margin="0,2,0,10" />
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</local:WorkspacePage>

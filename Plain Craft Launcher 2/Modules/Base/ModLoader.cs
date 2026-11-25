@@ -3,7 +3,6 @@ using PCL.Core.App;
 using PCL.Core.Utils;
 using System.Collections;
 using System.IO;
-using System.Windows.Shell;
 using PCL.Network;
 using PCL.Network.Loaders;
 
@@ -19,99 +18,9 @@ public static class ModLoader
         UpdateOnly
     }
 
-    // 任务栏进度条
-    public static ModBase.SafeList<LoaderBase> loaderTaskbar = new();
-    public static double loaderTaskbarProgress; // 平滑后的进度
-    private static TaskbarItemProgressState loaderTaskbarProgressLast = TaskbarItemProgressState.None;
-
-    // 文件夹刷新类委托
     private static readonly Dictionary<LoaderBase, LoaderFolderDictionaryEntry> loaderFolderDictionary = new();
 
-    public static void LoaderTaskbarAdd<T>(LoaderCombo<T> loader)
-    {
-        if (ModMain.frmSpeedLeft is not null)
-            ModMain.frmSpeedLeft.TaskRemove(loader);
-        loaderTaskbar.Add(loader);
-        ModBase.Log($"[Taskbar] {loader.name} 已加入任务列表");
-    }
-
-    public static void LoaderTaskbarProgressRefresh()
-    {
-        try
-        {
-            TaskbarItemProgressState newState;
-            var newProgress = LoaderTaskbarProgressGet();
-            // 若单个任务已中止，或全部任务已完成，则刷新并移除
-            foreach (var Task in loaderTaskbar)
-                if (loaderTaskbar.All(l => l.State != ModBase.LoadState.Loading) ||
-                    Task.State == ModBase.LoadState.Waiting || Task.State == ModBase.LoadState.Aborted)
-                {
-                    ModMain.frmSpeedLeft?.TaskRefresh(Task);
-                    loaderTaskbar.Remove(Task);
-                    ModBase.Log($"[Taskbar] {Task.name} 已移出任务列表");
-                }
-
-            // 更新平滑后的进度
-            if (newProgress <= 0d || newProgress >= 1d || loaderTaskbarProgress > newProgress)
-                loaderTaskbarProgress = newProgress;
-            else
-                loaderTaskbarProgress = loaderTaskbarProgress * 0.9d + newProgress * 0.1d;
-            ModBase.RunInUi(() => ModMain.frmMain.BtnExtraDownload.Progress = loaderTaskbarProgress);
-            // 更新任务栏信息
-            if (!loaderTaskbar.Any() || loaderTaskbarProgress == 1d)
-            {
-                newState = TaskbarItemProgressState.None;
-            }
-            else if (loaderTaskbarProgress < 0.015d)
-            {
-                newState = TaskbarItemProgressState.Indeterminate;
-            }
-            else
-            {
-                newState = TaskbarItemProgressState.Normal;
-                ModMain.frmMain.TaskbarItemInfo.ProgressValue = loaderTaskbarProgress;
-            }
-
-            if (loaderTaskbarProgressLast != newState)
-            {
-                loaderTaskbarProgressLast = newState;
-                ModMain.frmMain.TaskbarItemInfo.ProgressState = newState;
-                ModMain.frmMain.BtnExtraDownload.ShowRefresh();
-            }
-        }
-        catch (Exception ex)
-        {
-            ModBase.Log(
-                ex,
-                "刷新任务栏进度显示失败",
-                ModBase.LogLevel.Feedback,
-                userSummary: Lang.Text("Application.Loader.Error.OperationFailed"));
-        }
-    }
-
-    public static double LoaderTaskbarProgressGet()
-    {
-        try
-        {
-            if (!loaderTaskbar.Any())
-                return 1d;
-
-            return ModBase.MathClamp(
-                loaderTaskbar.Select(l => l.Progress).Average(),
-                0,
-                1
-            );
-        }
-        catch (Exception ex)
-        {
-            ModBase.Log(
-                ex,
-                "获取任务栏进度出错",
-                ModBase.LogLevel.Feedback,
-                userSummary: Lang.Text("Application.Loader.Error.OperationFailed"));
-            return 0.5d;
-        }
-    }
+    public static void LoaderTaskbarAdd<T>(LoaderCombo<T> loader) => DownloadTasks.Add(loader);
 
     /// <summary>
     ///     执行以文件夹检测作为输入的加载器。加载器需以文件夹路径为输入值。
@@ -297,18 +206,18 @@ public static class ModLoader
                     {
                         case ModBase.LoadState.Loading:
                         {
-                            LoadingState = MyLoading.MyLoadingState.Run;
+                            LoadingState = LoadingStatus.Run;
                             break;
                         }
                         case ModBase.LoadState.Failed:
                         {
-                            LoadingState = MyLoading.MyLoadingState.Error;
+                            LoadingState = LoadingStatus.Error;
                             break;
                         }
 
                         default:
                         {
-                            LoadingState = MyLoading.MyLoadingState.Stop;
+                            LoadingState = LoadingStatus.Stop;
                             break;
                         }
                     }
@@ -367,7 +276,7 @@ public static class ModLoader
 
         public bool IsLoader { get; } = true;
 
-        public MyLoading.MyLoadingState LoadingState
+        public LoadingStatus LoadingState
         {
             get => field;
             set
@@ -378,7 +287,7 @@ public static class ModLoader
                 field = value;
                 LoadingStateChanged?.Invoke(value, oldState);
             }
-        } = MyLoading.MyLoadingState.Stop;
+        } = LoadingStatus.Stop;
 
         public event ILoadingTrigger.LoadingStateChangedEventHandler? LoadingStateChanged;
         public event ILoadingTrigger.ProgressChangedEventHandler? ProgressChanged;
@@ -847,7 +756,6 @@ public static class ModLoader
                         loader.Abort();
                     }
 
-                    ModMain.frmMain.BtnExtraDownload.ShowRefresh();
                     return;
                 }
             }
@@ -960,7 +868,6 @@ public static class ModLoader
             {
                 RaisePreviewFinish();
                 State = ModBase.LoadState.Finished;
-                ModMain.frmMain.BtnExtraDownload.ShowRefresh();
             }
         }
 

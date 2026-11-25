@@ -1,0 +1,1154 @@
+<ResourceDictionary xmlns:local="clr-namespace:PCL" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+                    xmlns:svgIcon="clr-namespace:PCL.Core.UI.Controls.SvgIcon;assembly=PCL.Core"
+                    xmlns:glass="clr-namespace:PCLLF.Wpf.Glass">
+    <!--
+        PCL SE "Symbio" design language, built on Fluent 2 (Windows 11 / WinUI 3).
+        Geometry, type ramp and component styles live here. Colour brushes below are light-theme defaults
+        taken from the WinUI theme resources; SymbioPalette rewrites them for the current mode and accent.
+    -->
+
+    <!-- Geometry (Fluent: ControlCornerRadius 4, OverlayCornerRadius 8) -->
+    <CornerRadius x:Key="SyRadiusControl">4</CornerRadius>
+    <CornerRadius x:Key="SyRadiusOverlay">8</CornerRadius>
+    <CornerRadius x:Key="SyRadiusPill">999</CornerRadius>
+    <sys:Double x:Key="SyControlHeight">32</sys:Double>
+    <sys:Double x:Key="SyLargeControlHeight">40</sys:Double>
+
+    <!-- Type ramp (Fluent: Caption 12, Body 14, BodyStrong 14 SemiBold, Subtitle 20, Title 28) -->
+    <FontFamily x:Key="SyFontFamily">Segoe UI Variable Text, Segoe UI, Microsoft YaHei UI</FontFamily>
+    <FontFamily x:Key="SyDisplayFontFamily">Segoe UI Variable Display, Segoe UI, Microsoft YaHei UI</FontFamily>
+    <sys:Double x:Key="SyFontCaption">12</sys:Double>
+    <sys:Double x:Key="SyFontBody">14</sys:Double>
+    <sys:Double x:Key="SyFontSubtitle">20</sys:Double>
+    <sys:Double x:Key="SyFontTitle">28</sys:Double>
+
+    <!-- Colour (light defaults; replaced at runtime) -->
+    <SolidColorBrush x:Key="SyText" Color="#E4000000" />
+    <SolidColorBrush x:Key="SyTextSecondary" Color="#9E000000" />
+    <SolidColorBrush x:Key="SyTextTertiary" Color="#72000000" />
+    <SolidColorBrush x:Key="SyTextDisabled" Color="#5C000000" />
+    <SolidColorBrush x:Key="SyTextOnAccent" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="SyTextOnAccentDisabled" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="SyControl" Color="#B3FFFFFF" />
+    <SolidColorBrush x:Key="SyControlHover" Color="#80F9F9F9" />
+    <SolidColorBrush x:Key="SyControlPressed" Color="#4DF9F9F9" />
+    <SolidColorBrush x:Key="SySubtleHover" Color="#09000000" />
+    <SolidColorBrush x:Key="SySubtlePressed" Color="#06000000" />
+    <SolidColorBrush x:Key="SyControlStroke" Color="#0F000000" />
+    <LinearGradientBrush x:Key="SyControlElevation" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#0F000000" Offset="0" />
+        <GradientStop Color="#0F000000" Offset="0.9" />
+        <GradientStop Color="#29000000" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="SyCardFill" Color="#B3FFFFFF" />
+    <SolidColorBrush x:Key="SyCardStroke" Color="#0F000000" />
+    <SolidColorBrush x:Key="SyLayerFill" Color="#80FFFFFF" />
+    <SolidColorBrush x:Key="SyAcrylicTint" Color="#D9F9F9F9" />
+    <SolidColorBrush x:Key="SyFrostFill" Color="#C7F7F8FA" />
+    <SolidColorBrush x:Key="SyFrostHover" Color="#C7FDFDFD" />
+    <SolidColorBrush x:Key="SyTitleBarFill" Color="#B8F3F3F3" />
+    <SolidColorBrush x:Key="SyTextControlElevation" Color="#72000000" />
+    <SolidColorBrush x:Key="SyControlStrongStroke" Color="#72000000" />
+    <SolidColorBrush x:Key="SyFlyoutFill" Color="#FFF9F9F9" />
+    <SolidColorBrush x:Key="SyControlInputActive" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="SyControlAlt" Color="#06000000" />
+    <SolidColorBrush x:Key="SyCritical" Color="#FFC42B1C" />
+    <SolidColorBrush x:Key="SyFrostEdge" Color="#2635475B" />
+    <SolidColorBrush x:Key="SyVeil" Color="#99F3F3F3" />
+    <SolidColorBrush x:Key="SySurfaceStroke" Color="#24000000" />
+    <SolidColorBrush x:Key="SyDivider" Color="#0F000000" />
+    <SolidColorBrush x:Key="SyAccentFill" Color="#FF005FB8" />
+    <SolidColorBrush x:Key="SyAccentHover" Color="#E6005FB8" />
+    <SolidColorBrush x:Key="SyAccentPressed" Color="#CC005FB8" />
+    <SolidColorBrush x:Key="SyAccentDisabled" Color="#37000000" />
+    <SolidColorBrush x:Key="SyAccentText" Color="#FF005FB8" />
+    <LinearGradientBrush x:Key="SyAccentElevation" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#14FFFFFF" Offset="0" />
+        <GradientStop Color="#14FFFFFF" Offset="0.9" />
+        <GradientStop Color="#66000000" Offset="1" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="SySelected" Color="#09000000" />
+    <SolidColorBrush x:Key="SyFocusOuter" Color="#E4000000" />
+    <SolidColorBrush x:Key="SyFocusInner" Color="#B3FFFFFF" />
+    <SolidColorBrush x:Key="SyCaptionCloseHover" Color="#FFC42B1C" />
+    <SolidColorBrush x:Key="SyWindowFallback" Color="#FFF3F3F3" />
+    <Color x:Key="SyShadowColor">#FF000000</Color>
+    <Color x:Key="SyAccentColor">#FF005FB8</Color>
+
+    <!-- Fluent double-stroke focus visual -->
+    <Style x:Key="SyFocusVisual">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border Margin="-3" CornerRadius="7" BorderThickness="2" BorderBrush="{DynamicResource SyFocusOuter}">
+                        <Border CornerRadius="5" BorderThickness="1" BorderBrush="{DynamicResource SyFocusInner}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SyIcon" TargetType="svgIcon:SvgIcon">
+        <Setter Property="Width" Value="16" />
+        <Setter Property="Height" Value="16" />
+        <Setter Property="IconBrush" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Control}}" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
+
+    <!-- Fluent standard button -->
+    <Style x:Key="SyButton" TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="Background" Value="{DynamicResource SyControl}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SyControlElevation}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="MinHeight" Value="{StaticResource SyControlHeight}" />
+        <Setter Property="FontFamily" Value="{StaticResource SyFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource SyFontBody}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource SyFocusVisual}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Chrome" CornerRadius="{StaticResource SyRadiusControl}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter x:Name="Content"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlHover}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlPressed}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource SyControlStroke}" />
+                            <Setter Property="Foreground" Value="{DynamicResource SyTextSecondary}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlPressed}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource SyControlStroke}" />
+                            <Setter Property="Foreground" Value="{DynamicResource SyTextDisabled}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Fluent accent button -->
+    <Style x:Key="SyAccentButton" TargetType="Button" BasedOn="{StaticResource SyButton}">
+        <Setter Property="Foreground" Value="{DynamicResource SyTextOnAccent}" />
+        <Setter Property="Background" Value="{DynamicResource SyAccentFill}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SyAccentElevation}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Chrome" CornerRadius="{StaticResource SyRadiusControl}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyAccentHover}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyAccentPressed}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="Transparent" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyAccentDisabled}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="{DynamicResource SyTextOnAccentDisabled}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Fluent subtle button: no rest fill, subtle hover/pressed fill -->
+    <Style x:Key="SySubtleButton" TargetType="Button" BasedOn="{StaticResource SyButton}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Chrome" CornerRadius="{StaticResource SyRadiusControl}"
+                            Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtleHover}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtlePressed}" />
+                            <Setter Property="Foreground" Value="{DynamicResource SyTextSecondary}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource SyTextDisabled}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Square subtle icon button -->
+    <Style x:Key="SyIconButton" TargetType="Button" BasedOn="{StaticResource SySubtleButton}">
+        <Setter Property="Width" Value="32" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <!-- Windows 11 caption buttons -->
+    <Style x:Key="SyCaptionButton" TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="Width" Value="46" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Chrome" Background="Transparent">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtleHover}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtlePressed}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="SyCaptionCloseButton" TargetType="Button" BasedOn="{StaticResource SyCaptionButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Chrome" Background="Transparent">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyCaptionCloseHover}" />
+                            <Setter Property="Foreground" Value="White" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Opacity" Value="0.9" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Taskbar-style dock item: hover tile, the shell squishes the icon on press -->
+    <Style x:Key="SyDockButton" TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Margin" Value="2,0" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource SyFocusVisual}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Chrome" CornerRadius="{StaticResource SyRadiusControl}" Background="Transparent"
+                            BorderThickness="1" BorderBrush="Transparent">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlHover}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource SyControlStroke}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlPressed}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- SelectorBar item: text only, the selection pill is drawn by the owner -->
+    <Style x:Key="SySelectorItem" TargetType="Button">
+        <Setter Property="Foreground" Value="{DynamicResource SyTextSecondary}" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="FontFamily" Value="{StaticResource SyFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource SyFontBody}" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource SyFocusVisual}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Chrome" CornerRadius="{StaticResource SyRadiusControl}" Background="Transparent"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtleHover}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtlePressed}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Fluent TextBox: control fill, elevation border, accent underline when focused -->
+    <Style x:Key="SyTextBox" TargetType="TextBox">
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource SyText}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource SyAccentFill}" />
+        <Setter Property="Background" Value="{DynamicResource SyControl}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SyTextControlElevation}" />
+        <Setter Property="FontFamily" Value="{StaticResource SyFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource SyFontBody}" />
+        <Setter Property="MinHeight" Value="{StaticResource SyControlHeight}" />
+        <Setter Property="Padding" Value="10,0,6,1" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Grid>
+                        <Border x:Name="Chrome" CornerRadius="{StaticResource SyRadiusControl}"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" />
+                        <Border x:Name="Underline" CornerRadius="{StaticResource SyRadiusControl}" BorderThickness="0,0,0,2"
+                                BorderBrush="{DynamicResource SyAccentFill}" Visibility="Collapsed" IsHitTestVisible="False" />
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="1"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                      Focusable="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlHover}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlInputActive}" />
+                            <Setter TargetName="Underline" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlPressed}" />
+                            <Setter Property="Foreground" Value="{DynamicResource SyTextDisabled}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Fluent NavigationView-style list item; the owner toggles Tag="Selected" -->
+    <Style x:Key="SyNavItem" TargetType="Button" BasedOn="{StaticResource SySubtleButton}">
+        <Setter Property="Height" Value="36" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="Margin" Value="0,0,0,2" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="Chrome" CornerRadius="{StaticResource SyRadiusControl}" Background="Transparent" />
+                        <Border x:Name="Pill" Width="3" Height="16" CornerRadius="1.5" HorizontalAlignment="Left"
+                                Background="{DynamicResource SyAccentFill}" Visibility="Collapsed" />
+                        <ContentPresenter Margin="{TemplateBinding Padding}" VerticalAlignment="Center"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Tag" Value="Selected">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtleHover}" />
+                            <Setter TargetName="Pill" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtleHover}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtlePressed}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Fluent page title (Title ramp) and settings section header (BodyStrong) -->
+    <Style x:Key="SyPageTitle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource SyDisplayFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource SyFontTitle}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="Margin" Value="0,0,0,20" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style x:Key="SySectionHeader" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource SyFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource SyFontBody}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="Margin" Value="1,20,0,8" />
+    </Style>
+    <!-- LF frosted glass pane for lists and grouped content (Fluent card, 8 px overlay radius) -->
+    <Style x:Key="SyFrostPanel" TargetType="glass:GlassSurface">
+        <Setter Property="CornerRadius" Value="{StaticResource SyRadiusOverlay}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Background" Value="{DynamicResource SyFrostFill}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SyFrostEdge}" />
+        <Setter Property="BlurRadius" Value="24" />
+        <Setter Property="TintOpacity" Value="1" />
+        <Setter Property="HighlightOpacity" Value="0" />
+        <Setter Property="Padding" Value="4" />
+    </Style>
+    <Style x:Key="SySettingsPage" TargetType="StackPanel">
+        <Setter Property="Margin" Value="36,24,36,32" />
+        <Setter Property="MaxWidth" Value="1000" />
+    </Style>
+
+    <Style x:Key="SyProgress" TargetType="ProgressBar">
+        <Setter Property="Height" Value="3" />
+        <Setter Property="Minimum" Value="0" />
+        <Setter Property="Maximum" Value="1" />
+        <Setter Property="Foreground" Value="{DynamicResource SyAccentFill}" />
+        <Setter Property="Background" Value="{DynamicResource SyControlStroke}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ProgressBar">
+                    <Grid x:Name="PART_Track" ClipToBounds="True">
+                        <Border Height="1" CornerRadius="0.5" Background="{TemplateBinding Background}" VerticalAlignment="Center" />
+                        <Border x:Name="PART_Indicator" HorizontalAlignment="Left" CornerRadius="1.5"
+                                Background="{TemplateBinding Foreground}" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="SyActionButton" TargetType="local:SymbioButton" BasedOn="{StaticResource SyButton}">
+        <Setter Property="CornerRadius" Value="{StaticResource SyRadiusControl}" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:SymbioButton">
+                    <Border x:Name="Chrome" CornerRadius="{TemplateBinding CornerRadius}"
+                            Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlHover}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlPressed}" />
+                        </Trigger>
+                        <Trigger Property="ColorType" Value="Red">
+                            <Setter Property="Foreground" Value="{DynamicResource SyCritical}" />
+                        </Trigger>
+                        <Trigger Property="ColorType" Value="Highlight">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyAccentFill}" />
+                            <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource SyAccentElevation}" />
+                            <Setter Property="Foreground" Value="{DynamicResource SyTextOnAccent}" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions><Condition Property="ColorType" Value="Highlight" /><Condition Property="IsMouseOver" Value="True" /></MultiTrigger.Conditions>
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyAccentHover}" />
+                        </MultiTrigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions><Condition Property="ColorType" Value="Highlight" /><Condition Property="IsPressed" Value="True" /></MultiTrigger.Conditions>
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyAccentPressed}" />
+                        </MultiTrigger>
+                        <Trigger Property="IsTextAction" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="Transparent" />
+                            <Setter TargetName="Chrome" Property="BorderThickness" Value="0" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsTextAction" Value="True" />
+                                <Condition Property="IsMouseOver" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Foreground" Value="{DynamicResource SyAccentText}" />
+                        </MultiTrigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlPressed}" />
+                            <Setter Property="Foreground" Value="{DynamicResource SyTextDisabled}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsTextAction" Value="True">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="HorizontalContentAlignment" Value="Left" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="SeButton" TargetType="local:SymbioButton" BasedOn="{StaticResource SyActionButton}">
+        <Setter Property="Height" Value="32" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.55" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="SePrimaryButton" TargetType="local:SymbioButton" BasedOn="{StaticResource SeButton}">
+        <Setter Property="Height" Value="{DynamicResource SePrimaryHeight}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource SeRadiusMd}" />
+    </Style>
+    <!-- 胶囊切换按钮：用于实例/版本选择的 pill 形态 -->
+    <Style x:Key="SePillButton" TargetType="local:SymbioButton" BasedOn="{StaticResource SeButton}">
+        <Setter Property="Height" Value="32" />
+        <Setter Property="CornerRadius" Value="4" />
+    </Style>
+    <!-- Fluent ToggleSwitch look for SymbioCheck: 40x20 pill track, knob slides on a spring (SymbioCheck.UpdateGlyph) -->
+    <Style x:Key="SyToggleSwitch" TargetType="local:SymbioCheck">
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource SyFocusVisual}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:SymbioCheck">
+                    <Grid Background="Transparent" Width="40" Height="20">
+                        <Border x:Name="SwitchTrack" CornerRadius="10" BorderThickness="1"
+                                Background="{DynamicResource SyControlAlt}" BorderBrush="{DynamicResource SyControlStrongStroke}" />
+                        <Ellipse x:Name="SwitchKnob" Width="12" Height="12" HorizontalAlignment="Left" Margin="4,0,0,0"
+                                 VerticalAlignment="Center" Fill="{DynamicResource SyTextSecondary}" RenderTransformOrigin="0.5,0.5" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="SwitchTrack" Property="Background" Value="{DynamicResource SySubtleHover}" />
+                            <Setter TargetName="SwitchKnob" Property="Width" Value="14" />
+                            <Setter TargetName="SwitchKnob" Property="Height" Value="14" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="SwitchTrack" Property="Background" Value="{DynamicResource SyAccentFill}" />
+                            <Setter TargetName="SwitchTrack" Property="BorderBrush" Value="{DynamicResource SyAccentFill}" />
+                            <Setter TargetName="SwitchKnob" Property="Fill" Value="{DynamicResource SyTextOnAccent}" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True" />
+                                <Condition Property="IsMouseOver" Value="True" />
+                            </MultiTrigger.Conditions>
+                            <Setter TargetName="SwitchTrack" Property="Background" Value="{DynamicResource SyAccentHover}" />
+                        </MultiTrigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SyCheck" TargetType="local:SymbioCheck">
+        <Setter Property="FocusVisualStyle" Value="{StaticResource SyFocusVisual}" />
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:SymbioCheck">
+                    <Grid Background="Transparent">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <Border x:Name="Mark" Width="20" Height="20" CornerRadius="4" VerticalAlignment="Center"
+                                Background="{DynamicResource SyControlAlt}" BorderBrush="{DynamicResource SyControlStrongStroke}" BorderThickness="1">
+                            <Grid><Path x:Name="CheckGlyph" Data="M3,10 L8,15 L17,5" StrokeThickness="2" Stroke="{DynamicResource SyTextOnAccent}" Stretch="Uniform" Margin="3" RenderTransformOrigin=".5,.5"><Path.RenderTransform><ScaleTransform ScaleX="0" ScaleY="0" /></Path.RenderTransform></Path>
+                                    <Border x:Name="MixedGlyph" Background="{DynamicResource SyTextOnAccent}" Width="10" Height="2" CornerRadius="1" RenderTransformOrigin=".5,.5"><Border.RenderTransform><ScaleTransform ScaleX="0" ScaleY="0" /></Border.RenderTransform></Border></Grid>
+                        </Border>
+                        <ContentPresenter Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Mark" Property="Background" Value="{DynamicResource SySubtleHover}" /></Trigger>
+                        <Trigger Property="IsChecked" Value="True"><Setter TargetName="Mark" Property="Background" Value="{DynamicResource SyAccentFill}" /><Setter TargetName="Mark" Property="BorderBrush" Value="{DynamicResource SyAccentFill}" /></Trigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}"><Setter TargetName="Mark" Property="Background" Value="{DynamicResource SyAccentFill}" /></Trigger>
+                        <Trigger Property="IsPressed" Value="True"><Setter TargetName="Mark" Property="Opacity" Value=".86" /></Trigger>
+                        <Trigger Property="IsEnabled" Value="False"><Setter Property="Foreground" Value="{DynamicResource SyTextDisabled}" /><Setter TargetName="Mark" Property="Opacity" Value=".55" /></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="SyRadio" TargetType="local:SymbioRadio">
+        <Setter Property="FocusVisualStyle" Value="{StaticResource SyFocusVisual}" />
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:SymbioRadio">
+                    <Grid Background="Transparent">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
+                        <Border x:Name="Mark" Width="20" Height="20" CornerRadius="10" VerticalAlignment="Center"
+                                Background="{DynamicResource SyControlAlt}" BorderBrush="{DynamicResource SyControlStrongStroke}" BorderThickness="1">
+                            <Grid><Ellipse x:Name="Dot" Width="12" Height="12" Fill="{DynamicResource SyTextOnAccent}" RenderTransformOrigin=".5,.5"><Ellipse.RenderTransform><ScaleTransform ScaleX="0" ScaleY="0" /></Ellipse.RenderTransform></Ellipse></Grid>
+                        </Border>
+                        <ContentPresenter Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Mark" Property="Background" Value="{DynamicResource SySubtleHover}" /></Trigger>
+                        <Trigger Property="IsChecked" Value="True"><Setter TargetName="Mark" Property="Background" Value="{DynamicResource SyAccentFill}" /><Setter TargetName="Mark" Property="BorderBrush" Value="{DynamicResource SyAccentFill}" /></Trigger>
+                        <Trigger Property="IsChecked" Value="{x:Null}"><Setter TargetName="Mark" Property="Background" Value="{DynamicResource SyAccentFill}" /></Trigger>
+                        <Trigger Property="IsPressed" Value="True"><Setter TargetName="Mark" Property="Opacity" Value=".86" /></Trigger>
+                        <Trigger Property="IsEnabled" Value="False"><Setter Property="Foreground" Value="{DynamicResource SyTextDisabled}" /><Setter TargetName="Mark" Property="Opacity" Value=".55" /></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="SyTextField" TargetType="local:SymbioTextField">
+        <Setter Property="CornerRadius" Value="{StaticResource SyRadiusControl}" />
+        <Setter Property="Background" Value="{DynamicResource SyControl}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SyControlStrongStroke}" />
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource SyAccentFill}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource SyText}" />
+        <Setter Property="Padding" Value="10,0,8,1" />
+        <Setter Property="MinHeight" Value="{StaticResource SyControlHeight}" />
+        <Setter Property="FontSize" Value="{StaticResource SyFontBody}" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="AllowDrop" Value="True" />
+        <Setter Property="ScrollViewer.PanningMode" Value="VerticalFirst" />
+        <Setter Property="Stylus.IsFlicksEnabled" Value="False" />
+        <Setter Property="UndoLimit" Value="15" />
+        <Setter Property="MaxLength" Value="1000" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:SymbioTextField">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <!-- WinUI TextBox: elevation border whose bottom pixel is the strong stroke -->
+                        <Border x:Name="Chrome" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}"
+                                BorderBrush="{DynamicResource SyTextControlElevation}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <ScrollViewer x:Name="PART_ContentHost" Padding="0" BorderThickness="0"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Focusable="False" RenderOptions.ClearTypeHint="Enabled" />
+                                <!-- TextBox applies Padding to its text view itself (plus 2 px caret inset); the hint matches it -->
+                                <TextBlock x:Name="Hint" Visibility="Collapsed" IsHitTestVisible="False" Margin="{TemplateBinding Padding}"
+                                           Padding="2,0" Text="{TemplateBinding HintText}" Foreground="{DynamicResource SyTextTertiary}"
+                                           VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                           HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                            </Grid>
+                        </Border>
+                        <!-- Focus / error edge: 2 px bottom border on the same rounded shape, so it curves with the corners -->
+                        <Border x:Name="Underline" CornerRadius="{TemplateBinding CornerRadius}" BorderThickness="0,0,0,2"
+                                BorderBrush="{DynamicResource SyAccentFill}" Visibility="Collapsed" IsHitTestVisible="False" />
+                        <TextBlock Grid.Row="1" x:Name="Error" Visibility="Collapsed" Margin="1,3,1,0"
+                                   Foreground="{DynamicResource SyCritical}" TextWrapping="Wrap" Text="{TemplateBinding ValidateResult}" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Text" Value=""><Setter TargetName="Hint" Property="Visibility" Value="Visible" /></Trigger>
+                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlHover}" /></Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlInputActive}" />
+                            <Setter TargetName="Underline" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource SyTextDisabled}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlPressed}" />
+                        </Trigger>
+                        <Trigger Property="HasBackground" Value="False"><Setter TargetName="Chrome" Property="Background" Value="Transparent" /></Trigger>
+                        <Trigger Property="ShowError" Value="True">
+                            <Setter TargetName="Underline" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="Underline" Property="BorderBrush" Value="{DynamicResource SyCritical}" />
+                        </Trigger>
+                        <Trigger Property="BorderThickness" Value="0"><Setter TargetName="Underline" Property="Visibility" Value="Collapsed" /></Trigger>
+                        <Trigger Property="ShowErrorMessage" Value="True"><Setter TargetName="Error" Property="Visibility" Value="Visible" /></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SySelectOption" TargetType="ComboBoxItem">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource SyFocusVisual}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Grid Margin="4,1">
+                        <Border x:Name="Fill" Background="{TemplateBinding Background}" CornerRadius="{StaticResource SyRadiusControl}"
+                                MinHeight="30" Padding="10,4">
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </Border>
+                        <Border x:Name="Selection" HorizontalAlignment="Left" VerticalAlignment="Center" Height="14" Width="3"
+                                CornerRadius="1.5" Background="{DynamicResource SyAccentFill}" Visibility="Collapsed" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True"><Setter TargetName="Fill" Property="Background" Value="{DynamicResource SySubtleHover}" /></Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Fill" Property="Background" Value="{DynamicResource SySubtleHover}" />
+                            <Setter TargetName="Selection" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False"><Setter Property="Foreground" Value="{DynamicResource SyTextDisabled}" /></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SySelect" TargetType="local:SymbioSelect">
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="FontSize" Value="{StaticResource SyFontBody}" />
+        <Setter Property="Background" Value="{DynamicResource SyControl}" />
+        <Setter Property="Padding" Value="10,0" />
+        <Setter Property="MinHeight" Value="30" />
+        <Setter Property="MaxDropDownHeight" Value="300" />
+        <Setter Property="ItemContainerStyle" Value="{StaticResource SySelectOption}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:SymbioSelect">
+                    <Grid>
+                        <Border x:Name="Chrome" Background="{TemplateBinding Background}" CornerRadius="{StaticResource SyRadiusControl}"
+                                BorderBrush="{DynamicResource SyControlElevation}" BorderThickness="1" />
+                        <ToggleButton x:Name="Opener" Focusable="False" IsTabStop="False"
+                                      IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border Background="Transparent" Padding="0,0,10,0">
+                                        <Path x:Name="Chevron" Data="M0 0 L4 4 L8 0" Stroke="{DynamicResource SyTextSecondary}"
+                                              StrokeThickness="1.4" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsPressed" Value="True">
+                                            <Setter TargetName="Chevron" Property="local:SpringOffset.Y" Value="2" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                        </ToggleButton>
+                        <ContentPresenter x:Name="SelectionText" Content="{TemplateBinding SelectionBoxItem}"
+                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" IsHitTestVisible="False"
+                                          Margin="10,1,30,1" VerticalAlignment="Center" />
+                        <local:SymbioTextField x:Name="PART_EditableTextBox" Visibility="Collapsed" Margin="1,1,30,1"
+                                              HasBackground="False" BorderThickness="0" Padding="9,0"
+                                              HintText="{TemplateBinding HintText}" Tag="{TemplateBinding Tag}" />
+                        <Popup x:Name="PART_Popup" Placement="Bottom" VerticalOffset="3" Focusable="False"
+                               AllowsTransparency="True" IsOpen="{TemplateBinding IsDropDownOpen}"
+                               PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                            <Border x:Name="DropDown" Background="{DynamicResource SyFlyoutFill}"
+                                    BorderBrush="{DynamicResource SyCardStroke}" BorderThickness="1" Padding="0,3"
+                                    CornerRadius="{StaticResource SyRadiusOverlay}" MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                    MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ScrollViewer Style="{DynamicResource ScrollViewerNoMargin}" VerticalScrollBarVisibility="Auto"
+                                              HorizontalScrollBarVisibility="Disabled">
+                                    <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" />
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEditable" Value="True">
+                            <Setter TargetName="PART_EditableTextBox" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="SelectionText" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                        <Trigger Property="DropDownWidthSync" Value="True">
+                            <Setter TargetName="DropDown" Property="Width" Value="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlHover}" /></Trigger>
+                        <Trigger Property="IsDropDownOpen" Value="True"><Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlPressed}" /></Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource SyTextDisabled}" />
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SyControlPressed}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SyMenuAction" TargetType="local:SymbioMenuAction">
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Padding" Value="9,6" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:SymbioMenuAction">
+                    <Border x:Name="Row" CornerRadius="{StaticResource SyRadiusControl}" Margin="4,1"
+                            MinHeight="30" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="25" /><ColumnDefinition /></Grid.ColumnDefinitions>
+                            <ContentPresenter x:Name="Glyph" Width="16" Height="16" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                            <ContentPresenter Grid.Column="1" ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Row" Property="Background" Value="{DynamicResource SySubtleHover}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False"><Setter Property="Foreground" Value="{DynamicResource SyTextDisabled}" /></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="SyGlyphAction" TargetType="local:IconActionButton" BasedOn="{StaticResource SyButton}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{StaticResource SyRadiusControl}" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Padding" Value="4" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:IconActionButton">
+                    <Border x:Name="Chrome" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"
+                            BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtleHover}" /></Trigger>
+                        <Trigger Property="IsPressed" Value="True"><Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtlePressed}" /></Trigger>
+                        <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Chrome" Property="Opacity" Value=".45" /></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SyIconAction" TargetType="local:SymbioIconButton" BasedOn="{StaticResource SyGlyphAction}">
+        <Style.Triggers>
+            <Trigger Property="Theme" Value="White"><Setter Property="Foreground" Value="White" /></Trigger>
+            <Trigger Property="Theme" Value="Red"><Setter Property="Foreground" Value="{DynamicResource SyCritical}" /></Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="SyIconTextAction" TargetType="local:SymbioIconTextAction" BasedOn="{StaticResource SyGlyphAction}">
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="MinHeight" Value="28" />
+        <Style.Triggers>
+            <Trigger Property="ColorType" Value="Highlight"><Setter Property="Foreground" Value="{DynamicResource SyAccentText}" /></Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="SySliderRail" TargetType="RepeatButton">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RepeatButton">
+                    <Grid Background="Transparent">
+                        <Border Height="4" CornerRadius="2" Background="{TemplateBinding Background}"
+                                VerticalAlignment="Center" IsHitTestVisible="False" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SySlider" TargetType="local:SymbioSlider">
+        <Setter Property="MinHeight" Value="20" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource SyFocusVisual}" />
+        <Setter Property="Foreground" Value="{DynamicResource SyAccentFill}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:SymbioSlider">
+                    <Grid Background="Transparent">
+                        <Track x:Name="PART_Track" VerticalAlignment="Stretch"
+                               Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                               Value="{Binding Value, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="{x:Static Slider.DecreaseLarge}" Style="{StaticResource SySliderRail}"
+                                              Background="{TemplateBinding Foreground}" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb x:Name="Thumb" Width="20" Height="20" RenderTransformOrigin=".5,.5" Focusable="False">
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border Width="20" Height="20" CornerRadius="10" Background="{DynamicResource SyFlyoutFill}">
+                                                <Border Width="10" Height="10" CornerRadius="5" Background="{DynamicResource SyAccentFill}"
+                                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="{x:Static Slider.IncreaseLarge}" Style="{StaticResource SySliderRail}"
+                                              Background="{DynamicResource SyControlStrongStroke}" />
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                        <Popup x:Name="PART_ValueHint" Placement="Top" PlacementTarget="{Binding ElementName=Thumb}"
+                               AllowsTransparency="True" IsHitTestVisible="False" IsOpen="False" VerticalOffset="-4">
+                            <Border CornerRadius="{StaticResource SyRadiusControl}" Padding="8,5"
+                                    Background="{DynamicResource SyFlyoutFill}" BorderThickness="1" BorderBrush="{DynamicResource SyCardStroke}">
+                                <TextBlock Text="{TemplateBinding ValueHint}" Foreground="{DynamicResource SyText}" />
+                            </Border>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True"><Setter Property="Foreground" Value="{DynamicResource SyAccentHover}" /></Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="PART_Track" Property="Opacity" Value=".5" />
+                            <Setter Property="Foreground" Value="{DynamicResource SyAccentDisabled}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="SySegment" TargetType="local:SymbioSegment">
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+        <Setter Property="FocusVisualStyle" Value="{StaticResource SyFocusVisual}" />
+        <Setter Property="Padding" Value="10,4" />
+        <Setter Property="MinHeight" Value="27" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="local:SymbioSegment">
+                    <Border x:Name="Chrome" Background="Transparent" CornerRadius="{StaticResource SyRadiusControl}" Padding="{TemplateBinding Padding}">
+                        <Grid>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <Border x:Name="Marker" Height="2" Width="16" CornerRadius="1" Margin="0,0,0,-2"
+                                    VerticalAlignment="Bottom" HorizontalAlignment="Center" Background="{DynamicResource SyAccentFill}" Visibility="Collapsed" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtleHover}" /></Trigger>
+                        <Trigger Property="IsPressed" Value="True"><Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtlePressed}" /></Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SySubtleHover}" />
+                            <Setter TargetName="Marker" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <MultiTrigger>
+                            <MultiTrigger.Conditions>
+                                <Condition Property="IsChecked" Value="True" /><Condition Property="ColorType" Value="Highlight" />
+                            </MultiTrigger.Conditions>
+                            <Setter Property="Foreground" Value="{DynamicResource SyAccentText}" />
+                        </MultiTrigger>
+                        <Trigger Property="IsEnabled" Value="False"><Setter Property="Foreground" Value="{DynamicResource SyTextDisabled}" /></Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style TargetType="{x:Type local:SymbioSearchField}">
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:SymbioSearchField}">
+                    <Border Background="{DynamicResource SyFrostFill}" BorderBrush="{DynamicResource SyFrostEdge}"
+                            BorderThickness="1" CornerRadius="{StaticResource SyRadiusOverlay}" Padding="8,0,3,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="31" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <svgIcon:SvgIcon Width="14" Height="14" Margin="3,0,0,0" HorizontalAlignment="Left"
+                                             VerticalAlignment="Center" IsHitTestVisible="False"
+                                             IconBrush="{DynamicResource SyTextSecondary}" Icon="lucide/search" />
+                            <local:SymbioTextField x:Name="PART_Query" Grid.Column="1" MaxLength="50"
+                                                   HasBackground="False" Padding="0" BorderThickness="0"
+                                                   FontSize="13.5" VerticalContentAlignment="Center"
+                                                   HintText="{TemplateBinding HintText}" />
+                            <local:SymbioIconButton x:Name="PART_Clear" Grid.Column="2" Width="25" Height="26"
+                                                    SvgIcon="lucide/x" Theme="Black" IsHitTestVisible="False"
+                                                    IsTabStop="False" Opacity="0"
+                                                    AutomationProperties.Name="{DynamicResource Common.Action.Clear}" />
+                            <local:SymbioButton x:Name="PART_Search" Grid.Column="3" Margin="3,3,0,3" MinWidth="60"
+                                                Visibility="{TemplateBinding SearchButtonVisibility}" ColorType="Highlight"
+                                                Text="{DynamicResource Common.Action.Search}" />
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type local:SymbioNotice}">
+        <Setter Property="CornerRadius" Value="{StaticResource SyRadiusControl}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:SymbioNotice}">
+                    <Border x:Name="Surface" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <Grid Width="16" Height="16" Margin="14,10,0,10" VerticalAlignment="Top" IsHitTestVisible="False">
+                                <Ellipse Fill="{TemplateBinding GlyphBackground}" />
+                                <Path Data="{TemplateBinding Glyph}" Stroke="{TemplateBinding GlyphStroke}" StrokeThickness="1.4"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" />
+                            </Grid>
+                            <ContentPresenter Grid.Column="1" Content="{Binding Message, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <local:SymbioIconButton x:Name="PART_Dismiss" Grid.Column="2" Theme="Black" Margin="0,0,8,0" Height="24" Width="24"
+                                                    Visibility="Collapsed" VerticalAlignment="Center" SvgIcon="lucide/x"
+                                                    ToolTip="{DynamicResource Common.Hint.DoNotShowAgain}"
+                                                    AutomationProperties.Name="{DynamicResource Common.Hint.DoNotShowAgain}" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="CanClose" Value="True">
+                            <Setter TargetName="PART_Dismiss" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="HasBorder" Value="False">
+                            <Setter TargetName="Surface" Property="BorderThickness" Value="0" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type local:ExpandableSection}">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:ExpandableSection}">
+                    <StackPanel>
+                        <ToggleButton x:Name="HeaderSite" Height="36" HorizontalContentAlignment="Stretch"
+                                      AutomationProperties.Name="{TemplateBinding Header}"
+                                      IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                            <ToggleButton.Template>
+                                <ControlTemplate TargetType="ToggleButton">
+                                    <Border x:Name="HeaderSurface" CornerRadius="{StaticResource SyRadiusControl}" Background="Transparent"
+                                            Padding="10,0,12,0">
+                                        <ContentPresenter VerticalAlignment="Center" />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="HeaderSurface" Property="Background" Value="{DynamicResource SySubtleHover}" />
+                                        </Trigger>
+                                        <Trigger Property="IsKeyboardFocused" Value="True">
+                                            <Setter TargetName="HeaderSurface" Property="Background" Value="{DynamicResource SySubtleHover}" />
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </ToggleButton.Template>
+                            <DockPanel>
+                                <Path x:Name="PART_Chevron" DockPanel.Dock="Right" Data="M0,0 L5,5 L10,0"
+                                      Width="11" Height="6" Margin="10,0,0,0" Stretch="Uniform"
+                                      VerticalAlignment="Center" RenderTransformOrigin=".5,.5"
+                                      Stroke="{DynamicResource SyTextSecondary}" StrokeThickness="1.3"
+                                      StrokeStartLineCap="Round" StrokeEndLineCap="Round" />
+                                <TextBlock Text="{TemplateBinding Header}" FontSize="14" FontWeight="SemiBold" />
+                            </DockPanel>
+                        </ToggleButton>
+                        <ContentPresenter x:Name="PART_Body" ContentSource="Content" ClipToBounds="True" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="SyElevatedAction" TargetType="{x:Type local:ElevatedActionBase}">
+        <Setter Property="Background" Value="{DynamicResource SyAccentFill}" />
+        <Setter Property="Foreground" Value="{DynamicResource SyTextOnAccent}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SyAccentElevation}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{StaticResource SyRadiusOverlay}" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Height" Value="52" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{DynamicResource SyAccentHover}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Background" Value="{DynamicResource SyAccentPressed}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Background" Value="{DynamicResource SyAccentDisabled}" />
+                <Setter Property="Foreground" Value="{DynamicResource SyTextOnAccentDisabled}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="SyFloatingIconAction" TargetType="{x:Type local:FloatingIconAction}" BasedOn="{StaticResource SyElevatedAction}">
+        <Setter Property="ToolTipService.Placement" Value="Top" />
+        <Setter Property="ToolTipService.VerticalOffset" Value="-6" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:FloatingIconAction}">
+                    <Grid x:Name="PART_Pose" Width="52" HorizontalAlignment="Right">
+                        <Grid x:Name="PART_Pulses" IsHitTestVisible="False" />
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
+                            <Border.Effect>
+                                <DropShadowEffect ShadowDepth="8" Direction="270" BlurRadius="32" Opacity=".18"
+                                                  Color="{DynamicResource SyShadowColor}" />
+                            </Border.Effect>
+                        </Border>
+                        <Border x:Name="PART_Progress" Background="#2FFFFFFF" CornerRadius="{TemplateBinding CornerRadius}"
+                                VerticalAlignment="Bottom" IsHitTestVisible="False" />
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SyProminentAction" TargetType="{x:Type local:ProminentAction}" BasedOn="{StaticResource SyElevatedAction}">
+        <Setter Property="Margin" Value="20" />
+        <Setter Property="ToolTipService.Placement" Value="Left" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:ProminentAction}">
+                    <Border x:Name="PART_Pose" Margin="0,6" Padding="20,0" Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="{TemplateBinding CornerRadius}">
+                        <Border.Effect>
+                            <DropShadowEffect ShadowDepth="8" Direction="270" BlurRadius="32" Opacity=".18"
+                                              Color="{DynamicResource SyShadowColor}" />
+                        </Border.Effect>
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="SyPrimaryRowAction" TargetType="Button">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="HitArea" Background="Transparent" BorderBrush="Transparent" BorderThickness="1"
+                            CornerRadius="{StaticResource SyRadiusControl}" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="HitArea" Property="BorderBrush" Value="{DynamicResource SyAccentText}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

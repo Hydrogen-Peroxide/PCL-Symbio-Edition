@@ -164,6 +164,11 @@ public static partial class Config
         [ConfigItem<bool>("UiLogoLeft", false, ConfigSource.Local)] public partial bool TopBarLeftAlign { get; set; }
 
         /// <summary>
+        /// Dock 位置：0 = 窗口内底部，1 = 窗口外悬浮（与主面板分离的独立磨砂玻璃 Dock）。
+        /// </summary>
+        [ConfigItem<int>("UiDockPlacement", 0, ConfigSource.Local)] public partial int DockPlacement { get; set; }
+
+        /// <summary>
         /// 全局字体。
         /// </summary>
         [ConfigItem<string>("UiFont", "", ConfigSource.Local)] public partial string Font { get; set; }

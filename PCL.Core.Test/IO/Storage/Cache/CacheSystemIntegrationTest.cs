@@ -48,19 +48,8 @@ public class CacheSystemIntegrationTest
 
         if (Directory.Exists(_testCacheDir))
         {
-            // Wait for file locks to be released
-            for (int i = 0; i < 10; i++)
-            {
-                try
-                {
-                    Directory.Delete(_testCacheDir, true);
-                    break;
-                }
-                catch
-                {
-                    await Task.Delay(50);
-                }
-            }
+            SqliteTestDatabase.ClearPools(Path.Combine(_testCacheDir, "cache.db"));
+            Directory.Delete(_testCacheDir, true);
         }
     }
 

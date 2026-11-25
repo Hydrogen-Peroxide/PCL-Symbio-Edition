@@ -1,0 +1,15 @@
+<local:WorkspaceSidebar x:Class="PCL.SaveNavigation"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                  xmlns:local="clr-namespace:PCL"
+                  mc:Ignorable="d"
+                  d:DesignHeight="450" HorizontalAlignment="Left">
+    <StackPanel Margin="0,12,0,0" Name="PanItem">
+        <local:NavigationEntry x:Name="ItemInfo" Label="{DynamicResource Instance.Saves.Left.Info}" Icon="lucide/info" Tag="0" Height="36" VerticalAlignment="Top" Selected="True" />
+        <local:NavigationEntry x:Name="ItemDatapack" Label="{DynamicResource Instance.Saves.Left.Datapack}" Icon="lucide/file-archive" Tag="1" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="2" />
+        <TextBlock Text="{DynamicResource Instance.Saves.Left.QuickActions}" Margin="13,6,5,4" Opacity="0.6" FontSize="12" />
+        <local:NavigationEntry x:Name="BtnOpenFolder" Label="{DynamicResource Common.Action.OpenFolder}" Icon="lucide/folder-open" Height="36" VerticalAlignment="Top" />
+    </StackPanel>
+</local:WorkspaceSidebar>

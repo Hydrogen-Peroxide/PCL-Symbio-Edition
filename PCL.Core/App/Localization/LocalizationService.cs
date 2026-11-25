@@ -39,8 +39,7 @@ public sealed partial class LocalizationService
         "zh-CN",
         LocalizationFontProfile.SimplifiedChinese);
 
-    private static ResourceDictionary? _baseLanguageDictionary;
-    private static ResourceDictionary? _currentLanguageDictionary;
+    private static readonly List<ResourceDictionary> _languageDictionaries = [];
     private static CultureInfo _systemFormatCulture = CultureInfo.CurrentCulture;
     private static CultureInfo _systemUiCulture = CultureInfo.CurrentUICulture;
 
@@ -60,12 +59,17 @@ public sealed partial class LocalizationService
     public static IReadOnlyList<LocalizationLanguage> SupportedLanguages { get; } =
     [
         _DefaultLanguage,
-        new("zh-TW", "繁體中文（台灣）", "zh-TW", LocalizationFontProfile.TraditionalChinese),
+        new("zh-TW", "繁體中文（台灣）", "zh-TW", LocalizationFontProfile.TraditionalChinese)
+            { FallbackResourceCode = DefaultLanguageCode },
         new("en-US", "English (US)", "en-US", LocalizationFontProfile.English),
-        new("en-GB", "English (United Kingdom)", "en-GB", LocalizationFontProfile.English),
-        new("ja-JP", "日本語（日本）", "ja-JP", LocalizationFontProfile.Japanese),
-        new("fr-FR", "Français (France)", "fr-FR", LocalizationFontProfile.Other),
+        new("en-GB", "English (United Kingdom)", "en-GB", LocalizationFontProfile.English)
+            { FallbackResourceCode = "en-US" },
+        new("ja-JP", "日本語（日本）", "ja-JP", LocalizationFontProfile.Japanese)
+            { FallbackResourceCode = DefaultLanguageCode },
+        new("fr-FR", "Français (France)", "fr-FR", LocalizationFontProfile.Other)
+            { FallbackResourceCode = DefaultLanguageCode },
         new("es-ES", "Español (España)", "es-ES", LocalizationFontProfile.Other)
+            { FallbackResourceCode = DefaultLanguageCode }
     ];
 
     [RegisterConfigEvent]
@@ -124,14 +128,14 @@ public sealed partial class LocalizationService
         var isLanguageChanged = !string.Equals(CurrentLanguage.Code, language.Code, StringComparison.OrdinalIgnoreCase);
         var isFormatCultureChanged = !string.Equals(CurrentFormatCulture.Name, formatCulture.Name,
             StringComparison.OrdinalIgnoreCase);
-        if (_baseLanguageDictionary is not null && !isLanguageChanged && !isFormatCultureChanged)
+        if (_languageDictionaries.Count > 0 && !isLanguageChanged && !isFormatCultureChanged)
         {
             _SaveConfigIfNeeded(save, normalizedLanguageCode, language, normalizedFormatCultureCode);
             return;
         }
 
         _ApplyCultures(uiCulture, formatCulture);
-        _ApplyLanguageResources(language.Code, uiCulture, formatCulture);
+        _ApplyLanguageResources(language, uiCulture, formatCulture);
 
         CurrentLanguage = language;
         LocalizationFontService.ApplyLaunchFont(
@@ -240,7 +244,7 @@ public sealed partial class LocalizationService
         Lang.SyncCulture(formatCulture);
     }
 
-    private static void _ApplyLanguageResources(string languageCode, CultureInfo uiCulture, CultureInfo formatCulture)
+    private static void _ApplyLanguageResources(LocalizationLanguage language, CultureInfo uiCulture, CultureInfo formatCulture)
     {
         var app = Application.Current ?? Lifecycle.CurrentApplication;
 
@@ -249,33 +253,36 @@ public sealed partial class LocalizationService
             app.Dispatcher.Invoke(() =>
             {
                 _ApplyCultures(uiCulture, formatCulture);
-                _ApplyLanguageResourcesCore(app, languageCode);
+                _ApplyLanguageResourcesCore(app, language);
             });
             return;
         }
 
-        _ApplyLanguageResourcesCore(app, languageCode);
+        _ApplyLanguageResourcesCore(app, language);
     }
 
-    private static void _ApplyLanguageResourcesCore(Application app, string languageCode)
+    private static void _ApplyLanguageResourcesCore(Application app, LocalizationLanguage language)
     {
         var dictionaries = app.Resources.MergedDictionaries;
+        var replacement = GetLanguageResourceCodes(language).Select(_LoadLanguageDictionary).ToArray();
+        foreach (var dictionary in _languageDictionaries) dictionaries.Remove(dictionary);
+        _languageDictionaries.Clear();
 
-        if (_baseLanguageDictionary is not null) dictionaries.Remove(_baseLanguageDictionary);
-        if (_currentLanguageDictionary is not null) dictionaries.Remove(_currentLanguageDictionary);
-
-        _baseLanguageDictionary = _LoadLanguageDictionary(DefaultLanguageCode);
-        dictionaries.Add(_baseLanguageDictionary);
-
-        if (string.Equals(languageCode, DefaultLanguageCode, StringComparison.OrdinalIgnoreCase))
+        foreach (var dictionary in replacement)
         {
-            _currentLanguageDictionary = null;
+            dictionaries.Add(dictionary);
+            _languageDictionaries.Add(dictionary);
         }
-        else
-        {
-            _currentLanguageDictionary = _LoadLanguageDictionary(languageCode);
-            dictionaries.Add(_currentLanguageDictionary);
-        }
+    }
+
+    internal static IEnumerable<string> GetLanguageResourceCodes(LocalizationLanguage language)
+    {
+        // WPF searches merged dictionaries from last to first.
+        yield return DefaultLanguageCode;
+        if (language.Code == DefaultLanguageCode) yield break;
+        if (language.FallbackResourceCode is { } fallback && fallback != DefaultLanguageCode)
+            yield return fallback;
+        yield return language.Code;
     }
 
     private static ResourceDictionary _LoadLanguageDictionary(string languageCode)

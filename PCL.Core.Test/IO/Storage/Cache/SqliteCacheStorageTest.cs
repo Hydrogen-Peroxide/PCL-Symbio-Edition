@@ -35,26 +35,15 @@ public class SqliteCacheStorageTest
     }
 
     [TestCleanup]
-    public async Task Cleanup()
+    public void Cleanup()
     {
         _storage.Dispose();
 
         var testDir = Path.GetDirectoryName(_testDbPath);
         if (testDir != null && Directory.Exists(testDir))
         {
-            // Wait for file locks to be released
-            for (int i = 0; i < 10; i++)
-            {
-                try
-                {
-                    Directory.Delete(testDir, true);
-                    break;
-                }
-                catch
-                {
-                    await Task.Delay(50);
-                }
-            }
+            SqliteTestDatabase.ClearPools(_testDbPath);
+            Directory.Delete(testDir, true);
         }
     }
 
@@ -367,10 +356,9 @@ public class SqliteCacheStorageTest
     #region Expiration Tests
 
     [TestMethod]
-    public async Task DeleteExpriedAsync_ShouldRemoveExpiredEntries()
+    public async Task DeleteExpiredAsync_ShouldUseProvidedTimeAndSubsecondPrecision()
     {
-        // Arrange
-        var pastTime = DateTime.UtcNow.AddHours(-1);
+        var cutoff = new DateTime(2100, 1, 1, 0, 0, 0, 500, DateTimeKind.Utc);
 
         var expiredEntry = new CacheEntry
         {
@@ -380,7 +368,7 @@ public class SqliteCacheStorageTest
             EntryType = EntryType.Inline,
             Data = [1],
             ContentHash = "hash",
-            ExpiresAt = pastTime
+            ExpiresAt = cutoff.AddMilliseconds(-200)
         };
         await _storage.UpsertAsync(expiredEntry, default);
 
@@ -392,15 +380,15 @@ public class SqliteCacheStorageTest
             EntryType = EntryType.Inline,
             Data = [1],
             ContentHash = "hash",
-            ExpiresAt = DateTime.UtcNow.AddHours(1)
+            ExpiresAt = cutoff.AddMilliseconds(200)
         };
         await _storage.UpsertAsync(validEntry, default);
 
         // Act
-        var deletedCount = await _storage.DeleteExpiredAsync(DateTime.UtcNow, default);
+        var deletedCount = await _storage.DeleteExpiredAsync(cutoff, default);
 
         // Assert
-        Assert.IsTrue(deletedCount >= 1);
+        Assert.AreEqual(1, deletedCount);
         Assert.IsNull(await _storage.LookupAsync("expired", default));
         Assert.IsNotNull(await _storage.LookupAsync("valid", default));
     }

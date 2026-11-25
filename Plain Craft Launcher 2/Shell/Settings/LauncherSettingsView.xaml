@@ -1,0 +1,116 @@
+<local:WorkspacePage
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PCL" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" x:Class="PCL.LauncherSettingsView"
+    PanScroll="{Binding ElementName=PanBack}">
+    <ScrollViewer local:ScrollInput.Enabled="True" Style="{StaticResource SyScrollViewer}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
+        <StackPanel x:Name="PanMain" Style="{StaticResource SySettingsPage}">
+            <TextBlock Style="{StaticResource SyPageTitle}" Text="{DynamicResource Setup.Left.Item.Misc}" />
+
+            <!-- System -->
+            <TextBlock Style="{StaticResource SySectionHeader}" Margin="1,0,0,8" Text="{DynamicResource Setup.Misc.System.Title}" />
+            <local:SettingsCard Icon="lucide/bubbles" Header="{DynamicResource Setup.Misc.System.Announcement}" ActionWidth="240">
+                <local:SymbioSelect x:Name="ComboSystemActivity" Tag="SystemSystemActivity"
+                                    SelectionChanged="ComboSystemActivity_OnSelectionChanged">
+                    <local:SelectOption Content="{DynamicResource Setup.Misc.System.Announcement.All}" ToolTip="{DynamicResource Setup.Misc.System.Announcement.All.ToolTip}" />
+                    <local:SelectOption Content="{DynamicResource Setup.Misc.System.Announcement.ImportantOnly}" />
+                    <local:SelectOption Content="{DynamicResource Setup.Misc.System.Announcement.Disabled}" />
+                </local:SymbioSelect>
+            </local:SettingsCard>
+            <local:SettingsCard Icon="lucide/gauge" Header="{DynamicResource Setup.Misc.System.MaxFps}"
+                                Description="{DynamicResource Setup.Misc.System.MaxFps.ToolTip}" ActionWidth="240">
+                <local:SymbioSlider x:Name="SliderAniFPS" Tag="UiAniFPS" MaxValue="59" Value="59" Change="SliderChange" />
+            </local:SettingsCard>
+            <local:SettingsCard Icon="lucide/scroll-text" Header="{DynamicResource Setup.Misc.System.MaxLogLines}"
+                                Description="{DynamicResource Setup.Misc.System.MaxLogLines.ToolTip}" ActionWidth="240">
+                <local:SymbioSlider x:Name="SliderMaxLog" Tag="SystemMaxLog" MaxValue="29" Value="13" Change="SliderChange" />
+            </local:SettingsCard>
+            <local:SettingsCard Icon="lucide/cpu" Header="{DynamicResource Setup.Misc.System.DisableHardwareAcceleration}">
+                <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckSystemDisableHardwareAcceleration"
+                                   Tag="SystemDisableHardwareAcceleration" Change="CheckSystemDisableHardwareAcceleration_OnChange" />
+            </local:SettingsCard>
+            <local:SettingsCard Icon="lucide/share-2" Header="{DynamicResource Setup.Misc.System.Telemetry}"
+                                Description="{DynamicResource Setup.Misc.System.Telemetry.ToolTip}">
+                <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckSystemTelemetry" Tag="SystemTelemetry" Change="CheckBoxChange" />
+            </local:SettingsCard>
+            <local:SettingsCard Icon="lucide/scroll" Header="{DynamicResource Setup.Misc.System.LaunchLog}"
+                                Description="{DynamicResource Setup.Misc.System.LaunchLog.ToolTip}">
+                <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckShowLaunchLog" Change="CheckShowLaunchLog_Change" />
+            </local:SettingsCard>
+            <!-- Related actions, WinUI "Related settings" style -->
+            <WrapPanel Margin="0,8,0,0">
+                <local:SymbioButton x:Name="BtnSystemSettingExp" MinWidth="120" MinHeight="32" Margin="0,0,8,8"
+                                    Text="{DynamicResource Setup.Misc.System.ExportSettings}" Padding="13,0"
+                                    Click="BtnSystemSettingExp_Click" />
+                <local:SymbioButton x:Name="BtnSystemSettingImp" MinWidth="120" MinHeight="32" Margin="0,0,8,8"
+                                    Text="{DynamicResource Setup.Misc.System.ImportSettings}" Padding="13,0"
+                                    Click="BtnSystemSettingImp_Click" />
+                <local:SymbioButton x:Name="BtnSystemStopUsingPclCe" MinWidth="120" MinHeight="32" Margin="0,0,8,8"
+                                    Text="{DynamicResource Setup.Misc.System.StopUsingPclCe}" Padding="13,0"
+                                    ColorType="Red" Click="BtnSystemStopUsingPclCe_Click" />
+            </WrapPanel>
+
+            <!-- Network -->
+            <TextBlock Style="{StaticResource SySectionHeader}" Text="{DynamicResource Setup.Misc.Network.Title}" />
+            <local:SettingsCard Icon="lucide/shield-check" Header="{DynamicResource Setup.Misc.Network.DoH}"
+                                Description="{DynamicResource Setup.Misc.Network.DoH.ToolTip}">
+                <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckNetDohEnable" Tag="SystemNetEnableDoH" Change="CheckBoxChange" />
+            </local:SettingsCard>
+            <local:SettingsCard Icon="lucide/network" Header="{DynamicResource Setup.Misc.Network.HttpProxy}">
+                <StackPanel Orientation="Horizontal">
+                    <local:SymbioRadio Text="{DynamicResource Setup.Misc.Network.Proxy.None}" x:Name="RadioHttpProxyType0"
+                                       Tag="SystemHttpProxyType/0" Margin="0,0,20,0" Check="RadioBoxChange" />
+                    <local:SymbioRadio Text="{DynamicResource Setup.Misc.Network.Proxy.System}" x:Name="RadioHttpProxyType1"
+                                       Tag="SystemHttpProxyType/1" Margin="0,0,20,0" Check="RadioBoxChange" />
+                    <local:SymbioRadio Text="{DynamicResource Setup.Misc.Network.Proxy.Custom}" x:Name="RadioHttpProxyType2"
+                                       Tag="SystemHttpProxyType/2" Check="RadioBoxChange" />
+                </StackPanel>
+            </local:SettingsCard>
+            <local:SettingsCard x:Name="HttpProxyCustom" Stacked="True" Padding="58,12,16,16" Margin="0,-4,0,4"
+                                Visibility="{Binding ElementName=RadioHttpProxyType2,Path=Checked,Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <local:SymbioNotice Text="{DynamicResource Setup.Misc.Network.Proxy.UntrustedWarning}" Grid.ColumnSpan="4" Theme="Yellow" Margin="0,0,0,10" />
+                    <local:SymbioTextField x:Name="TextSystemHttpProxy" Grid.Row="1" Grid.ColumnSpan="4" Margin="0,0,0,10"
+                                           Tag="SystemHttpProxy" HintText="比如 http://127.0.0.1:1080/"
+                                           ToolTip="{DynamicResource Setup.Misc.Network.Proxy.InvalidWarning}" />
+                    <local:SymbioTextField Grid.Row="2" HintText="{DynamicResource Setup.Misc.Network.Proxy.Username}" Tag="SystemHttpProxyCustomUsername"
+                                           x:Name="TextSystemHttpProxyCustomUsername" ToolTip="{DynamicResource Setup.Misc.Network.Proxy.Optional}" />
+                    <local:SymbioTextField Grid.Row="2" Grid.Column="2" HintText="{DynamicResource Setup.Misc.Network.Proxy.Password}" Tag="SystemHttpProxyCustomPassword"
+                                           x:Name="TextSystemHttpProxyCustomPassword" ToolTip="{DynamicResource Setup.Misc.Network.Proxy.Optional}" />
+                    <local:SymbioButton Text="{DynamicResource Setup.Misc.Network.Proxy.Apply}" Grid.Row="2" Grid.Column="3" Margin="12,0,0,0"
+                                        Padding="16,0" x:Name="BtnApplyHttpProxy" MinHeight="32" Click="ApplyHttpProxyBtn_OnClicked" />
+                </Grid>
+            </local:SettingsCard>
+
+            <!-- Debug: collapsed by default -->
+            <TextBlock Style="{StaticResource SySectionHeader}" Text="{DynamicResource Setup.Misc.Debug.Title}" />
+            <local:SettingsExpander x:Name="CardDebug" Icon="lucide/wrench" Header="{DynamicResource Setup.Misc.Debug.Title}">
+                <local:SettingsRow x:Name="PanDebugAnim" Header="{DynamicResource Setup.Misc.Debug.AnimationSpeed}" ActionWidth="240">
+                    <local:SymbioSlider x:Name="SliderDebugAnim" Tag="SystemDebugAnim" MaxValue="30" Change="SliderChange" />
+                </local:SettingsRow>
+                <local:SettingsRow Header="{DynamicResource Setup.Misc.Debug.SkipCopy}" Description="{DynamicResource Setup.Misc.Debug.SkipCopy.ToolTip}">
+                    <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckDebugSkipCopy" Tag="SystemDebugSkipCopy" Change="CheckBoxChange" />
+                </local:SettingsRow>
+                <local:SettingsRow Header="{DynamicResource Setup.Misc.Debug.Mode}" Description="{DynamicResource Setup.Misc.Debug.Mode.ToolTip}">
+                    <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckDebugMode" Tag="SystemDebugMode" Change="CheckDebugMode_OnChange" />
+                </local:SettingsRow>
+                <local:SettingsRow Header="{DynamicResource Setup.Misc.Debug.Delay}" Description="{DynamicResource Setup.Misc.Debug.Delay.ToolTip}">
+                    <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckDebugDelay" Tag="SystemDebugDelay" Change="CheckBoxChange" />
+                </local:SettingsRow>
+            </local:SettingsExpander>
+        </StackPanel>
+    </ScrollViewer>
+</local:WorkspacePage>

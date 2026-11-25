@@ -339,7 +339,7 @@ public static class ModWatcher
             {
                 LogRealTime(e.Data, ref lastLevel);
                 if (e.Data is not null)
-                    fullLog.Add(e.Data);
+                    lock (fullLog) fullLog.Add(e.Data);
             }
         }
 

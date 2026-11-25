@@ -1,0 +1,25 @@
+<local:WorkspaceSidebar x:Class="PCL.BedrockInstanceNavigation"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:local="clr-namespace:PCL" AnimatedControl="{Binding ElementName=PanItem, Mode=OneWay}">
+    <ScrollViewer local:ScrollInput.Enabled="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
+                          Style="{StaticResource ScrollViewerFullMargin}">
+        <StackPanel Margin="0,12,0,0" x:Name="PanItem">
+            <TextBlock Text="{DynamicResource Bedrock.Instance.Left.Game}" Margin="13,6,5,4" Opacity="0.6"
+                       FontSize="12" />
+            <local:NavigationEntry x:Name="ItemOverall" Label="{DynamicResource Bedrock.Instance.Left.Overall}" Icon="lucide/layout-dashboard" Tag="0" Height="36" VerticalAlignment="Top" Selected="True" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="0" />
+            <local:NavigationEntry x:Name="ItemSetup" Label="{DynamicResource Bedrock.Instance.Left.Setup}" Icon="lucide/settings" Tag="1" Height="36" VerticalAlignment="Top" />
+            <local:NavigationEntry x:Name="ItemLoader" Label="{DynamicResource Bedrock.Instance.LoaderTitle}" Icon="lucide/package" Tag="31" Height="36" VerticalAlignment="Top" />
+            <local:NavigationEntry x:Name="ItemMod" Label="{DynamicResource Instance.Left.Mod}" Icon="lucide/puzzle" Tag="32" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="32" />
+            <TextBlock Text="{DynamicResource Bedrock.Instance.Left.Resources}" Margin="13,6,5,4" Opacity="0.6"
+                       FontSize="12" />
+            <local:NavigationEntry x:Name="ItemWorld" Label="{DynamicResource Instance.Left.Saves}" Icon="lucide/globe" Tag="3" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="3" />
+            <local:NavigationEntry x:Name="ItemScreenshot" Label="{DynamicResource Instance.Left.Screenshots}" Icon="lucide/image" Tag="33" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="33" />
+            <local:NavigationEntry x:Name="ItemServer" Label="{DynamicResource Instance.Left.Servers}" Icon="lucide/server" Tag="34" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="34" />
+            <TextBlock Text="{DynamicResource Bedrock.Instance.Left.Tools}" Margin="13,6,5,4" Opacity="0.6"
+                       FontSize="12" />
+            <local:NavigationEntry x:Name="ItemActions" Label="{DynamicResource Bedrock.Instance.Left.Actions}" Icon="lucide/wrench" Tag="30" Height="36" VerticalAlignment="Top" />
+            <local:NavigationEntry x:Name="ItemStats" Label="{DynamicResource Bedrock.Instance.Left.Stats}" Icon="lucide/layers" Tag="35" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="35" />
+        </StackPanel>
+    </ScrollViewer>
+</local:WorkspaceSidebar>

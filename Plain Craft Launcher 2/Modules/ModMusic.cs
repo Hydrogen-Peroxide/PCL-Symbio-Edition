@@ -224,6 +224,8 @@ public static class ModMusic
     /// <summary>
     ///     刷新背景音乐按钮 UI 与设置页 UI。
     /// </summary>
+    internal static event Action? LibraryChanged;
+
     private static void MusicRefreshUI()
     {
         ModBase.RunInUi(() =>
@@ -266,7 +268,7 @@ public static class ModMusic
                         tipText.Contains("\n") ? 10 : 16);
                 }
 
-                ModMain.frmSetupUI?.MusicRefreshUI();
+                LibraryChanged?.Invoke();
             }
             catch (Exception ex)
             {

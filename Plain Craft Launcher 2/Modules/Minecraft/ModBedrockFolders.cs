@@ -241,7 +241,9 @@ public static class ModBedrockFolders
     public static void Switch(Folder folder)
     {
         Config.Launch.BedrockFolder = folder.IsDefault ? "" : folder.Path;
+        ModBedrockInstance.SelectedVersionId = "";
         ModBase.Log($"[Bedrock] 切换数据目录：{folder.Path}", ModBase.LogLevel.Normal);
+        ModBase.RunInUi(BedrockLaunchSession.Current.NotifyLibraryChanged);
     }
 
     /// <summary>添加一个已有目录；返回添加后的条目，已存在时返回 null。</summary>
@@ -255,6 +257,7 @@ public static class ModBedrockFolders
         manual.Add(new Folder { Path = full, Alias = alias });
         SaveManual(manual);
         ModBase.Log($"[Bedrock] 已添加数据目录：{full}", ModBase.LogLevel.Normal);
+        ModBase.RunInUi(BedrockLaunchSession.Current.NotifyLibraryChanged);
         return new Folder { Path = full, Alias = alias, InstanceCount = CountInstances(full) };
     }
 

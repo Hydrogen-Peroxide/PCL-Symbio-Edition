@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace PCL.Core.Test.IO.Storage.Cache;
@@ -80,6 +81,48 @@ public class FileCacheStorageTest
 
         CollectionAssert.AreEqual(expectedContent, retrievedContent,
             "Retrieved content should match stored content");
+    }
+
+    [TestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
+    public async Task StoreAsync_ShouldReplaceLegacyEmptyFile(bool compression)
+    {
+        using var cache = new FileCacheStorage(_testCachePath, compression);
+        var content = "cached file content"u8.ToArray();
+        var hash = Convert.ToHexStringLower(SHA256.HashData(content));
+        var directory = Directory.CreateDirectory(Path.Combine(_testCachePath, hash[..2]));
+        await File.WriteAllBytesAsync(Path.Combine(directory.FullName, hash), []);
+
+        Assert.IsNull(cache.Retrieve(hash));
+        Assert.IsNull(cache.GetFilePath(hash));
+        Assert.IsFalse(cache.Exists(hash));
+
+        using var input = new MemoryStream(content);
+        Assert.AreEqual(hash, await cache.StoreAsync(input));
+        using var stored = cache.Retrieve(hash);
+        Assert.IsNotNull(stored);
+        using var output = new MemoryStream();
+        await stored.CopyToAsync(output);
+        CollectionAssert.AreEqual(content, output.ToArray());
+
+        var emptyHash = await cache.StoreAsync(Stream.Null);
+        using var validEmpty = cache.Retrieve(emptyHash);
+        Assert.IsNotNull(validEmpty);
+        Assert.AreEqual(-1, validEmpty.ReadByte());
+    }
+
+    [TestMethod]
+    public async Task StoreAsync_ShouldReadNonSeekableStream()
+    {
+        var content = "non-seekable file content"u8.ToArray();
+        using var input = new NonSeekableTestStream(content);
+        var hash = await _fileCache.StoreAsync(input);
+        using var stored = _fileCache.Retrieve(hash);
+        Assert.IsNotNull(stored);
+        using var output = new MemoryStream();
+        await stored.CopyToAsync(output);
+        CollectionAssert.AreEqual(content, output.ToArray());
     }
 
     [TestMethod]

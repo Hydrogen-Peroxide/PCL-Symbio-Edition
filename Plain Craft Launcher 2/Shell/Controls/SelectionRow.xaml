@@ -1,0 +1,33 @@
+<Grid x:Class="PCL.SelectionRow" x:Name="Row"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Height="42" Background="Transparent" KeyboardNavigation.TabNavigation="Local">
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition x:Name="SelectionSpace" Width="4" />
+        <ColumnDefinition x:Name="LeftSpace" Width="0" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition x:Name="ActionSpace" Width="4" />
+    </Grid.ColumnDefinitions>
+    <Border x:Name="SelectedSurface" Grid.ColumnSpan="5" CornerRadius="{StaticResource SyRadiusControl}"
+            IsHitTestVisible="False" Opacity="0" Background="{DynamicResource SySubtleHover}" />
+    <Border x:Name="RectBack" Grid.ColumnSpan="5" CornerRadius="{StaticResource SyRadiusControl}"
+            IsHitTestVisible="False" Opacity="0" Background="{DynamicResource SySubtleHover}" />
+    <Button x:Name="PrimaryAction" Grid.ColumnSpan="5" IsTabStop="False" IsHitTestVisible="False"
+            Style="{StaticResource SyPrimaryRowAction}" AutomationProperties.Name="{Binding Title, ElementName=Row}"
+            AutomationProperties.HelpText="{Binding Info, ElementName=Row}" />
+    <Border x:Name="SelectionMarker" Background="{DynamicResource SyAccentFill}" Width="3" Height="18" Opacity="0"
+            CornerRadius="1.5" VerticalAlignment="Center" HorizontalAlignment="Left" IsHitTestVisible="False" />
+    <ContentPresenter x:Name="LogoHost" Grid.Column="2" IsHitTestVisible="False" VerticalAlignment="Center" HorizontalAlignment="Center" />
+    <StackPanel Grid.Column="3" Margin="4,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False">
+        <TextBlock x:Name="LabTitle" Text="{Binding Title, ElementName=Row}" TextTrimming="CharacterEllipsis"
+                   FontSize="{Binding FontSize, ElementName=Row}" Foreground="{Binding Foreground, ElementName=Row}" />
+        <DockPanel LastChildFill="True">
+            <StackPanel x:Name="PanTags" Orientation="Horizontal" DockPanel.Dock="Left" />
+            <TextBlock x:Name="LabInfo" Visibility="Collapsed" TextTrimming="CharacterEllipsis"
+                       Foreground="{DynamicResource SyTextSecondary}" FontSize="12" />
+        </DockPanel>
+    </StackPanel>
+    <StackPanel x:Name="ActionHost" Grid.Column="4" Margin="0,0,4,0" Opacity="0"
+                IsHitTestVisible="False" HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" />
+</Grid>

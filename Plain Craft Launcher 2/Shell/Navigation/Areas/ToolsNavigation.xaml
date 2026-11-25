@@ -1,0 +1,18 @@
+<local:WorkspaceSidebar x:Class="PCL.ToolsNavigation"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                  xmlns:local="clr-namespace:PCL"
+                  mc:Ignorable="d">
+    <StackPanel Orientation="Vertical" x:Name="PanItem" Margin="0,12,0,0">
+
+        <TextBlock Text="{DynamicResource Tools.Left.Utilities}" Margin="13,5,5,3" Opacity="0.6" FontSize="12"
+                   x:Name="TextToolsCategory" />
+        <local:NavigationEntry x:Name="ItemTest" Label="{DynamicResource Tools.Left.Utilities.Title}" Icon="lucide/tool-case" Tag="3" Height="36" VerticalAlignment="Top" />
+        <local:NavigationEntry x:Name="ItemSaves" Label="{DynamicResource Tools.Left.Saves.Title}" Icon="lucide/earth" Tag="4" Height="36" VerticalAlignment="Top" />
+        <local:NavigationEntry x:Name="ItemSchematic" Label="{DynamicResource Tools.Left.Schematic.Title}" Icon="lucide/box" Tag="7" Height="36" VerticalAlignment="Top" />
+        <local:NavigationEntry x:Name="ItemDeviceInfo" Label="{DynamicResource Tools.Device.Title}" Icon="lucide/cpu" Tag="6" Height="36" VerticalAlignment="Top" />
+
+    </StackPanel>
+</local:WorkspaceSidebar>

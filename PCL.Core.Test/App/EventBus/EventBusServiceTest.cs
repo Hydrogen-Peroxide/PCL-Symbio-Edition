@@ -10,6 +10,9 @@ public class EventBusServiceTest
 {
     private record MyEvent(Guid Id, string Name, int Value) : EventDataBase(Id, Name);
 
+    [TestInitialize]
+    public void InitializeServiceContext() => _ = new EventBusService();
+
     [TestMethod]
     public async Task Publish_Calls_Delegate_Handler()
     {

@@ -1,0 +1,12 @@
+<UserControl x:Class="PCL.InstanceFoldersView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PCL" Focusable="False">
+    <AdornerDecorator>
+        <ScrollViewer local:ScrollInput.Enabled="True" local:ScrollInput.DeltaMultiplier="0.7"
+                      Style="{StaticResource ScrollViewerFullMargin}" VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel x:Name="PanList" />
+        </ScrollViewer>
+    </AdornerDecorator>
+</UserControl>

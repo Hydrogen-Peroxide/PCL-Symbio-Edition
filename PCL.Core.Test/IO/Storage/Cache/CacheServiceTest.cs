@@ -63,6 +63,7 @@ public class CacheServiceTest
         // Clean up the test directory
         if (Directory.Exists(_testCacheDir))
         {
+            SqliteTestDatabase.ClearPools(_options.DatabasePath);
             Directory.Delete(_testCacheDir, true);
         }
     }
@@ -530,7 +531,7 @@ public class CacheServiceTest
         // Arrange
         var key = "file_cache_key";
         var fileContent = "This is file content for caching"u8.ToArray();
-        var stream = new MemoryStream(fileContent);
+        using var stream = new NonSeekableTestStream(fileContent);
 
         // Act
         var hash = await _cache.CacheFileAsync(key, stream);
@@ -541,6 +542,7 @@ public class CacheServiceTest
         Assert.IsFalse(string.IsNullOrEmpty(hash));
         Assert.IsTrue(result.Found);
         CollectionAssert.AreEqual(fileContent, result.Value);
+        Assert.AreEqual(fileContent.LongLength, (await _cache.GetStatsAsync()).TotalSizeBytes);
     }
 
     [TestMethod]

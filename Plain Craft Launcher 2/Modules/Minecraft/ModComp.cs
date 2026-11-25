@@ -28,6 +28,7 @@ namespace PCL;
 
 public static class ModComp
 {
+    internal static readonly ConcurrentDictionary<CompType, string> RecentDownloadFolders = new();
     public enum CompLoaderType
     {
         // https://docs.curseforge.com/?http#tocS_ModLoaderType
@@ -386,7 +387,7 @@ public static class ModComp
             var body = new ContextMenu();
             foreach (var i in FavoritesList)
             {
-                var item = new MyMenuItem();
+                var item = new SymbioMenuAction();
                 item.MaxWidth = 240d;
                 var hasFavs = i.Favs.Contains(project.Id);
                 if (hasFavs)
@@ -439,7 +440,7 @@ public static class ModComp
             var body = new ContextMenu();
             foreach (var i in FavoritesList)
             {
-                var item = new MyMenuItem
+                var item = new SymbioMenuAction
                 {
                     MaxWidth = 240d,
                     Header = Lang.Text("Download.Comp.Detail.Favorites.FavoriteContextMenu", i.Name),
@@ -1704,8 +1705,8 @@ public static class ModComp
         ///     将当前工程信息实例化为控件。
         /// </summary>
         /// <param name="showQuickDownload">是否在卡片右侧显示快速下载按钮（仅搜索结果页应传 true）。</param>
-        public MyVirtualizingElement<MyCompItem> ToCompItem(bool showMcVersionDesc, bool showLoaderDesc,
-            bool showQuickDownload = false)
+        public DeferredView<ResourceProjectRow> ToCompItem(bool showMcVersionDesc, bool showLoaderDesc,
+            bool showQuickDownload = false, ResourceSearchOrigin? origin = null)
         {
             // --- 1. 获取版本描述 (核心算法优化) ---
             string gameVersionDescription;
@@ -1801,10 +1802,10 @@ public static class ModComp
             }
 
             // --- 3. 实例化 UI (精简布局逻辑) ---
-            return new MyVirtualizingElement<MyCompItem>(() =>
+            return new DeferredView<ResourceProjectRow>(() =>
                 {
-                    var newItem = new MyCompItem { Tag = this };
-                    ApplyLogoToMyImage(newItem.PathLogo);
+                    var newItem = new ResourceProjectRow { Tag = this, SearchOrigin = origin };
+                    (newItem.PathLogo.Address, newItem.PathLogo.FallbackSource) = LogoAddresses();
 
                     var title = GetControlTitle(true);
                     newItem.Title = title.Key;
@@ -1858,9 +1859,9 @@ public static class ModComp
                 { Height = 64 };
         }
 
-        public MyListItem ToListItem()
+        public SelectionRow ToListItem()
         {
-            var result = new MyListItem
+            var result = new SelectionRow
             {
                 Title = TranslatedName,
                 Info = Description.Replace("\r", "").Replace("\n", ""),
@@ -1872,18 +1873,10 @@ public static class ModComp
             return result;
         }
 
-        public void ApplyLogoToMyImage(MyImage img)
-        {
-            if (string.IsNullOrEmpty(LogoUrl))
-            {
-                img.Source = ModBase.pathImage + "Icons/NoIcon.png";
-            }
-            else
-            {
-                img.Source = LogoUrl;
-                img.FallbackSource = ModDownload.DlSourceModGet(LogoUrl);
-            }
-        }
+        private (string Primary, string? Fallback) LogoAddresses() =>
+            string.IsNullOrEmpty(LogoUrl)
+                ? (ModBase.pathImage + "Icons/NoIcon.png", null)
+                : (LogoUrl, ModDownload.DlSourceModGet(LogoUrl));
 
         public KeyValuePair<string, string> GetControlTitle(bool hasModLoaderDescription)
         {
@@ -3416,11 +3409,11 @@ public static class ModComp
         /// <summary>
         ///     将当前文件信息实例化为控件。
         /// </summary>
-        public MyVirtualizingElement<MyListItem> ToListItem(MyListItem.ClickEventHandler onClick,
-            MyIconButton.ClickEventHandler? onSaveClick = null,
+        public DeferredView<SelectionRow> ToListItem(RoutedEventHandler onClick,
+            System.Windows.RoutedEventHandler? onSaveClick = null,
             bool badDisplayName = false)
         {
-            return new MyVirtualizingElement<MyListItem>(() =>
+            return new DeferredView<SelectionRow>(() =>
                 {
                     // 1. 获取基础描述信息
                     var title = badDisplayName ? FileName : DisplayName;
@@ -3448,12 +3441,12 @@ public static class ModComp
                         info.Add(StatusDescription);
 
                     // 3. 建立控件
-                    var newItem = new MyListItem
+                    var newItem = new SelectionRow
                     {
                         Title = title,
                         SnapsToDevicePixels = true,
                         Height = 42,
-                        Type = MyListItem.CheckType.Clickable,
+                        Type = SelectionRow.CheckType.Clickable,
                         Tag = this,
                         Info = string.Join("  |  ", info),
                         // 使用 switch 表达式精简 Logo 选择喵！
@@ -3469,7 +3462,7 @@ public static class ModComp
                     // 4. 建立另存为按钮
                     if (onSaveClick is not null)
                     {
-                        var btnSave = new MyIconButton { SvgIcon = "lucide/save", ToolTip = Lang.Text("Download.Version.SaveAs") };
+                        var btnSave = new SymbioIconButton { SvgIcon = "lucide/save", ToolTip = Lang.Text("Download.Version.SaveAs") };
                         ToolTipService.SetPlacement(btnSave, PlacementMode.Center);
                         ToolTipService.SetVerticalOffset(btnSave, 30);
                         ToolTipService.SetHorizontalOffset(btnSave, 2);
@@ -3662,7 +3655,7 @@ public static class ModComp
     /// <summary>
     /// 资源卡片的快速下载入口：按 <see cref="Config.Download.Comp.QuickDownloadBehavior"/> 指定的行为，
     /// 下载该资源最新（优先 Release、其次最新发布）的兼容版本到目标实例或文件夹。
-    /// 由 <see cref="MyCompItem"/> 上的快速下载按钮调用。快速下载不会自动安装前置。
+    /// 由 <see cref="ResourceProjectRow"/> 上的快速下载按钮调用。快速下载不会自动安装前置。
     /// </summary>
     public static void QuickDownload(CompProject project)
     {
@@ -3692,9 +3685,9 @@ public static class ModComp
                     {
                         var options = new List<IMyRadio>
                         {
-                            new MyRadioBox { Text = Lang.Text("Download.Comp.QuickDownload.ChooseMethod.CurrentInstance") },
-                            new MyRadioBox { Text = Lang.Text("Download.Comp.QuickDownload.ChooseMethod.AskInstance") },
-                            new MyRadioBox { Text = Lang.Text("Download.Comp.QuickDownload.ChooseMethod.AskPath") }
+                            new SymbioRadio { Text = Lang.Text("Download.Comp.QuickDownload.ChooseMethod.CurrentInstance") },
+                            new SymbioRadio { Text = Lang.Text("Download.Comp.QuickDownload.ChooseMethod.AskInstance") },
+                            new SymbioRadio { Text = Lang.Text("Download.Comp.QuickDownload.ChooseMethod.AskPath") }
                         };
                         return ModMain.MyMsgBoxSelect(options,
                             Lang.Text("Download.Comp.QuickDownload.ChooseMethod.Title"),
@@ -3798,7 +3791,7 @@ public static class ModComp
         var indices = ModBase.RunInUiWait(() =>
         {
             var options = compatible
-                .Select(v => new MyListItem { Title = v.Name })
+                .Select(v => new SelectionRow { Title = v.Name })
                 .ToList();
             return ModMain.MyMsgBoxMultiSelect(options,
                 Lang.Text("Download.Comp.QuickDownload.ChooseInstance.Title"),
@@ -3874,8 +3867,6 @@ public static class ModComp
         };
         loader.Start(1);
         ModLoader.LoaderTaskbarAdd(loader);
-        ModMain.frmMain.BtnExtraDownload.ShowRefresh();
-        ModMain.frmMain.BtnExtraDownload.Ribble();
     }
 
     /// <summary>根据资源类型返回实例内的目标子文件夹（与 Save_Click 一致）。</summary>
@@ -3973,7 +3964,7 @@ public static class ModComp
     /// 将一组前置依赖（按工程 ID）渲染为一个可折叠栏并加入 <paramref name="stack"/>。
     /// 仅保留在 compProjectCache 中有信息的前置；若过滤后为空则不添加任何折叠栏。
     /// </summary>
-    /// <param name="collapsed">是否默认收起。前置 item 全部加入即可，靠 MyVirtualizingElement 在可见时才实例化。</param>
+    /// <param name="collapsed">是否默认收起。前置 item 全部加入即可，靠 DeferredView 在可见时才实例化。</param>
     private static void _AddDependencyBar(StackPanel stack, List<string> depIds, string title, bool collapsed)
     {
         if (depIds is null || !depIds.Any())
@@ -3991,7 +3982,7 @@ public static class ModComp
         if (!projects.Any())
             return;
 
-        var bar = new MyCollapseBar
+        var bar = new ExpandableSection
         {
             Title = $"{title} ({projects.Count})",
             IsCollapsed = collapsed

@@ -3275,6 +3275,7 @@ public static class ModBase
     /// </summary>
     public static object GetObjectFromXML(string str, out XamlEventSanitizer.SanitizeResult sanitizeResult)
     {
+        str = ViewMarkupNames.Upgrade(str);
         str = str. // 兼容旧版自定义事件写法
             Replace("EventType=\"", "local:CustomEventService.EventType=\"").
             Replace("EventData=\"", "local:CustomEventService.EventData=\"").

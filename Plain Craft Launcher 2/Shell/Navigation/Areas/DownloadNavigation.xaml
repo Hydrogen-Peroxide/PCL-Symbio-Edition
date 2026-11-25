@@ -1,0 +1,42 @@
+<local:WorkspaceSidebar x:Class="PCL.DownloadNavigation"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:local="clr-namespace:PCL">
+    <ScrollViewer local:ScrollInput.Enabled="True" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto"
+                          Style="{StaticResource ScrollViewerFullMargin}">
+        <StackPanel Margin="0,12,0,0" Name="PanItem">
+
+            <local:NavigationEntry x:Name="ItemInstall" Label="{DynamicResource Download.Left.Java}" Icon="lucide/boxes" Tag="1" Height="36" VerticalAlignment="Top" Selected="True" />
+            <local:NavigationEntry x:Name="ItemBedrock" Label="{DynamicResource Download.Left.BedrockVersion}" Icon="lucide/box" Tag="24" Height="36" VerticalAlignment="Top" />
+
+            <TextBlock Text="{DynamicResource Download.Left.CommunityResources}" Margin="13,10,5,4" Opacity="0.6"
+                       FontSize="12" />
+            <local:NavigationEntry x:Name="ItemMod" Label="{DynamicResource Download.Left.Mod}" Icon="lucide/puzzle" Tag="2" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="2" />
+
+            <local:NavigationEntry x:Name="ItemPack" Label="{DynamicResource Download.Left.Modpack}" Icon="lucide/package" Tag="3" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="3" />
+            <local:NavigationEntry x:Name="ItemDataPack" Label="{DynamicResource Download.Left.DataPack}" Icon="lucide/file-archive" Tag="4" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="4" />
+            <local:NavigationEntry x:Name="ItemResourcePack" Label="{DynamicResource Download.Left.ResourcePack}" Icon="lucide/layers" Tag="5" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="5" />
+            <local:NavigationEntry x:Name="ItemShader" Label="{DynamicResource Download.Left.Shader}" Icon="lucide/sparkles" Tag="6" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="6" />
+            <local:NavigationEntry x:Name="ItemWorld" Label="{DynamicResource Download.Left.World}" Icon="lucide/globe" Tag="7" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="7" />
+            <local:NavigationEntry x:Name="ItemFavorites" Label="{DynamicResource Download.Left.Favorites}" Icon="lucide/heart" Tag="8" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="8" />
+
+            <TextBlock Text="{DynamicResource Download.Left.Bedrock}" Margin="13,10,5,4" Opacity="0.6" FontSize="12" />
+            <local:NavigationEntry x:Name="ItemBedrockLip" Label="{DynamicResource Download.Left.BedrockLip}" Icon="lucide/cpu" Tag="25" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="25" />
+            <local:NavigationEntry x:Name="ItemBedrockAddon" Label="{DynamicResource Download.Left.BedrockAddon}" Icon="lucide/boxes" Tag="19" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="19" />
+            <local:NavigationEntry x:Name="ItemBedrockMap" Label="{DynamicResource Download.Left.BedrockMap}" Icon="lucide/globe" Tag="20" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="20" />
+            <local:NavigationEntry x:Name="ItemBedrockMaterial" Label="{DynamicResource Download.Left.BedrockMaterial}" Icon="lucide/palette" Tag="21" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="21" />
+            <local:NavigationEntry x:Name="ItemBedrockScript" Label="{DynamicResource Download.Left.BedrockScript}" Icon="lucide/scroll-text" Tag="22" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="22" />
+            <local:NavigationEntry x:Name="ItemBedrockSkin" Label="{DynamicResource Download.Left.BedrockSkin}" Icon="lucide/shirt" Tag="23" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="23" />
+
+            <TextBlock Text="{DynamicResource Download.Left.Installation}" Margin="13,10,5,4" Opacity="0.6" FontSize="12" />
+            <local:NavigationEntry x:Name="ItemOptiFine" Label="{DynamicResource Download.Left.Optifine}" Icon="lucide/gauge" Tag="10" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="10" />
+            <local:NavigationEntry x:Name="ItemForge" Label="{DynamicResource Download.Left.Forge}" Icon="lucide/anvil" Tag="11" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="11" />
+            <local:NavigationEntry x:Name="ItemNeoForge" Label="{DynamicResource Download.Left.NeoForge}" Icon="lucide/cat" Tag="12" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="12" />
+            <local:NavigationEntry x:Name="ItemCleanroom" Label="{DynamicResource Download.Left.Cleanroom}" Icon="lucide/flask-conical" Tag="13" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="13" />
+            <local:NavigationEntry x:Name="ItemFabric" Label="{DynamicResource Download.Left.Fabric}" Icon="lucide/scroll" Tag="14" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="14" />
+            <local:NavigationEntry x:Name="ItemLegacyFabric" Label="{DynamicResource Download.Left.LegacyFabric}" Icon="lucide/scroll" Tag="18" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="18" />
+            <local:NavigationEntry x:Name="ItemLabyMod" Label="{DynamicResource Download.Left.LabyMod}" Icon="lucide/box" Tag="17" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="17" />
+            <local:NavigationEntry x:Name="ItemLiteLoader" Label="{DynamicResource Download.Left.LiteLoader}" Icon="lucide/egg" Tag="16" Height="36" VerticalAlignment="Top" ActionIcon="lucide/refresh-cw" ActionHint="{DynamicResource Common.Action.Refresh}" ActionTag="16" />
+        </StackPanel>
+    </ScrollViewer>
+</local:WorkspaceSidebar>

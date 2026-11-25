@@ -1,0 +1,993 @@
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using Shape = System.Windows.Shapes.Shape;
+using System.Windows.Threading;
+using Microsoft.Win32;
+using PCL.Core.App;
+using PCL.Core.App.Localization;
+using PCL.Core.UI;
+
+namespace PCL;
+
+public partial class BedrockManagementSidebar
+{
+    // Xbox 应用的族名与固定 App Id；实际 AUMID 需要按当前用户已注册的包拼出来
+    private const string XboxAppFamilyName = "Microsoft.GamingApp_8wekyb3d8bbwe";
+    private const string XboxAppPackagePrefix = "Microsoft.GamingApp_";
+    private const string XboxAppApplicationId = "Microsoft.Xbox.App";
+
+    // 当前用户已注册的 UWP 包列表；用它判断 Xbox 应用是否可用，而不是把固定 AUMID 直接交给 explorer
+    private const string PackageRepositoryKey =
+        @"Software\Classes\Local Settings\Software\Microsoft\Windows\CurrentVersion\AppModel\Repository\Packages";
+
+    // 未安装 Xbox 应用时引导用户前往商店，商店不可用时回退到网页版商店
+    private const string XboxAppStoreUri = "ms-windows-store://pdp/?ProductId=9MV0B5HZVK9Z";
+    private const string XboxAppStoreWebsite = "https://apps.microsoft.com/detail/9MV0B5HZVK9Z";
+
+    // 登录等待的轮询间隔与总时长：Xbox 登录可能包含二步验证，留足时间
+    private static readonly TimeSpan SignInWatchInterval = TimeSpan.FromSeconds(2);
+    private static readonly TimeSpan SignInWatchTimeout = TimeSpan.FromMinutes(5);
+
+    private static readonly string[] BedrockPackageFamilies =
+    [
+        "Microsoft.MinecraftUWP_8wekyb3d8bbwe",
+        "Microsoft.Minecraft_8wekyb3d8bbwe"
+    ];
+
+
+    // 状态行展示「点击复制安装路径」时保存可复制的路径
+    private string? _detailCopyPath;
+
+    // 等待 Xbox 登录时的轮询任务；重复点击、手动刷新或离开页面时取消
+    private CancellationTokenSource? _signInWatch;
+
+    // 宿主窗口，用于在从 Xbox 应用切回时刷新账号
+    private Window? _hostWindow;
+
+    private System.Windows.Controls.Panel? _settingsHome;
+    public BedrockManagementSidebar()
+    {
+        InitializeComponent();
+        var session = BedrockLaunchSession.Current;
+        Loaded += (_, _) =>
+        {
+            session.LaunchStarted += ShowCurrentLaunch;
+            session.LaunchFinished += EndLaunchOverlay;
+            session.StateChanged += UpdateCurrentProgress;
+            session.StateChanged += RefreshInstallationStatus;
+            session.LibraryChanged += RefreshStatus;
+            if (session.IsLaunching) ShowCurrentLaunch();
+        };
+        Unloaded += (_, _) =>
+        {
+            session.LaunchStarted -= ShowCurrentLaunch;
+            session.LaunchFinished -= EndLaunchOverlay;
+            session.StateChanged -= UpdateCurrentProgress;
+            session.StateChanged -= RefreshInstallationStatus;
+            session.LibraryChanged -= RefreshStatus;
+        };
+        void ShowCurrentLaunch() => ShowLaunchOverlay(
+            ModBedrockInstance.GetDisplayName(ModBedrockInstance.VersionsDirectory, Config.Launch.BedrockSelectedVersion),
+            session.IsPortable);
+        void UpdateCurrentProgress()
+        {
+            if (session.IsLaunching) SetLaunchOverlayProgress(session.Progress, session.Detail);
+        }
+        // 面板收起后把输入区的缩放与透明度还原（与 Java 版一致）
+        PanLaunching.Hidden += (_, _) => RestoreLaunchInput();
+        Loaded += BedrockManagementSidebar_Loaded;
+        Unloaded += BedrockManagementSidebar_Unloaded;
+    }
+
+    private void BedrockManagementSidebar_Loaded(object sender, RoutedEventArgs e)
+    {
+        // 每次回到该页面时都重新读取账号与状态，切换账号 / 安装版本后能及时反映
+        RefreshAccount();
+        RefreshStatus();
+
+        AttachHostWindow();
+    }
+
+    private void BedrockManagementSidebar_Unloaded(object sender, RoutedEventArgs e)
+    {
+        CancelSignInWatch();
+        if (_hostWindow is null) return;
+        _hostWindow.Activated -= HostWindow_Activated;
+        _hostWindow = null;
+    }
+
+    /// <summary>
+    ///     从 Xbox 应用切回启动器时立即刷新账号，不必只依赖轮询或手动点刷新。
+    /// </summary>
+    private void HostWindow_Activated(object? sender, EventArgs e)
+    {
+        RefreshAccount();
+        RefreshStatus();
+
+        // 仍在等待登录时保留等待提示，账号变化后由轮询收尾
+        if (_signInWatch is null) return;
+        BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.Waiting");
+        LabAccountHint.Text = Lang.Text("Bedrock.Account.WaitingSignIn");
+    }
+
+    private void AttachHostWindow()
+    {
+        if (_hostWindow is not null) return;
+        _hostWindow = Window.GetWindow(this);
+        if (_hostWindow is not null) _hostWindow.Activated += HostWindow_Activated;
+    }
+
+    public void LaunchButtonClick()
+    {
+        BedrockLaunchSession.Current.RequestLaunch();
+    }
+
+    private void BtnLaunch_Click(object sender, System.Windows.RoutedEventArgs e) => LaunchButtonClick();
+
+    #region 账号
+
+    // Xbox 账号所在的根注册表位置，按优先级排列；账号也可能写在它们的子键里，检测时会一并枚举
+    private static readonly string[] XboxAccountRoots =
+    [
+        @"Software\Microsoft\XboxLive",
+        @"Software\Microsoft\Xbox"
+    ];
+
+    private sealed record XboxAccountInfo(string? Gamertag, string? Mail, string? Xuid, string Source);
+
+    /// <summary>
+    ///     读取当前 Windows 登录的 Xbox 账号信息。
+    /// </summary>
+    private void RefreshAccount()
+    {
+        // 启动器里登录并选中的基岩版账号优先：启动时注入游戏的就是它，
+        // 这里若继续显示系统 Xbox 账号，会让人以为切换压根没生效。
+        var launcherAccount = ModBedrockAccounts.Active;
+        if (launcherAccount is not null)
+        {
+            ApplyAvatar(launcherAccount.Gamertag);
+            LabGamertag.Text = launcherAccount.Gamertag;
+            LabAccountMail.Text = $"XUID {launcherAccount.Xuid}";
+            BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.SwitchShort");
+            LabAccountHint.Text = Lang.Text("Bedrock.Account.LauncherSelectedHint");
+            return;
+        }
+
+        var account = DetectXboxAccount();
+        ApplyAvatar(account?.Gamertag ?? account?.Xuid);
+        if (account is null)
+        {
+            // 没有 Xbox 账号时，再看 Windows 是否至少登录了 Microsoft 账号
+            var msa = DetectMicrosoftAccount();
+            if (msa is not null)
+            {
+                LabAvatar.Text = GetAvatarText(msa);
+                LabGamertag.Text = Lang.Text("Bedrock.Account.MsaOnly");
+                LabAccountMail.Text = msa;
+                BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.SignIn");
+                LabAccountHint.Text = Lang.Text("Bedrock.Account.MsaOnlyHint", msa);
+                return;
+            }
+
+            LabAvatar.Text = "?";
+            LabGamertag.Text = Lang.Text("Bedrock.Account.NotLoggedIn");
+            LabAccountMail.Text = Lang.Text("Bedrock.Account.SignInHint");
+            BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.SignIn");
+            LabAccountHint.Text = GetInstalledXboxAppAumid() is null
+                ? Lang.Text("Bedrock.Account.XboxNotInstalledHint")
+                : Lang.Text("Bedrock.Account.Hint");
+            return;
+        }
+
+        var name = account.Gamertag ?? account.Mail;
+        if (name is null)
+        {
+            // 系统只写入了 Xbox 身份标识（Xuid 等），没有缓存玩家代号
+            LabAvatar.Text = "X";
+            LabGamertag.Text = Lang.Text("Bedrock.Account.XboxOnly");
+            LabAccountMail.Text = account.Xuid is null
+                ? Lang.Text("Bedrock.Account.MicrosoftAccount")
+                : $"XUID {account.Xuid}";
+            BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.Switch");
+            LabAccountHint.Text = Lang.Text("Bedrock.Account.XboxOnlyHint");
+            return;
+        }
+
+        LabAvatar.Text = GetAvatarText(name);
+        LabGamertag.Text = name;
+        LabAccountMail.Text = string.IsNullOrWhiteSpace(account.Mail)
+            ? Lang.Text("Bedrock.Account.MicrosoftAccount")
+            : account.Mail;
+        BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.Switch");
+        LabAccountHint.Text = Lang.Text("Bedrock.Account.SwitchHint");
+    }
+
+    /// <summary>
+    ///     用 Windows 本地接口取到的头像替换圆形底图；取不到时回退为首字母 + 纯色底。
+    ///     图片会先缓存到本地目录，避免每次都读系统文件。
+    /// </summary>
+    private void ApplyAvatar(string? seed)
+    {
+        var path = ModBedrockAvatar.Resolve(seed);
+        if (path is null)
+        {
+            ShapeAvatar.Fill = (System.Windows.Media.Brush)FindResource("SyAccentText");
+            LabAvatar.Visibility = Visibility.Visible;
+            return;
+        }
+
+        try
+        {
+            var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+            bitmap.BeginInit();
+            bitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+            bitmap.CreateOptions = System.Windows.Media.Imaging.BitmapCreateOptions.IgnoreImageCache;
+            bitmap.UriSource = new Uri(path);
+            bitmap.EndInit();
+            bitmap.Freeze();
+            ShapeAvatar.Fill = new System.Windows.Media.ImageBrush(bitmap)
+            {
+                Stretch = System.Windows.Media.Stretch.UniformToFill
+            };
+            
+            LabAvatar.Visibility = Visibility.Collapsed;
+ModBase.Log($"[Bedrock] 已载入系统头像：{path}", ModBase.LogLevel.Debug);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[Bedrock] 载入系统头像失败，回退为首字母", ModBase.LogLevel.Debug);
+            ShapeAvatar.Fill = (System.Windows.Media.Brush)FindResource("SyAccentText");
+            LabAvatar.Visibility = Visibility.Visible;
+        }
+    }
+
+    /// <summary>
+    ///     依次尝试各个注册表位置读取 Xbox 账号，全部读不到时返回 null。
+    ///     除根键外还会枚举子键，兼容 DefaultUser、Identity、Authentication 等不同系统与 Xbox 应用的写法。
+    /// </summary>
+    private static XboxAccountInfo? DetectXboxAccount(bool writeLog = true)
+    {
+        foreach (var path in GetXboxAccountKeyPaths(writeLog))
+        {
+            try
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(path);
+                if (key is null) continue;
+
+                // 只记录值名，不记录账号内容，避免日志泄露
+                if (writeLog)
+                    ModBase.Log($"[Bedrock] 账号检测：注册表 {path} 的值 = {string.Join(", ", key.GetValueNames())}",
+                        ModBase.LogLevel.Debug);
+
+                var gamertag = FirstNonEmpty(
+                    ReadRegistryValue(key, "ModernGamertag"),
+                    ReadRegistryValue(key, "UniqueModernGamertag"),
+                    ReadRegistryValue(key, "Gamertag"),
+                    ReadRegistryValue(key, "DisplayName"),
+                    ReadRegistryValue(key, "PlayerName"));
+                var suffix = ReadRegistryValue(key, "ModernGamertagSuffix");
+                if (gamertag is not null && suffix is not null && !gamertag.Contains('#'))
+                    gamertag = $"{gamertag}#{suffix}";
+
+                var mail = FirstNonEmpty(
+                    ReadRegistryValue(key, "UserName"),
+                    ReadRegistryValue(key, "Email"),
+                    ReadRegistryValue(key, "EmailAddress"),
+                    ReadRegistryValue(key, "AccountName"));
+                var xuid = FirstNonEmpty(
+                    ReadRegistryValue(key, "Xuid"),
+                    ReadRegistryValue(key, "UserXUID"),
+                    ReadRegistryValue(key, "XboxUserId"));
+
+                // 部分系统只写入身份标识（Xuid、AccountId），不缓存昵称与邮箱，此时同样视为已登录
+                var hasIdentity = xuid is not null ||
+                                  ReadRegistryValue(key, "AccountId") is not null ||
+                                  ReadRegistryValue(key, "UserId") is not null;
+
+                // Gamertag、邮箱与身份标识都没有时视为该位置没有可用账号，继续尝试下一个
+                if (gamertag is null && mail is null && !hasIdentity) continue;
+                if (writeLog) ModBase.Log($"[Bedrock] 账号检测：命中注册表 {path}", ModBase.LogLevel.Normal);
+                return new XboxAccountInfo(gamertag, mail, xuid, path);
+            }
+            catch (Exception ex)
+            {
+                if (writeLog)
+                    ModBase.Log($"[Bedrock] 账号检测：读取 {path} 失败：{ex.Message}", ModBase.LogLevel.Debug);
+            }
+        }
+
+        if (writeLog) ModBase.Log("[Bedrock] 账号检测：所有 Xbox 注册表位置均未找到账号", ModBase.LogLevel.Normal);
+        return null;
+    }
+
+    /// <summary>
+    ///     列出需要尝试的注册表路径：先根键，再枚举其子键。
+    /// </summary>
+    private static List<string> GetXboxAccountKeyPaths(bool writeLog = true)
+    {
+        var paths = new List<string>();
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var root in XboxAccountRoots)
+        {
+            if (seen.Add(root)) paths.Add(root);
+
+            string[] subKeys;
+            try
+            {
+                using var key = Registry.CurrentUser.OpenSubKey(root);
+                subKeys = key?.GetSubKeyNames() ?? [];
+            }
+            catch (Exception ex)
+            {
+                if (writeLog)
+                    ModBase.Log($"[Bedrock] 账号检测：枚举 {root} 的子键失败：{ex.Message}", ModBase.LogLevel.Debug);
+                continue;
+            }
+
+            foreach (var subKey in subKeys)
+            {
+                var path = $@"{root}\{subKey}";
+                if (seen.Add(path)) paths.Add(path);
+            }
+        }
+
+        return paths;
+    }
+
+    /// <summary>读取字符串值；值名不区分大小写，非字符串类型（如令牌二进制）直接忽略。</summary>
+    private static string? ReadRegistryValue(RegistryKey key, string name) => key.GetValue(name) switch
+    {
+        string text => string.IsNullOrWhiteSpace(text) ? null : text.Trim(),
+        string[] parts => FirstNonEmpty(parts),
+        _ => null
+    };
+
+    /// <summary>
+    ///     读取 Windows 已登录的 Microsoft 账号（IdentityCRL）。
+    ///     系统会保留多个历史账号，无法判断 Xbox 当前使用的是哪一个，此时取第一个，
+    ///     由界面标注为仅 Microsoft 账号，而不是直接判定为未登录。
+    /// </summary>
+    private static string? DetectMicrosoftAccount()
+    {
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\IdentityCRL\UserExtendedProperties");
+            var identities = key?.GetSubKeyNames();
+            if (identities is not { Length: > 0 })
+            {
+                ModBase.Log("[Bedrock] 账号检测：IdentityCRL 中没有 Microsoft 账号", ModBase.LogLevel.Normal);
+                return null;
+            }
+
+            ModBase.Log($"[Bedrock] 账号检测：使用 IdentityCRL 中的 Microsoft 账号（共 {identities.Length} 个）",
+                ModBase.LogLevel.Normal);
+            return identities[0];
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 账号检测：读取 Microsoft 账号失败：{ex.Message}", ModBase.LogLevel.Debug);
+            return null;
+        }
+    }
+
+    private static string? FirstNonEmpty(params string?[] values)
+    {
+        foreach (var value in values)
+            if (!string.IsNullOrWhiteSpace(value))
+                return value.Trim();
+        return null;
+    }
+
+    /// <summary>打开实例选择浮层：左侧切换数据目录，右侧挑选实例。</summary>
+    private void BtnInstance_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        ModMain.frmMain.PageChange(FormMain.PageType.BedrockInstanceSelect);
+    }
+
+    /// <summary>打开实例设置：与 Java 版一致，使用整页界面而不是弹窗。</summary>
+    private void BtnInstanceSettings_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var version = EnsureSelectedVersion();
+        if (version is null)
+        {
+            HintService.Hint(Lang.Text("Bedrock.Instance.None"), HintType.Error);
+            return;
+        }
+
+        ModMain.frmBedrockInstanceLeft ??= new BedrockInstanceNavigation();
+        ModMain.frmBedrockInstanceLeft.pageID = FormMain.PageSubType.VersionSetup;
+        BedrockInstanceWorkspace.CurrentVersion = version;
+        ModMain.frmMain.PageChange(FormMain.PageType.BedrockInstance, FormMain.PageSubType.VersionSetup);
+    }
+
+    private static string ChannelText(string versionId) => ModBedrockInstance.GetChannel(versionId) switch
+    {
+        "preview" => Lang.Text("Download.Bedrock.Channel.Preview"),
+        "beta" => Lang.Text("Download.Bedrock.Channel.Beta"),
+        _ => Lang.Text("Download.Bedrock.Channel.Release")
+    };
+
+    /// <summary>把设置面板挂到弹窗层，显示为整窗浮层。</summary>
+    private void AttachSettingsOverlay()
+    {
+        var contentHost = ModMain.frmMain?.PanMain;
+        if (contentHost?.Parent is not Panel host) return;
+        if (PanInstanceSettings.Parent is Panel parent && !ReferenceEquals(parent, host))
+        {
+            _settingsHome = parent;
+            parent.Children.Remove(PanInstanceSettings);
+        }
+
+        // 与 Java 版实例页一致：铺满内容区，并带入场动画
+        PanInstanceSettings.HorizontalAlignment = HorizontalAlignment.Stretch;
+        PanInstanceSettings.VerticalAlignment = VerticalAlignment.Stretch;
+        PanInstanceSettings.Width = double.NaN;
+        PanInstanceSettings.Height = double.NaN;
+        PanInstanceSettings.Visibility = Visibility.Visible;
+        Panel.SetZIndex(PanInstanceSettings, 99);
+        Grid.SetRow(PanInstanceSettings, Grid.GetRow(contentHost));
+        Grid.SetRowSpan(PanInstanceSettings, Grid.GetRowSpan(contentHost));
+        if (!host.Children.Contains(PanInstanceSettings)) host.Children.Add(PanInstanceSettings);
+
+        SymbioMotion.EnterDepth(PanInstanceSettings);
+    }
+
+    /// <summary>关闭后把面板塞回左栏，避免影响下一次显示。</summary>
+    private void DetachSettingsOverlay()
+    {
+        PanInstanceSettings.Visibility = Visibility.Collapsed;
+        if (PanInstanceSettings.Parent is not Panel parent || ReferenceEquals(parent, _settingsHome)) return;
+
+        parent.Children.Remove(PanInstanceSettings);
+        PanInstanceSettings.Width = double.NaN;
+        PanInstanceSettings.Height = double.NaN;
+        PanInstanceSettings.RenderTransform = Transform.Identity;
+        PanInstanceSettings.Opacity = 1d;
+        PanInstanceSettings.HorizontalAlignment = HorizontalAlignment.Stretch;
+        PanInstanceSettings.VerticalAlignment = VerticalAlignment.Stretch;
+        _settingsHome?.Children.Add(PanInstanceSettings);
+    }
+
+    private void SettingsTab_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not SelectionRow item || item.Parent is not Panel nav) return;
+        // 导航面板第一个子元素是标题，所以索引要减一
+        ShowSettingsTab(nav.Children.IndexOf(item) - 1);
+    }
+
+    /// <summary>供外壳切换左侧标签页：0 详情 / 1 加载器 / 2 数据 / 3 快捷操作。</summary>
+    internal void SelectTab(int tab) => ShowSettingsTab(tab);
+
+    private void ShowSettingsTab(int tab)
+    {        PanSettingsDetail.Visibility = tab == 0 ? Visibility.Visible : Visibility.Collapsed;
+        PanSettingsLoader.Visibility = tab == 1 ? Visibility.Visible : Visibility.Collapsed;
+        PanSettingsData.Visibility = tab == 2 ? Visibility.Visible : Visibility.Collapsed;
+        PanSettingsShortcuts.Visibility = tab == 3 ? Visibility.Visible : Visibility.Collapsed;
+
+        // 导航项本身也保持选中态，视觉上与 Java 版一致
+        var nav = tab switch
+        {
+            1 => NavLoader,
+            2 => NavData,
+            3 => NavShortcuts,
+            _ => NavDetail
+        };
+        nav.SetChecked(true, false, false);
+    }
+
+    /// <summary>关闭浮层时保存加载器选择。</summary>
+    private void BtnInstanceSettingsClose_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        var version = EnsureSelectedVersion();
+        if (version is not null)
+        {
+            var loader = RadioLeviLamina.Checked == true
+                ? ModBedrockLoader.LeviLamina
+                : RadioBLoader.Checked == true
+                    ? ModBedrockLoader.BLoader
+                    : ModBedrockLoader.Vanilla;
+            ModBedrockLoader.SetLoader(version, loader);
+            HintService.Hint(Lang.Text("Bedrock.Instance.LoaderSaved", version), HintType.Success);
+        }
+
+        DetachSettingsOverlay();
+    }
+
+    private void ShowLaunchLog_Change(object sender, bool user)
+    {
+        if (!user) return;
+        States.UI.ShowLaunchLog = CheckShowLaunchLog.Checked == true;
+    }
+
+    /// <summary>把设置面板交给页面宿主使用。</summary>
+    public FrameworkElement TakeSettingsPage()
+    {
+        if (PanInstanceSettings.Parent is Panel parent) parent.Children.Remove(PanInstanceSettings);
+        PanInstanceSettings.Width = double.NaN;
+        PanInstanceSettings.Height = double.NaN;
+        PanInstanceSettings.HorizontalAlignment = HorizontalAlignment.Stretch;
+        PanInstanceSettings.VerticalAlignment = VerticalAlignment.Stretch;
+        PanInstanceSettings.Visibility = Visibility.Visible;
+        return PanInstanceSettings;
+    }
+
+    /// <summary>当前选中的实例；没有选中时退回本地列表里的第一个。</summary>
+    private static string? EnsureSelectedVersion()
+    {
+        if (!string.IsNullOrWhiteSpace(ModBedrockInstance.SelectedVersionId)) return ModBedrockInstance.SelectedVersionId;
+        var versions = ModBedrockInstance.GetLocalVersions();
+        if (versions.Count == 0) return null;
+        ModBedrockInstance.SelectedVersionId = versions[0];
+        return versions[0];
+    }
+    private static string GetAvatarText(string name) =>
+        name.Length > 1 && char.IsHighSurrogate(name[0]) ? name[..2] : name[..1].ToUpperInvariant();
+
+    #region 启动中面板
+
+    // 直接复用 Java 版同款启动面板 LaunchProgressOverlay，这里只做线程与文案转接
+    public void ShowLaunchOverlay(string? name, bool portable)
+    {
+        RunOnUi(() =>
+        {
+            PanInput.IsHitTestVisible = false;
+            PanInput.Visibility = Visibility.Visible;
+            SymbioMotion.ScaleReveal(PanInput, false);
+
+            PanLaunching.Show(Lang.Text("Bedrock.Launching.Title"), name,
+                Lang.Text(portable ? "Bedrock.Launching.Method.Portable" : "Bedrock.Launching.Method.Store"));
+        });
+    }
+
+    /// <summary>启动面板收起后，把输入区缩放回 1 并淡入。</summary>
+    private void RestoreLaunchInput()
+    {
+        RunOnUi(() =>
+        {
+            SymbioMotion.ScaleReveal(PanInput, true);
+            PanInput.IsHitTestVisible = true;
+        });
+    }
+
+    public void SetLaunchOverlayProgress(double progress, string? stage = null)
+    {
+        RunOnUi(() => PanLaunching.SetProgress(progress, stage));
+    }
+
+    public void EndLaunchOverlay(bool success, string? stage = null)
+    {
+        RunOnUi(() => PanLaunching.Finish(success, Lang.Text("Bedrock.Launching.Started"), stage));
+    }
+
+    private void RunOnUi(Action action)
+    {
+        if (Dispatcher.CheckAccess()) action();
+        else ModBase.RunInUi(action);
+    }
+
+    #endregion
+    private void RefreshAccount_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        CancelSignInWatch();
+        RefreshAccount();
+        RefreshStatus();
+    }
+
+    private void BtnSwitchAccount_Click(object sender, System.Windows.RoutedEventArgs e)
+    {
+        // 启动器已经接管基岩版账号时，切换要发生在启动器的账号页，
+        // 而不是去系统 Xbox 应用里换账号（那样只影响本机账号，不影响注入的会话）。
+        if (ModBedrockAccounts.Active is not null)
+        {
+            ModMain.frmMain?.ShowAccountPage();
+            return;
+        }
+
+        // 打开应用前先记下当前账号，避免 Xbox 应用瞬间完成登录时被当成“没有变化”
+        var baseline = AccountSignature(DetectXboxAccount());
+
+        if (!OpenXboxApp())
+        {
+            // 未安装 Xbox 应用时不能再交给 explorer，否则它会把“文档”文件夹打开，看起来像跳转到了文档
+            LabAccountHint.Text = Lang.Text("Bedrock.Account.XboxNotInstalledHint");
+            PromptInstallXboxApp();
+            return;
+        }
+
+        BeginSignInWatch(baseline);
+    }
+
+    /// <summary>
+    ///     打开 Xbox 应用。先确认当前用户注册了该应用，未安装时直接返回 false，
+    ///     避免 explorer 找不到目标后转而打开“文档”文件夹。
+    /// </summary>
+    private static bool OpenXboxApp()
+    {
+        var aumid = GetInstalledXboxAppAumid();
+        if (aumid is null)
+        {
+            ModBase.Log("[Bedrock] 未检测到可用的 Xbox 应用，已取消打开", ModBase.LogLevel.Normal);
+            return false;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"shell:AppsFolder\\{aumid}",
+                UseShellExecute = true
+            });
+            ModBase.Log($"[Bedrock] 已打开 Xbox 应用：{aumid}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 打开 Xbox 应用失败：{ex.Message}", ModBase.LogLevel.Debug);
+            return false;
+        }
+    }
+
+    /// <summary>
+    ///     调起 Xbox 应用后开始等待登录：轮询注册表，检测到账号变化立即刷新页面。
+    /// </summary>
+    private void BeginSignInWatch(string baseline)
+    {
+        CancelSignInWatch();
+
+        var cts = new CancellationTokenSource();
+        _signInWatch = cts;
+
+        BtnSwitchAccount.ToolTip = Lang.Text("Bedrock.Account.Waiting");
+        LabAccountHint.Text = Lang.Text("Bedrock.Account.WaitingSignIn");
+        ModBase.Log("[Bedrock] 已打开 Xbox 应用，开始等待账号变化");
+
+        _ = WatchSignInAsync(baseline, cts);
+    }
+
+    private void CancelSignInWatch()
+    {
+        var watch = _signInWatch;
+        if (watch is null) return;
+        _signInWatch = null;
+        watch.Cancel();
+    }
+
+    /// <summary>
+    ///     轮询 Xbox 账号信息，发生变化时自动刷新；超时或离开页面则恢复普通提示。
+    /// </summary>
+    private async Task WatchSignInAsync(string baseline, CancellationTokenSource cts)
+    {
+        var token = cts.Token;
+        try
+        {
+            var stopwatch = Stopwatch.StartNew();
+            while (!token.IsCancellationRequested && stopwatch.Elapsed < SignInWatchTimeout)
+            {
+                await Task.Delay(SignInWatchInterval, token).ConfigureAwait(false);
+
+                if (AccountSignature(DetectXboxAccount(false)) == baseline) continue;
+
+                ModBase.Log("[Bedrock] 检测到 Xbox 账号变化，自动刷新账号信息");
+                ModBase.RunInUi(() =>
+                {
+                    if (!ReferenceEquals(_signInWatch, cts)) return;
+                    CancelSignInWatch();
+                    RefreshAccount();
+                    HintService.Hint(Lang.Text("Bedrock.Account.AutoRefreshed"), HintType.Success);
+                });
+                return;
+            }
+
+            if (token.IsCancellationRequested) return;
+
+            ModBase.Log("[Bedrock] 等待 Xbox 登录超时，恢复普通提示", ModBase.LogLevel.Normal);
+            ModBase.RunInUi(() =>
+            {
+                if (!ReferenceEquals(_signInWatch, cts)) return;
+                CancelSignInWatch();
+                RefreshAccount();
+            });
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 等待 Xbox 登录失败：{ex.Message}", ModBase.LogLevel.Debug);
+        }
+    }
+
+    /// <summary>判断账号是否变化的特征值，不包含令牌等敏感内容。</summary>
+    private static string AccountSignature(XboxAccountInfo? account) =>
+        account is null ? "" : $"{account.Source}|{account.Gamertag}|{account.Mail}|{account.Xuid}";
+
+    /// <summary>
+    ///     读取当前用户已注册的 Xbox 应用 AUMID，未安装时返回 null。
+    /// </summary>
+    private static string? GetInstalledXboxAppAumid()
+    {
+        try
+        {
+            using var packages = Registry.CurrentUser.OpenSubKey(PackageRepositoryKey);
+            if (packages is null) return null;
+
+            foreach (var package in packages.GetSubKeyNames())
+            {
+                if (!package.StartsWith(XboxAppPackagePrefix, StringComparison.OrdinalIgnoreCase)) continue;
+
+                using var packageKey = packages.OpenSubKey(package);
+                if (packageKey is null) continue;
+
+                var appIds = packageKey.GetSubKeyNames();
+                var appId = appIds.FirstOrDefault(id =>
+                                string.Equals(id, XboxAppApplicationId, StringComparison.OrdinalIgnoreCase))
+                            ?? appIds.FirstOrDefault(id =>
+                                id.StartsWith(XboxAppApplicationId, StringComparison.OrdinalIgnoreCase));
+                if (appId is null) continue;
+
+                var aumid = $"{XboxAppFamilyName}!{appId}";
+                ModBase.Log($"[Bedrock] 检测到 Xbox 应用：{aumid}", ModBase.LogLevel.Debug);
+                return aumid;
+            }
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 检测 Xbox 应用失败：{ex.Message}", ModBase.LogLevel.Debug);
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    ///     未能打开 Xbox 应用时提示安装，用户确认后前往 Microsoft Store。
+    /// </summary>
+    private static void PromptInstallXboxApp()
+    {
+        if (ModMain.MyMsgBox(Lang.Text("Bedrock.Account.OpenXboxFailed"),
+                Lang.Text("Bedrock.Account.OpenXboxFailedTitle"),
+                Lang.Text("Bedrock.Account.InstallXbox"), Lang.Text("Common.Action.Cancel")) != 1)
+            return;
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = XboxAppStoreUri,
+                UseShellExecute = true
+            });
+            ModBase.Log("[Bedrock] 已打开 Microsoft Store 的 Xbox 应用页面");
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log($"[Bedrock] 打开 Microsoft Store 失败：{ex.Message}", ModBase.LogLevel.Normal);
+            ModBase.OpenWebsite(XboxAppStoreWebsite);
+        }
+    }
+
+    #endregion
+
+    #region 快捷操作
+
+    private void OpenEditor_Click(object sender, RoutedEventArgs e)
+    {
+        if (!BedrockLaunchSession.Current.IsBedrockInstalled)
+        {
+            ModMain.MyMsgBox(Lang.Text("Bedrock.Editor.NotInstalled"), Lang.Text("Bedrock.Editor.Title"));
+            return;
+        }
+
+        if (ModBedrockUwp.LaunchEditor()) return;
+        ModMain.MyMsgBox(Lang.Text("Bedrock.Editor.Failed"), Lang.Text("Bedrock.Editor.Title"));
+    }
+
+    private void BackupWorlds_Click(object sender, RoutedEventArgs e)
+    {
+        var worlds = ModBedrockWorldBackup.GetWorlds();
+        if (worlds.Count == 0)
+        {
+            HintService.Hint(Lang.Text("Bedrock.Backup.None"), HintType.Error);
+            return;
+        }
+
+        var path = SystemDialogs.SelectSaveFile(
+            Lang.Text("Bedrock.Backup.Title"),
+            $"Bedrock-Worlds-{DateTime.Now:yyyyMMdd-HHmmss}.zip",
+            Lang.Text("Bedrock.Backup.Filter"));
+        if (string.IsNullOrEmpty(path)) return;
+
+        Task.Run(() =>
+        {
+            try
+            {
+                var count = ModBedrockWorldBackup.BackupAll(path,
+                    name => ModBase.RunInUi(() => HintService.Hint(Lang.Text("Bedrock.Backup.Running", name), log: false)));
+                ModBase.Log($"[Bedrock] 已备份 {count} 个世界到 {path}", ModBase.LogLevel.Normal);
+                HintService.Hint(Lang.Text("Bedrock.Backup.Success", count));
+            }
+            catch (Exception ex)
+            {
+                ModBase.Log(ex, "备份基岩版世界失败", ModBase.LogLevel.Feedback,
+                    userSummary: Lang.Text("Bedrock.Backup.Failed", ex.Message));
+            }
+        });
+    }
+
+    private void OpenSavesFolder_Click(object sender, RoutedEventArgs e)
+    {
+        var dataDir = FindBedrockDataDir();
+        if (dataDir is null)
+        {
+            ModMain.MyMsgBox(Lang.Text("Bedrock.Folder.NotFound"), Lang.Text("Bedrock.Shortcuts.OpenSaves"));
+            return;
+        }
+
+        var saves = Path.Combine(dataDir, "games", "com.mojang", "minecraftWorlds");
+        OpenFolder(Directory.Exists(saves) ? saves : dataDir, Lang.Text("Bedrock.Folder.Saves"));
+    }
+
+    private void OpenPackageFolder_Click(object sender, RoutedEventArgs e)
+    {
+        var dir = ModBedrockInstance.VersionsDirectory;
+        if (!Directory.Exists(dir))
+        {
+            ModMain.MyMsgBox(Lang.Text("Bedrock.Folder.NoPackages"), Lang.Text("Bedrock.Shortcuts.OpenPackages"));
+            return;
+        }
+
+        OpenFolder(dir, Lang.Text("Bedrock.Folder.Packages"));
+    }
+
+    private void OpenScreenshotFolder_Click(object sender, RoutedEventArgs e)
+    {
+        var dataDir = FindBedrockDataDir();
+        var shots = dataDir is null ? null : Path.Combine(dataDir, "screenshots");
+        if (shots is not null && Directory.Exists(shots))
+        {
+            OpenFolder(shots, Lang.Text("Bedrock.Folder.Screenshots"));
+            return;
+        }
+
+        // 回退到 Xbox Game Bar 的截图目录
+        var gameBarShots = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyPictures), "Screenshots");
+        if (Directory.Exists(gameBarShots))
+        {
+            OpenFolder(gameBarShots, Lang.Text("Bedrock.Folder.Screenshots"));
+            return;
+        }
+
+        ModMain.MyMsgBox(Lang.Text("Bedrock.Folder.NoScreenshots"), Lang.Text("Bedrock.Shortcuts.OpenScreenshots"));
+    }
+
+    private void OpenXboxApp_Click(object sender, RoutedEventArgs e)
+    {
+        if (OpenXboxApp()) return;
+        PromptInstallXboxApp();
+    }
+
+    private static string? FindBedrockDataDir()
+    {
+        var packages = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Packages");
+        foreach (var family in BedrockPackageFamilies)
+        {
+            var dir = Path.Combine(packages, family, "LocalState");
+            if (Directory.Exists(dir)) return dir;
+        }
+
+        return null;
+    }
+
+    private static void OpenFolder(string path, string name)
+    {
+        if (!Directory.Exists(path))
+        {
+            ModMain.MyMsgBox(Lang.Text("Bedrock.Folder.NotFoundPath", name, path),
+                Lang.Text("Bedrock.Folder.OpenTitle", name));
+            return;
+        }
+
+        ModBase.OpenExplorer(path.TrimEnd('\\') + "\\");
+    }
+
+    /// <summary>
+    ///     登记一个外部基岩版版本目录（例如其它启动器的 bedrock_versions）。
+    ///     没有现成的目录选择器，改为输入路径后校验；登记成功立刻刷新版本列表。
+    /// </summary>
+    private void AddExternalFolder_Click(object sender, RoutedEventArgs e)
+    {
+        var input = ModMain.MyMsgBoxInput(
+            Lang.Text("Bedrock.ExternalFolder.Title"),
+            Lang.Text("Bedrock.ExternalFolder.Message"),
+            "");
+        if (string.IsNullOrWhiteSpace(input)) return;
+
+        var path = input.Trim().Trim('"');
+        if (!Directory.Exists(path))
+        {
+            ModMain.MyMsgBox(Lang.Text("Bedrock.ExternalFolder.NotFound", path),
+                Lang.Text("Bedrock.ExternalFolder.Title"), isWarn: true);
+            return;
+        }
+
+        ModBedrockInstance.AddExternalDirectory(path);
+        BedrockLaunchSession.Current.NotifyLibraryChanged();
+        HintService.Hint(Lang.Text("Bedrock.ExternalFolder.Added", path), HintType.Success);
+    }
+
+    #endregion
+
+    #region 状态
+
+    public void RefreshStatus()
+    {
+        var selected = GetSelectedLocalVersion();
+        LabLaunchVersion.Text = selected ?? "";
+        LabLaunchVersion.Visibility = string.IsNullOrWhiteSpace(selected)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+
+        RefreshInstallationStatus();
+    }
+
+    private void RefreshInstallationStatus()
+    {
+        var session = BedrockLaunchSession.Current;
+        var installed = session.IsBedrockInstalled;
+        ShapeStatusDot.SetResourceReference(Shape.FillProperty,
+            installed || LabLaunchVersion.Visibility == Visibility.Visible ? "SyAccentText" : "SyTextTertiary");
+        LabStatus.Text = installed ? Lang.Text("Bedrock.Status.Detected") : Lang.Text("Bedrock.Status.NotFound");
+        SetDetailPath(installed ? session.BedrockInstallPath : null);
+    }
+
+    /// <summary>当前选中的本地实例：优先配置里的选择，其次内存里记录的版本。</summary>
+    private static string? GetSelectedLocalVersion()
+    {
+        var versions = ModBedrockInstance.GetLocalVersions();
+        if (versions.Count == 0) return null;
+
+        var configured = Config.Launch.BedrockSelectedVersion;
+        if (!string.IsNullOrWhiteSpace(configured) && versions.Contains(configured)) return configured;
+
+        var memory = ModBedrockInstance.SelectedVersionId;
+        if (!string.IsNullOrWhiteSpace(memory) && versions.Contains(memory)) return memory;
+
+        return null;
+    }
+
+    /// <summary>路径不直接展示，悬停查看、点击复制。</summary>
+    private void SetDetailPath(string? path)
+    {
+        _detailCopyPath = string.IsNullOrEmpty(path) ? null : path;
+        LabDetail.Text = _detailCopyPath is null
+            ? Lang.Text("Bedrock.Status.AvailableToDownload")
+            : Lang.Text("Bedrock.Status.CopyPathHint");
+        LabDetail.ToolTip = _detailCopyPath;
+        LabDetail.Cursor = _detailCopyPath is null ? null : Cursors.Hand;
+    }
+
+    private void LabDetail_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (string.IsNullOrEmpty(_detailCopyPath)) return;
+
+        try
+        {
+            Clipboard.SetText(_detailCopyPath);
+            HintService.Hint(Lang.Text("Bedrock.Status.PathCopied"), HintType.Success);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[Bedrock] 复制安装路径失败");
+            HintService.Hint(Lang.Text("Bedrock.Status.PathCopyFailed"), HintType.Error);
+        }
+    }
+
+    #endregion
+}

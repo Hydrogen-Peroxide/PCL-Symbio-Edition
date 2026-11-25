@@ -1,0 +1,67 @@
+<local:WorkspacePage
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PCL" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" x:Class="PCL.ResourceDetailsView"
+    PanScroll="{Binding ElementName=PanBack}">
+    <ScrollViewer local:ScrollInput.Enabled="True" Style="{StaticResource SyScrollViewer}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
+        <Grid Margin="{StaticResource SePageScrollMargin}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <local:WorkspaceCard Margin="0,0,0,25" x:Name="CardIntro">
+                <StackPanel Margin="22,20,2,20" x:Name="PanIntro">
+                    <WrapPanel HorizontalAlignment="Left">
+                        <local:SymbioIconTextAction x:Name="BtnIntroWeb" Text="CurseForge"
+                                                BorderBrush="{DynamicResource SyControlStroke}" BorderThickness="1"
+                                                SvgIcon="lucide/globe"
+                                                Margin="0,0,3,0" HorizontalAlignment="Left" />
+                        <local:SymbioIconTextAction x:Name="BtnIntroWiki"
+                                                Text="{DynamicResource Download.Comp.Detail.McMod}"
+                                                BorderBrush="{DynamicResource SyControlStroke}" BorderThickness="1"
+                                                SvgIcon="lucide/globe"
+                                                Margin="0,0,3,0" HorizontalAlignment="Left" />
+                        <local:SymbioIconTextAction x:Name="BtnIntroCopy"
+                                                Text="{DynamicResource Download.Comp.Detail.CopyName}"
+                                                BorderBrush="{DynamicResource SyControlStroke}" BorderThickness="1"
+                                                SvgIcon="lucide/copy"
+                                                Margin="0,0,3,0" HorizontalAlignment="Left" />
+                        <local:SymbioIconTextAction x:Name="BtnIntroLinkCopy"
+                                                Text="{DynamicResource Download.Comp.Detail.CopyLink}"
+                                                BorderBrush="{DynamicResource SyControlStroke}" BorderThickness="1"
+                                                SvgIcon="lucide/copy"
+                                                Margin="0,0,3,0" HorizontalAlignment="Left" />
+                        <local:SymbioIconTextAction x:Name="BtnTranslate"
+                                                Text="{DynamicResource Download.Comp.Detail.TranslateDescription}"
+                                                BorderBrush="{DynamicResource SyControlStroke}" BorderThickness="1"
+                                                SvgIcon="lucide/earth"
+                                                Margin="0,0,3,0" HorizontalAlignment="Left" />
+                        <local:SymbioIconTextAction x:Name="BtnFavorites"
+                                                Text="{DynamicResource Download.Comp.Detail.Favorite}"
+                                                BorderBrush="{DynamicResource SyControlStroke}" BorderThickness="1"
+                                                SvgIcon="lucide/heart"
+                                                Margin="0,0,2,0" HorizontalAlignment="Left" />
+                    </WrapPanel>
+                </StackPanel>
+            </local:WorkspaceCard>
+            <StackPanel Grid.Row="1" Grid.RowSpan="2" Name="PanMain" Grid.IsSharedSizeScope="True">
+                <local:WorkspaceCard Margin="0,0,0,15" x:Name="CardFilter">
+                    <StackPanel>
+                        <StackPanel x:Name="PanInstanceFilter" Margin="10,10,0,5" Orientation="Horizontal"
+                                    VerticalAlignment="Top" HorizontalAlignment="Left" />
+                        <StackPanel x:Name="PanModLoaderFilter" Margin="10,5,0,10" Orientation="Horizontal"
+                                    VerticalAlignment="Top" HorizontalAlignment="Left" />
+                    </StackPanel>
+                </local:WorkspaceCard>
+                <StackPanel Name="PanResults" />
+            </StackPanel>
+            <local:WorkspaceCard Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center"
+                          SnapsToDevicePixels="True" x:Name="PanLoad" UseAnimation="False" Margin="0,0,0,8">
+            <local:LoadingIndicator Text="{DynamicResource Download.Version.LoadingList}" Margin="20,20,20,17" x:Name="Load" HorizontalAlignment="Center"
+                             VerticalAlignment="Center" />
+            </local:WorkspaceCard>
+        </Grid>
+    </ScrollViewer>
+</local:WorkspacePage>

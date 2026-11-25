@@ -1,0 +1,549 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
+using PCL.Core.App;
+using PCL.Core.App.Localization;
+using SvgIconControl = PCL.Core.UI.Controls.SvgIcon.SvgIcon;
+
+namespace PCL;
+
+/// <summary>
+///     百宝箱的投影页：布局与存档管理一致（实例卡片 + 搜索 + 快捷操作 + 卡片列表），
+///     点击条目在页面内全屏预览。
+/// </summary>
+public partial class SchematicLibraryView
+{
+    private readonly List<McInstance> _instances = [];
+    private SelectionRow? _checkedInstanceItem;
+
+    /// <summary>一行投影的元数据。扫描时一次性取好大小与时间，渲染时不再逐个打盘。</summary>
+    private sealed record SchematicEntry(string Path, long Length, DateTime Modified, string Relative);
+
+    // 投影可能有上千个：首次只建少量行，滚动到底再追加，避免一次性创建大量控件导致界面假死
+    private const int FirstPageRows = 80;
+    private const int MoreRowsPerScroll = 80;
+
+    private List<SchematicEntry> _all = [];
+    private List<SchematicEntry> _filtered = [];
+    private int _renderedRows;
+    private int _reloadVersion;
+
+    private McInstance? _instance;
+    private bool _initializing;
+    private bool _loadingPreview;
+    private bool _sortByTime = true;
+
+    public SchematicLibraryView()
+    {
+        InitializeComponent();
+        BtnRefresh.Click += (_, _) => Reload();
+        BtnOpenFolder.Click += (_, _) => OpenFolder();
+        BtnSort.Click += (_, _) =>
+        {
+            _sortByTime = !_sortByTime;
+            UpdateSortButton();
+            Reload();
+        };
+        SearchBox.TextChanged += (_, _) => ApplyFilter();
+        PanBack.ScrollChanged += PanBack_ScrollChanged;
+        Loaded += (_, _) => Initialize();
+        Unloaded += (_, _) => ClosePreview();
+        UpdateSortButton();
+    }
+
+    /// <summary>滚动接近底部时追加下一批行，避免一次创建上千个控件。</summary>
+    private void PanBack_ScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+        if (_renderedRows >= _filtered.Count) return;
+        if (e.ExtentHeight <= 0) return;
+        // 距离底部不足一屏时继续追加
+        if (e.VerticalOffset + e.ViewportHeight < e.ExtentHeight - e.ViewportHeight) return;
+        RenderMoreRows();
+    }
+
+    private static bool IsSchematicFile(string path)
+    {
+        var ext = Path.GetExtension(path).ToLowerInvariant();
+        return ext is ".litematic" or ".schem" or ".schematic" or ".nbt";
+    }
+
+    private string? SchematicFolder => _instance is null ? null : Path.Combine(_instance.PathIndie, "schematics");
+
+    private void Initialize()
+    {
+        try
+        {
+            _initializing = true;
+            _instances.Clear();
+            _schematicCounts.Clear();
+            var versionsPath = Path.Combine(ModFolder.mcFolderSelected ?? "", "versions");
+            if (Directory.Exists(versionsPath))
+                foreach (var dir in Directory.GetDirectories(versionsPath).OrderBy(Path.GetFileName))
+                    _instances.Add(new McInstance(Path.GetFileName(dir)));
+
+            var target = InstanceWorkspace.Current?.Name ?? ModInstanceList.McMcInstanceSelected?.Name ??
+                         States.Game.SelectedInstance;
+            // 优先当前实例；当前实例没有投影时退回第一个有投影的实例。
+            // HasSchematic 用 Any() 短路且带缓存，避免每个实例都做一次全递归枚举。
+            var hasSchematic = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+            bool HasAny(McInstance item)
+            {
+                if (hasSchematic.TryGetValue(item.Name, out var cached)) return cached;
+                var value = HasSchematic(item);
+                hasSchematic[item.Name] = value;
+                return value;
+            }
+
+            var instance = _instances.FirstOrDefault(item => item.Name == target && HasAny(item))
+                           ?? _instances.FirstOrDefault(HasAny)
+                           ?? _instances.FirstOrDefault(item => item.Name == target)
+                           ?? _instances.FirstOrDefault();
+            _initializing = false;
+
+            if (instance is null)
+            {
+                UpdateVersionPicker();
+                Reload();
+                return;
+            }
+
+            SelectInstance(instance, false);
+        }
+        catch (Exception ex)
+        {
+            _initializing = false;
+            ModBase.Log(ex, "[SchematicPage] 初始化投影页失败", ModBase.LogLevel.Hint,
+                userSummary: Lang.Text("Tools.Schematic.LoadFailed", ex.Message));
+        }
+    }
+
+    private void SelectInstance(McInstance instance, bool closePopup = true)
+    {
+        if (closePopup) PopupVersion.IsOpen = false;
+        if (_instance?.Name == instance.Name && !_initializing) return;
+
+        try
+        {
+            instance.Load();
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, $"[SchematicPage] 加载实例失败（{instance.Name}）", ModBase.LogLevel.Hint,
+                userSummary: Lang.Text("Tools.Schematic.LoadFailed", ex.Message));
+            return;
+        }
+
+        ClosePreview();
+        _instance = instance;
+        UpdateVersionPicker();
+        Reload();
+        PlayTransition();
+    }
+
+    private void UpdateVersionPicker()
+    {
+        LabVersionTitle.Text = _instance?.Name ?? Lang.Text("Tools.Schematic.NoInstance");
+        var folder = SchematicFolder;
+        LabVersionInfo.Text = string.IsNullOrEmpty(folder) ? "" : folder;
+        var logo = _instance is null ? "" : GetInstanceLogo(_instance);
+        ImgVersionLogo.Address = string.IsNullOrEmpty(logo) ? ModBase.pathImage + "Blocks/Grass.png" : logo;
+    }
+
+    private static string GetInstanceLogo(McInstance instance)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(instance.Logo)) return "";
+            return instance.Logo.EndsWith(@"PCL\Logo.png") ? instance.PathInstance + @"PCL\Logo.png" : instance.Logo;
+        }
+        catch
+        {
+            return "";
+        }
+    }
+
+    /// <summary>该实例下是否至少有一个投影文件；用 EnumerateFiles + Any 短路，不扫完整棵树。</summary>
+    private static bool HasSchematic(McInstance instance)
+    {
+        try
+        {
+            var folder = Path.Combine(instance.PathIndie, "schematics");
+            if (!Directory.Exists(folder)) return false;
+            return Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories).Any(IsSchematicFile);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private readonly Dictionary<string, int> _schematicCounts = new(StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>实例的投影数量，结果缓存；实例列表变化时清空。</summary>
+    private int GetSchematicCountCached(McInstance instance)
+    {
+        if (_schematicCounts.TryGetValue(instance.Name, out var cached)) return cached;
+        var count = GetSchematicCount(instance);
+        _schematicCounts[instance.Name] = count;
+        return count;
+    }
+
+    private static int GetSchematicCount(McInstance instance)
+    {
+        try
+        {
+            var folder = Path.Combine(instance.PathIndie, "schematics");
+            if (!Directory.Exists(folder)) return 0;
+            return Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories).Count(IsSchematicFile);
+        }
+        catch
+        {
+            return 0;
+        }
+    }
+
+    private void UpdateSortButton() =>
+        BtnSort.Text = Lang.Text("Instance.Saves.SortBy",
+            Lang.Text(_sortByTime ? "Instance.Saves.SortModifyTime" : "Instance.Saves.SortFileName"));
+
+    private void ApplyFilter()
+    {
+        var query = SearchBox.Text.Trim();
+        _filtered = string.IsNullOrEmpty(query)
+            ? _all
+            : _all.Where(entry => Path.GetFileName(entry.Path)
+                    .Contains(query, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+        PanList.Children.Clear();
+        _renderedRows = 0;
+        RenderMoreRows();
+
+        PanListBack.Title = Lang.Text("Tools.Schematic.Count", _filtered.Count);
+        LabEmpty.Visibility = _filtered.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    /// <summary>按批追加行；首批给一屏多，之后滚动到底再追加。</summary>
+    private void RenderMoreRows()
+    {
+        if (_renderedRows >= _filtered.Count) return;
+        var target = _renderedRows == 0
+            ? Math.Min(FirstPageRows, _filtered.Count)
+            : Math.Min(_renderedRows + MoreRowsPerScroll, _filtered.Count);
+
+        for (var index = _renderedRows; index < target; index++)
+            PanList.Children.Add(BuildRow(_filtered[index]));
+        _renderedRows = target;
+    }
+
+    private void Reload()
+    {
+        // 目录枚举与排序放到后台线程：投影数量多时这一步会明显阻塞 UI
+        var folder = SchematicFolder;
+        var byTime = _sortByTime;
+        var version = ++_reloadVersion;
+
+        _all = [];
+        ApplyFilter();
+
+        if (string.IsNullOrEmpty(folder)) return;
+        Task.Run(() =>
+        {
+            var entries = ScanSchematicFolder(folder, byTime);
+            ModBase.RunInUi(() =>
+            {
+                // 期间用户又切换了实例或点了刷新，丢弃这次结果
+                if (version != _reloadVersion) return;
+                _all = entries;
+                ApplyFilter();
+            });
+        });
+    }
+
+    private static List<SchematicEntry> ScanSchematicFolder(string folder, bool byTime)
+    {
+        try
+        {
+            if (!Directory.Exists(folder)) return [];
+            var entries = new List<SchematicEntry>();
+            foreach (var path in Directory.EnumerateFiles(folder, "*", SearchOption.AllDirectories))
+            {
+                if (!IsSchematicFile(path)) continue;
+                var info = new FileInfo(path);
+                var relative = path.Length > folder.Length
+                    ? path[folder.Length..].TrimStart('\\', '/')
+                    : info.Name;
+                entries.Add(new SchematicEntry(path, info.Length, info.LastWriteTime, relative));
+            }
+
+            return byTime
+                ? entries.OrderByDescending(entry => entry.Modified).ToList()
+                : entries.OrderBy(entry => Path.GetFileName(entry.Path), StringComparer.OrdinalIgnoreCase).ToList();
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[SchematicPage] 扫描投影文件夹失败", ModBase.LogLevel.Developer);
+            return [];
+        }
+    }
+
+    /// <summary>紧凑的投影行：图标 + 名称/信息 + 预览按钮，行距与存档列表接近。</summary>
+    private Border BuildRow(SchematicEntry entry)
+    {
+        var path = entry.Path;
+        var border = new Border
+        {
+            Height = 48, Margin = new Thickness(0, 1, 0, 1), CornerRadius = new CornerRadius(6),
+            Cursor = Cursors.Hand, Background = new SolidColorBrush(Colors.Transparent),
+            RenderTransformOrigin = new Point(0.5d, 0.5d), RenderTransform = new ScaleTransform(1d, 1d)
+        };
+        border.MouseEnter += (_, _) => border.SetResourceReference(Border.BackgroundProperty, "SySubtleHover");
+        border.MouseLeave += (_, _) => border.SetResourceReference(Border.BackgroundProperty, "ColorBrushTransparent");
+        SymbioMotion.AttachPress(border, border);
+        border.MouseLeftButtonUp += (_, _) => OpenPreview(path);
+
+        var grid = new Grid { Margin = new Thickness(12, 5, 10, 5) };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1d, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+        var icon = new SvgIconControl
+        {
+            Icon = "lucide/box", Width = 20, Height = 20, Margin = new Thickness(2, 0, 10, 0),
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        icon.SetResourceReference(SvgIconControl.IconBrushProperty, "SyAccentText");
+        grid.Children.Add(icon);
+
+        var text = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+        var name = new TextBlock
+        {
+            Text = Path.GetFileNameWithoutExtension(path), FontSize = 13, FontWeight = FontWeights.SemiBold,
+            TextTrimming = TextTrimming.CharacterEllipsis
+        };
+        name.SetResourceReference(TextBlock.ForegroundProperty, "SyText");
+        var info = new TextBlock
+        {
+            Text = $"{ModBase.GetString(entry.Length)} · {entry.Modified:g} · {entry.Relative}",
+            FontSize = 10.5, Margin = new Thickness(0, 2, 0, 0),
+            TextTrimming = TextTrimming.CharacterEllipsis
+        };
+        info.SetResourceReference(TextBlock.ForegroundProperty, "SyTextSecondary");
+        text.Children.Add(name);
+        text.Children.Add(info);
+        Grid.SetColumn(text, 1);
+        grid.Children.Add(text);
+
+        var previewButton = new SymbioButton
+        {
+            Text = Lang.Text("Common.Action.Preview"), Height = 26, MinWidth = 64,
+            Padding = new Thickness(10, 0, 10, 0), ColorType = SymbioButton.ColorState.Highlight,
+            VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(10, 0, 0, 0)
+        };
+        previewButton.Click += (_, _) => OpenPreview(path);
+        Grid.SetColumn(previewButton, 2);
+        grid.Children.Add(previewButton);
+
+        border.Child = grid;
+        return border;
+    }
+
+    private void OpenFolder()
+    {
+        var folder = SchematicFolder;
+        if (string.IsNullOrEmpty(folder)) return;
+        try
+        {
+            Directory.CreateDirectory(folder);
+            ModBase.OpenExplorer(folder + @"\");
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[SchematicPage] 打开投影文件夹失败", ModBase.LogLevel.Hint);
+        }
+    }
+
+    #region 实例选择卡片
+
+    private void PanVersionCard_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        BuildInstanceMenu();
+        PopupVersion.IsOpen = true;
+    }
+
+    private void PanVersionCard_MouseEnter(object sender, MouseEventArgs e) =>
+        SymbioMotion.Fade(VersionHover, 1);
+
+    private void PanVersionCard_MouseLeave(object sender, MouseEventArgs e) =>
+        SymbioMotion.Fade(VersionHover, 0);
+
+    private void BuildInstanceMenu()
+    {
+        PanVersionList.Children.Clear();
+        _checkedInstanceItem = null;
+        // 投影多的实例排在前面；没有投影的实例置底并禁用。
+        // 列表每次打开都会重建，因此计数缓存在字段里，避免反复递归枚举磁盘。
+        var entries = _instances
+            .Select(instance => (Instance: instance, Count: GetSchematicCountCached(instance)))
+            .OrderByDescending(entry => entry.Count)
+            .ThenBy(entry => entry.Instance.Name, StringComparer.Ordinal)
+            .ToList();
+
+        foreach (var (instance, count) in entries)
+        {
+            var item = new SelectionRow
+            {
+                Height = 42,
+                Type = SelectionRow.CheckType.RadioBox,
+                Title = instance.Name,
+                Info = Lang.Text("Tools.Schematic.VersionInfo", count),
+                MinPaddingRight = 20,
+                IsEnabled = count > 0
+            };
+            item.SvgIcon = "";
+            var logo = GetInstanceLogo(instance);
+            item.Logo = string.IsNullOrEmpty(logo) ? ModBase.pathImage + "Blocks/Grass.png" : logo;
+            if (count == 0)
+            {
+                item.Opacity = 0.4d;
+                item.isMouseOverAnimationEnabled = false;
+                item.Cursor = Cursors.No;
+            }
+
+            item.SetChecked(instance.Name == _instance?.Name, false, false);
+            if (item.Checked) _checkedInstanceItem = item;
+            item.Check += (_, _) =>
+            {
+                if (count > 0) SelectInstance(instance);
+            };
+            PanVersionList.Children.Add(item);
+        }
+    }
+
+    private void PopupVersion_Opened(object sender, EventArgs e)
+    {
+        AnimateVersionChevron(270d);
+        SymbioMotion.EnterDepth(PanVersionPopup, 8, .97, SymbioMotion.Pop);
+        Dispatcher.BeginInvoke(new Action(() => _checkedInstanceItem?.BringIntoView()),
+            DispatcherPriority.Background);
+    }
+
+    private void PopupVersion_Closed(object sender, EventArgs e) => AnimateVersionChevron(90d);
+
+    private void AnimateVersionChevron(double angle)
+    {
+        SymbioMotion.SpringRotate(IconVersionChevron, angle);
+    }
+
+    /// <summary>切换实例时给卡片与列表做一段平滑过渡。</summary>
+    private void PlayTransition()
+    {
+        SymbioMotion.EnterDepth(PanVersionCard, 0, .97);
+        SymbioMotion.EnterDepth(PanContent, 10, .98);
+    }
+
+    #endregion
+
+    #region 预览
+
+    private void OpenPreview(string path)
+    {
+        if (_instance is null || _loadingPreview || PanPreview.Visibility == Visibility.Visible) return;
+
+        var instance = _instance;
+        _loadingPreview = true;
+        HintService.Hint(Lang.Text("Tools.Schematic.Loading"));
+        ModBase.RunInNewThread(() =>
+        {
+            try
+            {
+                var data = ModSchematicPreview.Read(path);
+                if (data.IsEmpty)
+                {
+                    var error = data.Error ?? Lang.Text("Tools.Schematic.LoadFailed", Path.GetFileName(path));
+                    ModBase.RunInUi(() =>
+                    {
+                        _loadingPreview = false;
+                        ModMain.MyMsgBox(error, Path.GetFileName(path), Lang.Text("Instance.Resource.Item.Info.Return"));
+                    });
+                    return;
+                }
+
+                var jarPath = Path.Combine(instance.PathInstance, instance.Name + ".jar");
+                var textures = SchematicViewer3D.CanRender(data)
+                    ? ModSchematicTextures.Build(data.Blocks.Select(block => block.Name).Distinct(), jarPath)
+                    : null;
+                var info = BuildPreviewInfo(path, data);
+                ModBase.RunInUi(() =>
+                {
+                    _loadingPreview = false;
+                    ShowPreview(path, info, data, textures);
+                });
+            }
+            catch (Exception ex)
+            {
+                ModBase.RunInUi(() => _loadingPreview = false);
+                ModBase.Log(ex, $"[SchematicPage] 读取投影失败（{path}）", ModBase.LogLevel.Hint,
+                    userSummary: Lang.Text("Tools.Schematic.LoadFailed", Path.GetFileName(path)));
+            }
+        }, "Read Schematic");
+    }
+
+    private static string BuildPreviewInfo(string path, ModSchematicPreview.Data data)
+    {
+        var file = new FileInfo(path);
+        var minX = int.MaxValue;
+        var minY = int.MaxValue;
+        var minZ = int.MaxValue;
+        var maxX = int.MinValue;
+        var maxY = int.MinValue;
+        var maxZ = int.MinValue;
+        foreach (var block in data.Blocks)
+        {
+            minX = Math.Min(minX, block.X);
+            minY = Math.Min(minY, block.Y);
+            minZ = Math.Min(minZ, block.Z);
+            maxX = Math.Max(maxX, block.X);
+            maxY = Math.Max(maxY, block.Y);
+            maxZ = Math.Max(maxZ, block.Z);
+        }
+
+        var width = maxX - minX + 1;
+        var height = maxY - minY + 1;
+        var length = maxZ - minZ + 1;
+        var lines = new List<string>
+        {
+            Lang.Text("Instance.Resource.Item.Info.File", file.Name, ModBase.GetString(file.Length)),
+            Lang.Text("Instance.Resource.Item.Schematic.EnclosingDimensions") + $"{width} × {height} × {length}",
+            Lang.Text("Instance.Resource.Item.Schematic.TotalBlocks") + Lang.Number(data.Blocks.Count, "N0"),
+            Lang.Text("Instance.Resource.Item.Schematic.ModifiedTime") + $"{file.LastWriteTime:g}"
+        };
+        return string.Join("\r\n", lines);
+    }
+
+    private void ShowPreview(string path, string info, ModSchematicPreview.Data data,
+        ModSchematicTextures? textures)
+    {
+        PanPreview.Children.Clear();
+        var jarPath = _instance is null ? null : Path.Combine(_instance.PathInstance, _instance.Name + ".jar");
+        var view = new SchematicPreviewView(Path.GetFileName(path), info, data, textures, null, ClosePreview, jarPath);
+        PanPreview.Children.Add(view);
+        PanBack.Visibility = Visibility.Collapsed;
+        PanPreview.Visibility = Visibility.Visible;
+    }
+
+    private void ClosePreview()
+    {
+        PanPreview.Children.Clear();
+        PanPreview.Visibility = Visibility.Collapsed;
+        PanBack.Visibility = Visibility.Visible;
+    }
+
+    #endregion
+}

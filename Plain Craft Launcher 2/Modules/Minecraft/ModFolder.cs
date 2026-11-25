@@ -192,6 +192,109 @@ public static class ModFolder
     }
 
     /// <summary>
+    ///     将指定文件夹添加到 Minecraft 文件夹列表，并选中它。
+    /// </summary>
+    public static void AddFolder(string folderPath, string displayName, bool showHint)
+    {
+        // 检查文件夹权限
+        // 检查实际的 Minecraft 文件夹位置（没有问题，或是在子文件夹中）
+        // 判断是否已经添加过，若添加过则直接修改自定义名
+        // 如果没有添加过，则添加进去
+        // 保存
+        // 切换选择并更新列表
+        // 提示
+        // 检查是否为根目录整合包，自动关闭版本隔离
+        // 1. 根目录中存在数个 Mod
+        // 2. 实例数较少，可能为整合包
+        // 3. 能够找到可安装 Mod 的实例
+        // 4. 该实例的隔离文件夹下不存在 mods
+        // 满足以上全部条件则视为根目录整合包
+        ModBase.RunInThread(() =>
+        {
+            try
+            {
+                if (!folderPath.EndsWith(@"\")) folderPath += @"\";
+                if (!ModBase.CheckPermission(folderPath))
+                {
+                    if (!showHint) throw new Exception("PCL 没有访问文件夹的权限：" + folderPath);
+                    HintService.Hint(Lang.Text("Select.Folder.AccessDenied"), HintType.Error);
+                    return;
+                }
+
+                if (!ModBase.CheckPermission(folderPath + @"versions\"))
+                    foreach (var Folder in new DirectoryInfo(folderPath).GetDirectories())
+                        if (ModBase.CheckPermission(Path.Combine(Folder.FullName, "versions")))
+                        {
+                            folderPath = Folder.FullName + @"\";
+                            break;
+                        }
+
+                var folders = new List<string>(States.Game.Folders.Split("|"));
+                var isAdded = false;
+                var isReplace = false;
+                for (int i = 0, loopTo = folders.Count - 1; i <= loopTo; i++)
+                {
+                    var folder = folders[i];
+                    if (string.IsNullOrEmpty(folder)) continue;
+                    if (folder.Split(">")[1] != (folderPath ?? "")) continue;
+                    isAdded = true;
+                    if (folder.Split(">")[0] == displayName)
+                    {
+                        if (showHint) HintService.Hint(Lang.Text("Select.Folder.AlreadyInList"));
+                        return;
+                    }
+
+                    folders[i] = $"{displayName}>{folderPath}";
+                    isReplace = true;
+                    if (showHint)
+                        HintService.Hint(Lang.Text("Select.Folder.NameUpdated", displayName), HintType.Success);
+                    break;
+                }
+
+                if (!isAdded) folders.Add($"{displayName}>{folderPath}");
+                States.Game.Folders = folders.ToArray().Join("|");
+                States.Game.SelectedFolder = folderPath.Replace(ModBase.exePath, "$");
+                ModFolder.mcFolderListLoader.Start(isForceRestart: true);
+                if (isReplace) return;
+                if (showHint) HintService.Hint(Lang.Text("Select.Folder.Added", displayName), HintType.Success);
+                var modFolder = new DirectoryInfo(folderPath + @"mods\");
+                if (!(modFolder.Exists && modFolder.EnumerateFiles().Count() >= 3)) return;
+                var versionFolder = new DirectoryInfo(folderPath + @"versions\");
+                if (!(versionFolder.Exists && versionFolder.EnumerateDirectories().Count() <= 3)) return;
+                foreach (var VersionPath in versionFolder.EnumerateDirectories())
+                {
+                    var version = new McInstance(VersionPath.FullName);
+                    version.Load();
+                    if (!version.Modable) continue;
+                    var modIndieFolder = new DirectoryInfo(version.PathInstance + @"mods\");
+                    if (modIndieFolder.Exists && modIndieFolder.EnumerateFiles().Any()) return;
+                    Config.Instance.IndieV1[version.PathInstance] = 2;
+                    Config.Instance.IndieV2[version.PathInstance] = false;
+                    ModBase.Log("[Setup] 已自动关闭单版本隔离：" + version.Name, ModBase.LogLevel.Debug);
+                }
+            }
+            catch (Exception ex)
+            {
+                ModBase.Log(
+                    ex,
+                    Lang.Text("Select.Folder.Error.AddNew"),
+                    ModBase.LogLevel.Feedback,
+                    userSummary: Lang.Text("Select.Folder.Error.AddNew"));
+            }
+        });
+    }
+
+    public static void RefreshInstances(string folder, bool clearCache = false)
+    {
+        if (string.IsNullOrWhiteSpace(folder)) return;
+        if (clearCache) ModBase.WriteIni(Path.Combine(folder, "PCL.ini"), "InstanceCache", "");
+        if (string.Equals(folder, mcFolderSelected, StringComparison.OrdinalIgnoreCase))
+            ModLoader.LoaderFolderRun(ModInstanceList.mcInstanceListLoader, folder,
+                clearCache ? ModLoader.LoaderFolderRunType.ForceRun : ModLoader.LoaderFolderRunType.RunOnUpdated,
+                1, @"versions\");
+    }
+
+    /// <summary>
     ///     为 Minecraft 文件夹创建 launcher_profiles.json 文件。
     /// </summary>
     public static void McFolderLauncherProfilesJsonCreate(string folder)

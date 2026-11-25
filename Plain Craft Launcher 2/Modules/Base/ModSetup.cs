@@ -1,3 +1,4 @@
+using System.IO;
 using System.Net;
 using System.Windows;
 using System.Windows.Media;
@@ -8,17 +9,26 @@ using PCL.Core.IO.Net.Http;
 using PCL.Core.UI.Theme;
 using PCL.Core.Utils.Exts;
 using PCL.Network;
+using PCLLF.Wpf.Motion;
 
 using PCL.Core.App.Localization;
 namespace PCL;
 
 public class ModSetup
 {
+    internal static event Action? AppearanceOptionsChanged;
+    internal static event Action? LaunchLogVisibilityChanged;
+    internal static event Action<int>? LaunchMemoryChanged;
+    internal static event Action<string, int>? InstanceMemoryChanged;
+
     public ModSetup()
     {
         // === Hide Group ===
         ConfigService.RegisterObserver(Config.Preference.Hide,
-            new ConfigObserver(ConfigEvent.Changed, _ => PageSetupUI.HiddenRefresh()));
+            new ConfigObserver(ConfigEvent.Changed, _ => ShellNavigation.NotifyVisibilityChanged()));
+
+        States.UI.ShowLaunchLogConfig.Observe(new ConfigObserver(ConfigEvent.Changed,
+            _ => ModBase.RunInUi(() => LaunchLogVisibilityChanged?.Invoke())));
 
         // === Launch ===
         Config.Launch.MemoryAllocationModeConfig.Observe(new ConfigObserver(ConfigEvent.Changed,
@@ -61,8 +71,8 @@ public class ModSetup
             e => UiFont((string)(e.Value ?? ""))));
 
         // UI - Homepage
-        Config.Preference.Homepage.TypeConfig.Observe(new ConfigObserver(ConfigEvent.Changed,
-            e => UiCustomType((int)e.Value!)));
+        Config.Preference.Homepage.TypeConfig.Observe(new ConfigObserver(ConfigEvent.Changed, _ => NotifyAppearanceOptions()));
+        States.Hint.UntrustedHomepageConfig.Observe(new ConfigObserver(ConfigEvent.Changed, _ => NotifyAppearanceOptions()));
 
         // UI - Blur
         Config.Preference.Blur.IsEnabledConfig.Observe(new ConfigObserver(ConfigEvent.Changed,
@@ -87,6 +97,8 @@ public class ModSetup
             e => SystemDebugMode((bool)e.Value!)));
         Config.Debug.AnimationSpeedConfig.Observe(new ConfigObserver(ConfigEvent.Changed,
             e => SystemDebugAnim((int)e.Value!)));
+        Config.System.AnimationFpsLimitConfig.Observe(new ConfigObserver(ConfigEvent.Changed,
+            e => MotionPreferences.FrameRateLimit = Math.Clamp((int)e.Value!, 0, 239) + 1));
         Config.Network.HttpProxy.CustomAddressConfig.Observe(new ConfigObserver(ConfigEvent.Changed,
             e => SystemHttpProxy((string)(e.Value ?? ""))));
         Config.Network.HttpProxy.TypeConfig.Observe(new ConfigObserver(ConfigEvent.Changed,
@@ -98,9 +110,9 @@ public class ModSetup
 
         // === Version ===
         Config.Instance.MemorySolutionConfig.Observe(new ConfigObserver(ConfigEvent.Changed,
-            e => VersionRamType((int)e.Value!)));
+            e => PublishInstanceMemory(e.Argument as string, (int)e.Value!)));
         Config.InstanceAuth.LoginRequirementSolutionConfig.Observe(new ConfigObserver(ConfigEvent.Changed,
-            e => VersionServerLogin((int)e.Value!)));
+            e => RefreshInstanceLogin(e.Argument as string)));
     }
 
     /// <summary>
@@ -132,9 +144,6 @@ public class ModSetup
         // UI - Font
         UiFont(Config.Preference.Font);
 
-        // UI - Homepage
-        UiCustomType(Config.Preference.Homepage.Type);
-
         // UI - Blur
         if (Config.Preference.Blur.IsEnabled)
         {
@@ -155,11 +164,12 @@ public class ModSetup
         UiLogoLeft(Config.Preference.TopBarLeftAlign);
 
         // UI - Hide
-        PageSetupUI.HiddenRefresh();
+        ShellNavigation.NotifyVisibilityChanged();
 
         // System
         SystemDebugMode(Config.Debug.Enabled);
         SystemDebugAnim(Config.Debug.AnimationSpeed);
+        MotionPreferences.FrameRateLimit = Math.Clamp(Config.System.AnimationFpsLimit, 0, 239) + 1;
         SystemHttpProxy(Config.Network.HttpProxy.CustomAddress);
         SystemHttpProxyType(Config.Network.HttpProxy.Type);
         SystemHttpProxyCustomUsername(Config.Network.HttpProxy.CustomUsername);
@@ -182,11 +192,25 @@ public class ModSetup
     }
 
     // 游戏内存
-    public static void LaunchRamType(int type)
+    private static void LaunchRamType(int type) => ModBase.RunInUi(() => LaunchMemoryChanged?.Invoke(type));
+
+    internal static void ResetLaunchPreferences()
     {
-        if (ModMain.frmSetupLaunch is null)
-            return;
-        ModMain.frmSetupLaunch.RamType(type);
+        try
+        {
+            Config.Launch.Reset();
+            ModBase.Log("[Setup] 已初始化启动设置");
+            HintService.Hint(Lang.Text("Setup.Launch.Initialized"), HintType.Success, false);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(
+                ex,
+                Lang.Text("Setup.Launch.Error.InitFailed"),
+                ModBase.LogLevel.Msgbox,
+                userSummary: Lang.Text("Setup.Launch.Error.InitFailed"));
+        }
+
     }
 
     #endregion
@@ -216,12 +240,7 @@ public class ModSetup
     // 启动器
     public static void UiLauncherTransparent(int value)
     {
-        if (ModMain.frmMain.HasUpstreamGlass)
-        {
-            ModMain.frmMain.Opacity = 1;
-            return;
-        }
-        ModMain.frmMain.Opacity = value / 1000d + 0.4d;
+        ModMain.frmMain.Opacity = Math.Clamp(value / 1000d + .4, .4, 1);
     }
 
     public static void UiLauncherTheme(int value)
@@ -262,8 +281,8 @@ public class ModSetup
     public static void UiBackgroundOpacity(int value)
     {
         var window = ModMain.frmMain;
-        window.ImgBack.Opacity = window.HasUpstreamGlass && window.ImgBack.Background is ImageBrush ? 0 : value / 1000d;
-        window.RefreshUpstreamGlass();
+        window.ImgBack.Opacity = window.ImgBack.Background is ImageBrush ? 0 : value / 1000d;
+        window.RefreshShell();
     }
 
     public static void UiBackgroundBlur(int value)
@@ -389,72 +408,30 @@ public class ModSetup
         }
     }
 
-    // 主页
-    public static void UiCustomType(int value)
-    {
-        if (ModMain.frmSetupUI is null)
-            return;
-        switch (value)
-        {
-            case 0: // 无
-            {
-                ModMain.frmSetupUI.PanCustomPreset.Visibility = Visibility.Collapsed;
-                ModMain.frmSetupUI.PanCustomLocal.Visibility = Visibility.Collapsed;
-                ModMain.frmSetupUI.PanCustomNet.Visibility = Visibility.Collapsed;
-                ModMain.frmSetupUI.HintCustom.Visibility = Visibility.Collapsed;
-                ModMain.frmSetupUI.HintCustomWarn.Visibility = Visibility.Collapsed;
-                break;
-            }
-            case 1: // 本地
-            {
-                ModMain.frmSetupUI.PanCustomPreset.Visibility = Visibility.Collapsed;
-                ModMain.frmSetupUI.PanCustomLocal.Visibility = Visibility.Visible;
-                ModMain.frmSetupUI.PanCustomNet.Visibility = Visibility.Collapsed;
-                ModMain.frmSetupUI.HintCustom.Visibility = Visibility.Visible;
-                ModMain.frmSetupUI.HintCustomWarn.Visibility =
-                    States.Hint.UntrustedHomepage ? Visibility.Collapsed : Visibility.Visible;
-                ModMain.frmSetupUI.HintCustom.Text =
-                    Lang.Text("Setup.Ui.Homepage.LocalFile.Hint");
-                CustomEventService.SetEventType(ModMain.frmSetupUI.HintCustom, EventType.None);
-                break;
-            }
-            case 2: // 联网
-            {
-                ModMain.frmSetupUI.PanCustomPreset.Visibility = Visibility.Collapsed;
-                ModMain.frmSetupUI.PanCustomLocal.Visibility = Visibility.Collapsed;
-                ModMain.frmSetupUI.PanCustomNet.Visibility = Visibility.Visible;
-                ModMain.frmSetupUI.HintCustom.Visibility = Visibility.Visible;
-                ModMain.frmSetupUI.HintCustomWarn.Visibility =
-                    States.Hint.UntrustedHomepage ? Visibility.Collapsed : Visibility.Visible;
-                ModMain.frmSetupUI.HintCustom.Text =
-                    Lang.Text("Setup.Ui.Homepage.NetUpdate.Hint");
-                CustomEventService.SetEventType(ModMain.frmSetupUI.HintCustom, EventType.OpenUrl);
-                CustomEventService.SetEventData(ModMain.frmSetupUI.HintCustom,
-                    "https://github.com/Hydrogen-Peroxide/PCL-Symbio-Edition/wiki");
-                break;
-            }
-            case 3: // 预设
-            {
-                ModMain.frmSetupUI.PanCustomPreset.Visibility = Visibility.Visible;
-                ModMain.frmSetupUI.PanCustomLocal.Visibility = Visibility.Collapsed;
-                ModMain.frmSetupUI.PanCustomNet.Visibility = Visibility.Collapsed;
-                ModMain.frmSetupUI.HintCustom.Visibility = Visibility.Collapsed;
-                ModMain.frmSetupUI.HintCustomWarn.Visibility = Visibility.Collapsed;
-                break;
-            }
-        }
+    private static void NotifyAppearanceOptions() => ModBase.RunInUi(() => AppearanceOptionsChanged?.Invoke());
 
-        ModMain.frmSetupUI.CardCustom.TriggerForceResize();
+    internal static void ResetAppearancePreferences()
+    {
+        try
+        {
+            Config.Preference.Reset();
+            ModBase.Log("[Setup] 已初始化个性化设置！");
+            HintService.Hint(Lang.Text("Setup.Ui.Initialized"), HintType.Success, false);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, Lang.Text("Setup.Ui.Error.InitFailed"), ModBase.LogLevel.Msgbox,
+                userSummary: Lang.Text("Setup.Ui.Error.InitFailed"));
+        }
     }
 
     // 高级材质
     public static void UiBlur(bool value)
     {
-        if (ModMain.frmSetupUI is not null)
-            ModMain.frmSetupUI.PanBlurValue.Visibility = value ? Visibility.Visible : Visibility.Collapsed;
         UiBlurValue(value ? Config.Preference.Blur.Radius : 0);
         if (ModMain.frmMain is not null)
             ThemeManager.ThemeRefreshMain();
+        NotifyAppearanceOptions();
     }
 
     public static void UiBlurValue(int value)
@@ -476,123 +453,18 @@ public class ModSetup
     public static void UiLogoType(int value)
     {
         if (ThemeService.CurrentTheme == ColorTheme.HmclBlue) value = 4;
-        switch (value)
+        ModMain.frmMain.RefreshBrand();
+        if (value == 3)
         {
-            case 0: // 无
-            {
-                ModMain.frmMain.ShapeTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.BtnTitleHelp.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.ShapeHMCLTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.LabTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.ImageTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.SELogo.Visibility = Visibility.Collapsed;
-                if (ModMain.frmSetupUI is not null)
-                {
-                    ModMain.frmSetupUI.CheckLogoLeft.Visibility = Visibility.Visible;
-                    ModMain.frmSetupUI.PanLogoText.Visibility = Visibility.Collapsed;
-                    ModMain.frmSetupUI.PanLogoChange.Visibility = Visibility.Collapsed;
-                }
-
-                break;
-            }
-            case 1: // 默认
-            {
-                ModMain.frmMain.ShapeTitleLogo.Visibility = Visibility.Visible;
-                ModMain.frmMain.BtnTitleHelp.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.ShapeHMCLTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.LabTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.ImageTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.SELogo.Visibility = Visibility.Visible;
-                if (ModMain.frmSetupUI is not null)
-                {
-                    ModMain.frmSetupUI.CheckLogoLeft.Visibility = Visibility.Collapsed;
-                    ModMain.frmSetupUI.PanLogoText.Visibility = Visibility.Collapsed;
-                    ModMain.frmSetupUI.PanLogoChange.Visibility = Visibility.Collapsed;
-                }
-
-                break;
-            }
-            case 2: // 文本
-            {
-                ModMain.frmMain.ShapeTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.BtnTitleHelp.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.ShapeHMCLTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.LabTitleLogo.Visibility = Visibility.Visible;
-                ModMain.frmMain.ImageTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.SELogo.Visibility = Visibility.Visible;
-                if (ModMain.frmSetupUI is not null)
-                {
-                    ModMain.frmSetupUI.CheckLogoLeft.Visibility = Visibility.Collapsed;
-                    ModMain.frmSetupUI.PanLogoText.Visibility = Visibility.Visible;
-                    ModMain.frmSetupUI.PanLogoChange.Visibility = Visibility.Collapsed;
-                }
-
-                _ = Config.Preference.WindowTitleCustomText;
-                break;
-            }
-            case 3: // 图片
-            {
-                ModMain.frmMain.ShapeTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.BtnTitleHelp.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.ShapeHMCLTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.LabTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.ImageTitleLogo.Visibility = Visibility.Visible;
-                ModMain.frmMain.SELogo.Visibility = Visibility.Visible;
-                if (ModMain.frmSetupUI is not null)
-                {
-                    ModMain.frmSetupUI.CheckLogoLeft.Visibility = Visibility.Collapsed;
-                    ModMain.frmSetupUI.PanLogoText.Visibility = Visibility.Collapsed;
-                    ModMain.frmSetupUI.PanLogoChange.Visibility = Visibility.Visible;
-                }
-
-                try
-                {
-                    ModMain.frmMain.ImageTitleLogo.Source = ModBase.exePath + @"PCL\Logo.png";
-                }
-                catch (Exception ex)
-                {
-                    ModMain.frmMain.ImageTitleLogo.Source = null;
-                    ModBase.Log(
-                        ex,
-                        "显示标题栏图片失败",
-                        ModBase.LogLevel.Msgbox,
-                        userSummary: Lang.Text("Setup.Error.OperationFailed"));
-                }
-
-                break;
-            }
-            case 4: //HMCL (愚人节)
-                ModMain.frmMain.ShapeTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.ShapeHMCLTitleLogo.Visibility = Visibility.Visible;
-                ModMain.frmMain.LabTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.ImageTitleLogo.Visibility = Visibility.Collapsed;
-                ModMain.frmMain.BtnTitleHelp.Visibility = Visibility.Visible;
-                if (ModMain.frmSetupUI is not null) 
-                {
-                    ModMain.frmSetupUI.CheckLogoLeft.Visibility = Visibility.Collapsed;
-                    ModMain.frmSetupUI.PanLogoText.Visibility = Visibility.Collapsed;
-                    ModMain.frmSetupUI.PanLogoChange.Visibility = Visibility.Collapsed;
-                }
-
-                break;
+            try { ModMain.frmMain.LoadBrandImage(System.IO.Path.Combine(ModBase.exePath, "PCL", "Logo.png")); }
+            catch (Exception ex) { ModBase.Log(ex, "显示标题栏图片失败", ModBase.LogLevel.Hint); }
         }
-
-        _ = Config.Preference.TopBarLeftAlign;
-        if (ModMain.frmSetupUI is not null)
-            ModMain.frmSetupUI.CardLogo.TriggerForceResize();
+        NotifyAppearanceOptions();
     }
 
-    public static void UiLogoText(string value)
-    {
-        ModMain.frmMain.LabTitleLogo.Text = value;
-    }
+    public static void UiLogoText(string value) => ModMain.frmMain.RefreshBrand();
 
-    public static void UiLogoLeft(bool value)
-    {
-        ModMain.frmMain.PanTitleMain.ColumnDefinitions[0].Width = new GridLength(
-            value && Config.Preference.WindowTitleType == LauncherTitleType.None ? 0 : 1,
-            GridUnitType.Star);
-    }
+    public static void UiLogoLeft(bool value) => ModMain.frmMain.RefreshBrand();
 
     #endregion
 
@@ -655,29 +527,92 @@ public class ModSetup
 
     #endregion
 
-    #region Version
-
-    // 游戏内存
-    public static void VersionRamType(int type)
+    internal static void ResetGameManagePreferences()
     {
-        if (ModMain.frmInstanceSetup is null)
-            return;
-        ModMain.frmInstanceSetup.RamType(type);
+        try
+        {
+            Config.Download.Reset();
+            Config.Tool.Reset();
+            ModBase.Log("[Setup] 已初始化其他页设置");
+            HintService.Hint(Lang.Text("Setup.GameManage.Initialized"), HintType.Success, false);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(
+                ex,
+                Lang.Text("Setup.GameManage.Error.InitFailed"),
+                ModBase.LogLevel.Msgbox,
+                userSummary: Lang.Text("Setup.GameManage.Error.InitFailed"));
+        }
+
     }
 
-    // 服务器
-    public static void VersionServerLogin(int type)
+    internal static void ResetLauncherMiscPreferences()
     {
-        if (ModMain.frmInstanceSetup is null)
-            return;
-        // 为第三方登录清空缓存以更新描述
-        ModBase.WriteIni(ModFolder.mcFolderSelected + "PCL.ini", "InstanceCache", "");
-        if (PageInstanceLeft.McInstance is null)
-            return;
-        PageInstanceLeft.McInstance = new McInstance(PageInstanceLeft.McInstance.Name).Load();
-        ModLoader.LoaderFolderRun(ModInstanceList.mcInstanceListLoader, ModFolder.mcFolderSelected,
-            ModLoader.LoaderFolderRunType.ForceRun, 1, @"versions\");
+        try
+        {
+            Config.Network.Reset();
+            Config.Debug.Reset();
+            Config.System.Reset();
+            ModBase.Log("[Setup] 已初始化启动器-杂项页设置");
+            HintService.Hint(Lang.Text("Setup.Misc.Initialized"), HintType.Success, false);
+
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(
+                ex,
+                Lang.Text("Setup.Misc.Error.InitFailed"),
+                ModBase.LogLevel.Msgbox,
+                userSummary: Lang.Text("Setup.Misc.Error.InitFailed"));
+        }
+
     }
 
-    #endregion
+    private static void PublishInstanceMemory(string? path, int type)
+    {
+        if (path is not null) ModBase.RunInUi(() => InstanceMemoryChanged?.Invoke(path, type));
+    }
+
+    private static void RefreshInstanceLogin(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path) || !Path.IsPathFullyQualified(path)) return;
+        var instancePath = Path.TrimEndingDirectorySeparator(Path.GetFullPath(path));
+        var versions = Path.GetDirectoryName(instancePath);
+        if (versions is null || !string.Equals(Path.GetFileName(versions), "versions", StringComparison.OrdinalIgnoreCase)) return;
+        var directory = Path.GetDirectoryName(versions);
+        if (directory is null) return;
+        var folder = Path.TrimEndingDirectorySeparator(directory) + Path.DirectorySeparatorChar;
+        ModBase.RunInUi(() =>
+        {
+            if (InstanceWorkspace.Current is { } current && string.Equals(
+                Path.TrimEndingDirectorySeparator(current.PathInstance), instancePath, StringComparison.OrdinalIgnoreCase))
+                InstanceWorkspace.Current = new McInstance(instancePath).Load();
+            ModFolder.RefreshInstances(folder, clearCache: true);
+        });
+    }
+
+    internal static void ResetInstancePreferences(McInstance instance)
+    {
+        try
+        {
+            if (!Config.InstanceAuth.AuthLocked[instance.PathInstance])
+                Config.InstanceAuth.Reset(instance.PathInstance);
+
+            Config.Instance.Reset(instance.PathInstance);
+
+            ModBase.Log("[Setup] 已初始化实例独立设置");
+            HintService.Hint(Lang.Text("Instance.Setup.Initialize.Success"), HintType.Success, false);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(
+                ex,
+                "初始化实例独立设置失败",
+                ModBase.LogLevel.Msgbox,
+                userSummary: Lang.Text("Instance.Setup.Error.OperationFailed"));
+        }
+
+    }
+
 }

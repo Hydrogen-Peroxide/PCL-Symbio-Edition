@@ -119,7 +119,7 @@ public static class ModNet
 
     public static bool HasDownloadingTask(bool ignoreCustomDownload = false)
     {
-        foreach (var task in ModLoader.loaderTaskbar.ToList())
+        foreach (var task in DownloadTasks.GetActive())
         {
             if (task.show && task.State == ModBase.LoadState.Loading &&
                 (!ignoreCustomDownload || !task.name.Contains("自定义下载")))

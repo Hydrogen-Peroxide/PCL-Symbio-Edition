@@ -1,0 +1,103 @@
+<local:WorkspacePage x:Class="PCL.CapeLibraryView"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:local="clr-namespace:PCL"
+                   PanScroll="{Binding ElementName=PanBack}">
+    <ScrollViewer local:ScrollInput.Enabled="True" Style="{StaticResource SyScrollViewer}" x:Name="PanBack" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="24,20,24,20" UseLayoutRounding="True">
+            <TextBlock x:Name="LabCapeStatus" Margin="0,0,0,12" TextWrapping="Wrap"
+                       Foreground="{DynamicResource SyTextSecondary}" Visibility="Collapsed" />
+            <ListBox x:Name="CapeCards" Margin="0,0,0,4" SelectionChanged="CapeCards_SelectionChanged"
+                     AutomationProperties.Name="{DynamicResource Tools.SkinLibrary.Section.Capes}">
+                <ListBox.Template>
+                    <ControlTemplate TargetType="ListBox"><ItemsPresenter /></ControlTemplate>
+                </ListBox.Template>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Width" Value="180" />
+                        <Setter Property="Height" Value="230" />
+                        <Setter Property="Margin" Value="0,0,18,18" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="ToolTip" Value="{Binding Name}" />
+                        <Setter Property="FocusVisualStyle" Value="{StaticResource SeFocusVisual}" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border x:Name="Tile" Background="Transparent"
+                                            BorderBrush="{DynamicResource GlassAccentBrush}" BorderThickness="2"
+                                            CornerRadius="8" Padding="14,18,14,14">
+                                        <ContentPresenter />
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding Active}" Value="True">
+                                            <Setter TargetName="Tile" Property="BorderBrush" Value="{DynamicResource SyText}" />
+                                        </DataTrigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Tile" Property="Background" Value="{DynamicResource SyControlHover}" />
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Tile" Property="Background" Value="{DynamicResource GlassSelectedBrush}" />
+                                        </Trigger>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding Active}" Value="True" />
+                                                <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="False" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter TargetName="Tile" Property="Background" Value="Transparent" />
+                                        </MultiDataTrigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <Grid Width="84" Height="136" HorizontalAlignment="Center">
+                                <Border x:Name="Placeholder" CornerRadius="8"
+                                        BorderBrush="{DynamicResource SyControlStroke}" BorderThickness="2" Visibility="Collapsed">
+                                    <Path Data="M 0,0 L 12,12 M 12,0 L 0,12" Width="22" Height="22"
+                                          Stretch="Uniform" Stroke="{DynamicResource SyTextSecondary}"
+                                          StrokeThickness="2" Opacity="0.8" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <Image Source="{Binding Preview}" Stretch="Uniform"
+                                       RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                            </Grid>
+                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"
+                                       Foreground="{DynamicResource SyText}" FontWeight="Bold" FontSize="19"
+                                       TextAlignment="Center" Margin="0,14,0,3" />
+                            <TextBlock x:Name="DetailText" Text="{Binding Dimensions}" TextTrimming="CharacterEllipsis"
+                                       Foreground="{DynamicResource SyTextSecondary}" FontSize="15" TextAlignment="Center" />
+                        </StackPanel>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Preview}" Value="{x:Null}">
+                                <Setter TargetName="Placeholder" Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Active}" Value="True">
+                                <Setter TargetName="DetailText" Property="Text" Value="{DynamicResource Tools.SkinLibrary.Cape.InUse}" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <WrapPanel>
+                <local:SymbioButton x:Name="BtnApply" Style="{StaticResource SePillButton}"
+                                MinWidth="128" Height="38" Margin="0,0,10,10" ColorType="Highlight"
+                                Text="{DynamicResource Tools.SkinLibrary.Cape.Apply}" Click="BtnApply_Click" />
+                <local:SymbioButton x:Name="BtnImport" Style="{StaticResource SePillButton}"
+                                MinWidth="150" Height="38" Margin="0,0,10,10"
+                                Text="{DynamicResource Tools.SkinLibrary.Cape.Pick}" Click="BtnImport_Click" />
+                <local:SymbioButton x:Name="BtnManage" Style="{StaticResource SePillButton}"
+                                MinWidth="150" Height="38" Margin="0,0,10,10"
+                                Text="{DynamicResource Launch.Skin.ChangeCape}" Click="BtnManage_Click" />
+                <local:SymbioButton x:Name="BtnReload" Style="{StaticResource SePillButton}"
+                                MinWidth="128" Height="38" Margin="0,0,10,10"
+                                Text="{DynamicResource Tools.SkinLibrary.Refresh}" Click="BtnReload_Click" />
+            </WrapPanel>
+        </StackPanel>
+    </ScrollViewer>
+</local:WorkspacePage>

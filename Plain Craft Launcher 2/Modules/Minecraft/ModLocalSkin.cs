@@ -88,7 +88,7 @@ public static class ModLocalSkin
     {
         try
         {
-            ModBase.RunInUi(() => ModMain.frmLoginProfileSkin?.Reload());
+            ModBase.RunInUi(() => ProfileSkins.LoadSelected(true));
         }
         catch (Exception ex)
         {

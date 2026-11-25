@@ -41,18 +41,12 @@ public static class HintService
     {
         try
         {
-            ModMain.frmMain!.PanHint.HorizontalAlignment = HorizontalAlignment.Right;
-            ModMain.frmMain.PanHint.VerticalAlignment = VerticalAlignment.Bottom;
-
-            var extraHeight = ModMain.frmMain.PanExtraButtons.ActualHeight;
-            ModMain.frmMain.PanHint.Margin = new Thickness(0, 0, 0, extraHeight > 0 ? extraHeight + 20 : 20);
-
             if (!HintWaiting.Any())
                 return;
 
             var currentHint = HintWaiting[0];
 
-            var duplicate = ModMain.frmMain.PanHint.Children.OfType<MyToast>()
+            var duplicate = ModMain.frmMain.PanHint.Children.OfType<NotificationToast>()
                 .FirstOrDefault(t => !t.IsDismissing && t.Context == currentHint.Text && t.ToastType == currentHint.Type);
             if (duplicate != null)
             {
@@ -61,15 +55,15 @@ public static class HintService
                 return;
             }
 
-            var activeCount = ModMain.frmMain.PanHint.Children.OfType<MyToast>().Count(t => !t.IsDismissing);
+            var activeCount = ModMain.frmMain.PanHint.Children.OfType<NotificationToast>().Count(t => !t.IsDismissing);
             if (activeCount >= 5)
             {
-                var oldest = ModMain.frmMain.PanHint.Children.OfType<MyToast>().FirstOrDefault(t => !t.IsDismissing);
+                var oldest = ModMain.frmMain.PanHint.Children.OfType<NotificationToast>().FirstOrDefault(t => !t.IsDismissing);
                 oldest?.Dismiss();
                 return;
             }
 
-            var toast = new MyToast
+            var toast = new NotificationToast
             {
                 Context = currentHint.Text,
                 ToastType = currentHint.Type,
@@ -98,7 +92,7 @@ public static class HintService
 
     public static void HideAll()
     {
-        foreach (MyToast toast in ModMain.frmMain!.PanHint.Children.OfType<MyToast>().ToList())
+        foreach (NotificationToast toast in ModMain.frmMain!.PanHint.Children.OfType<NotificationToast>().ToList())
             toast.Dismiss();
     }
 }

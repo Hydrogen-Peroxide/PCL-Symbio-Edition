@@ -1,0 +1,14 @@
+<UserControl x:Class="PCL.LoadingIndicator"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    MinHeight="32" AutomationProperties.LiveSetting="Polite">
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="4,5">
+        <ProgressBar x:Name="Activity" IsIndeterminate="True" Height="4" Width="52" Visibility="Collapsed"
+                     Foreground="{DynamicResource SyAccentFill}" Background="{DynamicResource SyControlStroke}" />
+        <TextBlock x:Name="Caption" Margin="2,7,2,0" TextWrapping="Wrap" TextAlignment="Center"
+                   Foreground="{DynamicResource SyTextSecondary}" />
+        <Button x:Name="Retry" Visibility="Collapsed" Margin="0,8,0,0"
+                Style="{StaticResource SyButton}"
+                Content="{DynamicResource Common.Action.Refresh}" />
+    </StackPanel>
+</UserControl>

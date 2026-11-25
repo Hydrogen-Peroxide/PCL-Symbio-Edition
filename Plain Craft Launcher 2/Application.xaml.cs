@@ -192,7 +192,7 @@ public partial class Application
     // 切换窗口
 
     // 控件模板事件
-    private void _MyIconButtonClick(object sender, EventArgs e)
+    private void _MyIconButtonClick(object sender, System.Windows.RoutedEventArgs e)
     {
     }
 

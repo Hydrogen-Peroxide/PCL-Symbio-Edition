@@ -1,0 +1,59 @@
+<UserControl x:Class="PCL.SkinLibraryNavigation"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <!-- Fluent SelectorBar item: text tab, subtle hover, accent pill under the selected tab -->
+        <Style x:Key="SkinLibrarySectionTab" TargetType="RadioButton">
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{DynamicResource SyTextSecondary}" />
+            <Setter Property="FocusVisualStyle" Value="{StaticResource SyFocusVisual}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Grid>
+                            <Border x:Name="TabSurface" Background="Transparent" CornerRadius="4"
+                                    Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                  RecognizesAccessKey="True"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}"
+                                                  TextElement.FontWeight="{TemplateBinding FontWeight}" />
+                            </Border>
+                            <Border x:Name="Pill" Width="16" Height="3" CornerRadius="1.5" VerticalAlignment="Bottom"
+                                    HorizontalAlignment="Center" Background="{DynamicResource SyAccentFill}"
+                                    Visibility="Collapsed" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="TabSurface" Property="Background" Value="{DynamicResource SySubtleHover}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="TabSurface" Property="Background" Value="{DynamicResource SySubtlePressed}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Pill" Property="Visibility" Value="Visible" />
+                                <Setter Property="Foreground" Value="{DynamicResource SyText}" />
+                                <Setter Property="FontWeight" Value="SemiBold" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <StackPanel Orientation="Horizontal" UseLayoutRounding="True">
+        <TextBlock Text="{DynamicResource Tools.SkinLibrary.Title}" FontSize="20" FontWeight="SemiBold"
+                   FontFamily="{StaticResource SyDisplayFontFamily}"
+                   Foreground="{DynamicResource SyText}" VerticalAlignment="Center" Margin="0,0,20,0" />
+        <StackPanel Orientation="Horizontal">
+            <RadioButton x:Name="ItemSkins" GroupName="SkinLibrarySection" IsChecked="True"
+                         Content="{DynamicResource Tools.SkinLibrary.Section.Skins}"
+                         Style="{StaticResource SkinLibrarySectionTab}" Checked="TabChecked" />
+            <RadioButton x:Name="ItemCapes" GroupName="SkinLibrarySection" Margin="4,0,0,0"
+                         Content="{DynamicResource Tools.SkinLibrary.Section.Capes}"
+                         Style="{StaticResource SkinLibrarySectionTab}" Checked="TabChecked" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

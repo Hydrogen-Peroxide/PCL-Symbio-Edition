@@ -34,7 +34,7 @@ public static class ThemeManager
         {
             if (!ModMain.frmMain.IsLoaded) return;
             RefreshBackground();
-            ModMain.frmMain.RefreshUpstreamGlass();
+            ModMain.frmMain.RefreshShell();
             RefreshAllContextMenuThemes();
         });
     }
@@ -44,9 +44,7 @@ public static class ThemeManager
     {
         var window = ModMain.frmMain;
         var highContrast = SystemParameters.HighContrast;
-        AppResources["SeWallpaperScrim"] = IsDarkMode && !window.HasUpstreamGlass
-            ? AppResources["SeDarkScrim"]
-            : Brushes.Transparent;
+        AppResources["SeWallpaperScrim"] = Brushes.Transparent;
         AppResources["SeCardFill"] = AppResources[IsDarkMode ? "SeDarkCard" : "ColorBrushTransparentBackground"];
         AppResources["SeCardStroke"] = AppResources[IsDarkMode ? "SeDarkStroke" : "ColorBrushGray6"];
         AppResources["SeCaptionFill"] = AppResources[IsDarkMode ? "SeDarkCard" : "ColorBrushGray7"];
@@ -57,13 +55,7 @@ public static class ThemeManager
             AppResources["SeCardFill"] = SystemColors.WindowBrush;
             AppResources["SeCardStroke"] = SystemColors.WindowTextBrush;
             AppResources["SeCaptionFill"] = SystemColors.WindowBrush;
-            window.PanForm.Background = SystemColors.WindowBrush;
-            return;
-        }
-
-        if (window.HasUpstreamGlass)
-        {
-            window.PanForm.Background = null;
+            window.Stage?.SetStageBrush(SystemColors.WindowBrush);
             return;
         }
 
@@ -87,14 +79,15 @@ public static class ThemeManager
                 { Offset = 0.4d, Color = LabColor.FromLch(0.96d * darkLight, tone.C7 * chromaScale, hue) });
             brush.GradientStops.Add(new GradientStop
                 { Offset = 1.1d, Color = LabColor.FromLch(0.84d * darkLight, tone.C5 * chromaScale, hue2) });
-            ModMain.frmMain.PanForm.Background = brush;
+            brush.Freeze();
+            window.Stage?.SetStageBrush(brush);
         }
         else
         {
-            ModMain.frmMain.PanForm.Background = (Brush)System.Windows.Application.Current.Resources["ColorBrushBackground"];
+            window.Stage?.SetStageBrush(null);
         }
 
-        ModMain.frmMain.PanForm.Background.Freeze();
+
     }
 
     // 通用ContextMenu主题刷新

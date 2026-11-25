@@ -1,0 +1,28 @@
+<local:WorkspacePage x:Class="PCL.DeviceInfoView"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:local="clr-namespace:PCL"
+                   PanScroll="{Binding ElementName=PanBack}">
+    <ScrollViewer local:ScrollInput.Enabled="True" Style="{StaticResource SyScrollViewer}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="PanBack">
+        <StackPanel Margin="25,10">
+            <local:WorkspaceCard Margin="0,15" Title="{DynamicResource Tools.Device.System}">
+                <StackPanel Margin="21,36,21,8">
+                    <local:SelectionRow x:Name="ItemDeviceOs" Height="40" IsHitTestVisible="False"
+                                      SvgIcon="lucide/monitor"
+                                      Title="{DynamicResource Tools.Device.OS}" />
+                </StackPanel>
+            </local:WorkspaceCard>
+            <local:WorkspaceCard Margin="0,0,0,15" Title="{DynamicResource Tools.Device.Title}">
+                <StackPanel Margin="21,36,21,8">
+                    <local:SelectionRow x:Name="ItemDeviceCpu" Height="40" IsHitTestVisible="False"
+                                      SvgIcon="lucide/cpu"
+                                      Title="{DynamicResource Tools.Device.CPU}" />
+                    <StackPanel x:Name="PanDeviceGpu" />
+                    <local:SelectionRow x:Name="ItemDeviceMemory" Height="40" IsHitTestVisible="False"
+                                      SvgIcon="lucide/memory-stick"
+                                      Title="{DynamicResource Tools.Device.Memory}" />
+                </StackPanel>
+            </local:WorkspaceCard>
+        </StackPanel>
+    </ScrollViewer>
+</local:WorkspacePage>

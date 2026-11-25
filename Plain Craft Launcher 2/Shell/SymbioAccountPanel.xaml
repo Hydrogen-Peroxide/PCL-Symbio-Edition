@@ -1,0 +1,153 @@
+<UserControl x:Class="PCL.SymbioAccountPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:svgIcon="clr-namespace:PCL.Core.UI.Controls.SvgIcon;assembly=PCL.Core"
+             FontFamily="{StaticResource SyFontFamily}" FontSize="{StaticResource SyFontBody}"
+             Foreground="{DynamicResource SyText}"
+             HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <Grid Margin="24,20,24,20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="248" />
+            <ColumnDefinition Width="24" />
+            <ColumnDefinition Width="*" MinWidth="280" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Left: current account + account kinds -->
+        <StackPanel Grid.Column="0">
+            <Border CornerRadius="{StaticResource SyRadiusOverlay}" Padding="20,24,20,20"
+                    Background="{DynamicResource SyCardFill}" BorderBrush="{DynamicResource SyCardStroke}" BorderThickness="1">
+                <StackPanel>
+                    <Grid Width="72" Height="72" HorizontalAlignment="Center">
+                        <Ellipse Fill="{DynamicResource SyControl}" Stroke="{DynamicResource SyControlStroke}" />
+                        <TextBlock x:Name="CurrentGlyph" Text="?" FontSize="28" FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SyTextSecondary}" />
+                        <Image x:Name="CurrentAvatar" Stretch="UniformToFill" RenderOptions.BitmapScalingMode="NearestNeighbor">
+                            <Image.Clip>
+                                <EllipseGeometry Center="36,36" RadiusX="36" RadiusY="36" />
+                            </Image.Clip>
+                        </Image>
+                    </Grid>
+                    <TextBlock x:Name="CurrentName" Text="未登录" Margin="0,14,0,0" HorizontalAlignment="Center"
+                               FontFamily="{StaticResource SyDisplayFontFamily}"
+                               FontSize="{StaticResource SyFontSubtitle}" FontWeight="SemiBold"
+                               TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="CurrentInfo" Margin="0,4,0,0" HorizontalAlignment="Center"
+                               FontSize="{StaticResource SyFontCaption}" Foreground="{DynamicResource SyTextSecondary}"
+                               TextTrimming="CharacterEllipsis" />
+                    <Button x:Name="BtnSkin" Style="{StaticResource SyButton}" Margin="0,18,0,0"
+                            HorizontalAlignment="Center" Click="Skin_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <svgIcon:SvgIcon Icon="lucide/shirt" Style="{StaticResource SyIcon}" />
+                            <TextBlock Text="管理皮肤" Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="账号类型" Margin="4,24,0,8" FontWeight="SemiBold" />
+            <Button x:Name="BtnMicrosoft" Style="{StaticResource SyNavItem}" Click="TypeButton_Click">
+                <StackPanel Orientation="Horizontal">
+                    <svgIcon:SvgIcon Icon="lucide/shield-check" Style="{StaticResource SyIcon}" />
+                    <TextBlock Text="正版账号" Margin="12,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button x:Name="BtnOffline" Style="{StaticResource SyNavItem}" Click="TypeButton_Click">
+                <StackPanel Orientation="Horizontal">
+                    <svgIcon:SvgIcon Icon="lucide/user" Style="{StaticResource SyIcon}" />
+                    <TextBlock Text="离线账号" Margin="12,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button x:Name="BtnAuth" Style="{StaticResource SyNavItem}" Click="TypeButton_Click">
+                <StackPanel Orientation="Horizontal">
+                    <svgIcon:SvgIcon Icon="lucide/server" Style="{StaticResource SyIcon}" />
+                    <TextBlock Text="外置账号" Margin="12,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button x:Name="BtnBedrock" Style="{StaticResource SyNavItem}" Click="TypeButton_Click">
+                <StackPanel Orientation="Horizontal">
+                    <svgIcon:SvgIcon Icon="lucide/box" Style="{StaticResource SyIcon}" />
+                    <TextBlock Text="基岩版账号" Margin="12,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+
+        <!-- Right: accounts of the selected kind -->
+        <Grid Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock x:Name="ListTitle" Text="正版账号" FontFamily="{StaticResource SyDisplayFontFamily}"
+                               FontSize="{StaticResource SyFontSubtitle}" FontWeight="SemiBold" />
+                    <TextBlock x:Name="ListDetail" Margin="0,2,0,0" FontSize="{StaticResource SyFontCaption}"
+                               Foreground="{DynamicResource SyTextSecondary}" />
+                </StackPanel>
+                <Button x:Name="BtnAdd" Style="{StaticResource SyAccentButton}" HorizontalAlignment="Right"
+                        VerticalAlignment="Center" Click="Add_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <svgIcon:SvgIcon Icon="lucide/user-plus" Style="{StaticResource SyIcon}" />
+                        <TextBlock x:Name="BtnAddText" Text="添加账号" Margin="8,0,0,0" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <!-- Inline login card -->
+            <Border x:Name="LoginHost" Grid.Row="1" Visibility="Collapsed" Margin="0,16,0,0" Padding="20"
+                    CornerRadius="{StaticResource SyRadiusOverlay}"
+                    Background="{DynamicResource SyCardFill}" BorderBrush="{DynamicResource SyCardStroke}" BorderThickness="1">
+                <StackPanel>
+                    <TextBlock x:Name="LoginTitle" Text="登录账号" FontWeight="SemiBold" FontSize="16" />
+                    <TextBlock x:Name="LoginDetail" Margin="0,4,0,0" TextWrapping="Wrap"
+                               Foreground="{DynamicResource SyTextSecondary}" />
+                    <TextBox x:Name="LoginInput" Style="{StaticResource SyTextBox}" Margin="0,14,0,0" MaxWidth="360"
+                             HorizontalAlignment="Left" Width="360" Visibility="Collapsed" KeyDown="LoginInput_KeyDown" />
+                    <StackPanel x:Name="OfflineOptions" Visibility="Collapsed" Margin="0,8,0,0">
+                        <ComboBox x:Name="UuidMode" SelectedIndex="0" Width="200" HorizontalAlignment="Left" SelectionChanged="UuidMode_Changed">
+                            <ComboBoxItem Content="{DynamicResource Launch.Account.Offline.Uuid.Standard}" />
+                            <ComboBoxItem Content="{DynamicResource Launch.Account.Offline.Uuid.Legacy}" />
+                            <ComboBoxItem Content="{DynamicResource Common.Option.Customize}" />
+                        </ComboBox>
+                        <TextBox x:Name="CustomUuid" Style="{StaticResource SyTextBox}" Visibility="Collapsed"
+                                 ToolTip="{DynamicResource Launch.Account.Offline.Uuid.Custom.Input.ToolTip}" Margin="0,6,0,0" />
+                    </StackPanel>
+                    <StackPanel x:Name="AuthForm" Visibility="Collapsed" Margin="0,8,0,0" MaxWidth="390" HorizontalAlignment="Left">
+                        <TextBlock Text="验证服务器" />
+                        <DockPanel>
+                            <Button DockPanel.Dock="Right" Style="{StaticResource SyButton}" Content="LittleSkin" Click="LittleSkin_Click" />
+                            <TextBox x:Name="ServerAddress" MinWidth="240" Style="{StaticResource SyTextBox}" TextChanged="Server_Changed" />
+                        </DockPanel>
+                        <TextBlock x:Name="ServerName" Foreground="{DynamicResource SyTextSecondary}" />
+                        <TextBlock Text="用户名或邮箱" />
+                        <TextBox x:Name="AuthName" Style="{StaticResource SyTextBox}" TextChanged="AuthName_Changed" />
+                        <TextBlock Text="密码" Margin="0,6,0,0" />
+                        <PasswordBox x:Name="AuthPassword" MinHeight="30" />
+                        <WrapPanel Margin="0,6,0,0">
+                            <Button x:Name="WebSignIn" Visibility="Collapsed" Content="{DynamicResource Launch.Account.Auth.WebLogin}"
+                                    Style="{StaticResource SyButton}" Click="WebSignIn_Click" />
+                            <Button x:Name="Registration" Visibility="Collapsed" Style="{StaticResource SyButton}" Click="Registration_Click" />
+                        </WrapPanel>
+                    </StackPanel>
+                    <StackPanel x:Name="LoginActions" Orientation="Horizontal" Margin="0,16,0,0">
+                        <Button x:Name="BtnLoginStart" Style="{StaticResource SyAccentButton}" MinWidth="96"
+                                Content="开始登录" Click="LoginStart_Click" />
+                        <Button x:Name="BtnLoginBack" Style="{StaticResource SyButton}" MinWidth="96" Margin="8,0,0,0"
+                                Content="取消" Click="LoginBack_Click" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <ScrollViewer x:Name="AccountListScroll" Grid.Row="2" Margin="0,16,0,0" Style="{StaticResource ScrollViewerNoMargin}"
+                          VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <StackPanel x:Name="AccountItems" />
+                    <TextBlock x:Name="EmptyText" Margin="4,8,0,0" Visibility="Collapsed"
+                               Foreground="{DynamicResource SyTextSecondary}" TextWrapping="Wrap" />
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

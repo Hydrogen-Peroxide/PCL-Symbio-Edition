@@ -12,4 +12,8 @@ public sealed record LocalizationLanguage(
     string Code,
     string NativeName,
     string CultureName,
-    LocalizationFontProfile FontProfile);
+    LocalizationFontProfile FontProfile)
+{
+    /// <summary>资源覆盖词典缺少键时使用的完整语言。</summary>
+    internal string? FallbackResourceCode { get; init; }
+}

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO.Packaging;
 using System.Linq;
 using System.Windows;
 using System.Windows.Media;
@@ -13,7 +14,7 @@ namespace PCL.Core.App.Localization;
 public static class LocalizationFontService
 {
     private const string PclEnglishFont = "./Resources/#PCL English";
-    private static readonly Uri _ApplicationPackUri = new("pack://application:,,,/");
+    private static readonly Lazy<Uri> _ApplicationPackUri = new(() => PackUriHelper.Create(new Uri("application:///")));
 
     private static readonly IReadOnlyDictionary<string, LocalizationFontProfile> _ExactCultureProfiles =
         new Dictionary<string, LocalizationFontProfile>(StringComparer.OrdinalIgnoreCase)
@@ -54,7 +55,7 @@ public static class LocalizationFontService
             ? _GetDefaultFamilyNames(language.FontProfile)
             : _GetCustomFamilyNames(customFontName, language.FontProfile);
 
-        return new FontFamily(_ApplicationPackUri, string.Join(", ", familyNames));
+        return new FontFamily(_ApplicationPackUri.Value, string.Join(", ", familyNames));
     }
 
     /// <summary>
@@ -70,7 +71,7 @@ public static class LocalizationFontService
     /// </summary>
     public static FontFamily BuildRepresentativeFontFamily(LocalizationFontProfile profile)
     {
-        return new FontFamily(_ApplicationPackUri, string.Join(", ", _GetDefaultFamilyNames(profile)));
+        return new FontFamily(_ApplicationPackUri.Value, string.Join(", ", _GetDefaultFamilyNames(profile)));
     }
 
     /// <summary>

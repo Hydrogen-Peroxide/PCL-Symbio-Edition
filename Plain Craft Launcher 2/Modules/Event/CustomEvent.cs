@@ -186,13 +186,13 @@ namespace PCL
         /// <summary>
         /// 今日人品。
         /// </summary>
-        private static void _DailyFortune(string _, EventType __) => PageToolsTest.Jrrp();
+        private static void _DailyFortune(string _, EventType __) => LauncherTools.Jrrp();
 
         /// <summary>
         /// 清理垃圾。异步执行 RubbishClear。
         /// </summary>
         private static void _ClearTrash(string _, EventType __) =>
-            ModBase.RunInThread(PageToolsTest.RubbishClear);
+            ModBase.RunInThread(LauncherTools.RubbishClear);
 
         /// <summary>
         /// 弹出消息框。参数：Title|Content[|ButtonText]。
@@ -269,13 +269,13 @@ namespace PCL
 
             try
             {
-                PageToolsTest.StartCustomDownload(args[0],
+                LauncherTools.StartCustomDownload(args[0],
                     args.Length >= 2 ? args[1] : ModBase.GetFileNameFromPath(args[0]),
                     args.Length >= 3 ? args[2] : null);
             }
             catch
             {
-                PageToolsTest.StartCustomDownload(args[0], Lang.Text("Common.State.Unknown"));
+                LauncherTools.StartCustomDownload(args[0], Lang.Text("Common.State.Unknown"));
             }
         }
 
@@ -338,10 +338,10 @@ namespace PCL
                 {
                     var actualPaths = GetAbsoluteUrls(args[0], type);
                     var location = actualPaths[0];
-                    var content = PageHelpDetail.LoadContent(location);
+                    var content = HelpDocuments.LoadContent(location);
                     ModBase.RunInUiWait(() =>
                     {
-                        var page = new PageHelpDetail(content);
+                        var page = new HelpDocumentView(content);
                         ModMain.frmMain.PageChange(new FormMain.PageStackData
                         {
                             page = FormMain.PageType.HelpDetail,
@@ -366,7 +366,7 @@ namespace PCL
                 Uri.TryCreate(relativeUrl, UriKind.Absolute, out var remoteUri) &&
                 (remoteUri.Scheme == Uri.UriSchemeHttp || remoteUri.Scheme == Uri.UriSchemeHttps))
             {
-                if (ModBase.RunInUi()) throw new Exception("能打开联网帮助页面的 MyListItem 必须手动设置 Title、Info 属性！");
+                if (ModBase.RunInUi()) throw new Exception("能打开联网帮助页面的 SelectionRow 必须手动设置 Title、Info 属性！");
 
                 // 获取文件名
                 string rawFileName;

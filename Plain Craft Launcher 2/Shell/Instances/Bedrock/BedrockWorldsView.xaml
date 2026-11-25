@@ -1,0 +1,25 @@
+<local:WorkspacePage x:Class="PCL.BedrockWorldsView"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:local="clr-namespace:PCL" PanScroll="{Binding ElementName=PanBack}">
+    <ScrollViewer local:ScrollInput.Enabled="True" Style="{StaticResource SyScrollViewer}" x:Name="PanBack" VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+        <StackPanel x:Name="PanMain" Margin="{StaticResource SePageScrollMargin}">
+            <local:WorkspaceCard x:Name="CardSaves" Margin="0,15" Title="{DynamicResource Bedrock.Instance.Saves.Title}">
+                <StackPanel Margin="25,40,25,15">
+                    <WrapPanel Margin="0,-5,-20,7">
+                        <local:SymbioButton x:Name="BtnOpenSaves" Height="35" MinWidth="140" Padding="13,0"
+                                        Margin="0,5,20,0"
+                                        Text="{DynamicResource Bedrock.Instance.Saves.Open}" />
+                        <local:SymbioButton x:Name="BtnRefresh" Height="35" MinWidth="140" Padding="13,0"
+                                        Margin="0,5,20,0"
+                                        Text="{DynamicResource Common.Action.Refresh}" />
+                    </WrapPanel>
+                    <TextBlock x:Name="LabSavesPath" FontSize="11.5" Opacity="0.5" Margin="0,2,0,12"
+                               TextTrimming="CharacterEllipsis" />
+                    <StackPanel x:Name="PanWorlds" />
+                </StackPanel>
+            </local:WorkspaceCard>
+        </StackPanel>
+    </ScrollViewer>
+</local:WorkspacePage>

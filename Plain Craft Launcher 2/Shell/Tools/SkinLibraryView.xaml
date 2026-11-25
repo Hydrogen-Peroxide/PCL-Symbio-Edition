@@ -1,0 +1,90 @@
+<local:WorkspacePage x:Class="PCL.SkinLibraryView"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:local="clr-namespace:PCL"
+                   xmlns:controls="clr-namespace:PCL.Core.UI.Controls;assembly=PCL.Core"
+                   PanScroll="{Binding ElementName=PanBack}">
+    <ScrollViewer local:ScrollInput.Enabled="True" Style="{StaticResource SyScrollViewer}" x:Name="PanBack" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="16,32">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="292" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- 当前皮肤：只保留预览与名字，操作按钮挪到左栏顶部 -->
+                    <controls:BlurBorder Grid.Column="2" Width="292" HorizontalAlignment="Right" VerticalAlignment="Top" Style="{StaticResource SeFluentCard}" Padding="20">
+                    <StackPanel>
+                        <TextBlock Text="{DynamicResource Tools.SkinLibrary.Current}" FontSize="20" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SyText}" />
+                        <Border Margin="0,20,0,0" Padding="10" CornerRadius="8" Background="{DynamicResource ColorBrushSemiTransparent}">
+                            <!-- 预览底色不能太深：深色皮肤的手臂、躯干同色，与近黑底色几乎无法区分，会被误看成空隙 -->
+                            <local:SkinPreviewView x:Name="ViewerCurrent" Height="260" />
+                        </Border>
+                        <TextBlock x:Name="LabCurrentName" HorizontalAlignment="Center" Margin="0,10,0,0"
+                                   MaxWidth="200" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                   Foreground="{DynamicResource SyTextSecondary}" />
+                        <local:SymbioButton x:Name="BtnRename" Height="34" Margin="0,14,0,0" Padding="12,0"
+                                        HorizontalAlignment="Stretch" Visibility="Collapsed"
+                                        Text="{DynamicResource Tools.SkinLibrary.Rename}"
+                                        Click="BtnRename_Click" />
+                        <local:SymbioButton x:Name="BtnRemove" Height="34" Margin="0,8,0,0" Padding="12,0"
+                                        HorizontalAlignment="Stretch" ColorType="Red" Visibility="Collapsed"
+                                        Text="{DynamicResource Tools.SkinLibrary.RemoveFromLibrary}"
+                                        Click="BtnRemove_Click" />
+                    </StackPanel>
+                    </controls:BlurBorder>
+
+                    <!-- 皮肤库 -->
+                    <StackPanel Grid.Column="0" Margin="0,8,0,0">
+                        <!-- 顶部一条水平栏：模型切换 + 添加到皮肤库居中，刷新/打开文件夹靠右 -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="0" Width="200" VerticalAlignment="Center"
+                                  ToolTip="{DynamicResource Tools.SkinLibrary.SlimModel.ToolTip}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="8" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <local:SymbioButton x:Name="BtnClassicModel" Height="34" Style="{StaticResource SePillButton}"
+                                                Text="{DynamicResource Launch.Skin.Model.Steve}" Click="BtnModel_Click" />
+                                <local:SymbioButton x:Name="BtnSlimModel" Grid.Column="2" Height="34" Style="{StaticResource SePillButton}"
+                                                Text="{DynamicResource Launch.Skin.Model.Alex}" Click="BtnModel_Click" />
+                            </Grid>
+
+                            <local:SymbioButton x:Name="BtnPrimary" Grid.Column="1" Height="34" CornerRadius="8"
+                                            Margin="12,0,0,0" Padding="16,0" VerticalAlignment="Center"
+                                            ColorType="Highlight"
+                                            Text="{DynamicResource Tools.SkinLibrary.AddToLibrary}"
+                                            Click="BtnPrimary_Click" />
+
+                            <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                                <local:SymbioIconButton x:Name="BtnRefresh" SvgIcon="lucide/refresh-cw"
+                                                    Style="{StaticResource SeIconButton}"
+                                                    ToolTip="{DynamicResource Tools.SkinLibrary.Refresh}"
+                                                    Click="BtnRefresh_Click" />
+                                <local:SymbioIconButton x:Name="BtnOpenFolder" SvgIcon="lucide/folder-open"
+                                                    Style="{StaticResource SeIconButton}" Margin="6,0,0,0"
+                                                    ToolTip="{DynamicResource Tools.SkinLibrary.OpenFolder}"
+                                                    Click="BtnOpenFolder_Click" />
+                            </StackPanel>
+                        </Grid>
+                        <WrapPanel x:Name="PanSkinList" Margin="0,20,0,0" HorizontalAlignment="Left" />
+                        <TextBlock x:Name="LabEmpty" Text="{DynamicResource Tools.SkinLibrary.Empty}"
+                                   Margin="4,12,0,0" TextWrapping="Wrap" FontSize="12"
+                                   HorizontalAlignment="Left"
+                                   Foreground="{DynamicResource SyTextSecondary}" />
+                    </StackPanel>
+                </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</local:WorkspacePage>

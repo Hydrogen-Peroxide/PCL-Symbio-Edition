@@ -17,17 +17,28 @@ public class LocalizationTest
         .ToArray();
 
     [TestMethod]
-    public void AllLanguageDictionariesShouldContainBaseKeys()
+    public void AllLanguageDictionariesShouldProvideBaseKeysWithDeclaredFallback()
     {
-        var baseKeys = LoadKeys("zh-CN");
+        var baseKeys = LoadKeys(LocalizationService.DefaultLanguageCode);
 
-        foreach (var language in LanguageFiles.Where(language => language != "zh-CN"))
+        foreach (var language in LocalizationService.SupportedLanguages)
         {
-            var keys = LoadKeys(language);
+            var requiredCode = language.FallbackResourceCode ?? language.Code;
+            var resourceCodes = LocalizationService.GetLanguageResourceCodes(language)
+                .SkipWhile(code => code != requiredCode);
+            var keys = resourceCodes.SelectMany(LoadKeys).ToHashSet();
             var missing = baseKeys.Except(keys).ToArray();
 
-            Assert.IsEmpty(missing, $"{language} 缺少语言键：{string.Join(", ", missing)}");
+            Assert.IsEmpty(missing, $"{language.Code} 缺少 {missing.Length} 个语言键：{string.Join(", ", missing.Take(20))}");
         }
+    }
+
+    [TestMethod]
+    public void BritishEnglishShouldUseEnglishFallbackBeforeSimplifiedChinese()
+    {
+        var language = LocalizationService.ResolveLanguage("en-GB");
+        CollectionAssert.AreEqual(new[] { "zh-CN", "en-US", "en-GB" },
+            LocalizationService.GetLanguageResourceCodes(language).ToArray());
     }
 
 

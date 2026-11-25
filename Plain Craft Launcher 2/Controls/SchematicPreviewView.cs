@@ -18,8 +18,8 @@ public sealed class SchematicPreviewView : UserControl
 {
     private readonly Action _onBack;
     private readonly SchematicViewer3D? _viewer;
-    private readonly MyCheckBox _checkLayer;
-    private readonly MySlider _sliderLayer;
+    private readonly SymbioCheck _checkLayer;
+    private readonly SymbioSlider _sliderLayer;
     private readonly TextBlock _labLayer;
     private readonly Border _detailPanel;
     private readonly int _layerCount;
@@ -45,7 +45,7 @@ public sealed class SchematicPreviewView : UserControl
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-        var backButton = new MyButton
+        var backButton = new SymbioButton
         {
             Text = Lang.Text("Instance.Resource.Item.Info.Return"), Height = 32, MinWidth = 96,
             Padding = new Thickness(14, 0, 14, 0)
@@ -58,23 +58,23 @@ public sealed class SchematicPreviewView : UserControl
             Text = title, FontSize = 16, FontWeight = FontWeights.Bold, Margin = new Thickness(16, 0, 16, 0),
             VerticalAlignment = VerticalAlignment.Center, TextTrimming = TextTrimming.CharacterEllipsis
         };
-        titleText.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush1");
+        titleText.SetResourceReference(TextBlock.ForegroundProperty, "SyText");
         Grid.SetColumn(titleText, 1);
         header.Children.Add(titleText);
 
         if (!string.IsNullOrEmpty(url))
         {
-            var openButton = new MyButton
+            var openButton = new SymbioButton
             {
                 Text = Lang.Text("Instance.Resource.Item.Info.OpenWebsite"), Height = 32, MinWidth = 104,
-                Padding = new Thickness(14, 0, 14, 0), ColorType = MyButton.ColorState.Highlight
+                Padding = new Thickness(14, 0, 14, 0), ColorType = SymbioButton.ColorState.Highlight
             };
             openButton.Click += (_, _) => ModBase.OpenWebsite(url);
             Grid.SetColumn(openButton, 2);
             header.Children.Add(openButton);
         }
 
-        var detailButton = new MyButton
+        var detailButton = new SymbioButton
         {
             Text = Lang.Text("Instance.Resource.Schematic.Preview.Detail"), Height = 32, MinWidth = 72,
             Padding = new Thickness(14, 0, 14, 0), Margin = new Thickness(8, 0, 0, 0)
@@ -93,8 +93,8 @@ public sealed class SchematicPreviewView : UserControl
         {
             CornerRadius = new CornerRadius(8), ClipToBounds = true, BorderThickness = new Thickness(1)
         };
-        body.SetResourceReference(Border.BackgroundProperty, "ColorBrushGray8");
-        body.SetResourceReference(Border.BorderBrushProperty, "ColorBrushGray5");
+        body.SetResourceReference(Border.BackgroundProperty, "SyControlAlt");
+        body.SetResourceReference(Border.BorderBrushProperty, "SyTextDisabled");
         Grid.SetRow(body, 1);
         root.Children.Add(body);
 
@@ -124,7 +124,7 @@ public sealed class SchematicPreviewView : UserControl
                 Margin = new Thickness(40), FontSize = 13, TextWrapping = TextWrapping.Wrap,
                 TextAlignment = TextAlignment.Center
             };
-            notice.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray3");
+            notice.SetResourceReference(TextBlock.ForegroundProperty, "SyTextSecondary");
             bodyGrid.Children.Add(notice);
         }
 
@@ -159,22 +159,22 @@ public sealed class SchematicPreviewView : UserControl
         footer.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1d, GridUnitType.Star) });
         footer.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-        _checkLayer = new MyCheckBox
+        _checkLayer = new SymbioCheck
         {
             Text = Lang.Text("Instance.Resource.Schematic.Preview.LayerOnly"),
             VerticalAlignment = VerticalAlignment.Center
         };
         footer.Children.Add(_checkLayer);
 
-        // MySlider 内部会用 MaxValue 做除数，只有一层时也要保证 MaxValue 至少为 1
-        _sliderLayer = new MySlider
+        // SymbioSlider 内部会用 MaxValue 做除数，只有一层时也要保证 MaxValue 至少为 1
+        _sliderLayer = new SymbioSlider
         {
             Width = 180, Margin = new Thickness(16, 0, 0, 0), IsEnabled = false,
             MaxValue = Math.Max(1, _layerCount - 1),
             Visibility = _layerCount > 1 ? Visibility.Visible : Visibility.Collapsed
         };
         // 默认停在最高层，打开分层显示时从顶层往下看最自然
-        _sliderLayer.Value = _layerCount > 1 ? _layerCount - 1 : 0;
+        _sliderLayer.StepValue = _layerCount > 1 ? _layerCount - 1 : 0;
         Grid.SetColumn(_sliderLayer, 1);
         footer.Children.Add(_sliderLayer);
 
@@ -192,7 +192,7 @@ public sealed class SchematicPreviewView : UserControl
             _labLayer.Visibility = Visibility.Collapsed;
         }
 
-        _labLayer.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray3");
+        _labLayer.SetResourceReference(TextBlock.ForegroundProperty, "SyTextSecondary");
         Grid.SetColumn(_labLayer, 2);
         footer.Children.Add(_labLayer);
 
@@ -204,7 +204,7 @@ public sealed class SchematicPreviewView : UserControl
                 HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Center,
                 FontSize = 12
             };
-            hint.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray3");
+            hint.SetResourceReference(TextBlock.ForegroundProperty, "SyTextSecondary");
             Grid.SetColumn(hint, 4);
             footer.Children.Add(hint);
         }
@@ -214,8 +214,8 @@ public sealed class SchematicPreviewView : UserControl
             Child = footer, CornerRadius = new CornerRadius(8), Padding = new Thickness(12, 8, 12, 8),
             BorderThickness = new Thickness(1), Margin = new Thickness(0, 8, 0, 0)
         };
-        footerBar.SetResourceReference(Border.BackgroundProperty, "ColorBrushTransparentBackground");
-        footerBar.SetResourceReference(Border.BorderBrushProperty, "ColorBrushGray5");
+        footerBar.SetResourceReference(Border.BackgroundProperty, "SyFrostFill");
+        footerBar.SetResourceReference(Border.BorderBrushProperty, "SyTextDisabled");
         footerBar.Visibility = _viewer is null ? Visibility.Collapsed : Visibility.Visible;
         Grid.SetRow(footerBar, 2);
         root.Children.Add(footerBar);
@@ -223,7 +223,7 @@ public sealed class SchematicPreviewView : UserControl
         _checkLayer.Change += (_, _) => ApplyLayer();
         _sliderLayer.Change += (_, _) => ApplyLayer();
 
-        // MySlider 的 Change 事件在有其他动画时可能不触发，这里再做一层轮询兜底
+        // SymbioSlider 的 Change 事件在有其他动画时可能不触发，这里再做一层轮询兜底
         _layerWatch = new DispatcherTimer(DispatcherPriority.Background)
         {
             Interval = TimeSpan.FromMilliseconds(40)
@@ -242,7 +242,7 @@ public sealed class SchematicPreviewView : UserControl
         SyncLayer();
     }
 
-    /// <summary>同步分层状态；同时作为 MySlider 拖动时的轮询兜底，避免 Change 事件被动画吞掉。</summary>
+    /// <summary>同步分层状态；同时作为 SymbioSlider 拖动时的轮询兜底，避免 Change 事件被动画吞掉。</summary>
     private void SyncLayer()
     {
         if (_viewer is null) return;
@@ -260,7 +260,7 @@ public sealed class SchematicPreviewView : UserControl
         }
 
         var count = Math.Max(1, _layerCount);
-        var index = Math.Clamp(_sliderLayer.Value, 0, count - 1);
+        var index = Math.Clamp(_sliderLayer.StepValue, 0, count - 1);
         var top = _viewer.MinLayer + index;
         if (_viewer.VisibleTopLayer == top) return;
         _viewer.VisibleTopLayer = top;
@@ -282,8 +282,8 @@ public sealed class SchematicPreviewView : UserControl
             Margin = new Thickness(0, 12, 12, 0), CornerRadius = new CornerRadius(8),
             BorderThickness = new Thickness(1)
         };
-        panel.SetResourceReference(Border.BackgroundProperty, "ColorBrushTransparentBackground");
-        panel.SetResourceReference(Border.BorderBrushProperty, "ColorBrushGray5");
+        panel.SetResourceReference(Border.BackgroundProperty, "SyFrostFill");
+        panel.SetResourceReference(Border.BorderBrushProperty, "SyTextDisabled");
 
         var stack = new Grid();
         stack.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
@@ -296,11 +296,11 @@ public sealed class SchematicPreviewView : UserControl
             FontSize = 12.5, FontWeight = FontWeights.Bold, Margin = new Thickness(12, 10, 12, 8),
             TextWrapping = TextWrapping.Wrap
         };
-        header.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush1");
+        header.SetResourceReference(TextBlock.ForegroundProperty, "SyText");
         stack.Children.Add(header);
 
         var line = new Rectangle { Height = 1 };
-        line.SetResourceReference(Shape.FillProperty, "ColorBrushGray5");
+        line.SetResourceReference(Shape.FillProperty, "SyTextDisabled");
         Grid.SetRow(line, 1);
         stack.Children.Add(line);
 
@@ -331,7 +331,7 @@ public sealed class SchematicPreviewView : UserControl
                 ToolTip = pair.Key, TextTrimming = TextTrimming.CharacterEllipsis,
                 VerticalAlignment = VerticalAlignment.Center
             };
-            name.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush2");
+            name.SetResourceReference(TextBlock.ForegroundProperty, "SyAccentText");
             Grid.SetColumn(name, 1);
             row.Children.Add(name);
 
@@ -340,7 +340,7 @@ public sealed class SchematicPreviewView : UserControl
                 Text = "×" + pair.Value, FontSize = 11, Margin = new Thickness(8, 0, 0, 0),
                 VerticalAlignment = VerticalAlignment.Center
             };
-            count.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrushGray3");
+            count.SetResourceReference(TextBlock.ForegroundProperty, "SyTextSecondary");
             Grid.SetColumn(count, 2);
             row.Children.Add(count);
 
@@ -357,7 +357,7 @@ public sealed class SchematicPreviewView : UserControl
     private static Border BuildDetailPanel(string info)
     {
         var text = new TextBlock { Text = info, FontSize = 12, TextWrapping = TextWrapping.Wrap };
-        text.SetResourceReference(TextBlock.ForegroundProperty, "ColorBrush2");
+        text.SetResourceReference(TextBlock.ForegroundProperty, "SyAccentText");
 
         var panel = new Border
         {
@@ -365,19 +365,20 @@ public sealed class SchematicPreviewView : UserControl
             VerticalAlignment = VerticalAlignment.Bottom, Margin = new Thickness(12, 0, 0, 12),
             CornerRadius = new CornerRadius(8), Padding = new Thickness(12, 10, 12, 10), BorderThickness = new Thickness(1)
         };
-        panel.SetResourceReference(Border.BackgroundProperty, "ColorBrushTransparentBackground");
-        panel.SetResourceReference(Border.BorderBrushProperty, "ColorBrushGray5");
+        panel.SetResourceReference(Border.BackgroundProperty, "SyFrostFill");
+        panel.SetResourceReference(Border.BorderBrushProperty, "SyTextDisabled");
         return panel;
     }
 
     /// <summary>使用带独立滚动条列的样式，避免原生滚动条盖住列表内容。</summary>
     private static ScrollViewer CreateScrollViewer(UIElement content, double maxHeight)
     {
-        var scroll = new MyScrollViewer
+        var scroll = new System.Windows.Controls.ScrollViewer
         {
             Content = content, MaxHeight = maxHeight, VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled
         };
+        ScrollInput.SetEnabled(scroll, true);
         scroll.SetResourceReference(FrameworkElement.StyleProperty, "ScrollViewerFullMargin");
         return scroll;
     }

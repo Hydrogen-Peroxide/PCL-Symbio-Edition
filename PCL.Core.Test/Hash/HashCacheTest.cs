@@ -1,4 +1,5 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PCL.Core.Test.IO.Storage;
 using PCL.Core.Utils.Exts;
 using PCL.Core.Utils.Hash;
 using System;
@@ -27,7 +28,10 @@ public class HashCacheTest
     public void Cleanup()
     {
         if (Directory.Exists(_tempDir))
+        {
+            SqliteTestDatabase.ClearPools(Path.Combine(_tempDir, ".hash_cache.db"));
             Directory.Delete(_tempDir, true);
+        }
     }
 
     private sealed record FileItem(string FilePath, string MD5, string SHA1, string SHA256, string SHA512, string MurmurHash2);

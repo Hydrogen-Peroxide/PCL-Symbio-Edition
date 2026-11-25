@@ -159,8 +159,6 @@ public static class ModLivingForkEgg
         {
             combo.Start();
             ModLoader.LoaderTaskbarAdd(combo);
-            ModMain.frmMain.BtnExtraDownload.ShowRefresh();
-            ModMain.frmMain.BtnExtraDownload.Ribble();
         });
         combo.WaitForExit();
     }

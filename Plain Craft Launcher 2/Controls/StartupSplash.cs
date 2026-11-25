@@ -2,7 +2,6 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -58,10 +57,8 @@ public class StartupSplash : Window
         // 若窗口在首次渲染前就被要求关闭，不要再用淡入动画覆盖关闭时的淡出，
         // 否则淡出的 Completed 永远不触发，Logo 会一直留在屏幕上
         if (_closing) return;
-        BeginAnimation(OpacityProperty, new DoubleAnimation(0d, 1d, TimeSpan.FromMilliseconds(150))
-        {
-            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-        });
+        SymbioMotion.Fade(this, 0, immediate: true);
+        SymbioMotion.Fade(this, 1);
     }
 
     /// <summary>以淡出动画关闭窗口。</summary>
@@ -75,23 +72,19 @@ public class StartupSplash : Window
             return;
         }
 
-        var fade = new DoubleAnimation(Opacity, 0d, fadeOut)
+        // A busy startup dispatcher may not render another frame before shutdown.
+        var timer = new DispatcherTimer(DispatcherPriority.Send) { Interval = fadeOut };
+        var closed = false;
+        Closed += (_, _) => { closed = true; timer.Stop(); };
+        void Finish()
         {
-            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut }
-        };
-        fade.Completed += (_, _) => Close();
-        BeginAnimation(OpacityProperty, fade);
-
-        // 兜底：淡出动画可能被首次渲染的淡入替换而收不到 Completed，超时后强制关闭
-        var timer = new DispatcherTimer(DispatcherPriority.Send)
-        {
-            Interval = fadeOut + TimeSpan.FromMilliseconds(100)
-        };
-        timer.Tick += (_, _) =>
-        {
+            if (closed) return;
+            closed = true;
             timer.Stop();
             Close();
-        };
+        }
+        timer.Tick += (_, _) => Finish();
         timer.Start();
+        SymbioMotion.Fade(this, 0, completed: Finish);
     }
 }

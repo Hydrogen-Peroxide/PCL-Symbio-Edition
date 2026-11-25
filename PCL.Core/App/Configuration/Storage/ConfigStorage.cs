@@ -37,7 +37,7 @@ public abstract class ConfigStorage : IConfigProvider
     public void Stop() => OnStop();
 
 #if DEBUG
-    private static readonly bool _EnableTrace = Basics.CommandLineArguments.Contains("--trace-traffic");
+    private static readonly bool _EnableTrace = Environment.GetCommandLineArgs().Skip(1).Contains("--trace-traffic");
 #endif
 
     /// <summary>

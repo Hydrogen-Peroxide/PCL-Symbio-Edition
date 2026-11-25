@@ -1,0 +1,24 @@
+<local:WorkspacePage x:Class="PCL.LanguageSettingsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:PCL"
+    PanScroll="{Binding ElementName=Scroll}">
+    <ScrollViewer x:Name="Scroll" Style="{StaticResource SyScrollViewer}" local:ScrollInput.Enabled="True"
+                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Style="{StaticResource SySettingsPage}">
+            <TextBlock Style="{StaticResource SyPageTitle}" Text="{DynamicResource Setup.Language.CardTitle}" />
+            <local:SettingsCard Icon="lucide/earth" Header="{DynamicResource Setup.Language.UiLanguage}" ActionWidth="260">
+                <local:SymbioSelect x:Name="Languages" SelectedValuePath="Code" SelectionChanged="ChoiceChanged">
+                    <local:SymbioSelect.ItemTemplate><DataTemplate><TextBlock Text="{Binding Label}" FontFamily="{Binding Font}" /></DataTemplate></local:SymbioSelect.ItemTemplate>
+                </local:SymbioSelect>
+            </local:SettingsCard>
+            <local:SettingsCard Icon="lucide/globe" Header="{DynamicResource Setup.Language.FormatCulture}" ActionWidth="260">
+                <local:SymbioSelect x:Name="Cultures" SelectedValuePath="Code" DisplayMemberPath="Label" SelectionChanged="ChoiceChanged" />
+            </local:SettingsCard>
+            <TextBlock Style="{StaticResource SySectionHeader}" Text="{DynamicResource Setup.Language.Banner.SubmitPullRequest}" />
+            <local:SettingsCard Icon="lucide/git-pull-request-arrow" Header="{DynamicResource Setup.Language.Banner.DescriptionLine1}"
+                                Description="{DynamicResource Setup.Language.Banner.DescriptionLine2}">
+                <Button Style="{StaticResource SyButton}" Content="{DynamicResource Setup.Language.Banner.SubmitPullRequest}" Click="OpenTranslations" />
+            </local:SettingsCard>
+        </StackPanel>
+    </ScrollViewer>
+</local:WorkspacePage>

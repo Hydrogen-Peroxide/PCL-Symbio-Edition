@@ -11,12 +11,10 @@ namespace PCL.Core.IO.Storage.Cache;
 public class FileCacheStorage : IDisposable
 {
     private readonly HashStorage _hashStorage;
-    private readonly string _basePath;
     private readonly ConcurrentDictionary<string, int> _refCounts = [];
 
     public FileCacheStorage(string cacheRoot, bool enableCompression = true)
     {
-        _basePath = cacheRoot;
         Directory.CreateDirectory(cacheRoot);
 
         _hashStorage = new HashStorage(
@@ -27,25 +25,19 @@ public class FileCacheStorage : IDisposable
             prefixLength: 2);
     }
 
-    public async Task<string> StoreAsync(Stream source, string? knownHash = null)
+    public async Task<string> StoreAsync(Stream source, string? knownHash = null) =>
+        (await StoreWithLengthAsync(source, knownHash).ConfigureAwait(false)).Hash;
+
+    internal async Task<(string Hash, long Length)> StoreWithLengthAsync(Stream source, string? knownHash = null)
     {
-        var hash = await _hashStorage.PutAsync(source, knownHash).ConfigureAwait(false);
-        if (hash is not null)
-        {
-            _refCounts.AddOrUpdate(hash, 1, (_, count) => count + 1);
-        }
-        return hash!;
+        var stored = await _hashStorage.PutWithLengthAsync(source, knownHash).ConfigureAwait(false);
+        _refCounts.AddOrUpdate(stored.Hash, 1, (_, count) => count + 1);
+        return stored;
     }
 
     public Stream? Retrieve(string hash) => _hashStorage.Get(hash);
 
-    public string? GetFilePath(string hash)
-    {
-        var prefix = hash[..2];
-        var paht = Path.Combine(_basePath, prefix, hash);
-        return File.Exists(paht) ? paht : null;
-
-    }
+    public string? GetFilePath(string hash) => _hashStorage.GetExistingPath(hash);
 
     public bool Exists(string hash) => _hashStorage.Exists(hash);
 

@@ -3385,6 +3385,11 @@
     <sys:String x:Key="Setup.Ui.Basic.BlurSamplingRate.ToolTip">Sets the sampling rate of the blur effect. Higher values produce finer blur.&#xA;If your device has poor performance, try lowering this value for better performance.</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.GetSnapshot">Get official snapshot build</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.LockWindow">Lock launcher size</sys:String>
+    <sys:String x:Key="Setup.Ui.Dock.Placement">Dock position</sys:String>
+    <sys:String x:Key="Setup.Ui.Dock.Placement.Description">Keep the dock inside the window, or float it below the window as a separate frosted glass dock</sys:String>
+    <sys:String x:Key="Setup.Ui.Dock.Placement.Inside">Inside the window</sys:String>
+    <sys:String x:Key="Setup.Ui.Dock.Placement.Detached">Floating outside</sys:String>
+    <sys:String x:Key="Setup.Ui.Window.Title">Window</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.Opacity">Opacity</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.Opacity2">Opacity</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.ShowLogo">Display the PCL SE logo while opening the launcher</sys:String>
@@ -3552,6 +3557,7 @@
     <sys:String x:Key="Setup.Update.FromSource">{0} ({1})</sys:String>
     <sys:String x:Key="Setup.Update.OtherOptions.Placeholder">AquaCL 3 is the first major update of PCL SE. It brings a refreshing new design, uses the latest development technologies, completely rebuilds the core experience, and adds support for macOS, Linux, and other platforms.</sys:String>
     <sys:String x:Key="Setup.Update.OtherOptions.Title">Other update options - upgrade to AquaCL</sys:String>
+    <sys:String x:Key="Setup.Update.Options.Title">Update options</sys:String>
     <sys:String x:Key="Setup.Update.RestartInstall">Restart to install</sys:String>
 
     <!-- Setup.Update.Auto -->
@@ -3964,7 +3970,7 @@
     <sys:String x:Key="Watcher.WindowLoaded">Minecraft window loaded: {0} ({1})</sys:String>
     <sys:String x:Key="Watcher.WindowMaximized">Minecraft window maximized: {0}</sys:String>
 
-    <sys:String x:Key="Setup.Language.Banner.DescriptionLine1">Simplified Chinese and US English cover the main interface; other languages are still incomplete. Untranslated text falls back to Simplified Chinese.</sys:String>
+    <sys:String x:Key="Setup.Language.Banner.DescriptionLine1">Simplified Chinese, US English and UK English cover the main interface. Languages still in progress use Simplified Chinese where translations are missing.</sys:String>
     <sys:String x:Key="Setup.Language.Banner.DescriptionLine2">Contribute language resource changes to the PCL SE maintenance repository.</sys:String>
     <sys:String x:Key="Setup.Language.Banner.SubmitPullRequest">Contribute translations</sys:String>
 

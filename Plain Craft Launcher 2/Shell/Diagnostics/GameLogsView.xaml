@@ -1,0 +1,46 @@
+<local:WorkspacePage x:Class="PCL.GameLogsView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:PCL">
+    <Grid Margin="{StaticResource SePageScrollMargin}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <DockPanel LastChildFill="True" Margin="0,4,0,10">
+            <Button x:Name="RemoveSessionButton" DockPanel.Dock="Right" Content="关闭此日志" Style="{StaticResource SyButton}"
+                    Margin="8,0,0,0" Click="RemoveSession" />
+            <local:SymbioSelect x:Name="Sessions" AutomationProperties.Name="{DynamicResource LogPage.Left.InstancesTitle}"
+                                DisplayMemberPath="Title" SelectionChanged="SessionChanged" />
+        </DockPanel>
+        <WrapPanel Grid.Row="1" x:Name="Tools" Margin="0,0,0,8">
+            <local:SymbioCheck x:Name="AutoScroll" Text="{DynamicResource LogPage.Action.Scroll}" IsChecked="True"
+                               VerticalAlignment="Center" Margin="0,0,12,4" />
+            <Button Style="{StaticResource SyButton}" Content="{DynamicResource LogPage.Action.Export}" Click="ExportLog" Margin="0,0,6,4" />
+            <Button Style="{StaticResource SyButton}" Content="{DynamicResource LogPage.Action.Clear}" Click="ClearLog" Margin="0,0,6,4" />
+            <Button x:Name="KillButton" Style="{StaticResource SyButton}" Content="{DynamicResource LogPage.Action.KillProcess}" Click="KillGame" Margin="0,0,6,4" />
+            <Button x:Name="DumpButton" Style="{StaticResource SyButton}" Content="{DynamicResource LogPage.Action.ExportStack}" Click="ExportStack" Margin="0,0,6,4" />
+        </WrapPanel>
+        <Border Grid.Row="2" x:Name="Viewer" Background="{DynamicResource SyControl}" BorderBrush="{DynamicResource SyCardStroke}"
+                BorderThickness="1" CornerRadius="{StaticResource SyRadiusOverlay}" Padding="10">
+            <RichTextBox x:Name="LogText" IsReadOnly="True" VerticalScrollBarVisibility="Auto"
+                         Background="Transparent" Foreground="{DynamicResource SyText}" BorderThickness="0"
+                         FontFamily="Cascadia Mono, Consolas" FontSize="12" />
+        </Border>
+        <StackPanel Grid.Row="2" x:Name="Empty" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="{DynamicResource LogPage.Empty.Title}" FontSize="{StaticResource SyFontSubtitle}" HorizontalAlignment="Center" />
+            <TextBlock Text="{DynamicResource LogPage.Empty.Description}" Margin="0,6,0,0"
+                       Foreground="{DynamicResource SyTextSecondary}" TextWrapping="Wrap" />
+        </StackPanel>
+        <DockPanel Grid.Row="3" x:Name="Footer" Margin="0,8,0,4">
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                <TextBlock Text="{DynamicResource LogPage.MaxLines.Title}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                <Slider x:Name="RetainSlider" Width="110" Minimum="0" Maximum="29" TickFrequency="1" IsSnapToTickEnabled="True"
+                        ValueChanged="RetentionChanged" ToolTip="{DynamicResource LogPage.MaxLines.ToolTip}" />
+            </StackPanel>
+            <TextBlock x:Name="Counts" VerticalAlignment="Center" TextWrapping="Wrap"
+                       Foreground="{DynamicResource SyTextSecondary}" Margin="0,0,12,0" />
+        </DockPanel>
+    </Grid>
+</local:WorkspacePage>

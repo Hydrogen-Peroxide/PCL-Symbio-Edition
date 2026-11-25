@@ -3,11 +3,11 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     xmlns:local="clr-namespace:PCL"
                     xmlns:controls="clr-namespace:PCL.Core.UI.Controls;assembly=PCL.Core">
-    <!-- Geometry in WPF DIPs. Only the existing theme service owns the palette. -->
-    <CornerRadius x:Key="SeRadiusXs">4</CornerRadius>
-    <CornerRadius x:Key="SeRadiusSm">16</CornerRadius>
-    <CornerRadius x:Key="SeRadiusMd">18</CornerRadius>
-    <CornerRadius x:Key="SeRadiusLg">16</CornerRadius>
+    <!-- Geometry in WPF DIPs, aligned to Fluent 2 (controls 4, cards/overlays 8). -->
+    <CornerRadius x:Key="SeRadiusXs">2</CornerRadius>
+    <CornerRadius x:Key="SeRadiusSm">4</CornerRadius>
+    <CornerRadius x:Key="SeRadiusMd">8</CornerRadius>
+    <CornerRadius x:Key="SeRadiusLg">8</CornerRadius>
     <CornerRadius x:Key="SeRadiusPill">999</CornerRadius>
     <SolidColorBrush x:Key="SeWallpaperAccent" Color="#FF5269C5" />
     <SolidColorBrush x:Key="SeDarkScrim" Color="#BF1E1E28" />
@@ -61,82 +61,67 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Control">
-                    <Border CornerRadius="{StaticResource SeRadiusSm}" BorderThickness="{StaticResource SeFocusLine}"
-                            BorderBrush="{DynamicResource ColorBrush4}" SnapsToDevicePixels="True" IsHitTestVisible="False" />
+                    <Border Margin="-3" CornerRadius="7" BorderThickness="2" BorderBrush="{DynamicResource SyFocusOuter}"
+                            SnapsToDevicePixels="True" IsHitTestVisible="False">
+                        <Border CornerRadius="5" BorderThickness="1" BorderBrush="{DynamicResource SyFocusInner}" />
+                    </Border>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-    <Style x:Key="SeButton" TargetType="local:MyButton">
-        <Setter Property="Height" Value="{StaticResource SeButtonHeight}" />
-        <Setter Property="CornerRadius" Value="{StaticResource SeRadiusSm}" />
-        <Style.Triggers>
-            <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Opacity" Value="{StaticResource SeDisabledOpacity}" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-    <Style x:Key="SePrimaryButton" TargetType="local:MyButton" BasedOn="{StaticResource SeButton}">
-        <Setter Property="Height" Value="{StaticResource SePrimaryHeight}" />
-        <Setter Property="CornerRadius" Value="{StaticResource SeRadiusMd}" />
-    </Style>
-    <!-- 胶囊切换按钮：用于实例/版本选择的 pill 形态 -->
-    <Style x:Key="SePillButton" TargetType="local:MyButton" BasedOn="{StaticResource SeButton}">
-        <Setter Property="Height" Value="30" />
-        <Setter Property="CornerRadius" Value="{StaticResource SeRadiusPill}" />
-    </Style>
-    <Style x:Key="SeIconButton" TargetType="local:MyIconButton">
+
+    <Style x:Key="SeIconButton" TargetType="local:SymbioIconButton">
         <Setter Property="Height" Value="{StaticResource SeButtonHeight}" />
         <Setter Property="Width" Value="{StaticResource SeButtonHeight}" />
         <Setter Property="CornerRadius" Value="{StaticResource SeRadiusSm}" />
     </Style>
-    <Style x:Key="SeCard" TargetType="local:MyCard">
+    <Style x:Key="SeCard" TargetType="local:WorkspaceCard">
         <Setter Property="Margin" Value="{StaticResource SeCardGap}" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
-    <Style x:Key="SeListItem" TargetType="local:MyListItem">
+    <Style x:Key="SeListItem" TargetType="local:SelectionRow">
         <Setter Property="FontSize" Value="{StaticResource SeBodyStrong}" />
     </Style>
     <Style x:Key="SeSidebarLabel" TargetType="TextBlock">
         <Setter Property="Margin" Value="{StaticResource SeSidebarLabelMargin}" />
         <Setter Property="FontSize" Value="{StaticResource SeCaption}" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{DynamicResource ColorBrushGray2}" />
+        <Setter Property="Foreground" Value="{DynamicResource SyTextSecondary}" />
     </Style>
     <Style x:Key="SeSubtitleText" TargetType="TextBlock">
         <Setter Property="FontSize" Value="{StaticResource SeSubtitle}" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{DynamicResource ColorBrush1}" />
+        <Setter Property="Foreground" Value="{DynamicResource SyText}" />
     </Style>
     <Style x:Key="SeSolidSurface" TargetType="Border">
         <Setter Property="CornerRadius" Value="{StaticResource SeRadiusMd}" />
         <Setter Property="BorderThickness" Value="{StaticResource SeHairline}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource ColorBrushGray6}" />
-        <Setter Property="Background" Value="{DynamicResource ColorBrushBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SyCardStroke}" />
+        <Setter Property="Background" Value="{DynamicResource SyFlyoutFill}" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
     <Style x:Key="SeAcrylic" TargetType="controls:BlurBorder" BasedOn="{StaticResource SeSolidSurface}">
         <Setter Property="BlurRadius" Value="{DynamicResource BlurRadius}" />
         <Setter Property="BlurSamplingRate" Value="{DynamicResource BlurSamplingRate}" />
         <Setter Property="BlurKernelType" Value="{DynamicResource BlurType}" />
-        <Setter Property="Background" Value="{DynamicResource ColorBrushTransparentBackground}" />
+        <Setter Property="Background" Value="{DynamicResource SyFrostFill}" />
         <Style.Triggers>
             <!-- The existing advanced-material switch sets the shared radius to zero. -->
             <Trigger Property="BlurRadius" Value="0">
-                <Setter Property="Background" Value="{DynamicResource ColorBrushBackground}" />
+                <Setter Property="Background" Value="{DynamicResource SyFlyoutFill}" />
             </Trigger>
         </Style.Triggers>
     </Style>
     <Style x:Key="SeFluentCard" TargetType="controls:BlurBorder" BasedOn="{StaticResource SeAcrylic}">
-        <Setter Property="Background" Value="{DynamicResource SeCardFill}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource SeCardStroke}" />
+        <Setter Property="Background" Value="{DynamicResource SyFrostFill}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SyFrostEdge}" />
     </Style>
     <Style x:Key="SeSkinTile" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource SeCardFill}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource SeCardStroke}" />
+        <Setter Property="Background" Value="{DynamicResource SyFrostFill}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SyFrostEdge}" />
         <Setter Property="Effect">
             <Setter.Value>
-                <DropShadowEffect Color="Black" Opacity="0.15" BlurRadius="16" ShadowDepth="2" />
+                <DropShadowEffect Color="Black" Opacity="0.08" BlurRadius="16" ShadowDepth="4" Direction="270" />
             </Setter.Value>
         </Setter>
         <Setter Property="RenderTransform">
@@ -146,25 +131,10 @@
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Effect">
                     <Setter.Value>
-                        <DropShadowEffect Color="Black" Opacity="0.36" BlurRadius="24" ShadowDepth="4" />
+                        <DropShadowEffect Color="Black" Opacity="0.2" BlurRadius="24" ShadowDepth="8" Direction="270" />
                     </Setter.Value>
                 </Setter>
-                <Trigger.EnterActions>
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                             To="-3" Duration="0:0:0.16" />
-                        </Storyboard>
-                    </BeginStoryboard>
-                </Trigger.EnterActions>
-                <Trigger.ExitActions>
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
-                                             To="0" Duration="0:0:0.16" />
-                        </Storyboard>
-                    </BeginStoryboard>
-                </Trigger.ExitActions>
+                <Setter Property="local:SpringOffset.Y" Value="-3" />
             </Trigger>
         </Style.Triggers>
     </Style>

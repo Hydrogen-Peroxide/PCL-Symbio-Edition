@@ -2,7 +2,6 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 
 namespace PCL;
@@ -116,25 +115,6 @@ internal static class FluentAppearance
 
     internal static void AnimatePage(FrameworkElement surface)
     {
-        if (!SystemParameters.ClientAreaAnimation || ModAnimation.aniSpeed <= 0)
-            return;
-
-        surface.RenderTransformOrigin = new Point(0.5, 0.5);
-        surface.RenderTransform = new ScaleTransform();
-        var storyboard = new Storyboard { FillBehavior = FillBehavior.Stop };
-        AddAnimation(new PropertyPath(UIElement.OpacityProperty), 0, 1);
-        AddAnimation(new PropertyPath("RenderTransform.ScaleX"), 0.97, 1);
-        AddAnimation(new PropertyPath("RenderTransform.ScaleY"), 0.97, 1);
-        storyboard.Begin(surface, HandoffBehavior.SnapshotAndReplace);
-
-        void AddAnimation(PropertyPath path, double from, double to)
-        {
-            var animation = new DoubleAnimation(from, to, TimeSpan.FromMilliseconds(240))
-            {
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
-            };
-            Storyboard.SetTargetProperty(animation, path);
-            storyboard.Children.Add(animation);
-        }
+        SymbioMotion.EnterDepth(surface, 0, .97);
     }
 }

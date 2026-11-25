@@ -23,13 +23,13 @@
             CaptionHeight="0"
             UseAeroCaptionButtons="False"
             ResizeBorderThickness="12"
-            CornerRadius="18"
+            CornerRadius="8"
             GlassFrameThickness="0" />
     </WindowChrome.WindowChrome>
     <Grid SnapsToDevicePixels="True" UseLayoutRounding="True">
         <Border x:Name="PanBack" Margin="8" SizeChanged="PanBack_SizeChanged">
             <Border.Clip>
-                <RectangleGeometry x:Name="RectForm" RadiusX="18" RadiusY="18" />
+                <RectangleGeometry x:Name="RectForm" RadiusX="8" RadiusY="8" />
             </Border.Clip>
             <Grid x:Name="PanForm" SnapsToDevicePixels="False" UseLayoutRounding="False">
                 <Grid.RowDefinitions>
@@ -52,107 +52,6 @@
                         Background="{DynamicResource SeWallpaperScrim}"
                         Visibility="{Binding Visibility, ElementName=ImgBack}"
                         Opacity="{Binding Opacity, ElementName=ImgBack}" />
-                <local:AnimatedBackgroundGrid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" x:Name="PanTitle" Height="36"
-                                              MouseLeftButtonDown="FormDragMove"
-                                              WindowChrome.IsHitTestVisibleInChrome="True"
-                                              BackgroundBrush="{DynamicResource ColorBrushBackground}">
-                    <!-- <Grid.Background> -->
-                    <!--     <LinearGradientBrush EndPoint="1,0" StartPoint="0,0"> -->
-                    <!--         <GradientStop Color="{StaticResource ColorObject4}" Offset="0"/> -->
-                    <!--     </LinearGradientBrush> -->
-                    <!-- </Grid.Background> -->
-                    <local:MyImage x:Name="ImgTitle" IsHitTestVisible="False" Stretch="UniformToFill" IsEnabled="False" RenderOptions.BitmapScalingMode="LowQuality" />
-                    <Border HorizontalAlignment="Right" VerticalAlignment="Center" Width="58" Height="28"
-                            Margin="0,0,5,0" CornerRadius="{StaticResource SeRadiusSm}"
-                            Background="{DynamicResource SeCaptionFill}" IsHitTestVisible="False" />
-                    <local:MyIconButton x:Name="BtnTitleClose" HorizontalAlignment="Right" Height="24" VerticalAlignment="Center" Width="24" Margin="0,0,8,0" Theme="Black" Click="BtnTitleClose_Click"
-                                        SvgIcon="lucide/x" />
-                    <local:MyIconButton x:Name="BtnTitleMin" HorizontalAlignment="Right" Height="24" VerticalAlignment="Center" Width="24" Margin="0,0,36,0" Theme="Black" Click="BtnTitleMin_Click"
-                                       SvgIcon="lucide/minus" />
-                    <local:MyIconButton x:Name="BtnTitleHelp" HorizontalAlignment="Right" Height="24" VerticalAlignment="Center" Width="24" Margin="0,0,64,0" Theme="Black" Visibility="Collapsed" Click="BtnTitleHelp_Click"
-                                        SvgIcon="lucide/circle-help" />
-                    <Grid x:Name="PanTitleMain" HorizontalAlignment="Left" Width="{Binding ActualWidth, ElementName=PanTitle, Mode=OneWay}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="1*" />
-                        </Grid.ColumnDefinitions>
-                        <Grid x:Name="PanTitleLeft" SizeChanged="PanTitle_SizeChanged">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition />
-                            </Grid.ColumnDefinitions>
-
-                            <Path Grid.Column="0" x:Name="ShapeTitleLogo" Data="M26,29 v-25 h6 a7,7 180 0 1 0,14 h-6 M62.5,6.5 a10,11.5 180 1 0 0,18 M71,2.5 v24.5 h13.5" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="14,11,0,11" Stretch="fill" Stroke="{DynamicResource ColorBrushGray1}" StrokeThickness="2" Width="28" />
-                            <Path Grid.Column="0" x:Name="ShapeHMCLTitleLogo" Data="M 60.375 53.406 L 53.625 53.406 L 53.625 0.906 L 63.6 0.906 L 78.15 34.131 L 92.475 0.906 L 102.675 0.906 L 102.675 53.406 L 95.55 53.406 L 95.55 9.981 L 81.525 41.556 L 74.475 41.556 L 60.375 9.981 L 60.375 53.406 Z M 7.125 53.406 L 0 53.406 L 0 0.906 L 7.125 0.906 L 7.125 23.331 L 33 23.331 L 33 0.906 L 40.125 0.906 L 40.125 53.406 L 33 53.406 L 33 29.481 L 7.125 29.481 L 7.125 53.406 Z M 149.85 2.706 L 147.675 8.706 Q 145.35 7.581 142.913 6.906 Q 140.475 6.231 137.175 6.231 Q 132.375 6.231 128.588 8.706 Q 124.8 11.181 122.625 15.831 A 25.755 25.755 0 0 0 120.458 26.263 A 38.963 38.963 0 0 0 120.45 27.081 Q 120.45 33.381 122.588 38.106 Q 124.725 42.831 128.512 45.456 Q 132.3 48.081 137.175 48.081 Q 140.85 48.081 143.55 47.181 Q 146.25 46.281 148.8 44.856 L 150.975 50.781 Q 148.2 52.281 144.638 53.293 Q 141.075 54.306 136.35 54.306 Q 129.525 54.306 124.275 51.043 Q 119.025 47.781 116.1 41.743 A 31.603 31.603 0 0 1 113.201 28.922 A 45.601 45.601 0 0 1 113.175 27.381 Q 113.175 19.356 116.138 13.168 Q 119.1 6.981 124.538 3.493 Q 129.975 0.006 137.25 0.006 Q 141 0.006 144.075 0.718 Q 147.15 1.431 149.85 2.706 Z M 191.925 53.406 L 160.725 53.406 L 160.725 0.906 L 167.85 0.906 L 167.85 47.031 L 191.925 47.031 L 191.925 53.406 Z"
-                                StrokeThickness="0.2" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Height="15" Margin="45,15.5,0,15.5" Stretch="Fill" Stroke="{DynamicResource ColorBrushGray1}" Fill="{DynamicResource ColorBrushGray1}" Width="52" />
-                            <TextBlock Grid.Column="0" x:Name="LabTitleLogo" Visibility="Collapsed" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="18,0,0,0" Foreground="{DynamicResource ColorBrushGray1}" FontSize="17" VerticalAlignment="Center" />
-                            <local:MyImage Grid.Column="0" x:Name="ImageTitleLogo" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="7" VerticalAlignment="Center" Visibility="Collapsed" />
-                            <Border x:Name="SELogo" Grid.Column="1" SnapsToDevicePixels="False" UseLayoutRounding="False" IsHitTestVisible="False" HorizontalAlignment="Left" Margin="10,0,0,0" Background="White" CornerRadius="5" Height="18" Width="20">
-                                <TextBlock Text="SE" Foreground="{DynamicResource ColorBrush3}" FontFamily="Resources/#PCL English" FontSize="13" FontWeight="Normal" HorizontalAlignment="Center" VerticalAlignment="Center" TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="False" SnapsToDevicePixels="False">
-                                    <TextBlock.LayoutTransform>
-                                        <ScaleTransform ScaleX="0.9" ScaleY="1" />
-                                    </TextBlock.LayoutTransform>
-                                </TextBlock>
-                            </Border>
-                        </Grid>
-                    </Grid>
-                    <Grid x:Name="PanTitleInner" Visibility="Collapsed" Margin="-16,0,0,0" Opacity="0"
-                          HorizontalAlignment="Left" Width="{Binding ActualWidth, ElementName=PanTitle, Mode=OneWay}">
-                        <local:MyIconButton HorizontalAlignment="Left" Theme="Black" x:Name="BtnTitleInner"
-                                            Margin="12,0,0,0" Height="28" Width="28" Click="BtnTitleInner_Click"
-                                            LogoScale="0.87"
-                                            SvgIcon="lucide/arrow-left" />
-                        <TextBlock SnapsToDevicePixels="False" IsHitTestVisible="False" Name="LabTitleInner"
-                                   VerticalAlignment="Center" Margin="47,1,60,0" HorizontalAlignment="Left"
-                                   Foreground="{DynamicResource ColorBrushGray1}" FontSize="15" />
-                    </Grid>
-                </local:AnimatedBackgroundGrid>
-                <!-- 侧边导航栏 -->
-                <controls:BlurBorder Grid.Row="1" Grid.Column="0" Width="72" Style="{StaticResource SeFluentCard}"
-                                     Margin="8,12,12,12" CornerRadius="20">
-                    <StackPanel x:Name="PanSidebar" VerticalAlignment="Top" Margin="0,12,0,0">
-                        <local:MyListItem x:Name="BtnTitleSelect0" Tag="0" Height="64" Width="64" Margin="4,0"
-                                         IsFluentNavigation="True" Type="RadioBox" Checked="True" Check="BtnTitleSelect_Click"
-                                         LogoScale="1.2" SvgIcon="lucide/play"
-                                         AutomationProperties.Name="{DynamicResource Main.Tab.Game}"
-                                         ToolTip="{DynamicResource Main.Tab.Game}" />
-                        <local:MyListItem x:Name="BtnTitleSelect2" Tag="1" Height="64" Width="64" Margin="4,8,4,0"
-                                         IsFluentNavigation="True" Type="RadioBox" Check="BtnTitleSelect_Click"
-                                         LogoScale="1.2" SvgIcon="lucide/download"
-                                         AutomationProperties.Name="{DynamicResource Main.Tab.Download}"
-                                         ToolTip="{DynamicResource Main.Tab.Download}" />
-                        <local:MyListItem x:Name="BtnTitleSelect3" Tag="2" Height="64" Width="64" Margin="4,8,4,0"
-                                         IsFluentNavigation="True" Type="RadioBox" Check="BtnTitleSelect_Click"
-                                         LogoScale="1.2" SvgIcon="lucide/settings"
-                                         AutomationProperties.Name="{DynamicResource Main.Tab.Settings}"
-                                         ToolTip="{DynamicResource Main.Tab.Settings}" />
-                        <local:MyListItem x:Name="BtnTitleSelect4" Tag="3" Height="64" Width="64" Margin="4,8,4,0"
-                                         IsFluentNavigation="True" Type="RadioBox" Check="BtnTitleSelect_Click"
-                                         LogoScale="1.2" SvgIcon="lucide/wrench"
-                                         AutomationProperties.Name="{DynamicResource Main.Tab.Tools}"
-                                         ToolTip="{DynamicResource Main.Tab.Tools}" />
-                    </StackPanel>
-                </controls:BlurBorder>
-                <Grid x:Name="PanLeft" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" SnapsToDevicePixels="True">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="1*" />
-                    </Grid.ColumnDefinitions>
-                    <controls:BlurBorder IsHitTestVisible="False">
-                        <local:AnimatedBackgroundGrid x:Name="RectLeftBackground" Width="0"
-                                                      BackgroundBrush="{DynamicResource ColorBrushTransparentBackground}" />
-                    </controls:BlurBorder>
-                    <Rectangle x:Name="RectLeftShadow" Width="4" HorizontalAlignment="Left" IsHitTestVisible="False"
-                               Grid.Column="1">
-                        <Rectangle.Fill>
-                            <LinearGradientBrush EndPoint="1,0" StartPoint="0,0" Opacity="0.04">
-                                <GradientStop Color="#000000" Offset="0" />
-                                <GradientStop Color="#00000000" Offset="1" />
-                            </LinearGradientBrush>
-                        </Rectangle.Fill>
-                    </Rectangle>
-                </Grid>
                 <Grid x:Name="PanMain" Grid.Row="1" Grid.Column="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -171,43 +70,44 @@
                     </Border>
                 </Grid>
                 <StackPanel x:Name="PanHint" UseLayoutRounding="True"
-                            SnapsToDevicePixels="True" HorizontalAlignment="Left" VerticalAlignment="Bottom"
-                            Margin="80,0,0,20"
+                            SnapsToDevicePixels="True" HorizontalAlignment="Center" VerticalAlignment="Top"
+                            Margin="0,62,0,0"
                             Grid.Row="1" Grid.Column="1" Panel.ZIndex="1" />
-                <StackPanel x:Name="PanExtraButtons" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.Row="1" Grid.Column="1" Margin="15">
-                    <local:MyExtraButton x:Name="BtnExtraUpdateRestart" HorizontalAlignment="Right"
+                <StackPanel x:Name="PanExtraButtons" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.Row="1" Grid.Column="1" Margin="0,0,14,14" Panel.ZIndex="1">
+                    <local:FloatingIconAction x:Name="BtnExtraUpdateRestart" HorizontalAlignment="Right"
                                          Click="BtnExtraUpdateRestart_Click"
                                          VerticalAlignment="Center" ToolTip="{DynamicResource Main.Extra.UpdateRestart.ToolTip}"
                                          Visibility="Collapsed"
                                          SvgIcon="lucide/refresh-cw" />
-                    <local:MyExtraButton x:Name="BtnExtraBack" HorizontalAlignment="Right" VerticalAlignment="Center"
+                    <local:FloatingIconAction x:Name="BtnExtraBack" HorizontalAlignment="Right" VerticalAlignment="Center"
                                          Click="BtnExtraBack_Click"
                                          ToolTip="{DynamicResource Main.Extra.BackToTop.ToolTip}" Visibility="Collapsed"
                                          SvgIcon="lucide/arrow-up-to-line" />
-                    <local:MyExtraButton x:Name="BtnExtraDownload" HorizontalAlignment="Right"
+                    <local:FloatingIconAction x:Name="BtnExtraDownload" HorizontalAlignment="Right"
                                          Click="BtnExtraDownload_Click"
                                          VerticalAlignment="Center" ToolTip="{DynamicResource Main.Extra.TaskManager.ToolTip}" Visibility="Collapsed"
                                          SvgIcon="lucide/download" />
-                    <local:MyExtraButton x:Name="BtnExtraApril" HorizontalAlignment="Right" VerticalAlignment="Center"
+                    <local:FloatingIconAction x:Name="BtnExtraApril" HorizontalAlignment="Right" VerticalAlignment="Center"
                                          Click="BtnExtraApril_Click"
                                          ToolTip="{DynamicResource Main.Extra.GiveUp.ToolTip}" Visibility="Collapsed"
                                          SvgIcon="lucide/flag" />
-                    <local:MyExtraButton x:Name="BtnExtraShutdown" HorizontalAlignment="Right"
+                    <local:FloatingIconAction x:Name="BtnExtraShutdown" HorizontalAlignment="Right"
                                          Click="BtnExtraShutdown_Click"
                                          VerticalAlignment="Center" ToolTip="{DynamicResource Main.Extra.ShutdownMinecraft.ToolTip}" Visibility="Collapsed"
                                          SvgIcon="lucide/power" />
-                    <local:MyExtraButton x:Name="BtnExtraLog" HorizontalAlignment="Right" VerticalAlignment="Center"
+                    <local:FloatingIconAction x:Name="BtnExtraLog" HorizontalAlignment="Right" VerticalAlignment="Center"
                                          Click="BtnExtraLog_Click"
                                          ToolTip="{DynamicResource Main.Extra.GameLog.ToolTip}" Visibility="Collapsed"
                                          SvgIcon="lucide/scroll-text" />
-                    <local:MyExtraButton x:Name="BtnExtraMusic" HorizontalAlignment="Right" VerticalAlignment="Center"
+                    <local:FloatingIconAction x:Name="BtnExtraMusic" HorizontalAlignment="Right" VerticalAlignment="Center"
                                          Click="BtnExtraMusic_Click" RightClick="BtnExtraMusic_RightClick"
                                          Visibility="Collapsed" CanRightClick="True" />
                 </StackPanel>
-                <controls:BlurBorder x:Name="PanMsgBackground" Grid.Row="0" Grid.RowSpan="2" Grid.ColumnSpan="2" Background="#00000000"
-                                     Panel.ZIndex="2" Visibility="Collapsed">
-                    <Grid x:Name="PanMsg" Background="#00000000" MouseLeftButtonDown="FormDragMove" />
-                </controls:BlurBorder>
+                <Grid x:Name="DialogLayer" Grid.Row="0" Grid.RowSpan="2" Grid.ColumnSpan="2"
+                      Panel.ZIndex="2" Visibility="Collapsed">
+                    <controls:BlurBorder x:Name="PanMsgBackground" Background="#4D000000" Opacity="0" />
+                    <Grid x:Name="PanMsg" Background="Transparent" MouseLeftButtonDown="FormDragMove" />
+                </Grid>
             </Grid>
         </Border>
     </Grid>

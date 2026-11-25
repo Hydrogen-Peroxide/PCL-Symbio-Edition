@@ -3385,6 +3385,11 @@
     <sys:String x:Key="Setup.Ui.Basic.BlurSamplingRate.ToolTip">设定模糊效果的采样率，值越大模糊效果越细致。&#xA;若设备性能不佳，可尝试降低该值以获得更好的性能。</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.GetSnapshot">获取官方快照版</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.LockWindow">锁定启动器大小</sys:String>
+    <sys:String x:Key="Setup.Ui.Dock.Placement">Dock 位置</sys:String>
+    <sys:String x:Key="Setup.Ui.Dock.Placement.Description">Dock 可以停靠在窗口内底部，也可以作为独立的磨砂玻璃 Dock 悬浮在窗口外</sys:String>
+    <sys:String x:Key="Setup.Ui.Dock.Placement.Inside">窗口内</sys:String>
+    <sys:String x:Key="Setup.Ui.Dock.Placement.Detached">窗口外悬浮</sys:String>
+    <sys:String x:Key="Setup.Ui.Window.Title">窗口</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.Opacity">不透明度</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.Opacity2">不透明度</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.ShowLogo">打开启动器时显示 PCL SE 图标</sys:String>
@@ -3552,6 +3557,7 @@
     <sys:String x:Key="Setup.Update.FromSource">{0}（{1}）</sys:String>
     <sys:String x:Key="Setup.Update.OtherOptions.Placeholder">AquaCL 3 是 PCL SE 的第一个主要更新，带来了让人眼前一亮的新设计，使用了最新开发技术，完全重构了基础体验，并更支持 macOS、Linux 等其他平台。</sys:String>
     <sys:String x:Key="Setup.Update.OtherOptions.Title">其他更新选项 - 升级到 AquaCL</sys:String>
+    <sys:String x:Key="Setup.Update.Options.Title">更新选项</sys:String>
     <sys:String x:Key="Setup.Update.RestartInstall">重启安装</sys:String>
 
     <!-- Setup.Update.Auto -->
@@ -3964,7 +3970,7 @@
     <sys:String x:Key="Watcher.WindowLoaded">Minecraft 窗口已加载：{0}（{1}）</sys:String>
     <sys:String x:Key="Watcher.WindowMaximized">已最大化 Minecraft 窗口：{0}</sys:String>
 
-    <sys:String x:Key="Setup.Language.Banner.DescriptionLine1">简体中文与美式英文已覆盖主要界面，其他语言仍待补齐。未翻译内容使用简体中文。</sys:String>
+    <sys:String x:Key="Setup.Language.Banner.DescriptionLine1">简体中文、美式英文和英式英文已覆盖主要界面。尚未完成的语言使用简体中文补充缺少的文本。</sys:String>
     <sys:String x:Key="Setup.Language.Banner.DescriptionLine2">如需补充翻译，请向 PCL SE 维护仓库提交语言资源修改。</sys:String>
     <sys:String x:Key="Setup.Language.Banner.SubmitPullRequest">贡献翻译</sys:String>
 

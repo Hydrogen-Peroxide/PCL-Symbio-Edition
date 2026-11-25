@@ -14,6 +14,9 @@ namespace PCL;
 
 public static class ModDownload
 {
+    internal static IEnumerable<JsonObject> ReadManifestRows(JsonObject? manifest, string key) =>
+        manifest?[key] is JsonArray rows ? rows.OfType<JsonObject>() : [];
+
     #region DlClient* | Minecraft 客户端
 
     /// <summary>
@@ -2964,7 +2967,7 @@ public static class ModDownload
                 // 下载
                 ModBase.RunInUi(() =>
                 {
-                    PageDownloadInstall.mcVersionWaitingForSelect = versionName;
+                    JavaInstallRequests.RequestVersion(versionName);
                     ModMain.frmMain.PageChange(FormMain.PageType.Download, FormMain.PageSubType.DownloadInstall);
                 });
         }

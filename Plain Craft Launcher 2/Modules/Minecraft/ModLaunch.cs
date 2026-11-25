@@ -205,6 +205,11 @@ public static class ModLaunch
     /// </summary>
     public static bool McLaunchStart(McLaunchOptions options = null)
     {
+        if (AccountSignIn.IsActive)
+        {
+            HintService.Hint("请等待当前账号登录完成。");
+            return false;
+        }
         isLaunching = true;
         currentLaunchOptions = options ?? new McLaunchOptions();
         // 预检查
@@ -234,8 +239,7 @@ public static class ModLaunch
             // 切换实例
             ModInstanceList.McMcInstanceSelected = currentLaunchOptions.instance;
             States.Game.SelectedInstance = ModInstanceList.McMcInstanceSelected.Name;
-            ModMain.frmLaunchLeft.RefreshButtonsUI();
-            ModMain.frmLaunchLeft.RefreshPage(false);
+            ModMain.frmMain.RefreshShell();
         }
 
         ModMain.frmMain.AprilGiveup();
@@ -254,7 +258,7 @@ public static class ModLaunch
     {
         text = McLogFilter.FilterUserName(McLogFilter.FilterAccessToken(text, '*'), '*');
         ModBase.RunInUi(() =>
-            ModMain.frmLaunchRight.LabLog.Text += "\r\n" + "[" + TimeUtils.GetTimeNow() + "] " + text);
+            JavaLaunchSession.AppendLog("[" + TimeUtils.GetTimeNow() + "] " + text));
         ModBase.Log("[Launch] " + text);
     }
 
@@ -275,13 +279,13 @@ public static class ModLaunch
             case ModBase.LoadState.Waiting:
             case ModBase.LoadState.Aborted:
             {
-                ModMain.frmLaunchLeft.PageChangeToLogin();
+                ModMain.frmMain.RefreshShell();
                 break;
             }
             case ModBase.LoadState.Loading:
             {
                 // 在预检测结束后再触发动画
-                ModMain.frmLaunchRight.LabLog.Text = "";
+                JavaLaunchSession.ClearLog();
                 break;
             }
         }
@@ -296,7 +300,7 @@ public static class ModLaunch
     private static void McLaunchStart(ModLoader.LoaderTask<McLaunchOptions, object> loader)
     {
         // 开始动画
-        ModBase.RunInUiWait(ModMain.frmLaunchLeft.PageChangeToLaunching);
+        ModBase.RunInUiWait(ModMain.frmMain.RefreshShellLaunch);
         // 预检测（预检测的错误将直接抛出）
         try
         {
@@ -344,11 +348,17 @@ public static class ModLaunch
             ModLoader.LoaderTaskbarAdd(launchLoader);
             while (launchLoader.State == ModBase.LoadState.Loading)
             {
-                ModMain.frmLaunchLeft.Dispatcher.Invoke(ModMain.frmLaunchLeft.LaunchingRefresh);
+                ModBase.RunInUiWait(() =>
+            {
+                ModMain.frmMain.RefreshShellLaunch();
+            });
                 Thread.Sleep(100);
             }
 
-            ModMain.frmLaunchLeft.Dispatcher.Invoke(ModMain.frmLaunchLeft.LaunchingRefresh);
+            ModBase.RunInUiWait(() =>
+            {
+                ModMain.frmMain.RefreshShellLaunch();
+            });
             // 成功与失败处理
             switch (launchLoader.State)
             {
@@ -636,7 +646,7 @@ public static class ModLaunch
         // 尝试加载
         loader.WaitForExit(data.input, mcLoginLoader, data.isForceRestarting);
         data.output = (McLoginResult)((dynamic)loader).output;
-        ModBase.RunInUi(() => ModMain.frmLaunchLeft.RefreshPage(false)); // 刷新自动填充列表
+        ModBase.RunInUi(ModMain.frmMain.RefreshShell); // 刷新自动填充列表
         ModBase.Log("[Profile] 选定档案加载完成");
     }
 
@@ -1734,7 +1744,7 @@ public static class ModLaunch
                         var selectionJson = new List<JsonNode>();
                         foreach (var profile in loginJson["availableProfiles"].AsArray())
                         {
-                            selectionControl.Add(new MyRadioBox { Text = profile["name"].ToString() });
+                            selectionControl.Add(new SymbioRadio { Text = profile["name"].ToString() });
                             selectionJson.Add(profile);
                         }
 
@@ -2267,7 +2277,7 @@ public static class ModLaunch
 
         double availableGb = KernelInterop.GetAvailablePhysicalMemoryBytes() / 1073741824.0;
         ModLaunch.McLaunchLog($"当前剩余内存：{availableGb.ToString("N1", CultureInfo.InvariantCulture)}G");
-        double totalRamMb = PageInstanceSetup.GetRam(ModInstanceList.McMcInstanceSelected) * 1024d;
+        double totalRamMb = JavaMemoryAllocation.GetInstanceRam(ModInstanceList.McMcInstanceSelected) * 1024d;
         var maxHeapArg = Math.Floor(totalRamMb).ToString(CultureInfo.InvariantCulture);
         dataList.Add("-Xmn" + Math.Floor(totalRamMb * 0.15).ToString(CultureInfo.InvariantCulture) + "m");
         dataList.Add("-Xmx" + maxHeapArg + "m");
@@ -2282,7 +2292,7 @@ public static class ModLaunch
             else
             {
                 // #3511: 支持自定义初始堆大小（-Xms），可低于最大堆。
-                var initialRam = PageInstanceSetup.GetInitialRam(ModInstanceList.McMcInstanceSelected);
+                var initialRam = JavaMemoryAllocation.GetInstanceInitialRam(ModInstanceList.McMcInstanceSelected);
                 if (initialRam.HasValue)
                     dataList.Add("-Xms" + Math.Floor(initialRam.Value * 1024d).ToString(CultureInfo.InvariantCulture) + "m");
             }
@@ -2636,9 +2646,9 @@ public static class ModLaunch
         argumentJvm = argumentJvm.Replace(" -XX:MaxDirectMemorySize=256M", ""); // #3511 的清理
         dataList.Insert(0, argumentJvm); // 可变 JVM 参数
         dataList.Add("-Xmn" +
-                     Math.Floor(PageInstanceSetup.GetRam(ModInstanceList.McMcInstanceSelected,
+                     Math.Floor(JavaMemoryAllocation.GetInstanceRam(ModInstanceList.McMcInstanceSelected,
                          !mcLaunchJavaSelected.Installation.Is64Bit) * 1024d * 0.15d) + "m");
-        var maxHeapArg = Math.Floor(PageInstanceSetup.GetRam(ModInstanceList.McMcInstanceSelected,
+        var maxHeapArg = Math.Floor(JavaMemoryAllocation.GetInstanceRam(ModInstanceList.McMcInstanceSelected,
             !mcLaunchJavaSelected.Installation.Is64Bit) * 1024d);
         dataList.Add("-Xmx" + maxHeapArg + "m");
         // 若 dataList 中已存在 -Xms（例如用户自定义参数已设）则跳过，避免重复/冲突。
@@ -2652,7 +2662,7 @@ public static class ModLaunch
             else
             {
                 // #3511: 支持自定义初始堆大小（-Xms），可低于最大堆。
-                var initialRam = PageInstanceSetup.GetInitialRam(ModInstanceList.McMcInstanceSelected,
+                var initialRam = JavaMemoryAllocation.GetInstanceInitialRam(ModInstanceList.McMcInstanceSelected,
                     !mcLaunchJavaSelected.Installation.Is64Bit);
                 if (initialRam.HasValue)
                     dataList.Add("-Xms" + Math.Floor(initialRam.Value * 1024d).ToString(CultureInfo.InvariantCulture) + "m");
@@ -3776,7 +3786,7 @@ public static class ModLaunch
         McLaunchLog("实例继承：" + (string.IsNullOrEmpty(ModInstanceList.McMcInstanceSelected.InheritInstanceName)
             ? "无"
             : ModInstanceList.McMcInstanceSelected.InheritInstanceName));
-        var launchRamGb = PageInstanceSetup.GetRam(ModInstanceList.McMcInstanceSelected,
+        var launchRamGb = JavaMemoryAllocation.GetInstanceRam(ModInstanceList.McMcInstanceSelected,
             !mcLaunchJavaSelected.Installation.Is64Bit);
         McLaunchLog("分配的内存：" +
                     launchRamGb.ToString("N1", CultureInfo.InvariantCulture) + " GiB（" +
@@ -3816,16 +3826,7 @@ public static class ModLaunch
         // 显示实时日志
         if (currentLaunchOptions.IsTest)
         {
-            if (ModMain.frmLogLeft is null)
-                ModBase.RunInUiWait(() => ModMain.frmLogLeft = new PageLogLeft());
-            if (ModMain.frmLogRight is null)
-                ModBase.RunInUiWait(() =>
-                {
-                    ModAnimation.AniBeginControl();
-                    ModMain.frmLogRight = new PageLogRight();
-                    ModAnimation.AniEndControl();
-                });
-            ModMain.frmLogLeft.Add(watcher);
+            LiveGameLogs.Track(watcher);
             McLaunchLog("已显示游戏实时日志");
         }
 

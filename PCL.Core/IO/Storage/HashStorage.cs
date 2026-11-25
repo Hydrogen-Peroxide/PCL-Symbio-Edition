@@ -28,24 +28,56 @@ public class HashStorage(string folder, IHashProvider hashProvider, bool compres
         return await PutAsync(originalFs, hash).ConfigureAwait(false);
     }
 
-    public async Task<string?> PutAsync(Stream input, string? hash = null)
+    public async Task<string?> PutAsync(Stream input, string? hash = null) =>
+        (await PutWithLengthAsync(input, hash).ConfigureAwait(false)).Hash;
+
+    internal async Task<(string Hash, long Length)> PutWithLengthAsync(Stream input, string? hash = null)
     {
         ArgumentNullException.ThrowIfNull(input);
 
         if (hash is not null && hash.Length != hashProvider.Length)
             throw new ArgumentException("Provide hash is not correct", nameof(hash));
 
-        if (input.CanSeek) input.Position = 0;
+        if (!input.CanSeek)
+        {
+            var bufferPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            await using var buffer = new FileStream(bufferPath, FileMode.CreateNew, FileAccess.ReadWrite,
+                FileShare.None, 81920, FileOptions.Asynchronous | FileOptions.DeleteOnClose);
+            await input.CopyToAsync(buffer).ConfigureAwait(false);
+            return await PutWithLengthAsync(buffer, hash).ConfigureAwait(false);
+        }
 
+        input.Position = 0;
+        var length = input.Length;
         var fileHash = hash ?? (await hashProvider.ComputeHashAsync(input).ConfigureAwait(false)).ToHexString();
         var destPath = _GetDestPath(fileHash);
-        //纠正: 由于之前错误设计导致的文件访问效率低下的文件结构
-        if (correctMisplacedFile && _CorrectMisplacedFile(fileHash)) LogWrapper.Info("HashStorage", "Move misplaced file into correct folder");
-        //检查是否已存在保存的文件
-        if (File.Exists(destPath)) return fileHash;
-        await using var destinationFs = _GetSaveStream(destPath);
-        await input.CopyToAsync(destinationFs).ConfigureAwait(false);
-        return fileHash;
+        if (correctMisplacedFile) _CorrectMisplacedFile(fileHash, destPath);
+        if (_IsAvailable(destPath, fileHash)) return (fileHash, length);
+
+        input.Position = 0;
+        var directory = Path.GetDirectoryName(destPath)!;
+        Directory.CreateDirectory(directory);
+        var stagedPath = Path.Combine(directory, $".{Guid.NewGuid():N}.tmp");
+        try
+        {
+            await using (var destination = _GetSaveStream(stagedPath))
+            {
+                await input.CopyToAsync(destination).ConfigureAwait(false);
+            }
+
+            // Publish only a complete file. Another writer may already have stored the same hash.
+            if (!_IsAvailable(destPath, fileHash))
+            {
+                try { File.Move(stagedPath, destPath, overwrite: File.Exists(destPath)); }
+                catch (IOException) when (_IsAvailable(destPath, fileHash)) { }
+            }
+        }
+        finally
+        {
+            File.Delete(stagedPath);
+        }
+
+        return (fileHash, length);
     }
 
     public Task<bool> DeleteAsync(string hash)
@@ -85,21 +117,36 @@ public class HashStorage(string folder, IHashProvider hashProvider, bool compres
     {
         ArgumentNullException.ThrowIfNull(hash);
         var destPath = _GetDestPath(hash);
-        if (correctMisplacedFile && _CorrectMisplacedFile(hash))
-            LogWrapper.Info("HashStorage", $"Move misplaced file into correct folder: {hash}");
+        if (correctMisplacedFile) _CorrectMisplacedFile(hash, destPath);
 
-        return File.Exists(destPath) ? _GetReadStream(destPath) : null;
+        return _IsAvailable(destPath, hash) ? _GetReadStream(destPath) : null;
     }
 
     public bool Exists(string hash)
     {
         ArgumentNullException.ThrowIfNull(hash);
-        return File.Exists(_GetDestPath(hash)) || (correctMisplacedFile && File.Exists(_GetMisplacedFilePath(hash)));
+        return GetExistingPath(hash) is not null ||
+               (correctMisplacedFile && _IsAvailable(_GetMisplacedFilePath(hash), hash));
+    }
+
+    internal string? GetExistingPath(string hash)
+    {
+        var path = _GetDestPath(hash);
+        return _IsAvailable(path, hash) ? path : null;
+    }
+
+    private bool _IsAvailable(string path, string hash)
+    {
+        var file = new FileInfo(path);
+        // Earlier writes could leave a zero-byte file after hashing a nonempty stream.
+        return file.Exists && (file.Length != 0 ||
+            string.Equals(hash, hashProvider.ComputeHash(ReadOnlySpan<byte>.Empty).ToHexString(),
+                StringComparison.OrdinalIgnoreCase));
     }
 
     private Stream _GetSaveStream(string destPath)
     {
-        var fs = File.Open(destPath, FileMode.Create, FileAccess.ReadWrite, FileShare.Read);
+        var fs = File.Open(destPath, FileMode.CreateNew, FileAccess.Write, FileShare.None);
         if (compressObjects) return new DeflateStream(fs, CompressionMode.Compress);
         return fs;
     }
@@ -113,16 +160,22 @@ public class HashStorage(string folder, IHashProvider hashProvider, bool compres
 
     private string _GetDestPath(string hash)
     {
-        return Path.Combine(folder, _GetPrefixFolder(hash), hash);
+        if (hash.Length < prefixLength)
+            throw new ArgumentException($"Hash length({hash.Length}) is shorter than required prefix length({prefixLength})", nameof(hash));
+        return Path.Combine(folder, hash[..prefixLength], hash);
     }
 
-    private bool _CorrectMisplacedFile(string hash)
+    private void _CorrectMisplacedFile(string hash, string correctPath)
     {
         var misplacedPath = _GetMisplacedFilePath(hash);
-        if (!File.Exists(misplacedPath)) return false;
-        var correctPath = _GetDestPath(hash);
-        File.Move(misplacedPath, correctPath);
-        return true;
+        if (File.Exists(correctPath) || !File.Exists(misplacedPath)) return;
+        Directory.CreateDirectory(Path.GetDirectoryName(correctPath)!);
+        try
+        {
+            File.Move(misplacedPath, correctPath);
+            LogWrapper.Info("HashStorage", $"Move misplaced file into correct folder: {hash}");
+        }
+        catch (IOException) when (File.Exists(correctPath)) { }
     }
 
     private string _GetMisplacedFilePath(string hash)
@@ -130,14 +183,4 @@ public class HashStorage(string folder, IHashProvider hashProvider, bool compres
         return Path.Combine(folder, hash);
     }
 
-    private string _GetPrefixFolder(string hash)
-    {
-        if (hash.Length < prefixLength)
-            throw new ArgumentException($"Hash length({hash.Length}) is shorter than required prefix length({prefixLength})", nameof(hash));
-
-        var folderName = hash[..prefixLength];
-        var folderPath = Path.Combine(folder, folderName);
-        Directory.CreateDirectory(folderPath);
-        return folderName;
-    }
 }

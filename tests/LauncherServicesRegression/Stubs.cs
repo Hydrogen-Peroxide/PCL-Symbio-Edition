@@ -2,6 +2,14 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace PCL
 {
+    // This fixture exercises process lifetimes; a real Xbox session must never be started by the host.
+    public static class BLoaderXUserBridge
+    {
+        public sealed record Session;
+        public static void BeginForSuspendedProcess(int processId, Session session) =>
+            throw new NotSupportedException("Xbox sessions are outside this fixture.");
+    }
+
     public static partial class ModBase
     {
         public const string versionBaseName = "1.0.0";

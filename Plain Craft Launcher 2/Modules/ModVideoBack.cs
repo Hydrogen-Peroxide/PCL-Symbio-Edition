@@ -33,50 +33,6 @@ public static class ModVideoBack
     public static event EventHandler<BooleanEventArgs>? GamingStateChanged;
     public static event EventHandler<BooleanEventArgs>? ForcePlayChanged;
 
-    public static void OnGamingStateChanged(object sender, BooleanEventArgs e) // 用户是否在游戏中 事件
-    {
-        ModBase.RunInUi(() =>
-        {
-            if (IsGaming)
-            {
-                if (ForcePlay)
-                {
-                    if (ModMain.frmSetupUI is not null) ModMain.frmSetupUI.BtnBackgroundRefresh.IsEnabled = true;
-                }
-                else if (ModMain.frmSetupUI is not null)
-                {
-                    ModMain.frmSetupUI.BtnBackgroundRefresh.IsEnabled = false;
-                }
-            }
-            else if (ModMain.frmSetupUI is not null)
-            {
-                ModMain.frmSetupUI.BtnBackgroundRefresh.IsEnabled = true;
-            }
-        });
-    }
-
-    public static void OnForcePlayChanged(object sender, BooleanEventArgs e) // 是否强行播放 事件
-    {
-        ModBase.RunInUi(() =>
-        {
-            if (IsGaming)
-            {
-                if (ForcePlay)
-                {
-                    if (ModMain.frmSetupUI is not null) ModMain.frmSetupUI.BtnBackgroundRefresh.IsEnabled = true;
-                }
-                else if (ModMain.frmSetupUI is not null)
-                {
-                    ModMain.frmSetupUI.BtnBackgroundRefresh.IsEnabled = false;
-                }
-            }
-            else if (ModMain.frmSetupUI is not null)
-            {
-                ModMain.frmSetupUI.BtnBackgroundRefresh.IsEnabled = true;
-            }
-        });
-    }
-
     /// <summary>
     ///     尝试开始视频背景播放
     /// </summary>
@@ -148,7 +104,6 @@ public static class ModVideoBack
             {
                 try
                 {
-                    if (ModMain.frmSetupUI is not null) ModMain.frmSetupUI.BtnBackgroundRefresh.IsEnabled = false;
                     ModMain.frmMain.VideoBack.Pause();
                     ModBase.Log("[UI] 已暂停视频背景播放");
                 }

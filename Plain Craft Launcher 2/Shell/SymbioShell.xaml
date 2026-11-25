@@ -1,0 +1,358 @@
+<UserControl x:Class="PCL.SymbioShell"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:glass="clr-namespace:PCLLF.Wpf.Glass"
+             xmlns:svgIcon="clr-namespace:PCL.Core.UI.Controls.SvgIcon;assembly=PCL.Core"
+             FontFamily="{StaticResource SyFontFamily}" FontSize="{StaticResource SyFontBody}"
+             Foreground="{DynamicResource SyText}" Background="Transparent"
+             UseLayoutRounding="True" SnapsToDevicePixels="True" Focusable="False">
+    <UserControl.Resources>
+        <!-- Fluent flyout/dialog elevation -->
+        <DropShadowEffect x:Key="SyElevation" BlurRadius="32" ShadowDepth="8" Direction="270" Opacity="0.18"
+                          Color="{DynamicResource SyShadowColor}" RenderingBias="Performance" />
+        <DropShadowEffect x:Key="SyTooltipElevation" BlurRadius="8" ShadowDepth="2" Direction="270" Opacity="0.16"
+                          Color="{DynamicResource SyShadowColor}" RenderingBias="Performance" />
+
+        <Style x:Key="SyElevationHost" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource SyWindowFallback}" />
+            <Setter Property="CornerRadius" Value="{StaticResource SyRadiusOverlay}" />
+            <Setter Property="Margin" Value="1" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="Effect" Value="{StaticResource SyElevation}" />
+        </Style>
+
+        <!-- Acrylic: blurred backdrop + luminosity tint + surface stroke -->
+        <Style x:Key="SyAcrylic" TargetType="glass:GlassSurface">
+            <Setter Property="Background" Value="{DynamicResource SyAcrylicTint}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SySurfaceStroke}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="{StaticResource SyRadiusOverlay}" />
+            <Setter Property="BlurRadius" Value="40" />
+            <Setter Property="HighlightOpacity" Value="0" />
+        </Style>
+
+        <Style x:Key="SyAccountButton" TargetType="Button" BasedOn="{StaticResource SySubtleButton}">
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="6,0,10,0" />
+        </Style>
+    </UserControl.Resources>
+
+    <Grid x:Name="ShellRoot" Background="{DynamicResource SyWindowFallback}" ClipToBounds="True"
+          MouseLeftButtonDown="ShellRoot_MouseLeftButtonDown">
+        <Image x:Name="WallpaperImage" Stretch="UniformToFill" IsHitTestVisible="False"
+               RenderOptions.BitmapScalingMode="HighQuality" />
+
+        <Grid x:Name="Stage">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="48" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- ============ Title bar ============ -->
+            <!-- Frosted band (Mica Alt style) so caption content stays legible over any wallpaper -->
+            <glass:GlassSurface x:Name="TitleBarSurface" Grid.Row="0" IsHitTestVisible="False" CornerRadius="0"
+                                BlurRadius="36" TintOpacity="1" HighlightOpacity="0" BorderThickness="0,0,0,1"
+                                Background="{DynamicResource SyTitleBarFill}" BorderBrush="{DynamicResource SyDivider}" />
+            <Grid x:Name="TitleBar" Grid.Row="0" Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel x:Name="TitleIdentity" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+                    <Image x:Name="BrandIcon" Width="18" Height="18" VerticalAlignment="Center"
+                           Source="pack://application:,,,/Plain Craft Launcher 2;component/Images/icon.png"
+                           RenderOptions.BitmapScalingMode="HighQuality" />
+                    <Image x:Name="CustomBrandImage" Height="28" MaxWidth="160" Visibility="Collapsed" Stretch="Uniform" />
+                    <Path x:Name="SeasonalLogo" Data="M 60.375 53.406 L 53.625 53.406 L 53.625 0.906 L 63.6 0.906 L 78.15 34.131 L 92.475 0.906 L 102.675 0.906 L 102.675 53.406 L 95.55 53.406 L 95.55 9.981 L 81.525 41.556 L 74.475 41.556 L 60.375 9.981 L 60.375 53.406 Z M 7.125 53.406 L 0 53.406 L 0 0.906 L 7.125 0.906 L 7.125 23.331 L 33 23.331 L 33 0.906 L 40.125 0.906 L 40.125 53.406 L 33 53.406 L 33 29.481 L 7.125 29.481 L 7.125 53.406 Z M 149.85 2.706 L 147.675 8.706 Q 145.35 7.581 142.913 6.906 Q 140.475 6.231 137.175 6.231 Q 132.375 6.231 128.588 8.706 Q 124.8 11.181 122.625 15.831 A 25.755 25.755 0 0 0 120.458 26.263 A 38.963 38.963 0 0 0 120.45 27.081 Q 120.45 33.381 122.588 38.106 Q 124.725 42.831 128.512 45.456 Q 132.3 48.081 137.175 48.081 Q 140.85 48.081 143.55 47.181 Q 146.25 46.281 148.8 44.856 L 150.975 50.781 Q 148.2 52.281 144.638 53.293 Q 141.075 54.306 136.35 54.306 Q 129.525 54.306 124.275 51.043 Q 119.025 47.781 116.1 41.743 A 31.603 31.603 0 0 1 113.201 28.922 A 45.601 45.601 0 0 1 113.175 27.381 Q 113.175 19.356 116.138 13.168 Q 119.1 6.981 124.538 3.493 Q 129.975 0.006 137.25 0.006 Q 141 0.006 144.075 0.718 Q 147.15 1.431 149.85 2.706 Z M 191.925 53.406 L 160.725 53.406 L 160.725 0.906 L 167.85 0.906 L 167.85 47.031 L 191.925 47.031 L 191.925 53.406 Z" Width="50" Height="22"
+                          Fill="{DynamicResource SyText}" Stretch="Uniform" Visibility="Collapsed" />
+                    <TextBlock x:Name="BrandText" Text="PCL SE" Margin="12,0,0,0" VerticalAlignment="Center"
+                               MaxWidth="200" TextTrimming="CharacterEllipsis" FontSize="{StaticResource SyFontCaption}" />
+                    <Button x:Name="SeasonalHelp" Content="?" Margin="4,0,0,0" Style="{StaticResource SyButton}"
+                            Visibility="Collapsed" Click="SeasonalHelp_Click" AutomationProperties.Name="帮助" />
+                </StackPanel>
+
+                <!-- Edition SelectorBar (home only) -->
+                <Grid x:Name="EditionHost" Grid.Column="1" HorizontalAlignment="Left" Margin="20,0,0,0"
+                      VerticalAlignment="Center">
+                    <Grid.RenderTransform>
+                        <TranslateTransform x:Name="EditionHostTranslation" />
+                    </Grid.RenderTransform>
+                    <StackPanel x:Name="EditionItems" Orientation="Horizontal" Height="36">
+                        <Button x:Name="JavaButton" Style="{StaticResource SySelectorItem}" Click="JavaButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <svgIcon:SvgIcon Icon="lucide/coffee" Width="16" Height="16"
+                                                 IconBrush="{Binding Foreground, ElementName=JavaButton}" />
+                                <TextBlock x:Name="JavaText" Text="Java 版" Margin="8,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="BedrockButton" Style="{StaticResource SySelectorItem}" Margin="4,0,0,0"
+                                Click="BedrockButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <svgIcon:SvgIcon Icon="lucide/box" Width="16" Height="16"
+                                                 IconBrush="{Binding Foreground, ElementName=BedrockButton}" />
+                                <TextBlock x:Name="BedrockText" Text="基岩版" Margin="8,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <Border x:Name="EditionPill" Width="16" Height="3" CornerRadius="1.5"
+                            Background="{DynamicResource SyAccentFill}" IsHitTestVisible="False"
+                            HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,-1">
+                        <Border.RenderTransform>
+                            <TranslateTransform x:Name="EditionPillTranslation" />
+                        </Border.RenderTransform>
+                    </Border>
+                </Grid>
+
+                <Button x:Name="AccountChip" Grid.Column="2" Style="{StaticResource SyAccountButton}"
+                        VerticalAlignment="Center" Margin="0,0,16,0" Click="AccountChip_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <Grid Width="24" Height="24">
+                            <Ellipse Fill="{DynamicResource SyControl}" Stroke="{DynamicResource SyControlStroke}" />
+                            <svgIcon:SvgIcon x:Name="AccountFallbackIcon" Icon="lucide/user" Width="13" Height="13"
+                                             IconBrush="{DynamicResource SyTextSecondary}" />
+                            <Image x:Name="AccountAvatarImage" Stretch="UniformToFill"
+                                   RenderOptions.BitmapScalingMode="NearestNeighbor">
+                                <Image.Clip>
+                                    <EllipseGeometry Center="12,12" RadiusX="12" RadiusY="12" />
+                                </Image.Clip>
+                            </Image>
+                        </Grid>
+                        <TextBlock x:Name="AccountNameText" Margin="10,0,0,0" VerticalAlignment="Center"
+                                   MaxWidth="160" TextTrimming="CharacterEllipsis" />
+                        <TextBlock x:Name="AccountDetailText" Margin="8,0,0,0" VerticalAlignment="Center"
+                                   FontSize="{StaticResource SyFontCaption}"
+                                   Foreground="{DynamicResource SyTextTertiary}" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Windows 11 caption buttons: full title-bar height, system Fluent glyphs (E921 minimize, E8BB close) -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Stretch">
+                    <Button x:Name="MinimizeButton" Style="{StaticResource SyCaptionButton}" ToolTip="最小化"
+                            Click="MinimizeButton_Click">
+                        <TextBlock Text="&#xE921;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="10" />
+                    </Button>
+                    <Button x:Name="CloseButton" Style="{StaticResource SyCaptionCloseButton}" ToolTip="关闭"
+                            Click="CloseButton_Click">
+                        <TextBlock Text="&#xE8BB;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="10" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- ============ Stage ============ -->
+            <Grid x:Name="StageContent" Grid.Row="1">
+
+                <!-- Home: an acrylic launch card anchored bottom-left; the wallpaper stays visible -->
+                <Grid x:Name="HomeLayer">
+                    <Grid x:Name="HeroHost" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                          Margin="24,0,0,92" Width="380" RenderTransformOrigin="0.5,1">
+                        <Grid.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform x:Name="HeroScale" />
+                                <TranslateTransform x:Name="HeroTranslation" />
+                            </TransformGroup>
+                        </Grid.RenderTransform>
+                        <Border Style="{StaticResource SyElevationHost}" />
+                        <glass:GlassSurface x:Name="HeroSurface" Style="{StaticResource SyAcrylic}" Padding="20">
+                            <StackPanel x:Name="HeroContent">
+                                <StackPanel.RenderTransform>
+                                    <TranslateTransform x:Name="HeroContentTranslation" />
+                                </StackPanel.RenderTransform>
+                                <TextBlock x:Name="EditionBadgeText" Text="Java 版"
+                                           FontSize="{StaticResource SyFontCaption}" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SyAccentText}" />
+
+                                <Grid Margin="0,12,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Width="48" Height="48" CornerRadius="{StaticResource SyRadiusControl}"
+                                            ClipToBounds="True" Background="{DynamicResource SyCardFill}"
+                                            BorderBrush="{DynamicResource SyCardStroke}" BorderThickness="1">
+                                        <Image x:Name="InstanceImage" Margin="4" Stretch="Uniform"
+                                               RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                                    </Border>
+                                    <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock x:Name="InstanceNameText" FontFamily="{StaticResource SyDisplayFontFamily}"
+                                                   FontSize="{StaticResource SyFontSubtitle}" FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock x:Name="InstanceDescriptionText" Margin="0,2,0,0"
+                                                   Foreground="{DynamicResource SyTextSecondary}"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Margin="0,20,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border x:Name="LaunchMotionSurface" RenderTransformOrigin=".5,.5">
+                                        <Border.RenderTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform x:Name="AprilScaleTrans" />
+                                                <TranslateTransform x:Name="AprilPosTrans" />
+                                            </TransformGroup>
+                                        </Border.RenderTransform>
+                                    <Button x:Name="LaunchButton" Style="{StaticResource SyAccentButton}"
+                                            Height="{StaticResource SyLargeControlHeight}" Click="LaunchButton_Click">
+                                        <StackPanel Orientation="Horizontal">
+                                            <svgIcon:SvgIcon x:Name="LaunchIcon" Icon="lucide/play" Style="{StaticResource SyIcon}" />
+                                            <TextBlock x:Name="LaunchButtonText" Text="启动游戏" Margin="8,0,0,0"
+                                                       VerticalAlignment="Center" FontWeight="SemiBold" />
+                                        </StackPanel>
+                                    </Button>
+                                    </Border>
+                                    <Button x:Name="SelectInstanceButton" Grid.Column="1" Style="{StaticResource SyButton}"
+                                            Width="40" Height="40" Padding="0" Margin="8,0,0,0" ToolTip="选择实例"
+                                            Click="SelectInstanceButton_Click">
+                                        <svgIcon:SvgIcon Icon="lucide/layers" Style="{StaticResource SyIcon}" />
+                                    </Button>
+                                    <Button x:Name="InstanceSettingsButton" Grid.Column="2" Style="{StaticResource SyButton}"
+                                            Width="40" Height="40" Padding="0" Margin="8,0,0,0" ToolTip="实例设置"
+                                            Click="InstanceSettingsButton_Click">
+                                        <svgIcon:SvgIcon Icon="lucide/settings" Style="{StaticResource SyIcon}" />
+                                    </Button>
+                                    <Button x:Name="HomeDetailsButton" Grid.Column="3" Style="{StaticResource SyButton}"
+                                            Width="40" Height="40" Padding="0" Margin="8,0,0,0"
+                                            ToolTip="主页内容和启动日志" Click="HomeDetailsButton_Click">
+                                        <svgIcon:SvgIcon Icon="lucide/layout-list" Style="{StaticResource SyIcon}" />
+                                    </Button>
+                                </Grid>
+
+                                <StackPanel x:Name="LaunchProgressPanel" Margin="0,14,0,0" Visibility="Collapsed">
+                                    <Grid>
+                                        <TextBlock x:Name="LaunchStatusText" FontSize="{StaticResource SyFontCaption}"
+                                                   Foreground="{DynamicResource SyTextSecondary}"
+                                                   TextTrimming="CharacterEllipsis" Margin="0,0,48,0" />
+                                        <TextBlock x:Name="LaunchPercentText" HorizontalAlignment="Right"
+                                                   FontSize="{StaticResource SyFontCaption}"
+                                                   Foreground="{DynamicResource SyTextSecondary}" />
+                                    </Grid>
+                                    <ProgressBar x:Name="LaunchProgressBar" Style="{StaticResource SyProgress}" Margin="0,8,0,0" />
+                                </StackPanel>
+                            </StackPanel>
+                        </glass:GlassSurface>
+                    </Grid>
+                </Grid>
+
+                <!-- Pages: an acrylic surface above the dock; content sits on a Fluent layer -->
+                <Grid x:Name="SheetLayer" Margin="12,8,12,80" Visibility="Hidden" RenderTransformOrigin="0.5,0.6">
+                    <Grid.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform x:Name="SheetScale" />
+                            <TranslateTransform x:Name="SheetTranslation" />
+                        </TransformGroup>
+                    </Grid.RenderTransform>
+                    <Border Style="{StaticResource SyElevationHost}" />
+                    <glass:GlassSurface x:Name="SheetSurface" Style="{StaticResource SyAcrylic}" Background="{DynamicResource SyVeil}" BlurRadius="32">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid x:Name="SheetHeader" Margin="12,10,16,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="BackButton" Style="{StaticResource SyIconButton}" Margin="0,0,4,0"
+                                        VerticalAlignment="Center" ToolTip="返回" Click="BackButton_Click"
+                                        Visibility="Collapsed">
+                                    <svgIcon:SvgIcon Icon="lucide/arrow-left" Style="{StaticResource SyIcon}" />
+                                </Button>
+                                <TextBlock x:Name="PageTitleText" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center"
+                                           FontFamily="{StaticResource SyDisplayFontFamily}"
+                                           FontSize="{StaticResource SyFontSubtitle}" FontWeight="SemiBold" />
+                                <ContentControl x:Name="HostedPageHeader" Grid.Column="2" Margin="16,0,0,0"
+                                                HorizontalAlignment="Left" VerticalAlignment="Center" Focusable="False" />
+                            </Grid>
+                            <Grid Grid.Row="1">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border x:Name="SidebarHost" Margin="4,0,4,8" />
+                                <Border x:Name="PageSurface" Grid.Column="1" ClipToBounds="True" Background="Transparent">
+                                    <ContentControl x:Name="PageContent" Focusable="False" />
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    </glass:GlassSurface>
+                </Grid>
+
+                <!-- Taskbar-style dock -->
+                <Grid x:Name="DockLayer" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,14">
+                    <Border x:Name="DockShadow" Style="{StaticResource SyElevationHost}" />
+                    <!-- LF-style frosted dock: light tint so the blurred wallpaper reads through -->
+                    <glass:GlassSurface x:Name="DockSurface" Style="{StaticResource SyAcrylic}" Height="52" Padding="4,0"
+                                        Background="{DynamicResource SyFrostFill}" BorderBrush="{DynamicResource SyFrostEdge}" BlurRadius="36" TintOpacity="1">
+                        <Grid>
+                            <StackPanel x:Name="DockItems" Orientation="Horizontal" VerticalAlignment="Center"
+                                        MouseMove="DockItems_MouseMove" MouseLeave="DockItems_MouseLeave">
+                                <Button x:Name="DockLaunch" Tag="0" Style="{StaticResource SyDockButton}"
+                                        Click="DockButton_Click" AutomationProperties.Name="启动">
+                                    <svgIcon:SvgIcon Icon="lucide/rocket" Width="20" Height="20"
+                                                     IconBrush="{Binding Foreground, ElementName=DockLaunch}" />
+                                </Button>
+                                <Button x:Name="DockDownload" Tag="1" Style="{StaticResource SyDockButton}"
+                                        Click="DockButton_Click" AutomationProperties.Name="下载">
+                                    <svgIcon:SvgIcon Icon="lucide/download" Width="20" Height="20"
+                                                     IconBrush="{Binding Foreground, ElementName=DockDownload}" />
+                                </Button>
+                                <Button x:Name="DockLan" Tag="2" Style="{StaticResource SyDockButton}"
+                                        Click="DockButton_Click" AutomationProperties.Name="联机">
+                                    <svgIcon:SvgIcon Icon="lucide/network" Width="20" Height="20"
+                                                     IconBrush="{Binding Foreground, ElementName=DockLan}" />
+                                </Button>
+                                <Button x:Name="DockSkinLibrary" Tag="3" Style="{StaticResource SyDockButton}"
+                                        Click="DockButton_Click" AutomationProperties.Name="皮肤库">
+                                    <svgIcon:SvgIcon Icon="lucide/shirt" Width="20" Height="20"
+                                                     IconBrush="{Binding Foreground, ElementName=DockSkinLibrary}" />
+                                </Button>
+                                <Border Width="1" Height="24" Margin="6,0" Background="{DynamicResource SyDivider}" />
+                                <Button x:Name="DockSetup" Tag="4" Style="{StaticResource SyDockButton}"
+                                        Click="DockButton_Click" AutomationProperties.Name="设置">
+                                    <svgIcon:SvgIcon Icon="lucide/settings" Width="20" Height="20"
+                                                     IconBrush="{Binding Foreground, ElementName=DockSetup}" />
+                                </Button>
+                                <Button x:Name="DockTools" Tag="5" Style="{StaticResource SyDockButton}"
+                                        Click="DockButton_Click" AutomationProperties.Name="更多">
+                                    <svgIcon:SvgIcon Icon="lucide/grid-2x2" Width="20" Height="20"
+                                                     IconBrush="{Binding Foreground, ElementName=DockTools}" />
+                                </Button>
+                            </StackPanel>
+                            <Border x:Name="DockIndicator" Width="16" Height="3" CornerRadius="1.5"
+                                    Background="{DynamicResource SyAccentFill}"
+                                    HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="0,0,0,3"
+                                    IsHitTestVisible="False">
+                                <Border.RenderTransform>
+                                    <TranslateTransform x:Name="DockIndicatorTranslation" />
+                                </Border.RenderTransform>
+                            </Border>
+                        </Grid>
+                    </glass:GlassSurface>
+
+                    <!-- Fluent tooltip that follows the hovered dock item -->
+                    <Canvas IsHitTestVisible="False" VerticalAlignment="Top" HorizontalAlignment="Left">
+                        <Border x:Name="DockLabel" Canvas.Top="-38" CornerRadius="{StaticResource SyRadiusControl}"
+                                Padding="8,5,8,6" Background="{DynamicResource SyAcrylicTint}"
+                                BorderBrush="{DynamicResource SySurfaceStroke}" BorderThickness="1"
+                                Effect="{StaticResource SyTooltipElevation}" Opacity="0">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="DockLabelTranslation" />
+                            </Border.RenderTransform>
+                            <TextBlock x:Name="DockLabelText" FontSize="{StaticResource SyFontCaption}" />
+                        </Border>
+                    </Canvas>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>

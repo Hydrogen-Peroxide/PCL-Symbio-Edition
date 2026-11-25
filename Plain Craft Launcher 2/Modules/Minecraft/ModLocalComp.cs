@@ -2310,15 +2310,56 @@ public static class ModLocalComp
         }
     }
 
+    internal enum ResourceScanStage { Inspecting, WaitingForUpdate, Scanning }
+
+    internal static event Action<CompLocalLoaderData>? ResourceScanChanged;
+    internal static event Action<CompLocalLoaderData>? ResourceDetailsChanged;
+    internal static event Action? NestedComponentsChanged;
+    internal static readonly ModBase.SafeList<string> UpdatingResourcePaths = new();
+
+    internal static void NotifyNestedComponentsChanged() => ModBase.RunInUi(() => NestedComponentsChanged?.Invoke());
+
     public class CompLocalLoaderData
     {
         public string compPath;
         public CompType compType;
 
         public KeyValuePair<List<LocalCompFile>, JsonObject> detailInfo;
-        public PageInstanceCompResource frm;
         public McInstance gameVersion;
         public List<CompLoaderType> loaders;
+        internal string? CurrentFolderPath;
+        internal string ScanPath => string.IsNullOrEmpty(CurrentFolderPath) ? compPath : CurrentFolderPath;
+        private int stage;
+        internal ResourceScanStage Stage => (ResourceScanStage)Volatile.Read(ref stage);
+
+        internal void PublishStage(ResourceScanStage value)
+        {
+            Volatile.Write(ref stage, (int)value);
+            ModBase.RunInUi(() => ResourceScanChanged?.Invoke(this));
+        }
+    }
+
+    internal static CompLocalLoaderData CreateResourceScan(McInstance instance, CompType type,
+        string? currentFolder = null, string? rootOverride = null)
+    {
+        var baseFolder = instance.Info.HasLabyMod
+            ? Path.Combine(instance.PathIndie, "labymod-neo", "fabric", instance.Info.VanillaName)
+            : instance.PathIndie;
+        var resourceRoot = rootOverride ?? Path.Combine(baseFolder, GetPathNameByCompType(type));
+        if (!Path.EndsInDirectorySeparator(resourceRoot)) resourceRoot += Path.DirectorySeparatorChar;
+        return new CompLocalLoaderData
+        {
+            compPath = resourceRoot,
+            compType = type,
+            gameVersion = instance,
+            CurrentFolderPath = currentFolder,
+            loaders = type switch
+            {
+                CompType.Mod => GetVersionModLoaders(instance),
+                CompType.Shader => [CompLoaderType.OptiFine, CompLoaderType.Iris, CompLoaderType.Vanilla, CompLoaderType.Canvas],
+                _ => [CompLoaderType.Minecraft]
+            }
+        };
     }
 
     // 加载资源列表
@@ -2386,64 +2427,41 @@ public static class ModLocalComp
             {
                 CompJijResolved = allResolved;
                 // 内嵌解析状态变化后，若关系页正显示则刷新；失败时仍保留“未完成”保护。
-                ModBase.RunInUi(() => ModMain.frmInstanceModJarInJar?.OnJijResolved());
+                NotifyNestedComponentsChanged();
             }
         }
     }
 
     private static void CompResourceListLoad(LoaderTask<CompLocalLoaderData, List<LocalCompFile>> loader)
     {
+        var request = loader.input;
         try
         {
-            ModBase.RunInUiWait(() =>
+            request.PublishStage(ResourceScanStage.Inspecting);
+            if (UpdatingResourcePaths.Contains(request.compPath))
             {
-                if (loader.input.frm is not null) loader.input.frm.Load.ShowProgress = false;
-            });
-
-            // 等待 Mod 更新完成
-            if (PageInstanceCompResource.updatingVersions.Contains(loader.input.compPath))
-            {
-                ModBase.Log("[Mod] 等待资源更新完成后才能继续加载资源列表：" + loader.input.compPath);
-                try
+                ModBase.Log("[Mod] 等待资源更新完成后才能继续加载资源列表：" + request.compPath);
+                request.PublishStage(ResourceScanStage.WaitingForUpdate);
+                while (UpdatingResourcePaths.Contains(request.compPath))
                 {
-                    ModBase.RunInUiWait(() =>
-                    {
-                        if (loader.input.frm is not null)
-                            loader.input.frm.Load.Text = Lang.Text("Instance.Resource.Update.WaitingForUpdate");
-                    });
-                    while (PageInstanceCompResource.updatingVersions.Contains(loader.input.compPath))
-                    {
-                        if (loader.IsAborted)
-                            return;
-                        Thread.Sleep(100);
-                    }
+                    if (loader.IsAborted) return;
+                    Thread.Sleep(100);
                 }
-                finally
-                {
-                    ModBase.RunInUiWait(() =>
-                    {
-                        if (loader.input.frm is not null)
-                            loader.input.frm.Load.Text = Lang.Text("Instance.Resource.List.Loading");
-                    });
-                }
-
-                loader.input.frm.LoaderRun(LoaderFolderRunType.UpdateOnly);
+                if (loader.IsAborted) return;
+                request.PublishStage(ResourceScanStage.Inspecting);
+                ModBase.RunInUiWait(() => ModLoader.LoaderFolderRun(loader, request.ScanPath,
+                    LoaderFolderRunType.UpdateOnly, loaderInput: request));
             }
 
             // 获取 Mod 文件夹下的可用文件列表
             var modList = new List<LocalCompFile>();
-            if (Directory.Exists(loader.input.compPath))
+            if (Directory.Exists(request.compPath))
             {
-                var rawName = loader.input.compPath.ToLower();
+                var rawName = request.compPath.ToLower();
 
-                if (loader.input.compType == CompType.Schematic)
+                if (request.compType == CompType.Schematic)
                 {
-                    var currentFolderPath = "";
-                    if (loader.input.frm is not null) currentFolderPath = loader.input.frm.CurrentFolderPath;
-
-                    var searchPath = string.IsNullOrEmpty(currentFolderPath)
-                        ? loader.input.compPath
-                        : currentFolderPath;
+                    var searchPath = request.ScanPath;
 
                     try
                     {
@@ -2453,7 +2471,7 @@ public static class ModLocalComp
                         foreach (var File in dirInfo.EnumerateFiles("*", SearchOption.AllDirectories))
                             try
                             {
-                                if (LocalCompFile.IsCompFile(File.FullName, loader.input.compType))
+                                if (LocalCompFile.IsCompFile(File.FullName, request.compType))
                                     modList.Add(new LocalCompFile(File.FullName));
                             }
                             catch (Exception ex)
@@ -2470,17 +2488,15 @@ public static class ModLocalComp
                 {
                     try
                     {
-                        foreach (var File in ModBase.EnumerateFiles(loader.input.compPath))
+                        foreach (var File in ModBase.EnumerateFiles(request.compPath))
                             try
                             {
                                 if ((File.DirectoryName.ToLower() ?? "") != (rawName.TrimEnd('\\') ?? ""))
-                                    if (!(PageInstanceLeft.McInstance is not null &&
-                                          PageInstanceLeft.McInstance.Info.HasForge &&
-                                          PageInstanceLeft.McInstance.Info.Drop < 130 && (File.Directory.Name ?? "") ==
-                                          (PageInstanceLeft.McInstance.Info.VanillaName ?? "")))
+                                    if (!(request.gameVersion?.Info is { HasForge: true, Drop: < 130 } info &&
+                                          string.Equals(File.Directory.Name, info.VanillaName, StringComparison.Ordinal)))
                                         continue;
 
-                                if (LocalCompFile.IsCompFile(File.FullName, loader.input.compType))
+                                if (LocalCompFile.IsCompFile(File.FullName, request.compType))
                                     modList.Add(new LocalCompFile(File.FullName));
                             }
                             catch (Exception ex)
@@ -2490,18 +2506,14 @@ public static class ModLocalComp
                     }
                     catch (Exception ex)
                     {
-                        ModBase.Log(ex, $"枚举文件夹失败：{loader.input.compPath}");
+                        ModBase.Log(ex, $"枚举文件夹失败：{request.compPath}");
                     }
                 }
             }
 
             // 确定是否显示进度
             loader.Progress = 0.05d;
-            if (modList.Count > 50)
-                ModBase.RunInUi(() =>
-                {
-                    if (loader.input.frm is not null) loader.input.frm.Load.ShowProgress = true;
-                });
+            if (modList.Count > 50) request.PublishStage(ResourceScanStage.Scanning);
 
             // 获取本地文件缓存
             var cachePath = ModBase.pathTemp + @"Cache\LocalComp.json";
@@ -2530,9 +2542,9 @@ public static class ModLocalComp
             // 加载 Mod 列表 - 优化：对于原理图文件，延迟加载NBT数据
             var modUpdateList = new List<LocalCompFile>();
             // 仅 Mod 类型启用 Jar-in-Jar 缓存；资源包/光影/投影共用同一 loader，不能用其路径污染/剪裁 mod 缓存
-            var jijEnabled = loader.input.compType == CompType.Mod;
-            var jijInstancePath = jijEnabled ? loader.input.gameVersion.PathInstance : null;
-            var preferredLoader = jijEnabled ? GetPreferredLoader(loader.input.gameVersion) : null;
+            var jijEnabled = request.compType == CompType.Mod;
+            var jijInstancePath = jijEnabled ? request.gameVersion.PathInstance : null;
+            var preferredLoader = jijEnabled ? GetPreferredLoader(request.gameVersion) : null;
             var jijGeneration = 0;
             Action? startJijResolve = null;
             ModJarInJarCache.UseInstance(jijInstancePath);
@@ -2554,7 +2566,7 @@ public static class ModLocalComp
 
                 if (jijEnabled) ModEntry.PreferredLoader = preferredLoader;
                 // 优化：对于原理图文件，只进行基础加载，不解析NBT数据
-                if (loader.input.compType == CompType.Schematic)
+                if (request.compType == CompType.Schematic)
                     ModEntry.LoadBasicInfo();
                 else
                     // 加载 McMod 对象
@@ -2563,8 +2575,8 @@ public static class ModLocalComp
                 // 读取 Comp 缓存
                 if (ModEntry.State == LocalCompFile.LocalFileStatus.Unavailable)
                     continue;
-                var cacheKey = ModEntry.ModrinthHash + loader.input.gameVersion.Info.VanillaName +
-                               loader.input.loaders.Join("");
+                var cacheKey = ModEntry.ModrinthHash + request.gameVersion.Info.VanillaName +
+                               request.loaders.Join("");
                 if (cache.ContainsKey(cacheKey))
                 {
                     ModEntry.FromJson((JsonObject)cache[cacheKey]);
@@ -2624,8 +2636,8 @@ public static class ModLocalComp
             if (modUpdateList.Any())
             {
                 // TODO: 添加信息获取中提示
-                loader.input.detailInfo = new KeyValuePair<List<LocalCompFile>, JsonObject>(modUpdateList, cache);
-                compUpdateDetailLoader.Start(loader.input, true);
+                request.detailInfo = new KeyValuePair<List<LocalCompFile>, JsonObject>(modUpdateList, cache);
+                compUpdateDetailLoader.Start(request, true);
             }
         }
 
@@ -2650,12 +2662,13 @@ public static class ModLocalComp
 
     private static void CompUpdateDetailLoad(LoaderTask<CompLocalLoaderData, int> loader)
     {
-        var mods = loader.input.detailInfo.Key;
-        var cache = loader.input.detailInfo.Value;
+        var request = loader.input;
+        var mods = request.detailInfo.Key;
+        var cache = request.detailInfo.Value;
         // 获取作为检查目标的加载器和版本
-        var modLoaders = loader.input.loaders;
-        var compType = loader.input.compType;
-        var mcInstance = loader.input.gameVersion.Info.VanillaName;
+        var modLoaders = request.loaders;
+        var compType = request.compType;
+        var mcInstance = request.gameVersion.Info.VanillaName;
 
         // 开始网络获取
         ModBase.Log($"[Mod] 目标加载器：{string.Join("/", modLoaders)}，版本：{mcInstance}");
@@ -2967,28 +2980,24 @@ public static class ModLocalComp
         ModBase.WriteFile(Path.Combine(ModBase.pathTemp, "Cache", "LocalComp.json"),
             cache.ToJsonString(ModBase.modeDebug ? new JsonSerializerOptions(JsonCompat.SerializerOptions) { WriteIndented = true } : null));
 
-        // 刷新 UI
-        ModBase.RunInUi(() =>
-        {
-            if (ModMain.frmInstanceMod?.Filter == PageInstanceCompResource.FilterType.CanUpdate)
-                ModMain.frmInstanceMod?.RefreshUI();
-            else
-                ModMain.frmInstanceMod?.RefreshBars();
-        });
+        ModBase.RunInUi(() => ResourceDetailsChanged?.Invoke(request));
     }
 
-    public static List<CompLoaderType> GetCurrentVersionModLoader()
+    public static List<CompLoaderType> GetCurrentVersionModLoader() =>
+        GetVersionModLoaders(InstanceWorkspace.Current);
+
+    private static List<CompLoaderType> GetVersionModLoaders(McInstance? instance)
     {
         var modLoaders = new List<CompLoaderType>();
-        if (PageInstanceLeft.McInstance.Info.HasForge)
+        if (instance?.Info.HasForge == true)
             modLoaders.Add(CompLoaderType.Forge);
-        if (PageInstanceLeft.McInstance.Info.HasNeoForge)
+        if (instance?.Info.HasNeoForge == true)
             modLoaders.Add(CompLoaderType.NeoForge);
-        if (PageInstanceLeft.McInstance.Info.HasFabric)
+        if (instance?.Info.HasFabric == true)
             modLoaders.Add(CompLoaderType.Fabric);
-        if (PageInstanceLeft.McInstance.Info.HasQuilt)
+        if (instance?.Info.HasQuilt == true)
             modLoaders.AddRange(new[] { CompLoaderType.Fabric, CompLoaderType.Quilt });
-        if (PageInstanceLeft.McInstance.Info.HasLiteLoader)
+        if (instance?.Info.HasLiteLoader == true)
             modLoaders.Add(CompLoaderType.LiteLoader);
         if (!modLoaders.Any())
             modLoaders.AddRange(new[]

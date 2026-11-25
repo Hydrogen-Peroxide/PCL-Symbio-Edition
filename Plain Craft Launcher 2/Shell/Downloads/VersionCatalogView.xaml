@@ -1,0 +1,25 @@
+<local:WorkspacePage x:Class="PCL.VersionCatalogView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PCL" PanScroll="{Binding ElementName=CatalogScroll}">
+    <ScrollViewer x:Name="CatalogScroll" local:ScrollInput.Enabled="True" Style="{StaticResource SyScrollViewer}"
+                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="{StaticResource SePageScrollMargin}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <local:WorkspaceCard x:Name="Introduction" Margin="0,0,0,12">
+                <DockPanel Margin="16,40,16,12">
+                    <local:SymbioIconTextAction x:Name="Website" DockPanel.Dock="Right" Margin="12,0,0,0"
+                                              Text="{DynamicResource Download.Version.OpenWebsite}" SvgIcon="lucide/globe" />
+                    <TextBlock x:Name="Description" VerticalAlignment="Center" TextWrapping="Wrap" />
+                </DockPanel>
+            </local:WorkspaceCard>
+            <StackPanel x:Name="Results" Grid.Row="1" />
+            <local:WorkspaceCard x:Name="Waiting" Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <local:LoadingIndicator x:Name="Progress" Margin="18,9" />
+            </local:WorkspaceCard>
+        </Grid>
+    </ScrollViewer>
+</local:WorkspacePage>
