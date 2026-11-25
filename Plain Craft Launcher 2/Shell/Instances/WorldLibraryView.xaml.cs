@@ -206,10 +206,24 @@ public partial class WorldLibraryView : IRefreshable
         }
     }
 
+    /// <summary>
+    ///     统计一个实例可见的存档数量。必须与 <see cref="LoadFileList" /> 用同一套判定
+    ///     （目录里有 level.dat 才算存档），否则会出现「版本选择器说有 2 个存档、列表却是空的」。
+    /// </summary>
     private static int GetSaveCount(McInstance instance)
     {
-        var savesPath = Path.Combine(instance.PathIndie, "saves");
-        return Directory.Exists(savesPath) ? Directory.GetDirectories(savesPath).Length : 0;
+        try
+        {
+            var savesPath = Path.Combine(instance.PathIndie, "saves");
+            if (!Directory.Exists(savesPath)) return 0;
+            return Directory.EnumerateDirectories(savesPath)
+                .Count(folder => File.Exists(Path.Combine(folder, "level.dat")));
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[World] 统计存档数量失败", ModBase.LogLevel.Debug);
+            return 0;
+        }
     }
 
     private static string BuildVersionInfo(McInstance instance)
