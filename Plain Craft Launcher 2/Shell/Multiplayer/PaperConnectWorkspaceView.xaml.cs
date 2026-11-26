@@ -1,9 +1,11 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using PCL.Core.App;
+using PCL.Core.Multiplayer;
 using PaperConnect.Core.Entry;
 
 namespace PCL;
@@ -23,13 +25,15 @@ public partial class PaperConnectWorkspaceView
         InitializeComponent();
         ModPaperConnect.Changed += OnChanged;
         timer.Tick += (_, _) => Refresh();
-        Loaded += (_, _) =>
+        Loaded += async (_, _) =>
         {
             runtimeFound = ModPaperConnect.LocateEasyTier();
             TextPeers.Text = Config.Preference.PaperConnectPeers ?? string.Empty;
             CheckTun.Checked = Config.Preference.PaperConnectTunMode;
             timer.Start();
             Refresh();
+            // 页面打开时自动检测本机基岩版世界，省去手填端口
+            await AutoDetectPortAsync();
         };
         Unloaded += (_, _) => timer.Stop();
     }
@@ -40,6 +44,50 @@ public partial class PaperConnectWorkspaceView
         if (!user) return;
         Config.Preference.PaperConnectTunMode = CheckTun.Checked == true;
         Refresh();
+    }
+
+    // ---- 自动检测本机基岩版端口 ----
+
+    private async void BtnDetectPort_Click(object sender, RoutedEventArgs e) =>
+        await AutoDetectPortAsync();
+
+    /// <summary>
+    ///     扫描本机基岩版世界端口（Minecraft.Windows UDP 监听端口 + 默认 19132/19133）。
+    ///     找到后自动填入「游戏端口」并显示世界名称，让房主不用手填端口。
+    /// </summary>
+    private async Task AutoDetectPortAsync()
+    {
+        BtnDetectPort.IsEnabled = false;
+        LabDetectedWorld.Text = "正在检测…";
+        LabDetectedWorld.Visibility = Visibility.Visible;
+        try
+        {
+            var worlds = await BedrockWorldProbe.DiscoverLocalAsync(timeout: TimeSpan.FromSeconds(1));
+            if (worlds.Count > 0)
+            {
+                var w = worlds[0];
+                TextPort.Text = w.Port.ToString();
+                LabDetectedWorld.Text = $"✔ 已检测到：{w.Name}（{w.Version}，端口 {w.Port}）";
+                // 多于一个时追加提示
+                if (worlds.Count > 1)
+                    LabDetectedWorld.Text +=
+                        $"，另有 {worlds.Count - 1} 个（端口 {string.Join("/", worlds.Skip(1).Select(x => x.Port))}）";
+            }
+            else
+            {
+                LabDetectedWorld.Text = "未检测到基岩版世界。请先在游戏里进入世界并「对局域网开放」，再重新检测。";
+                // 无世界时不清空已填的端口
+            }
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[PaperConnect] 自动检测端口失败", ModBase.LogLevel.Debug);
+            LabDetectedWorld.Text = "检测失败，请手动填写端口。";
+        }
+        finally
+        {
+            BtnDetectPort.IsEnabled = true;
+        }
     }
 
     private void OnChanged() => ModBase.RunInUi(Refresh);
