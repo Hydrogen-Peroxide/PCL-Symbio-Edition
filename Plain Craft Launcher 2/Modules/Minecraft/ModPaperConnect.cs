@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using PCL.Core.App;
+using PCL.Core.Provision;
 using PaperConnect.Core;
 using PaperConnect.Core.Entry;
 using PaperConnect.Core.Entry.Easytier;
@@ -257,6 +258,57 @@ internal static class ModPaperConnect
 
     internal const string EasyTierReleaseUrl = "https://github.com/EasyTier/EasyTier/releases";
 
+    /// <summary>自动下载时使用的 EasyTier 版本（与 BedrockBoot 内置的 2.6.4 对齐）。</summary>
+    private const string EasyTierVersion = "v2.6.4";
+
+    private const string EasyTierToolsId = "EasyTier";
+
+    /// <summary>
+    ///     确保 EasyTier 就绪：先找现成的（缓存/本机已装），找不到就自动下载官方发行包并解压。
+    ///     走统一的 <see cref="ToolProvisionService" />，落在 <c>%AppData%\PCLSE\Tools\EasyTier\v2.6.4\</c>，
+    ///     下载进度通过 <paramref name="progress" /> 回调（0~1）。
+    /// </summary>
+    internal static async Task<bool> EnsureEasyTierAsync(IProgress<double>? progress = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (LocateEasyTier()) return true;
+
+        var definition = new ToolDefinition(
+            EasyTierToolsId,
+            EasyTierVersion,
+            new Uri($"https://github.com/EasyTier/EasyTier/releases/download/{EasyTierVersion}/easytier-windows-x86_64-{EasyTierVersion}.zip"),
+            Sha256: null,
+            EntryFile: "easytier-core.exe",
+            IsArchive: true);
+
+        try
+        {
+            var core = await ToolProvisionService.EnsureAsync(definition, progress, cancellationToken)
+                .ConfigureAwait(false);
+            // 解压目录里同时有 cli，找一下即可
+            var directory = Path.GetDirectoryName(core);
+            if (directory is null) return false;
+            var cli = Directory.EnumerateFiles(directory, "easytier-cli.exe", SearchOption.AllDirectories)
+                .FirstOrDefault();
+            if (cli is null)
+            {
+                ModBase.Log("[PaperConnect] EasyTier 解压后缺少 easytier-cli.exe", ModBase.LogLevel.Hint);
+                return false;
+            }
+
+            EasyTierCore = core;
+            EasyTierCli = cli;
+            ModBase.Log($"[PaperConnect] 已自动下载 EasyTier {EasyTierVersion}：{core}", ModBase.LogLevel.Normal);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[PaperConnect] 自动下载 EasyTier 失败", ModBase.LogLevel.Hint,
+                userSummary: "联机组件下载失败");
+            return false;
+        }
+    }
+
     /// <summary>查找 easytier-core / easytier-cli：优先启动器缓存，其次复用本机已下载的 EasyTier。</summary>
     internal static bool LocateEasyTier()
     {
@@ -413,7 +465,12 @@ internal static class ModPaperConnect
     internal static async Task<string> HostAsync(string playerName, int gamePort = DefaultGamePort)
     {
         if (IsRunning) throw new InvalidOperationException("已经在联机中，请先断开。");
-        if (!LocateEasyTier()) throw new FileNotFoundException("没有找到 EasyTier 运行文件。");
+        // 缺组件就自动补齐，不再直接把用户挡在门外
+        if (!LocateEasyTier())
+        {
+            SetStatus("正在准备联机组件…");
+            if (!await EnsureEasyTierAsync()) throw new FileNotFoundException("联机组件下载失败，请重试或检查网络。");
+        }
 
         IsBusy = true;
         LastError = null;
@@ -479,7 +536,12 @@ internal static class ModPaperConnect
         if (IsRunning) throw new InvalidOperationException("已经在联机中，请先断开。");
         var normalized = Normalize(code);
         if (!RoomCodeGenerator.IsValidFormat(normalized)) throw new ArgumentException("联机码格式不正确。");
-        if (!LocateEasyTier()) throw new FileNotFoundException("没有找到 EasyTier 运行文件。");
+        // 缺组件就自动补齐，不再直接把用户挡在门外
+        if (!LocateEasyTier())
+        {
+            SetStatus("正在准备联机组件…");
+            if (!await EnsureEasyTierAsync()) throw new FileNotFoundException("联机组件下载失败，请重试或检查网络。");
+        }
 
         IsBusy = true;
         LastError = null;

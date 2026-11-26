@@ -87,14 +87,16 @@
                     </StackPanel>
                 </local:WorkspaceCard>
 
-                <!-- 缺少 EasyTier 时的引导，默认隐藏 -->
+                <!-- 缺少 EasyTier 时的引导，默认隐藏；点按钮自动下载，不用跳官网 -->
                 <local:WorkspaceCard x:Name="CardRuntime" Margin="0,0,0,15" Title="缺少联机运行文件" Visibility="Collapsed">
                     <StackPanel Margin="21,36,21,18">
-                        <TextBlock FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
-                                   Text="PaperConnect 需要 EasyTier 运行文件（easytier-core.exe / easytier-cli.exe）。可以把官方 EasyTier 发行包解压到启动器缓存目录，或前往发行页下载。" />
-                        <local:SymbioButton Height="30" Padding="14,0" Margin="0,12,0,0" HorizontalAlignment="Left"
-                                            ColorType="Highlight" Text="打开 EasyTier 发行页"
-                                            Click="BtnRuntime_Click" />
+                        <TextBlock x:Name="LabRuntime" FontSize="12.5" TextWrapping="Wrap" LineHeight="21"
+                                   Text="PaperConnect 需要 EasyTier 运行文件（easytier-core.exe / easytier-cli.exe）。点下面的按钮会自动下载并解压，无需手动去官网。" />
+                        <local:SymbioButton x:Name="BtnRuntime" Height="30" Padding="14,0" Margin="0,12,0,0"
+                                            HorizontalAlignment="Left" ColorType="Highlight"
+                                            Text="自动下载联机组件" Click="BtnRuntime_Click" />
+                        <ProgressBar x:Name="BarRuntime" Height="4" Margin="0,10,0,0" Minimum="0" Maximum="1"
+                                     Visibility="Collapsed" />
                     </StackPanel>
                 </local:WorkspaceCard>
 

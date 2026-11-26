@@ -131,8 +131,47 @@ public partial class PaperConnectWorkspaceView
         HintService.Hint($"已复制连接地址：{address}", HintType.Success);
     }
 
-    private void BtnRuntime_Click(object sender, RoutedEventArgs e) =>
-        ModBase.OpenWebsite(ModPaperConnect.EasyTierReleaseUrl);
+    /// <summary>缺组件时一键自动下载 EasyTier（走统一下载管线，带进度）。</summary>
+    private async void BtnRuntime_Click(object sender, RoutedEventArgs e)
+    {
+        BtnRuntime.IsEnabled = false;
+        BarRuntime.Visibility = Visibility.Visible;
+        BarRuntime.Value = 0;
+        LabRuntime.Text = "正在下载联机组件…";
+
+        var progress = new Progress<double>(value =>
+        {
+            BarRuntime.Value = value;
+            LabRuntime.Text = $"正在下载联机组件… {value:P0}";
+        });
+
+        try
+        {
+            runtimeFound = await ModPaperConnect.EnsureEasyTierAsync(progress);
+            if (runtimeFound)
+            {
+                LabRuntime.Text = "联机组件已就绪。";
+                BarRuntime.Value = 1;
+                HintService.Hint("联机组件下载完成", HintType.Success);
+            }
+            else
+            {
+                LabRuntime.Text = "下载失败。可以重试，或手动把 EasyTier 发行包解压到启动器缓存目录。";
+                BtnRuntime.IsEnabled = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "[PaperConnect] 自动下载联机组件失败", ModBase.LogLevel.Hint);
+            LabRuntime.Text = "下载失败：" + ex.Message;
+            BtnRuntime.IsEnabled = true;
+        }
+        finally
+        {
+            BarRuntime.Visibility = runtimeFound ? Visibility.Collapsed : Visibility.Visible;
+            Refresh();
+        }
+    }
 
     private void Refresh()
     {
@@ -159,8 +198,9 @@ public partial class PaperConnectWorkspaceView
                 : ModPaperConnect.Status
             : ModPaperConnect.LastError;
 
-        BtnHost.IsEnabled = !busy && !running && runtimeFound;
-        BtnJoin.IsEnabled = !busy && !running && runtimeFound;
+        // 缺组件也允许点：点下去会自动下载组件再继续，不再让用户先自己找运行文件
+        BtnHost.IsEnabled = !busy && !running;
+        BtnJoin.IsEnabled = !busy && !running;
         BtnStop.IsEnabled = !busy && running;
 
         LabRoomCode.Text = role switch

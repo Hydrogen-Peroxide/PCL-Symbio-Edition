@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -83,7 +84,22 @@ public static class ToolProvisionService
         if (definition.IsArchive) ExtractArchive(target, directory);
 
         var entryFile = definition.EntryFile ?? Path.GetFileName(target);
+        // 发行包常常把 exe 放在子目录里（例如 easytier-windows-x86_64/），
+        // 先按根层找，找不到就按文件名在解压目录里递归找，避免"明明下载成功却报找不到入口"。
         var entryPath = Path.Combine(directory, entryFile);
+        if (!File.Exists(entryPath))
+        {
+            var entryName = Path.GetFileName(entryFile);
+            var found = System.IO.Directory
+                .EnumerateFiles(directory, entryName, SearchOption.AllDirectories)
+                .FirstOrDefault();
+            if (found is not null)
+            {
+                entryFile = Path.GetRelativePath(directory, found);
+                entryPath = found;
+            }
+        }
+
         if (!File.Exists(entryPath))
             throw new FileNotFoundException($"工具 {definition.Id} 解压后找不到入口文件 {entryFile}", entryPath);
 
