@@ -56,8 +56,18 @@ public sealed class SymbioSlider : Slider
     public override void OnApplyTemplate()
     {
         HideHint();
+        if (hint is not null) hint.Opened -= Hint_Opened;
         base.OnApplyTemplate();
         hint = GetTemplateChild("PART_ValueHint") as Popup;
+        if (hint is not null) hint.Opened += Hint_Opened;
+    }
+
+    /// <summary>值提示气泡以前是瞬时出现，接上与下拉框一致的进入动效。</summary>
+    private void Hint_Opened(object? sender, EventArgs e)
+    {
+        if (hint?.Child is not FrameworkElement child) return;
+        child.RenderTransformOrigin = new Point(0.5, 1);
+        SymbioMotion.EnterDepth(child, 4, .97, SymbioMotion.Pop);
     }
 
     protected override void OnValueChanged(double oldValue, double newValue)
