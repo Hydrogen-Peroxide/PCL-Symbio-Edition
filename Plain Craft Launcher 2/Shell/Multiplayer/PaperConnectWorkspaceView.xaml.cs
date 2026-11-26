@@ -112,6 +112,8 @@ public partial class PaperConnectWorkspaceView
         try
         {
             SavePeers();
+            if (string.IsNullOrWhiteSpace(TextPort.Text))
+                await AutoDetectPortAsync();
             var code = await ModPaperConnect.HostAsync(PlayerName, ReadGamePort());
             HintService.Hint($"房间已创建，联机码：{code}", HintType.Success);
         }

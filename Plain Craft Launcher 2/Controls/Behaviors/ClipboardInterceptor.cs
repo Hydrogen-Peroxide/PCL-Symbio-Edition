@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
-using Clipboard = System.Windows.Forms.Clipboard;
 
 // Author: uye (owner of the MaaAssistantArknights team)
 // Original Source: MaaAssistantArknights project - https://github.com/MaaAssistantArknights/MaaAssistantArknights
@@ -109,9 +108,9 @@ public sealed class ClipboardInterceptor
         if (tb is null)
             return;
 
-        if (Clipboard.ContainsText())
+        if (System.Windows.Clipboard.ContainsText())
         {
-            var pasteText = Clipboard.GetText();
+            var pasteText = System.Windows.Clipboard.GetText();
 
             if (!tb.AcceptsReturn)
                 pasteText = pasteText.Replace("\r\n", " ").Replace("\r", " ")
@@ -163,10 +162,10 @@ public sealed class ClipboardInterceptor
         if (rtb is null)
             return;
 
-        if (!Clipboard.ContainsText())
+        if (!System.Windows.Clipboard.ContainsText())
             return;
 
-        var pasteText = Clipboard.GetText();
+        var pasteText = System.Windows.Clipboard.GetText();
         var selection = rtb.Selection;
 
         selection.Text = pasteText;
@@ -205,8 +204,8 @@ public sealed class ClipboardInterceptor
     {
         try
         {
-            Clipboard.Clear();
-            Clipboard.SetDataObject(text, true);
+            System.Windows.Clipboard.Clear();
+            System.Windows.Clipboard.SetDataObject(text, true);
             return true;
         }
         catch

@@ -79,7 +79,8 @@
                             Click="BtnLaunch_Click"
                             Padding="30,0,30,15" />
             <TextBlock x:Name="LabLaunchVersion" HorizontalAlignment="Center" VerticalAlignment="Bottom"
-                       Margin="20,0,20,8" FontSize="10.5" Opacity="0.8" Foreground="White"
+                       Margin="20,0,20,8" FontSize="10.5" Opacity="0.8"
+                       Foreground="{DynamicResource SyTextOnAccent}"
                        IsHitTestVisible="False" TextTrimming="CharacterEllipsis" Visibility="Collapsed" />
 
         </Grid>
@@ -98,7 +99,7 @@
         </Grid>
 
         <!-- 实例设置：以整窗浮层显示，左导航 + 右内容，避免挤在 300px 左栏里 -->
-        <Border x:Name="PanInstanceSettings" Grid.RowSpan="4" Background="#00000000" Visibility="Collapsed">
+        <Border x:Name="PanInstanceSettings" Grid.RowSpan="4" Background="{DynamicResource SyTransparent}" Visibility="Collapsed">
             <Border Background="{DynamicResource SyFlyoutFill}" CornerRadius="0">
                 <Grid>
                     <Grid.ColumnDefinitions>

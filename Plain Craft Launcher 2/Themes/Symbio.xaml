@@ -31,6 +31,7 @@
     <SolidColorBrush x:Key="SyTextDisabled" Color="#5C000000" />
     <SolidColorBrush x:Key="SyTextOnAccent" Color="#FFFFFFFF" />
     <SolidColorBrush x:Key="SyTextOnAccentDisabled" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="SyTransparent" Color="#00000000" />
     <SolidColorBrush x:Key="SyControl" Color="#B3FFFFFF" />
     <SolidColorBrush x:Key="SyControlHover" Color="#80F9F9F9" />
     <SolidColorBrush x:Key="SyControlPressed" Color="#4DF9F9F9" />

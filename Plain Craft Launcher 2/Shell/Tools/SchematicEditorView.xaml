@@ -220,7 +220,7 @@
                                     <DrawingBrush.Drawing>
                                         <GeometryDrawing>
                                             <GeometryDrawing.Pen>
-                                                <Pen Brush="#26FFFFFF" Thickness="1" />
+                                                <Pen Brush="{DynamicResource SyDivider}" Thickness="1" />
                                             </GeometryDrawing.Pen>
                                             <GeometryDrawing.Geometry>
                                                 <RectangleGeometry Rect="0,0,4,4" />
@@ -236,7 +236,7 @@
                                     <DrawingBrush.Drawing>
                                         <GeometryDrawing>
                                             <GeometryDrawing.Pen>
-                                                <Pen Brush="#4DFFFFFF" Thickness="1" />
+                                                <Pen Brush="{DynamicResource SyControlStrongStroke}" Thickness="1" />
                                             </GeometryDrawing.Pen>
                                             <GeometryDrawing.Geometry>
                                                 <RectangleGeometry Rect="0,0,128,128" />

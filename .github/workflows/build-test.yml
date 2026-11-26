@@ -39,6 +39,9 @@ jobs:
       - uses: actions/setup-dotnet@v5
         with:
           global-json-file: global.json
+      - name: Validate Symbio UI resources
+        shell: pwsh
+        run: ./tests/UiRegression/Assert-SymbioUi.ps1
       - name: Run offline core tests
         run: >-
           dotnet test PCL.Core.Test/PCL.Core.Test.csproj

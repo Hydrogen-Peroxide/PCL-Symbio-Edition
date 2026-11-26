@@ -124,11 +124,11 @@ public partial class Application
                 string.IsNullOrEmpty(filePath)
                     ? Lang.Text("Application.InitializationError.PathUnavailable")
                     : filePath);
-            MessageBox.Show(
+            ModMain.MyMsgBox(
                 ExceptionDetails.Compose(summary, ex),
                 Lang.Text("SystemDialog.Startup.InitializationTitle"),
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+                Lang.Text("Common.Action.Confirm"),
+                isWarn: true);
             FormMain.EndProgramForce(ModBase.ProcessReturnValues.Exception);
         }
     }

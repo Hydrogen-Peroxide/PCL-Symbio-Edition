@@ -717,7 +717,7 @@ public partial class LocalProjectRow
                 Opacity = 0d,
                 Margin = new Thickness(0d, 0d, 5d, 0d),
                 SnapsToDevicePixels = false,
-                Orientation = (Orientation)System.Windows.Forms.Orientation.Horizontal,
+                Orientation = Orientation.Horizontal,
                 HorizontalAlignment = HorizontalAlignment.Right,
                 VerticalAlignment = VerticalAlignment.Center,
                 UseLayoutRounding = false
