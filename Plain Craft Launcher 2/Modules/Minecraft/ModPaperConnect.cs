@@ -68,10 +68,14 @@ internal static class ModPaperConnect
         string.Join(" ", ReadRelays().Select(relay => $"-p {relay}"));
 
     /// <summary>
-    ///     房主在 EasyTier 里的 hostname 前缀。规范文档写的是 <c>paper-connect-server-</c>，
-    ///     但 BedrockBoot 的 PaperConnect 实际按 <c>pcs-</c> 前缀找联机中心（报错原文：
-    ///     「未找到主机（前缀 pcs-）」），所以这里跟随实际生态用 <c>pcs-</c>；
-    ///     房客侧则同时兼容三种前缀。
+    ///     房主在 EasyTier 里的 hostname 前缀。
+    ///     实测（BedrockBoot 报错原文，两轮对照）：
+    ///     - 用 <c>paper-connect-server-&lt;port&gt;</c> → 「未找到主机（前缀 pcs-）」，前缀都不匹配；
+    ///     - 用 <c>pcs-&lt;port&gt;</c> → 「解析主机名失败: unrecognized hostname format: pcs-30933」，
+    ///       前缀匹配上了但格式不完整。
+    ///     所以是 <c>pcs-</c> 开头、结构比「纯端口」复杂。bedrockboot 的解析在闭源 CLI 里，
+    ///     拿不到确切规则，这里同时发两个信息：端口 + 房间码 N 段（<c>pcs-&lt;端口&gt;-&lt;NNNN-NNNN&gt;</c>），
+    ///     并让房客侧对两种写法都宽容（见 CenterHostnamePrefixes 的解析）。
     /// </summary>
     private const string HostHostnamePrefix = "pcs-";
 
@@ -524,7 +528,9 @@ internal static class ModPaperConnect
 
             var code = GenerateRoomCode();
             var network = RoomCodeGenerator.ParseRoomCode(code);
-            var args = $"-i {HostVip} --hostname {HostHostnamePrefix}{roomServer.ServerPort} " +
+            // hostname: pcs-<控制面端口>-<房间码 N 段>，兼顾"前缀匹配"与"带房间标识"两种解析期待
+            var roomTag = code.Substring(RoomCodeGenerator.ROOM_CODE_HEADER.Length, 9); // NNNN-NNNN
+            var args = $"-i {HostVip} --hostname {HostHostnamePrefix}{roomServer.ServerPort}-{roomTag} " +
                        $"--network-name {network.NetworkName} --network-secret {network.NetworkKey} " +
                        string.Join(" ", BuildParameters()) + " " +
                        $"--listeners tcp://0.0.0.0:{DirectListenPort} " +
@@ -534,6 +540,9 @@ internal static class ModPaperConnect
             Role = RoomRole.Host;
             RoomCode = code;
             SetStatus("房间已创建，等待其他玩家加入…");
+            // 把 hostname 明确记下来：bedrockboot 报「解析主机名失败」时可直接对照这条
+            ModBase.Log($"[PaperConnect] 房主 hostname = {HostHostnamePrefix}{roomServer.ServerPort}-{roomTag}",
+                ModBase.LogLevel.Normal);
             ModBase.Log($"[PaperConnect] 开房成功，联机码 {code}，控制面端口 {roomServer.ServerPort}，游戏端口 {gamePort}，" +
                         $"直连地址 {DirectAddress}，共享节点 {(ReadRelays().Length == 0 ? "无" : string.Join(" ", ReadRelays()))}",
                 ModBase.LogLevel.Normal);
