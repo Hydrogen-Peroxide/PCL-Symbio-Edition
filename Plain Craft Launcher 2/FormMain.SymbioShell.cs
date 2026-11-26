@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -19,6 +20,9 @@ public partial class FormMain
     private bool shellAccountPageOpen;
     private ImageSource? shellWallpaper;
     private SymbioShellState shellState = new();
+
+    /// <summary>RefreshShell 的合并标记：1 表示本帧已排过一次刷新。</summary>
+    private int shellRefreshPending;
 
     /// <summary>
     ///     Dock 位置暂时锁定为「窗口外悬浮」：窗口内模式下 Dock 会覆盖面板底部，联动动效也还没稳定，
@@ -157,7 +161,8 @@ public partial class FormMain
         PanMain.Children.Remove(sidebarFrame);
         view.SetHostedSidebar(sidebarFrame);
         view.SetPageContent(PanMain);
-        RefreshShell();
+        // 窗口刚创建：必须同帧拿到正确状态，不能等 Background 派发
+        RefreshShellNow();
     }
 
     private void HookAccountPanel(SymbioAccountPanel accountPanel)
@@ -221,7 +226,29 @@ public partial class FormMain
         view.SetPageContent(PanMain);
     }
 
+    /// <summary>
+    ///     合并刷新：多个数据源（启动状态、实例列表、主题、账号）会在同一瞬间各调一次，
+    ///     这里用一次性 Background 派发把它们压成一帧，避免 24 个调用点叠加成"每来一条刷一次"。
+    /// </summary>
     internal void RefreshShell()
+    {
+        if (shell is null) return;
+        if (Interlocked.Exchange(ref shellRefreshPending, 1) != 0) return;
+        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(() =>
+        {
+            Interlocked.Exchange(ref shellRefreshPending, 0);
+            RefreshShellCore();
+        }));
+    }
+
+    /// <summary>立即刷新，用于窗口刚创建、必须同帧拿到正确状态的场景。</summary>
+    internal void RefreshShellNow()
+    {
+        Interlocked.Exchange(ref shellRefreshPending, 0);
+        RefreshShellCore();
+    }
+
+    private void RefreshShellCore()
     {
         if (shell is not { } view) return;
 
@@ -248,7 +275,7 @@ public partial class FormMain
         var instance = ResolveShellInstance(isBedrock);
         var launch = ResolveShellLaunch(isBedrock);
 
-        shellState = new SymbioShellState
+        var next = new SymbioShellState
         {
             IsHome = pageCurrent.page is PageType.Launch or PageType.Bedrock && !shellAccountPageOpen,
             Destination = pageCurrent.page switch
@@ -279,7 +306,10 @@ public partial class FormMain
             LaunchStatus = launch.Status,
             LaunchProgress = launch.Progress
         };
-        view.SetState(shellState);
+        // 状态没变就不重推一遍：record 是值比较，能挡掉大部分无效刷新（尤其是启动进度条那种高频回调）
+        if (next == shellState) return;
+        shellState = next;
+        view.SetState(next);
     }
 
     /// <summary>
