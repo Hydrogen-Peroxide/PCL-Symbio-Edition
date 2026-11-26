@@ -6,7 +6,6 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -40,8 +39,12 @@ public static class BedrockWorldProbe
 
         try
         {
-            using var client = new UdpClient(AddressFamily.InterNetwork);
-            client.Client.Bind(new IPEndPoint(IPAddress.Any, 0));
+            var family = host.Contains(':', StringComparison.Ordinal)
+                ? AddressFamily.InterNetworkV6
+                : AddressFamily.InterNetwork;
+            using var client = new UdpClient(family);
+            client.Client.Bind(new IPEndPoint(
+                family == AddressFamily.InterNetworkV6 ? IPAddress.IPv6Any : IPAddress.Any, 0));
 
             var payload = BuildPing();
             await client.SendAsync(payload, payload.Length, host, port).ConfigureAwait(false);
@@ -56,9 +59,17 @@ public static class BedrockWorldProbe
     }
 
     /// <summary>本机端口探测的便捷入口。</summary>
-    public static Task<BedrockWorldInfo?> PingLocalAsync(int port, TimeSpan? timeout = null,
-        CancellationToken cancellationToken = default) =>
-        PingAsync("127.0.0.1", port, timeout, cancellationToken);
+    public static async Task<BedrockWorldInfo?> PingLocalAsync(int port, TimeSpan? timeout = null,
+        CancellationToken cancellationToken = default)
+    {
+        // 部分商店版 / GDK 版本只在 IPv6 回环地址上监听，两个回环地址都尝试。
+        var ipv4 = PingAsync("127.0.0.1", port, timeout, cancellationToken);
+        var ipv6 = PingAsync("::1", port, timeout, cancellationToken);
+        var first = await Task.WhenAny(ipv4, ipv6).ConfigureAwait(false);
+        var result = await first.ConfigureAwait(false);
+        if (result is not null) return result;
+        return await (ReferenceEquals(first, ipv4) ? ipv6 : ipv4).ConfigureAwait(false);
+    }
 
     /// <summary>
     ///     自动发现本机正在开放局域网的基岩版世界。
@@ -73,8 +84,10 @@ public static class BedrockWorldProbe
     {
         var ports = new SortedSet<int> { 19132, 19133 };
 
-        // 从 Minecraft.Windows 进程的 UDP 监听列表里补充端口（nethernet 类房间用随机高端口）
-        foreach (var port in GetMinecraftUdpPorts())
+        // 从 Minecraft.Windows 进程的 UDP 监听列表里补充端口（nethernet 类房间用随机高端口）。
+        // 某些 UWP 容器不会把真实 PID 暴露给 netstat，此时再用系统监听表作候选，最终仍由 RakNet 应答确认。
+        var minecraftPorts = GetMinecraftUdpPorts();
+        foreach (var port in minecraftPorts.Count > 0 ? minecraftPorts : GetActiveUdpPorts())
             ports.Add(port);
 
         if (extraPorts is not null)
@@ -96,16 +109,28 @@ public static class BedrockWorldProbe
     {
         try
         {
-            // 找 Minecraft.Windows 进程
-            var mcPids = Process.GetProcessesByName("Minecraft.Windows")
-                .Concat(Process.GetProcessesByName("Minecraft.Windows.exe"))
-                .Select(p => p.Id)
-                .ToHashSet();
+            // 找基岩版进程。UWP、GDK 和旧版客户端的进程名略有不同。
+            var mcPids = new HashSet<int>();
+            foreach (var name in new[] { "Minecraft.Windows", "Minecraft.Win10.DX11", "Minecraft.Windows.GDK" })
+            {
+                try
+                {
+                    foreach (var process in Process.GetProcessesByName(name))
+                    {
+                        mcPids.Add(process.Id);
+                        process.Dispose();
+                    }
+                }
+                catch
+                {
+                    // 进程在探测过程中退出时忽略这一项，继续使用其余进程。
+                }
+            }
 
             if (mcPids.Count == 0) return [];
 
             // netstat -ano 输出 UDP 行，格式：UDP  0.0.0.0:19132  *:*  <PID>
-            var psi = new ProcessStartInfo("netstat", "-ano")
+            var psi = new ProcessStartInfo("netstat", "-ano -p udp")
             {
                 UseShellExecute = false, CreateNoWindow = true,
                 RedirectStandardOutput = true, RedirectStandardError = true
@@ -118,16 +143,36 @@ public static class BedrockWorldProbe
             var ports = new List<int>();
             foreach (var line in output.Split('\n'))
             {
-                // UDP  0.0.0.0:PORT  *:*  PID
-                var m = Regex.Match(line, @"UDP\s+\S+:(\d+)\s+\*:\*\s+(\d+)", RegexOptions.IgnoreCase);
-                if (!m.Success) continue;
-                if (!int.TryParse(m.Groups[1].Value, out var port)) continue;
-                if (!int.TryParse(m.Groups[2].Value, out var pid)) continue;
+                // 不依赖本地化列宽和地址格式，兼容 0.0.0.0:PORT、[::]:PORT 等输出。
+                var columns = line.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+                if (columns.Length < 4 || !columns[0].Equals("UDP", StringComparison.OrdinalIgnoreCase)) continue;
+                var localAddress = columns[1];
+                var separator = localAddress.LastIndexOf(':');
+                if (separator < 0 || !int.TryParse(localAddress[(separator + 1)..], out var port)) continue;
+                if (!int.TryParse(columns[^1], out var pid)) continue;
                 if (mcPids.Contains(pid) && port > 1024)
                     ports.Add(port);
             }
 
             return ports;
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    /// <summary>获取系统当前所有 UDP 监听端口，作为 UWP PID 不可见时的候选集合。</summary>
+    private static IReadOnlyList<int> GetActiveUdpPorts()
+    {
+        try
+        {
+            return IPGlobalProperties.GetIPGlobalProperties()
+                .GetActiveUdpListeners()
+                .Select(endpoint => endpoint.Port)
+                .Where(port => port > 1024)
+                .Distinct()
+                .ToArray();
         }
         catch
         {

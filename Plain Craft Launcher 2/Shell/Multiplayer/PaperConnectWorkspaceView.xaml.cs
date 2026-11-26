@@ -62,7 +62,7 @@ public partial class PaperConnectWorkspaceView
         LabDetectedWorld.Visibility = Visibility.Visible;
         try
         {
-            var worlds = await BedrockWorldProbe.DiscoverLocalAsync(timeout: TimeSpan.FromSeconds(1));
+            var worlds = await BedrockWorldProbe.DiscoverLocalAsync(timeout: TimeSpan.FromSeconds(1.5));
             if (worlds.Count > 0)
             {
                 var w = worlds[0];
@@ -76,7 +76,9 @@ public partial class PaperConnectWorkspaceView
             }
             else
             {
-                LabDetectedWorld.Text = "未检测到基岩版世界。请先在游戏里进入世界并「对局域网开放」，再重新检测。";
+                LabDetectedWorld.Text = ModBedrockIsolation.IsAnyGameRunning()
+                    ? "已检测到 Minecraft，但当前没有可应答的基岩版世界。请在游戏世界的暂停菜单选择「对局域网开放」，再重新检测。"
+                    : "未检测到 Minecraft 正在运行。请先打开 Minecraft，进入世界并选择「对局域网开放」，再重新检测。";
                 // 无世界时不清空已填的端口
                 return false;
             }
@@ -118,7 +120,9 @@ public partial class PaperConnectWorkspaceView
             if (string.IsNullOrWhiteSpace(TextPort.Text))
                 if (!await AutoDetectPortAsync())
                 {
-                    HintService.Hint("未检测到本机 Minecraft 基岩版世界，请先打开 Minecraft，进入世界并选择「对局域网开放」。",
+                    HintService.Hint(ModBedrockIsolation.IsAnyGameRunning()
+                        ? "已检测到 Minecraft，但没有检测到可应答的基岩版世界。请在游戏世界的暂停菜单选择「对局域网开放」，再重新检测。"
+                        : "未检测到 Minecraft 正在运行。请先打开 Minecraft，进入世界并选择「对局域网开放」，再重新检测。",
                         HintType.Info);
                     return;
                 }
@@ -235,12 +239,6 @@ public partial class PaperConnectWorkspaceView
     {
         IsEnabled = !busy;
         CardRuntime.Visibility = runtimeFound ? Visibility.Collapsed : Visibility.Visible;
-        if (!runtimeFound)
-        {
-            LabState.Text = "缺少联机运行文件";
-            LabDetail.Text = "把 EasyTier 的 easytier-core.exe 与 easytier-cli.exe 放到启动器缓存目录后重试。";
-        }
-
         var running = ModPaperConnect.IsRunning;
         var role = ModPaperConnect.Role;
 
@@ -255,6 +253,12 @@ public partial class PaperConnectWorkspaceView
                 ? "创建房间后把联机码发给朋友，双方运行基岩版即可互连。"
                 : ModPaperConnect.Status
             : ModPaperConnect.LastError;
+
+        if (!runtimeFound)
+        {
+            LabState.Text = "缺少联机运行文件";
+            LabDetail.Text = "PaperConnect 需要 EasyTier 运行文件。点击右侧卡片即可自动下载联机组件。";
+        }
 
         // 缺组件也允许点：点下去会自动下载组件再继续，不再让用户先自己找运行文件
         BtnHost.IsEnabled = !busy && !running;

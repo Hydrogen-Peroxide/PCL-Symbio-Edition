@@ -498,8 +498,9 @@ internal static class ModPaperConnect
                 WorldProbeWarning = $"本机 {gamePort} 端口没有探测到基岩版世界，请先在游戏里「对局域网开放」";
                 ModBase.Log($"[PaperConnect] 本机 {gamePort} 端口无基岩版应答，房客可能加入失败",
                     ModBase.LogLevel.Hint);
-                throw new InvalidOperationException(
-                    "未检测到本机 Minecraft 基岩版世界，请先打开 Minecraft，进入世界并选择「对局域网开放」。");
+                throw new InvalidOperationException(ModBedrockIsolation.IsAnyGameRunning()
+                    ? "已检测到 Minecraft，但没有检测到可应答的基岩版世界。请在游戏世界的暂停菜单选择「对局域网开放」，再重新检测。"
+                    : "未检测到 Minecraft 正在运行。请先打开 Minecraft，进入世界并选择「对局域网开放」，再重新检测。");
             }
             else
             {
