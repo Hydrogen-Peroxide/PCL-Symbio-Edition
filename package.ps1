@@ -86,9 +86,19 @@ if ($LASTEXITCODE -ne 0) { throw "dotnet publish 失败，退出码 $LASTEXITCOD
 $built = Join-Path $publishDir 'Plain Craft Launcher 2.exe'
 if (-not (Test-Path $built)) { throw "没有找到产物：$built" }
 
-# ---- 固定文件名（覆盖）----
+# ---- 固定文件名（覆盖；被正在运行的实例占用时降级为带时间戳的副本）----
 $exeTarget = Join-Path $outDir "$name.exe"
-Copy-Item -LiteralPath $built -Destination $exeTarget -Force
+try {
+    Copy-Item -LiteralPath $built -Destination $exeTarget -Force
+}
+catch [System.IO.IOException] {
+    $stamp = Get-Date -Format 'HHmmss'
+    $exeTarget = Join-Path $outDir "$name-$stamp.exe"
+    Copy-Item -LiteralPath $built -Destination $exeTarget -Force
+    $name = [System.IO.Path]::GetFileNameWithoutExtension($exeTarget)
+    Write-Warning "固定名被占用（有实例正在运行），本次输出：$exeTarget"
+    Write-Warning '关闭正在运行的启动器后重跑本脚本即可覆盖固定名。'
+}
 $hash = (Get-FileHash -LiteralPath $exeTarget -Algorithm SHA256).Hash.ToLowerInvariant()
 Set-Content -LiteralPath (Join-Path $outDir "$name.exe.sha256") -Value ("{0}  {1}" -f $hash, "$name.exe") -Encoding ascii
 
