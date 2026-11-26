@@ -62,14 +62,6 @@
                       HorizontalScrollBarVisibility="Disabled">
             <StackPanel>
 
-                <!-- 跨平台互通的显式提示：不让用户点了才发现连不上 -->
-                <Border Margin="0,0,0,15" Padding="14,10" CornerRadius="{StaticResource SyRadiusOverlay}"
-                        Background="{DynamicResource SyFrostFill}" BorderBrush="{DynamicResource SyFrostEdge}"
-                        BorderThickness="1">
-                    <TextBlock FontSize="12" TextWrapping="Wrap" Opacity="0.8"
-                               Text="Java 版与基岩版不互通：这里只处理基岩版联机。Java 版的联机在「Java 大厅」（陶瓦）里。" />
-                </Border>
-
                 <local:WorkspaceCard Margin="0,0,0,15" Title="当前房间">
                     <StackPanel Margin="21,36,21,18">
                         <TextBlock x:Name="LabRoomCode" FontSize="26" FontWeight="Bold" TextWrapping="Wrap"
@@ -95,21 +87,6 @@
                     </StackPanel>
                 </local:WorkspaceCard>
 
-                <local:WorkspaceCard Margin="0,0,0,15" Title="好友">
-                    <StackPanel Margin="21,36,21,18">
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                            <local:SymbioButton x:Name="BtnAddFriend" Height="30" Padding="14,0" Text="添加好友"
-                                                Click="BtnAddFriend_Click" />
-                            <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" FontSize="11.5" Opacity="0.6"
-                                       TextWrapping="Wrap" MaxWidth="360"
-                                       Text="PaperConnect 去中心化，没有服务器记录上线状态：只有同一个房间里的人才会显示在线。" />
-                        </StackPanel>
-                        <StackPanel x:Name="PanelFriends" />
-                        <TextBlock x:Name="LabFriendEmpty" FontSize="12" Opacity="0.6" TextWrapping="Wrap"
-                                   Text="还没有好友。把常在同一个房间里玩的人加进来，进房时就能直接看到谁在。" />
-                    </StackPanel>
-                </local:WorkspaceCard>
-
                 <!-- 缺少 EasyTier 时的引导，默认隐藏 -->
                 <local:WorkspaceCard x:Name="CardRuntime" Margin="0,0,0,15" Title="缺少联机运行文件" Visibility="Collapsed">
                     <StackPanel Margin="21,36,21,18">
@@ -118,34 +95,6 @@
                         <local:SymbioButton Height="30" Padding="14,0" Margin="0,12,0,0" HorizontalAlignment="Left"
                                             ColorType="Highlight" Text="打开 EasyTier 发行页"
                                             Click="BtnRuntime_Click" />
-                    </StackPanel>
-                </local:WorkspaceCard>
-
-                <local:WorkspaceCard Margin="0,0,0,15" Title="局域网发现">
-                    <StackPanel Margin="21,36,21,18">
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                            <local:SymbioButton x:Name="BtnScanLan" Height="30" Padding="14,0" ColorType="Highlight"
-                                                Text="扫描同网段" Click="BtnScanLan_Click" />
-                            <TextBlock x:Name="LabScanState" Margin="12,0,0,0" VerticalAlignment="Center"
-                                       FontSize="12" Opacity="0.7" Text="向 19132 / 19133 发 RakNet 探测" />
-                        </StackPanel>
-                        <StackPanel x:Name="PanelLanWorlds" />
-                        <TextBlock x:Name="LabLanEmpty" FontSize="12" Opacity="0.6" TextWrapping="Wrap"
-                                   Text="没扫到房间时：确认对方已经在基岩版里「对局域网开放」，且两台机器在同一网段（或已通过上面的联机码入网）。" />
-                    </StackPanel>
-                </local:WorkspaceCard>
-
-                <local:WorkspaceCard Margin="0,0,0,15" Title="我的服务器">
-                    <StackPanel Margin="21,36,21,18">
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                            <local:SymbioButton x:Name="BtnAddServer" Height="30" Padding="14,0"
-                                                Text="添加服务器" Click="BtnAddServer_Click" />
-                            <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" FontSize="12" Opacity="0.7"
-                                       Text="格式：名称 地址:端口（端口可省略，默认 19132）" />
-                        </StackPanel>
-                        <StackPanel x:Name="PanelServers" />
-                        <TextBlock x:Name="LabServerEmpty" FontSize="12" Opacity="0.6" TextWrapping="Wrap"
-                                   Text="还没有收藏的服务器。把朋友给的 IP:端口 加进来，之后点一下就复制到剪贴板。" />
                     </StackPanel>
                 </local:WorkspaceCard>
 

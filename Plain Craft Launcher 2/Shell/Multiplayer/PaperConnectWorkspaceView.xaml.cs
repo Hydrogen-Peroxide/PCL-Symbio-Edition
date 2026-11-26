@@ -1,11 +1,9 @@
-﻿using System;
+using System;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using PCL.Core.App;
-using PCL.Core.Multiplayer;
 using PaperConnect.Core.Entry;
 
 namespace PCL;
@@ -30,8 +28,6 @@ public partial class PaperConnectWorkspaceView
             runtimeFound = ModPaperConnect.LocateEasyTier();
             TextPeers.Text = Config.Preference.PaperConnectPeers ?? string.Empty;
             CheckTun.Checked = Config.Preference.PaperConnectTunMode;
-            RefreshServers();
-            RefreshFriends();
             timer.Start();
             Refresh();
         };
@@ -138,171 +134,6 @@ public partial class PaperConnectWorkspaceView
     private void BtnRuntime_Click(object sender, RoutedEventArgs e) =>
         ModBase.OpenWebsite(ModPaperConnect.EasyTierReleaseUrl);
 
-    // ---- 好友（在线判定只看当前房间成员，不接任何账号体系）----
-    private void BtnAddFriend_Click(object sender, RoutedEventArgs e)
-    {
-        var name = ModMain.MyMsgBoxInput("添加好友", "填写对方在联机房间里显示的玩家名");
-        if (string.IsNullOrWhiteSpace(name)) return;
-        try
-        {
-            if (!BedrockFriendList.Add(name)) HintService.Hint("这个玩家已经在名单里了", HintType.Info);
-            RefreshFriends();
-        }
-        catch (Exception ex)
-        {
-            HintService.Hint(ex.Message, HintType.Error);
-        }
-    }
-
-    private void RefreshFriends()
-    {
-        var friends = BedrockFriendList.All;
-        var inRoom = ModPaperConnect.IsRunning;
-        var members = ModPaperConnect.Players
-            .Select(player => new RoomMember(player.PlayerName, player.ClientId, player.IsRoomHost))
-            .ToArray();
-
-        PanelFriends.Children.Clear();
-        LabFriendEmpty.Visibility = friends.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        foreach (var friend in friends)
-        {
-            var (online, text) = BedrockFriendList.Describe(friend, members, inRoom);
-            var row = new Grid { Margin = new Thickness(0, 0, 0, 8) };
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-            var label = new TextBlock
-            {
-                FontSize = 12.5,
-                VerticalAlignment = VerticalAlignment.Center,
-                Text = $"{friend.Name} · {text}",
-                Opacity = online ? 1 : 0.6
-            };
-            row.Children.Add(label);
-
-            var remove = new SymbioButton
-            {
-                Height = 28,
-                Padding = new Thickness(12, 0, 12, 0),
-                Text = "移除"
-            };
-            Grid.SetColumn(remove, 1);
-            remove.Click += (_, _) =>
-            {
-                BedrockFriendList.Remove(friend.Name);
-                RefreshFriends();
-            };
-            row.Children.Add(remove);
-
-            PanelFriends.Children.Add(row);
-        }
-    }
-
-    // ---- 局域网发现 ----
-    private async void BtnScanLan_Click(object sender, RoutedEventArgs e)
-    {
-        BtnScanLan.IsEnabled = false;
-        LabScanState.Text = "正在扫描…";
-        try
-        {
-            var worlds = await BedrockLanDiscovery.ScanAsync(TimeSpan.FromSeconds(2));
-            PanelLanWorlds.Children.Clear();
-            LabLanEmpty.Visibility = worlds.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-            foreach (var world in worlds)
-            {
-                var row = new SymbioButton
-                {
-                    Height = 30,
-                    Padding = new Thickness(12, 0, 12, 0),
-                    Margin = new Thickness(0, 0, 0, 8),
-                    HorizontalAlignment = HorizontalAlignment.Left,
-                    Text = $"{world.Name} · {world.Players}/{world.MaxPlayers} · {world.Address}:{world.Port}"
-                };
-                row.Click += (_, _) =>
-                {
-                    ModBase.ClipboardSet($"{world.Address}:{world.Port}");
-                    HintService.Hint($"已复制 {world.Name} 的地址", HintType.Success);
-                };
-                PanelLanWorlds.Children.Add(row);
-            }
-
-            LabScanState.Text = worlds.Count == 0 ? "没有发现房间" : $"发现 {worlds.Count} 个房间，点条目复制地址";
-        }
-        catch (Exception ex)
-        {
-            ModBase.Log(ex, "[Bedrock] 局域网扫描失败", ModBase.LogLevel.Hint);
-            LabScanState.Text = "扫描失败：" + ex.Message;
-        }
-        finally
-        {
-            BtnScanLan.IsEnabled = true;
-        }
-    }
-
-    // ---- 我的服务器 ----
-    private void BtnAddServer_Click(object sender, RoutedEventArgs e)
-    {
-        var input = ModMain.MyMsgBoxInput("添加服务器", "格式：名称 地址:端口（端口可省略，默认 19132）");
-        if (string.IsNullOrWhiteSpace(input)) return;
-        try
-        {
-            BedrockServerList.Add(BedrockServerList.Parse(input));
-            RefreshServers();
-            RefreshFriends();
-            HintService.Hint("已添加", HintType.Success);
-        }
-        catch (Exception ex)
-        {
-            HintService.Hint(ex.Message, HintType.Error);
-        }
-    }
-
-    private void RefreshServers()
-    {
-        var servers = BedrockServerList.All;
-        PanelServers.Children.Clear();
-        LabServerEmpty.Visibility = servers.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
-        foreach (var server in servers)
-        {
-            var row = new Grid { Margin = new Thickness(0, 0, 0, 8) };
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-            var copy = new SymbioButton
-            {
-                Height = 30,
-                Padding = new Thickness(12, 0, 12, 0),
-                HorizontalAlignment = HorizontalAlignment.Left,
-                Text = $"{server.Name} · {server.Address}"
-            };
-            copy.Click += (_, _) =>
-            {
-                ModBase.ClipboardSet(server.Address);
-                HintService.Hint($"已复制 {server.Address}", HintType.Success);
-            };
-            row.Children.Add(copy);
-
-            var remove = new SymbioButton
-            {
-                Height = 30,
-                Padding = new Thickness(12, 0, 12, 0),
-                Margin = new Thickness(8, 0, 0, 0),
-                Text = "删除"
-            };
-            Grid.SetColumn(remove, 1);
-            remove.Click += (_, _) =>
-            {
-                BedrockServerList.Remove(server.Address);
-                RefreshServers();
-            RefreshFriends();
-            };
-            row.Children.Add(remove);
-
-            PanelServers.Children.Add(row);
-        }
-    }
-
     private void Refresh()
     {
         IsEnabled = !busy;
@@ -361,7 +192,6 @@ public partial class PaperConnectWorkspaceView
             : $"连接地址：{ModPaperConnect.PlayAddress}";
 
         RefreshPlayers();
-        RefreshFriends();
     }
 
     private void RefreshPlayers()
