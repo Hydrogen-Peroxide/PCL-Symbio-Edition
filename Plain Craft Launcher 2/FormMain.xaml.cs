@@ -34,8 +34,7 @@ public partial class FormMain
     private BedrockLibraryView? bedrockLibrary;
     private BedrockManagementSidebar? bedrockManagementSidebar;
     private BedrockManagementView? bedrockManagement;
-    private LanWorkspaceView? lanWorkspace;
-    private PaperConnectWorkspaceView? paperConnectWorkspace;
+    private MultiplayerWorkspaceView? multiplayerWorkspace;
     private HomeContentView? homeContent;
     internal void RefreshInstanceLibraryVisibility() => instanceLibrary?.RefreshDownloadVisibility();
 
@@ -1717,11 +1716,10 @@ public partial class FormMain
                     break;
                 case PageType.Lan: // 联机大厅
                     {
-                        // 基岩版走 PaperConnect（联机码 + EasyTier），Java 版仍用陶瓦联机
-                        if (BedrockMode)
-                            PageChangeAnim(null, paperConnectWorkspace ??= new PaperConnectWorkspaceView());
-                        else
-                            PageChangeAnim(null, lanWorkspace ??= new LanWorkspaceView());
+                        // 左栏选 Java / 基岩版，右栏承载对应大厅；默认选中当前启动器版本
+                        if (multiplayerWorkspace is null)
+                            multiplayerWorkspace = new MultiplayerWorkspaceView { StartOnBedrock = BedrockMode };
+                        PageChangeAnim(null, multiplayerWorkspace);
                         break;
                     }
                 case PageType.InstanceSelect:
