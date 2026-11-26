@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -85,6 +86,12 @@ public partial class LanWorkspaceView
     private async void BtnHost_Click(object sender, System.Windows.RoutedEventArgs e)
     {
         if (_busy) return;
+        if (!IsMinecraftRunning())
+        {
+            HintService.Hint("未检测到 Minecraft 正在运行，请先打开 Minecraft 并进入已开放局域网的世界。",
+                HintType.Info);
+            return;
+        }
         _busy = true;
         SetButtons();
         try
@@ -96,6 +103,19 @@ public partial class LanWorkspaceView
         {
             _busy = false;
             await RefreshAsync();
+        }
+    }
+
+    private static bool IsMinecraftRunning()
+    {
+        try
+        {
+            return Process.GetProcessesByName("javaw").Length > 0 ||
+                   Process.GetProcessesByName("java").Length > 0;
+        }
+        catch
+        {
+            return false;
         }
     }
 
@@ -172,7 +192,7 @@ public partial class LanWorkspaceView
             {
                 "host-scanning" => Lang.Text("Tools.Lan.State.Scanning.Hint"),
                 "guest-ok" => Lang.Text("Tools.Lan.State.GuestOk.Hint", state?["url"]?.ToString() ?? ""),
-                "exception" => Lang.Text("Tools.Lan.State.Exception.Hint"),
+                "exception" => "未检测到 Minecraft 局域网世界，请先打开 Minecraft 并在世界中选择「对局域网开放」，然后重试。",
                 _ => running ? Lang.Text("Tools.Lan.State.Ready.Hint") : Lang.Text("Tools.Lan.State.Stopped.Hint")
             };
 

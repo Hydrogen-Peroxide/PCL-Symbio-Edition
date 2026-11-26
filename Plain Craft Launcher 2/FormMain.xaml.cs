@@ -34,8 +34,7 @@ public partial class FormMain
     private BedrockLibraryView? bedrockLibrary;
     private BedrockManagementSidebar? bedrockManagementSidebar;
     private BedrockManagementView? bedrockManagement;
-    private LanWorkspaceView? lanWorkspace;
-    private PaperConnectWorkspaceView? paperConnectWorkspace;
+    private MultiplayerLobbyView? multiplayerLobby;
     private HomeContentView? homeContent;
     internal void RefreshInstanceLibraryVisibility() => instanceLibrary?.RefreshDownloadVisibility();
 
@@ -1717,11 +1716,7 @@ public partial class FormMain
                     break;
                 case PageType.Lan: // 联机大厅
                     {
-                        // 基岩版走 PaperConnect（联机码 + EasyTier），Java 版仍用陶瓦联机
-                        if (BedrockMode)
-                            PageChangeAnim(null, paperConnectWorkspace ??= new PaperConnectWorkspaceView());
-                        else
-                            PageChangeAnim(null, lanWorkspace ??= new LanWorkspaceView());
+                        PageChangeAnim(null, multiplayerLobby ??= new MultiplayerLobbyView(BedrockMode));
                         break;
                     }
                 case PageType.InstanceSelect:

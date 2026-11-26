@@ -1,0 +1,37 @@
+<local:WorkspacePage x:Class="PCL.MultiplayerLobbyView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:PCL">
+    <Grid Margin="{StaticResource SePageScrollMargin}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Margin="0,0,0,14" Padding="20,16"
+                CornerRadius="{StaticResource SyRadiusOverlay}"
+                Background="{DynamicResource SyFrostFill}"
+                BorderBrush="{DynamicResource SyFrostEdge}" BorderThickness="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="联机大厅" FontSize="24" FontWeight="SemiBold" />
+                    <TextBlock x:Name="LabModeHint" Margin="0,5,0,0" FontSize="12.5"
+                               Opacity="0.7" TextWrapping="Wrap"
+                               Text="选择 Java 或基岩版，然后创建或加入房间。" />
+                </StackPanel>
+                <local:SymbioButton Grid.Column="1" x:Name="BtnJava" Height="34" MinWidth="104"
+                                    Margin="14,0,8,0" Text="Java 版"
+                                    Click="BtnJava_Click" />
+                <local:SymbioButton Grid.Column="2" x:Name="BtnBedrock" Height="34" MinWidth="104"
+                                    Text="基岩版" Click="BtnBedrock_Click" />
+            </Grid>
+        </Border>
+
+        <ContentControl Grid.Row="1" x:Name="ContentHost" />
+    </Grid>
+</local:WorkspacePage>

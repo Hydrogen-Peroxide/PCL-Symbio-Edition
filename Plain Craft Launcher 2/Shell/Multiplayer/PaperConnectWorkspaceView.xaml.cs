@@ -49,13 +49,13 @@ public partial class PaperConnectWorkspaceView
     // ---- 自动检测本机基岩版端口 ----
 
     private async void BtnDetectPort_Click(object sender, RoutedEventArgs e) =>
-        await AutoDetectPortAsync();
+        _ = await AutoDetectPortAsync();
 
     /// <summary>
     ///     扫描本机基岩版世界端口（Minecraft.Windows UDP 监听端口 + 默认 19132/19133）。
     ///     找到后自动填入「游戏端口」并显示世界名称，让房主不用手填端口。
     /// </summary>
-    private async Task AutoDetectPortAsync()
+    private async Task<bool> AutoDetectPortAsync()
     {
         BtnDetectPort.IsEnabled = false;
         LabDetectedWorld.Text = "正在检测…";
@@ -72,17 +72,20 @@ public partial class PaperConnectWorkspaceView
                 if (worlds.Count > 1)
                     LabDetectedWorld.Text +=
                         $"，另有 {worlds.Count - 1} 个（端口 {string.Join("/", worlds.Skip(1).Select(x => x.Port))}）";
+                return true;
             }
             else
             {
                 LabDetectedWorld.Text = "未检测到基岩版世界。请先在游戏里进入世界并「对局域网开放」，再重新检测。";
                 // 无世界时不清空已填的端口
+                return false;
             }
         }
         catch (Exception ex)
         {
             ModBase.Log(ex, "[PaperConnect] 自动检测端口失败", ModBase.LogLevel.Debug);
             LabDetectedWorld.Text = "检测失败，请手动填写端口。";
+            return false;
         }
         finally
         {
@@ -113,7 +116,12 @@ public partial class PaperConnectWorkspaceView
         {
             SavePeers();
             if (string.IsNullOrWhiteSpace(TextPort.Text))
-                await AutoDetectPortAsync();
+                if (!await AutoDetectPortAsync())
+                {
+                    HintService.Hint("未检测到本机 Minecraft 基岩版世界，请先打开 Minecraft，进入世界并选择「对局域网开放」。",
+                        HintType.Info);
+                    return;
+                }
             var code = await ModPaperConnect.HostAsync(PlayerName, ReadGamePort());
             HintService.Hint($"房间已创建，联机码：{code}", HintType.Success);
         }
