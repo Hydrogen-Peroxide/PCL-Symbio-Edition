@@ -137,38 +137,41 @@
                                        x:Name="SearchBox" />
 
                     <local:WorkspaceCard Margin="0,0,0,15" Title="{DynamicResource Instance.Saves.QuickActions}">
-                        <!-- 用 WrapPanel：窗口窄的时候按钮换行，而不是把第 4 个（转换存档）挤出可视区 -->
-                        <WrapPanel Margin="25,40,15,20">
-                            <local:SymbioButton MinWidth="120" Height="32" Margin="0,0,12,10"
-                                            Text="{DynamicResource Instance.Saves.OpenFolder}" Padding="13,0"
-                                            Click="BtnOpenFolder_Click" ColorType="Highlight" />
-                            <local:SymbioButton MinWidth="120" Height="32" Margin="0,0,12,10"
-                                            Text="{DynamicResource Instance.Resource.DownloadNew}" Padding="13,0"
-                                            Click="BtnDownloadNew_Click" />
-                            <local:SymbioButton MinWidth="120" Height="32" Margin="0,0,12,10"
-                                            Text="{DynamicResource Instance.Saves.PasteFile}" Padding="13,0"
-                                            Click="BtnPaste_Click" />
-                            <local:SymbioButton x:Name="BtnConvert" MinWidth="120" Height="32" Margin="0,0,12,10"
-                                            Text="{DynamicResource Instance.Saves.Convert.Button}" Padding="13,0"
-                                            Click="BtnConvert_Click" />
-                        </WrapPanel>
-                        <!-- 存档转换的状态条：可解释禁用态 + 自动补齐的出口（重试 / 手动指定 / 查看日志） -->
-                        <Grid x:Name="PanConvertState" Visibility="Collapsed" Margin="25,0,15,16">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock x:Name="LabConvertState" VerticalAlignment="Center" FontSize="12"
-                                       TextWrapping="Wrap" Opacity="0.75" />
-                            <local:SymbioButton Grid.Column="1" x:Name="BtnConvertRetry" Height="30" Padding="12,0"
-                                                Margin="8,0,0,0" Text="重试下载" Click="BtnConvertRetry_Click" />
-                            <local:SymbioButton Grid.Column="2" x:Name="BtnConvertLocate" Height="30" Padding="12,0"
-                                                Margin="8,0,0,0" Text="手动指定" Click="BtnConvertLocate_Click" />
-                            <local:SymbioButton Grid.Column="3" x:Name="BtnConvertLog" Height="30" Padding="12,0"
-                                                Margin="8,0,0,0" Text="查看日志" Click="BtnConvertLog_Click" />
-                        </Grid>
+                        <!-- WorkspaceCard 本身是 Grid，多个子元素会重叠；按钮组与状态条必须装在同一个纵向容器里 -->
+                        <StackPanel Margin="25,40,15,20">
+                            <!-- 用 WrapPanel：窗口窄的时候按钮换行，而不是把第 4 个（转换存档）挤出可视区 -->
+                            <WrapPanel>
+                                <local:SymbioButton MinWidth="120" Height="32" Margin="0,0,12,10"
+                                                Text="{DynamicResource Instance.Saves.OpenFolder}" Padding="13,0"
+                                                Click="BtnOpenFolder_Click" ColorType="Highlight" />
+                                <local:SymbioButton MinWidth="120" Height="32" Margin="0,0,12,10"
+                                                Text="{DynamicResource Instance.Resource.DownloadNew}" Padding="13,0"
+                                                Click="BtnDownloadNew_Click" />
+                                <local:SymbioButton MinWidth="120" Height="32" Margin="0,0,12,10"
+                                                Text="{DynamicResource Instance.Saves.PasteFile}" Padding="13,0"
+                                                Click="BtnPaste_Click" />
+                                <local:SymbioButton x:Name="BtnConvert" MinWidth="120" Height="32" Margin="0,0,12,10"
+                                                Text="{DynamicResource Instance.Saves.Convert.Button}" Padding="13,0"
+                                                Click="BtnConvert_Click" />
+                            </WrapPanel>
+                            <!-- 存档转换状态条：可解释禁用态 + 自动补齐出口（重试 / 手动指定 / 查看日志） -->
+                            <Grid x:Name="PanConvertState" Visibility="Collapsed" Margin="0,2,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="LabConvertState" VerticalAlignment="Center" FontSize="12"
+                                           TextWrapping="Wrap" Opacity="0.75" />
+                                <local:SymbioButton Grid.Column="1" x:Name="BtnConvertRetry" Height="30" Padding="12,0"
+                                                    Margin="8,0,0,0" Text="重试下载" Click="BtnConvertRetry_Click" />
+                                <local:SymbioButton Grid.Column="2" x:Name="BtnConvertLocate" Height="30" Padding="12,0"
+                                                    Margin="8,0,0,0" Text="手动指定" Click="BtnConvertLocate_Click" />
+                                <local:SymbioButton Grid.Column="3" x:Name="BtnConvertLog" Height="30" Padding="12,0"
+                                                    Margin="8,0,0,0" Text="查看日志" Click="BtnConvertLog_Click" />
+                            </Grid>
+                        </StackPanel>
                     </local:WorkspaceCard>
 
                     <local:WorkspaceCard Margin="0,0,0,15" x:Name="PanListBack" VerticalAlignment="Top"
