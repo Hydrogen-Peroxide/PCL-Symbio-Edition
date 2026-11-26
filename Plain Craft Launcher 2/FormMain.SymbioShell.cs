@@ -36,6 +36,9 @@ public partial class FormMain
     /// <summary>右下角悬浮按钮与面板边缘的间距（与 FormMain.xaml 里 PanExtraButtons 的 Margin 保持一致）。</summary>
     private const double ExtraButtonMargin = 14;
 
+    /// <summary>外置 Dock 时，扩展按钮与主面板底边之间的安全间距。</summary>
+    private const double ExtraButtonInsideGap = 10;
+
     private static bool IsDetachedDock(int placement) =>
         (DockPlacementLocked ? LockedDockPlacement : placement) == 1;
 
@@ -366,9 +369,10 @@ public partial class FormMain
         PanBack.Clip = shape ?? (Geometry)RectForm;
 
         // 外置 Dock 时窗口被裁成「主面板 + Dock 岛」，主面板底部上方留出一条透明带；
-        // 右下角的悬浮按钮（启动器扩展按钮）必须整体上移到主面板以内，否则会落进被裁掉的区域，看起来就是消失了。
+        // 右下角的悬浮按钮（启动器扩展按钮）必须整体上移到主面板以内，Dock 本身仍保持外置。
         if (PanExtraButtons is not null)
-            PanExtraButtons.Margin = new Thickness(0, 0, ExtraButtonMargin, ExtraButtonMargin + (shell?.DetachedDockBand ?? 0));
+            PanExtraButtons.Margin = new Thickness(0, 0, ExtraButtonMargin,
+                ExtraButtonMargin + (shell?.DetachedDockBand ?? 0) + ExtraButtonInsideGap);
     }
 
     private void RefreshShellBackdrop(SymbioShell view)
