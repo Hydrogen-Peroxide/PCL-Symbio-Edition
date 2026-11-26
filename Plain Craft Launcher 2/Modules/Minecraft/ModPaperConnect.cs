@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -7,6 +7,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using PCL.Core.App;
+using PCL.Core.Multiplayer;
 using PCL.Core.Provision;
 using PaperConnect.Core;
 using PaperConnect.Core.Entry;
@@ -170,6 +171,12 @@ internal static class ModPaperConnect
     internal static string RoomCode { get; private set; } = string.Empty;
     internal static string Status { get; private set; } = string.Empty;
     internal static string? LastError { get; private set; }
+
+    /// <summary>
+    ///     开房时本机端口探测的警告：本机没有基岩版世界应答时非空。
+    ///     不阻断开房（有些环境 UDP 回环受限），只把原因直接告诉房主。
+    /// </summary>
+    internal static string? WorldProbeWarning { get; private set; }
     internal static int GamePort { get; private set; } = DefaultGamePort;
     internal static bool IsBusy { get; private set; }
     internal static bool IsRunning => Role != RoomRole.None;
@@ -478,6 +485,24 @@ internal static class ModPaperConnect
         session = new CancellationTokenSource();
         try
         {
+            // 开房前确认本机端口真有基岩版世界在应答：房客（尤其 BedrockBoot）加入时会 ping
+            // 127.0.0.1:<gamePort>，本机没人应答它就报「未检测到本地基岩房间」，而房主看不出原因。
+            SetStatus("正在检查本机基岩版世界…");
+            var probe = await BedrockWorldProbe.PingLocalAsync(gamePort);
+            if (probe is null)
+            {
+                WorldProbeWarning = $"本机 {gamePort} 端口没有探测到基岩版世界，请先在游戏里「对局域网开放」";
+                ModBase.Log($"[PaperConnect] 本机 {gamePort} 端口无基岩版应答，房客可能加入失败",
+                    ModBase.LogLevel.Hint);
+            }
+            else
+            {
+                WorldProbeWarning = null;
+                ModBase.Log(
+                    $"[PaperConnect] 已确认本机世界：{probe.Name}（{probe.Version}，{probe.Players}/{probe.MaxPlayers}）",
+                    ModBase.LogLevel.Normal);
+            }
+
             SetStatus("正在创建房间…");
 
             // 官方控制面服务端：端口由它自己随机挑一个，主机名里要带上它

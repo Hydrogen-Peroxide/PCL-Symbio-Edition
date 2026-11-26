@@ -221,6 +221,11 @@ public partial class PaperConnectWorkspaceView
             _ => "创建房间 → 复制联机码发给朋友 → 朋友填入联机码加入。"
         };
 
+        // 房主端端口自检结果：本机没探测到基岩版世界时，把原因直接摆出来
+        if (role == ModPaperConnect.RoomRole.Host && !string.IsNullOrEmpty(ModPaperConnect.WorldProbeWarning))
+            LabRoomHint.Text = "⚠ " + ModPaperConnect.WorldProbeWarning + "。"
+                               + "否则房客（尤其 BedrockBoot）会报「未检测到本地基岩房间」。";
+
         BtnCopyCode.IsEnabled = !string.IsNullOrEmpty(ModPaperConnect.RoomCode);
         BtnCopyAddress.IsEnabled = !string.IsNullOrEmpty(ModPaperConnect.PlayAddress);
 
