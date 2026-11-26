@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     主仓打包脚本：固定输出到 releases\latest，同名文件自动覆盖。
 
