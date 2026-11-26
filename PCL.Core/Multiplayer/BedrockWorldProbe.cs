@@ -87,7 +87,7 @@ public static class BedrockWorldProbe
         // 从 Minecraft.Windows 进程的 UDP 监听列表里补充端口（nethernet 类房间用随机高端口）。
         // 某些 UWP 容器不会把真实 PID 暴露给 netstat，此时再用系统监听表作候选，最终仍由 RakNet 应答确认。
         var minecraftPorts = GetMinecraftUdpPorts();
-        foreach (var port in minecraftPorts.Count > 0 ? minecraftPorts : GetActiveUdpPorts())
+        foreach (var port in minecraftPorts.Concat(GetActiveUdpPorts()))
             ports.Add(port);
 
         if (extraPorts is not null)
