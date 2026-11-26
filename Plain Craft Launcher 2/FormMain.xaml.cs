@@ -153,6 +153,8 @@ public partial class FormMain
     private void FormMain_Loaded() // (sender As Object, e As RoutedEventArgs) Handles Me.Loaded
     {
         FormMain_SizeChanged();
+        // UI 线程基线探针（B 段先测量）：默认开启，日志里以 [Perf] 标注
+        if (Config.Preference.EnablePerfProbe) UiThreadProbe.Start();
         ModBase.applicationStartTick = TimeUtils.GetTimeTick();
         ModBase.frmHandle = new WindowInteropHelper(this).Handle;
         // 读取设置

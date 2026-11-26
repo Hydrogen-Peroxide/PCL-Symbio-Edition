@@ -192,6 +192,13 @@ public static partial class Config
         public partial bool DisableAllMotion { get; set; }
 
         /// <summary>
+        /// UI 线程性能探针：每 5 秒往日志写一行 [Perf] 统计（帧率/最长帧/卡帧数/Dispatcher 队列峰值）。
+        /// 默认开启以便收集基线；复测完成后可以关掉，关闭时零开销。
+        /// </summary>
+        [ConfigItem<bool>("UiPerfProbe", true, ConfigSource.Local)]
+        public partial bool EnablePerfProbe { get; set; }
+
+        /// <summary>
         /// 全局字体。
         /// </summary>
         [ConfigItem<string>("UiFont", "", ConfigSource.Local)] public partial string Font { get; set; }
