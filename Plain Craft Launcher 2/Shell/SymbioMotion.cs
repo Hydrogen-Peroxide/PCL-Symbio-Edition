@@ -292,9 +292,16 @@ internal static class SymbioMotion
                 _group.Children.Add(_offset);
                 _element.RenderTransformOrigin = new Point(.5, .5);
                 _element.RenderTransform = _group;
-                _offset.Y = entering ? distance : 0;
-                _scale.ScaleX = _scale.ScaleY = entering ? scale : 1;
-                if (entering) _element.Opacity = 0;
+            }
+
+            // 起始姿态必须每次都重置：之前只在"首次挂上 TransformGroup"时设置，
+            // 若上一次进场被后续切换打断、Settled 没跑完，元素就停在终态附近，
+            // 下一次进场等于从终点弹到终点 —— 看起来就是「切换页面没有动效」。
+            if (entering)
+            {
+                _offset.Y = distance;
+                _scale.ScaleX = _scale.ScaleY = scale;
+                _element.Opacity = 0;
             }
 
             var pending = 3;
