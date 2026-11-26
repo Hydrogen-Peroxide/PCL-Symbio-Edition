@@ -340,11 +340,14 @@ public partial class SelectionRow : IMyRadio
 
     private void UpdateSelection(bool animate)
     {
-        var selected = Checked && Type is CheckType.RadioBox or CheckType.CheckBox;
+        var markerSelected = Checked && Type is CheckType.RadioBox or CheckType.CheckBox;
         var scale = SymbioMotion.Scale(SelectionMarker);
-        SymbioMotion.Reveal(SelectionMarker, selected, value => scale.ScaleY = Math.Max(0, value), SymbioMotion.Pop,
+        SymbioMotion.Reveal(SelectionMarker, markerSelected, value => scale.ScaleY = Math.Max(0, value), SymbioMotion.Pop,
             immediate: !animate || !IsLoaded);
-        SymbioMotion.Fade(SelectedSurface, selected && IsFluentNavigation ? 1 : 0, immediate: !animate || !IsLoaded);
+
+        // 选择框（选中背景）以前被 IsFluentNavigation 卡着，而这个属性全仓库从未被赋值，
+        // 结果选中时只有文字和竖条变化、背景框永远不出现。改为只看 Checked，并跟随同一个动画开关。
+        SymbioMotion.Fade(SelectedSurface, Checked ? 1 : 0, immediate: !animate || !IsLoaded);
     }
 
     private void Activate(object sender, RoutedEventArgs e)
