@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     主仓打包脚本：固定输出到 releases\latest，同名文件自动覆盖。
 
@@ -111,6 +111,9 @@ SHA256 $hash
     Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal
     Remove-Item $stage -Recurse -Force
 }
+
+# 中间 publish 目录与最终产物重复（各 36 MB），打完包就删掉，避免 releases 目录越滚越大
+if (Test-Path $publishDir) { Remove-Item $publishDir -Recurse -Force }
 
 Write-Host ''
 Write-Host "EXE   : $exeTarget"
