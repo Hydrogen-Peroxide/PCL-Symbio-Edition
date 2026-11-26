@@ -11,8 +11,15 @@ using System.Threading.Tasks;
 
 namespace PCL.Core.Multiplayer;
 
-/// <summary>探测到的一个基岩版世界（单播 ping 结果）。</summary>
-public sealed record BedrockWorldInfo(string Name, string Address, int Port, string Version, int Players, int MaxPlayers);
+/// <summary>探测到的一个基岩版世界或 Minecraft 进程拥有的游戏端口。</summary>
+public sealed record BedrockWorldInfo(
+    string Name,
+    string Address,
+    int Port,
+    string Version,
+    int Players,
+    int MaxPlayers,
+    bool IsRakNetResponsive = true);
 
 /// <summary>
 ///     基岩版世界的 RakNet 单播探测。
@@ -75,7 +82,7 @@ public static class BedrockWorldProbe
     ///     自动发现本机正在开放局域网的基岩版世界。
     ///     1) 先查 Minecraft.Windows 进程实际监听的 UDP 端口（netstat + PID 过滤）；
     ///     2) 加上默认的 19132/19133 以及调用方提供的附加端口；
-    ///     3) 并发 RakNet ping，只返回真正应答的端口。
+    ///     3) 并发 RakNet ping。新版本不回复 RakNet 时，回退到 Minecraft 进程拥有的端口。
     /// </summary>
     public static async Task<IReadOnlyList<BedrockWorldInfo>> DiscoverLocalAsync(
         IEnumerable<int>? extraPorts = null,
@@ -97,7 +104,15 @@ public static class BedrockWorldProbe
 
         var tasks = ports.Select(port => PingLocalAsync(port, timeout, cancellationToken)).ToArray();
         var results = await Task.WhenAll(tasks).ConfigureAwait(false);
-        return results.Where(item => item is not null).Select(item => item!).ToArray();
+        var detected = results.Where(item => item is not null).Select(item => item!).ToArray();
+        if (detected.Length > 0 || minecraftPorts.Count == 0) return detected;
+
+        // 26.50 之后的基岩版逐步改用 NetherNet。此时端口仍属于 Minecraft，
+        // 但不会回复 RakNet UnconnectedPing，只能把进程拥有的端口作为已确认候选交给上层。
+        return minecraftPorts
+            .Select(port => new BedrockWorldInfo("Minecraft", "127.0.0.1", port, string.Empty, 0, 0,
+                IsRakNetResponsive: false))
+            .ToArray();
     }
 
     /// <summary>
@@ -109,21 +124,22 @@ public static class BedrockWorldProbe
     {
         try
         {
-            // 找基岩版进程。UWP、GDK 和旧版客户端的进程名略有不同。
+            // 找基岩版进程。UWP、GDK 和旧版客户端的进程名略有不同，不能只匹配一个固定名称。
             var mcPids = new HashSet<int>();
-            foreach (var name in new[] { "Minecraft.Windows", "Minecraft.Win10.DX11", "Minecraft.Windows.GDK" })
+            foreach (var process in Process.GetProcesses())
             {
                 try
                 {
-                    foreach (var process in Process.GetProcessesByName(name))
-                    {
+                    if (process.ProcessName.Contains("Minecraft", StringComparison.OrdinalIgnoreCase))
                         mcPids.Add(process.Id);
-                        process.Dispose();
-                    }
                 }
                 catch
                 {
                     // 进程在探测过程中退出时忽略这一项，继续使用其余进程。
+                }
+                finally
+                {
+                    process.Dispose();
                 }
             }
 
@@ -140,7 +156,7 @@ public static class BedrockWorldProbe
             var output = proc.StandardOutput.ReadToEnd();
             proc.WaitForExit(5000);
 
-            var ports = new List<int>();
+            var ports = new HashSet<int>();
             foreach (var line in output.Split('\n'))
             {
                 // 不依赖本地化列宽和地址格式，兼容 0.0.0.0:PORT、[::]:PORT 等输出。
@@ -154,7 +170,37 @@ public static class BedrockWorldProbe
                     ports.Add(port);
             }
 
-            return ports;
+            if (ports.Count > 0) return ports.ToArray();
+
+            // Get-NetUDPEndpoint 使用 Windows 端点表，某些 UWP 容器在 netstat 中不显示拥有者时仍可查询。
+            var endpointPsi = new ProcessStartInfo("powershell.exe")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+            endpointPsi.ArgumentList.Add("-NoProfile");
+            endpointPsi.ArgumentList.Add("-NonInteractive");
+            endpointPsi.ArgumentList.Add("-Command");
+            endpointPsi.ArgumentList.Add(
+                "Get-NetUDPEndpoint -ErrorAction SilentlyContinue | " +
+                "ForEach-Object { Write-Output ($_.OwningProcess.ToString() + '|' + $_.LocalPort.ToString()) }");
+
+            using var endpointProcess = Process.Start(endpointPsi);
+            if (endpointProcess is null) return [];
+            var endpointOutput = endpointProcess.StandardOutput.ReadToEnd();
+            endpointProcess.WaitForExit(5000);
+            foreach (var line in endpointOutput.Split('\n'))
+            {
+                var columns = line.Trim().Split('|', StringSplitOptions.RemoveEmptyEntries);
+                if (columns.Length != 2 || !int.TryParse(columns[0], out var pid) ||
+                    !int.TryParse(columns[1], out var port)) continue;
+                if (mcPids.Contains(pid) && port > 1024)
+                    ports.Add(port);
+            }
+
+            return ports.ToArray();
         }
         catch
         {

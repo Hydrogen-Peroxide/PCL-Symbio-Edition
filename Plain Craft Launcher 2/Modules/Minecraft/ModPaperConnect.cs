@@ -493,7 +493,8 @@ internal static class ModPaperConnect
             // 127.0.0.1:<gamePort>，本机没人应答它就报「未检测到本地基岩房间」，而房主看不出原因。
             SetStatus("正在检查本机基岩版世界…");
             var probe = await BedrockWorldProbe.PingLocalAsync(gamePort);
-            if (probe is null)
+            var processOwnsPort = BedrockWorldProbe.GetMinecraftUdpPorts().Contains(gamePort);
+            if (probe is null && !processOwnsPort)
             {
                 WorldProbeWarning = $"本机 {gamePort} 端口没有探测到基岩版世界，请先在游戏里「对局域网开放」";
                 ModBase.Log($"[PaperConnect] 本机 {gamePort} 端口无基岩版应答，房客可能加入失败",
@@ -501,6 +502,12 @@ internal static class ModPaperConnect
                 throw new InvalidOperationException(ModBedrockIsolation.IsAnyGameRunning()
                     ? "已检测到 Minecraft，但没有检测到可应答的基岩版世界。请在游戏世界的暂停菜单选择「对局域网开放」，再重新检测。"
                     : "未检测到 Minecraft 正在运行。请先打开 Minecraft，进入世界并选择「对局域网开放」，再重新检测。");
+            }
+            else if (probe is null)
+            {
+                WorldProbeWarning = $"已确认 Minecraft 正在使用本机 {gamePort} UDP 端口，但当前版本未响应 RakNet，将继续创建房间";
+                ModBase.Log($"[PaperConnect] 已确认 Minecraft 进程拥有 UDP 端口 {gamePort}，跳过 RakNet 应答要求",
+                    ModBase.LogLevel.Normal);
             }
             else
             {

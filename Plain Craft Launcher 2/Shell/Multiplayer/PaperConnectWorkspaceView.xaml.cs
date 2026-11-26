@@ -67,7 +67,9 @@ public partial class PaperConnectWorkspaceView
             {
                 var w = worlds[0];
                 TextPort.Text = w.Port.ToString();
-                LabDetectedWorld.Text = $"✔ 已检测到：{w.Name}（{w.Version}，端口 {w.Port}）";
+                LabDetectedWorld.Text = w.IsRakNetResponsive
+                    ? $"✔ 已检测到：{w.Name}（{w.Version}，端口 {w.Port}）"
+                    : $"✔ 已检测到 Minecraft UDP 端口：{w.Port}（当前版本未响应 RakNet，已按游戏进程端口处理）";
                 // 多于一个时追加提示
                 if (worlds.Count > 1)
                     LabDetectedWorld.Text +=
