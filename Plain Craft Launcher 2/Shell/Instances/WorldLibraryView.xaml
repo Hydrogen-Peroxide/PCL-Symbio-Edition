@@ -148,10 +148,27 @@
                             <local:SymbioButton MinWidth="120" Height="32" Margin="0,0,12,10"
                                             Text="{DynamicResource Instance.Saves.PasteFile}" Padding="13,0"
                                             Click="BtnPaste_Click" />
-                            <local:SymbioButton MinWidth="120" Height="32" Margin="0,0,12,10"
+                            <local:SymbioButton x:Name="BtnConvert" MinWidth="120" Height="32" Margin="0,0,12,10"
                                             Text="{DynamicResource Instance.Saves.Convert.Button}" Padding="13,0"
                                             Click="BtnConvert_Click" />
                         </WrapPanel>
+                        <!-- 存档转换的状态条：可解释禁用态 + 自动补齐的出口（重试 / 手动指定 / 查看日志） -->
+                        <Grid x:Name="PanConvertState" Visibility="Collapsed" Margin="25,0,15,16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="LabConvertState" VerticalAlignment="Center" FontSize="12"
+                                       TextWrapping="Wrap" Opacity="0.75" />
+                            <local:SymbioButton Grid.Column="1" x:Name="BtnConvertRetry" Height="30" Padding="12,0"
+                                                Margin="8,0,0,0" Text="重试下载" Click="BtnConvertRetry_Click" />
+                            <local:SymbioButton Grid.Column="2" x:Name="BtnConvertLocate" Height="30" Padding="12,0"
+                                                Margin="8,0,0,0" Text="手动指定" Click="BtnConvertLocate_Click" />
+                            <local:SymbioButton Grid.Column="3" x:Name="BtnConvertLog" Height="30" Padding="12,0"
+                                                Margin="8,0,0,0" Text="查看日志" Click="BtnConvertLog_Click" />
+                        </Grid>
                     </local:WorkspaceCard>
 
                     <local:WorkspaceCard Margin="0,0,0,15" x:Name="PanListBack" VerticalAlignment="Top"

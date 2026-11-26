@@ -1,5 +1,6 @@
 using System.Collections.Specialized;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -9,6 +10,7 @@ using System.Windows.Threading;
 using Microsoft.VisualBasic.FileIO;
 using PCL.Core.App;
 using PCL.Core.App.Localization;
+using PCL.Core.Provision;
 using PCL.Core.UI;
 
 namespace PCL;
@@ -83,6 +85,9 @@ public partial class WorldLibraryView : IRefreshable
 
         ApplyInstancePath();
         Reload();
+        SetConvertState(ToolProvisionService.Resolve(ChunkerTool.Id) is null
+            ? SaveFeatureState.ToolMissing
+            : SaveFeatureState.Ready);
 
         // 非重复加载部分
         if (isLoad)
@@ -706,11 +711,64 @@ public partial class WorldLibraryView : IRefreshable
             Lang.Text("Instance.Saves.Convert.Title"),
             Lang.Text("Instance.Saves.Convert.Local.Button"),
             Lang.Text("Common.Action.Cancel"));
-        if (choice == 1)
-            Dispatcher.BeginInvoke(new Action(LocalConvert), DispatcherPriority.Background);
+        if (choice == 1) LocalConvert();
     }
 
-    private void LocalConvert()
+    /// <summary>存档转换状态机：ToolMissing → ToolDownloading → Ready / ToolFailed。</summary>
+    private SaveFeatureState convertState = SaveFeatureState.ToolMissing;
+    private double convertProgress;
+
+    private void SetConvertState(SaveFeatureState state, string? detail = null)
+    {
+        convertState = state;
+        LabConvertState.Text = string.IsNullOrWhiteSpace(detail)
+            ? state switch
+            {
+                SaveFeatureState.ToolMissing => "转换工具未就绪，点击「转换存档」会自动下载",
+                SaveFeatureState.ToolDownloading => $"正在准备转换工具… {convertProgress:P0}",
+                SaveFeatureState.ToolFailed => "转换工具不可用",
+                SaveFeatureState.FormatUnsupported => "格式不兼容，非工具问题",
+                SaveFeatureState.PlatformLimited => "当前平台不支持该转换",
+                _ => "转换工具已就绪"
+            }
+            : detail;
+
+        PanConvertState.Visibility = state == SaveFeatureState.Ready ? Visibility.Collapsed : Visibility.Visible;
+        var failed = state == SaveFeatureState.ToolFailed;
+        BtnConvertRetry.Visibility = failed ? Visibility.Visible : Visibility.Collapsed;
+        BtnConvertLocate.Visibility = failed ? Visibility.Visible : Visibility.Collapsed;
+        BtnConvertLog.Visibility = failed ? Visibility.Visible : Visibility.Collapsed;
+        BtnConvert.IsEnabled = state is not SaveFeatureState.ToolDownloading;
+    }
+
+    private void BtnConvertRetry_Click(object sender, RoutedEventArgs e) => LocalConvert();
+
+    private void BtnConvertLocate_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = "选择本地 Chunker CLI（jar）",
+            Filter = "Chunker CLI (*.jar)|*.jar|所有文件|*.*",
+            CheckFileExists = true
+        };
+        if (dialog.ShowDialog() != true) return;
+        try
+        {
+            ToolProvisionService.RegisterManual(ChunkerTool.Id, dialog.FileName);
+            SetConvertState(SaveFeatureState.Ready);
+            HintService.Hint("已使用手动指定的 Chunker，可以直接转换了", HintType.Success);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "登记本地 Chunker 失败", ModBase.LogLevel.Hint);
+            SetConvertState(SaveFeatureState.ToolFailed, "无法使用该文件：" + ex.Message);
+        }
+    }
+
+    private void BtnConvertLog_Click(object sender, RoutedEventArgs e) =>
+        ModBase.OpenExplorer(ModBase.exePath + @"PCL\Log\");
+
+    private async void LocalConvert()
     {
         var dialog = new Microsoft.Win32.OpenFolderDialog
         {
@@ -735,49 +793,77 @@ public partial class WorldLibraryView : IRefreshable
         var toBedrock = direction == 1;
         var sourceName = Path.GetFileName(source.TrimEnd(Path.DirectorySeparatorChar));
 
-        ModBase.RunInNewThread(() =>
+        try
         {
-            try
+            // 1) 备好工具：命中清单直接返回，未命中自动下载（带进度）
+            var cli = ToolProvisionService.Resolve(ChunkerTool.Id);
+            if (cli is null)
             {
-                ModBase.RunInUi(() => HintService.Hint(Lang.Text("Instance.Saves.Convert.Local.Preparing")));
+                convertProgress = 0;
+                SetConvertState(SaveFeatureState.ToolDownloading);
+                var definition = await ChunkerTool.ResolveLatestAsync();
+                var progress = new Progress<double>(value =>
+                {
+                    convertProgress = value;
+                    if (convertState == SaveFeatureState.ToolDownloading) SetConvertState(SaveFeatureState.ToolDownloading);
+                });
+                cli = await ToolProvisionService.EnsureAsync(definition, progress);
+            }
+
+            SetConvertState(SaveFeatureState.Ready);
+
+            // 2) 转换：Java 探测、格式列举、Chunker 进程全部在后台线程，UI 不阻塞
+            SetConvertState(SaveFeatureState.ToolDownloading, "正在转换存档…");
+            var (output, format) = await Task.Run(() =>
+            {
                 var java = ModSaveConverter.FindJava() ??
                            throw new InvalidOperationException(Lang.Text("Instance.Saves.Convert.Local.NoJava"));
-                var cli = ModSaveConverter.EnsureCliAsync().GetAwaiter().GetResult();
-                var formats = ModSaveConverter.ListFormats(java, cli);
-                // Java 输出优先用当前实例的版本，避免把存档升到过新的格式
-                string? preferred = null;
-                if (!toBedrock)
-                {
-                    var match = System.Text.RegularExpressions.Regex.Match(currentInstance.Name,
-                        @"(\d+)\.(\d+)(?:\.(\d+))?");
-                    if (match.Success)
-                        preferred = "JAVA_" + match.Groups[1].Value + "_" + match.Groups[2].Value +
-                                    (match.Groups[3].Success ? "_" + match.Groups[3].Value : "");
-                }
+                return RunChunker(java, cli, source, toBedrock, sourceName);
+            });
+            _ = format;
+            SetConvertState(SaveFeatureState.Ready);
 
-                var format = formats.FirstOrDefault(item =>
-                                 string.Equals(item, preferred, StringComparison.OrdinalIgnoreCase)) ??
-                             (toBedrock
-                                 ? ModSaveConverter.PickBedrockFormat(formats)
-                                 : ModSaveConverter.PickLatestFormat(formats, "JAVA")) ??
-                             throw new InvalidOperationException(Lang.Text("Instance.Saves.Convert.Local.NoFormat"));
-                var output = Path.Combine(ModSaveConverter.CacheDirectory, "out",
-                    $"{sourceName}-{DateTime.Now:yyyyMMdd-HHmmss}");
-                ModBase.RunInUi(() => HintService.Hint(Lang.Text("Instance.Saves.Convert.Local.Converting", format)));
-                ModSaveConverter.Convert(java, cli, source, format, output);
-
-                if (toBedrock) ImportBedrockOutput(output, sourceName);
-                else ImportJavaOutput(output);
-
-                ModBase.RunInUi(() => Reload());
-            }
-            catch (Exception ex)
-            {
-                ModBase.Log(ex, "Chunker 转换失败", ModBase.LogLevel.Hint,
-                    userSummary: Lang.Text("Instance.Saves.Convert.Local.Failed"));
-            }
-        }, "Chunker convert");
+            if (toBedrock) ImportBedrockOutput(output, sourceName);
+            else ImportJavaOutput(output);
+            Reload();
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "Chunker 转换失败", ModBase.LogLevel.Hint,
+                userSummary: Lang.Text("Instance.Saves.Convert.Local.Failed"));
+            SetConvertState(SaveFeatureState.ToolFailed, Truncate("转换失败：" + ex.Message, 40));
+        }
     }
+
+    /// <summary>跑一次 Chunker 转换，返回输出目录与所用格式。纯后台逻辑，不碰 UI。</summary>
+    private (string Output, string Format) RunChunker(string java, string cli, string source, bool toBedrock,
+        string sourceName)
+    {
+        var formats = ModSaveConverter.ListFormats(java, cli);
+        // Java 输出优先用当前实例的版本，避免把存档升到过新的格式
+        string? preferred = null;
+        if (!toBedrock)
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(currentInstance.Name, @"(\d+)\.(\d+)(?:\.(\d+))?");
+            if (match.Success)
+                preferred = "JAVA_" + match.Groups[1].Value + "_" + match.Groups[2].Value +
+                            (match.Groups[3].Success ? "_" + match.Groups[3].Value : "");
+        }
+
+        var format = formats.FirstOrDefault(item =>
+                         string.Equals(item, preferred, StringComparison.OrdinalIgnoreCase)) ??
+                     (toBedrock
+                         ? ModSaveConverter.PickBedrockFormat(formats)
+                         : ModSaveConverter.PickLatestFormat(formats, "JAVA")) ??
+                     throw new InvalidOperationException(Lang.Text("Instance.Saves.Convert.Local.NoFormat"));
+        var output = Path.Combine(ModSaveConverter.CacheDirectory, "out",
+            $"{sourceName}-{DateTime.Now:yyyyMMdd-HHmmss}");
+        ModSaveConverter.Convert(java, cli, source, format, output);
+        return (output, format);
+    }
+
+    private static string Truncate(string text, int max) =>
+        text.Length <= max ? text : text[..(max - 1)] + "…";
 
     private void ImportJavaOutput(string folder)
     {
