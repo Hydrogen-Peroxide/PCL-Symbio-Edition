@@ -69,8 +69,11 @@ internal static class UiThreadProbe
         if (current > Volatile.Read(ref peakQueued)) Volatile.Write(ref peakQueued, current);
     }
 
-    private static void OnOperationCompleted(object? sender, DispatcherHookEventArgs e) =>
-        Interlocked.Decrement(ref queued);
+    private static void OnOperationCompleted(object? sender, DispatcherHookEventArgs e)
+    {
+        // 探针挂上之前就排队的操作只会有 Completed、没有 Posted，直接减会跑成负数
+        if (Volatile.Read(ref queued) > 0) Interlocked.Decrement(ref queued);
+    }
 
     private static void OnRendering(object? sender, EventArgs e)
     {
@@ -109,6 +112,7 @@ internal static class UiThreadProbe
             frameTotalMs = 0;
             maxFrameMs = 0;
             peakQueued = 0;
+            Interlocked.Exchange(ref queued, 0); // 每个窗口从零开始，避免跨窗口累积误差
             windowStartTicks = Environment.TickCount64;
         }
 
