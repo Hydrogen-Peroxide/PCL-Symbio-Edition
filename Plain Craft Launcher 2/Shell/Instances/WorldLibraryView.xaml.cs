@@ -419,7 +419,7 @@ public partial class WorldLibraryView : IRefreshable
                     showingSaves.Sort((a, b) => sortMethod(a, b));
                 }
 
-                ModAnimation.AniBeginControl();
+                using var _anim = ModAnimation.Suppress();
                 PanList.Children.Clear();
 
                 foreach (var curFolder in showingSaves)
@@ -553,8 +553,6 @@ public partial class WorldLibraryView : IRefreshable
 
                     PanList.Children.Add(worldItem);
                 }
-
-                ModAnimation.AniEndControl();
             }
         }
         catch (Exception ex)

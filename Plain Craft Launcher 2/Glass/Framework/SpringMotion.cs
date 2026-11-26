@@ -27,7 +27,8 @@ public static class MotionPreferences {
 
     internal static double FrameInterval => 1d / FrameRateLimit;
 
-    public static bool AllowsAnimation => PlaybackRate is > 0 and < 200 &&
+    public static bool AllowsAnimation => !PCL.Core.App.Config.Preference.DisableAllMotion &&
+        PlaybackRate is > 0 and < 200 &&
         SystemParameters.ClientAreaAnimation && !SystemParameters.HighContrast;
 }
 

@@ -3394,6 +3394,8 @@
     <sys:String x:Key="Setup.Ui.Basic.Opacity2">不透明度</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.ShowLogo">打开启动器时显示 PCL SE 图标</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.ShowTriviaHint">在启动游戏时显示"你知道吗"</sys:String>
+    <sys:String x:Key="Setup.Ui.Basic.DisableMotion">关闭所有动效</sys:String>
+    <sys:String x:Key="Setup.Ui.Basic.DisableMotion.ToolTip">停用全部过渡动画与弹簧动效，低端机或远程桌面下可改善卡顿</sys:String>
     <sys:String x:Key="Setup.Ui.Basic.Title">基础</sys:String>
 
     <!-- Setup.Ui.FeatureHide -->

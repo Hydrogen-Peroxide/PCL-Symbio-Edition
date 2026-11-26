@@ -110,6 +110,7 @@ public partial class AppearanceSettingsView
             SliderBlurSamplingRate.StepValue = Config.Preference.Blur.SamplingRate;
             ComboBlurType.SelectedIndex = Config.Preference.Blur.KernelType;
             CheckLockWindowSize.Checked = Config.Preference.LockWindowSize;
+            CheckDisableMotion.Checked = Config.Preference.DisableAllMotion;
             ComboDockPlacement.SelectedIndex = Math.Clamp(Config.Preference.DockPlacement, 0, 1);
 
             // 背景图片

@@ -185,6 +185,13 @@ public static partial class Config
         public partial bool PaperConnectTunMode { get; set; }
 
         /// <summary>
+        /// 强制关闭全部过渡动画（低端机 / 远程桌面 / 高对比度场景）。
+        /// 开启后 MotionPreferences.AllowsAnimation 恒为 false，所有 spring/淡入淡出直接跳到终值。
+        /// </summary>
+        [ConfigItem<bool>("UiDisableAllMotion", false, ConfigSource.Local)]
+        public partial bool DisableAllMotion { get; set; }
+
+        /// <summary>
         /// 全局字体。
         /// </summary>
         [ConfigItem<string>("UiFont", "", ConfigSource.Local)] public partial string Font { get; set; }

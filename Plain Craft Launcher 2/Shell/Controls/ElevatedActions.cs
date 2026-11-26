@@ -33,6 +33,15 @@ public abstract class ElevatedActionBase : IconActionButton
             field = value;
             IsHitTestVisible = IsTabStop = value;
             if (value) OnRevealStarted();
+            // 未 Loaded 时不能 Begin：先归零姿态，等 Loaded 后再补播一次，否则会直接跳到终态、看不出动画
+            if (!IsLoaded && value)
+            {
+                ApplyReveal(0);
+                UiAnim.RunOnce(this, () => SymbioMotion.Spring(this, "elevatedActionReveal", () => reveal, ApplyReveal,
+                    1, SymbioMotion.Pop, completed: () => { if (!Show) OnRevealFinished(); }));
+                return;
+            }
+
             SymbioMotion.Spring(this, "elevatedActionReveal", () => reveal, ApplyReveal,
                 value ? 1 : 0, SymbioMotion.Pop, immediate: !IsLoaded,
                 completed: () => { if (!Show) OnRevealFinished(); });

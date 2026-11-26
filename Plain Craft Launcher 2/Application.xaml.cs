@@ -106,7 +106,8 @@ public partial class Application
             // 计时
             ModBase.Log("[Start] 第一阶段加载用时：" + (TimeUtils.GetTimeTick() - ModBase.applicationStartTick) + " ms");
             ModBase.applicationStartTick = TimeUtils.GetTimeTick();
-            ModAnimation.AniBeginControl();
+            // 启动期闸门：带 10 秒自动释放，主窗口加载失败也不会把动画/交互永久锁死
+            ModAnimation.BeginStartupGate(TimeSpan.FromSeconds(10));
         }
         catch (Exception ex)
         {

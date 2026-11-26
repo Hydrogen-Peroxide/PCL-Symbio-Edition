@@ -198,7 +198,7 @@ public partial class FormMain
         hwndSource.AddHook(WndProc);
         Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
         {
-            ModAnimation.AniEndControl();
+            ModAnimation.EndStartupGate();
             isWindowLoadFinished = true;
             ModBase.Log($"[System] DPI：{ModBase.dpi}，系统版本：{Environment.OSVersion.VersionString}，PCL 位置：{Basics.ExecutablePath}");
         }));

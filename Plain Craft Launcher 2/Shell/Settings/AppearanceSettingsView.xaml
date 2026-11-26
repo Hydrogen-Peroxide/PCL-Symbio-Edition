@@ -89,6 +89,10 @@
                 <local:SettingsCard Icon="lucide/circle-help" Header="{DynamicResource Setup.Ui.Basic.ShowTriviaHint}">
                     <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckShowLaunchingHint" Tag="UiShowLaunchingHint" Change="CheckBoxChange" />
                 </local:SettingsCard>
+                <local:SettingsCard Icon="lucide/zap-off" Header="{DynamicResource Setup.Ui.Basic.DisableMotion}"
+                                    Description="{DynamicResource Setup.Ui.Basic.DisableMotion.ToolTip}">
+                    <local:SymbioCheck Style="{StaticResource SyToggleSwitch}" x:Name="CheckDisableMotion" Tag="UiDisableAllMotion" Change="CheckBoxChange" />
+                </local:SettingsCard>
                 <StackPanel x:Name="PanelBlur">
                     <local:SettingsCard Icon="lucide/flask-conical" Header="{DynamicResource Setup.Ui.Basic.AdvancedMaterial}"
                                         Description="{DynamicResource Setup.Ui.Basic.AdvancedMaterial.ToolTip}">
