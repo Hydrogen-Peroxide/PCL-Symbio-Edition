@@ -31,6 +31,7 @@ public partial class PaperConnectWorkspaceView
             TextPeers.Text = Config.Preference.PaperConnectPeers ?? string.Empty;
             CheckTun.Checked = Config.Preference.PaperConnectTunMode;
             RefreshServers();
+            RefreshFriends();
             timer.Start();
             Refresh();
         };
@@ -137,6 +138,66 @@ public partial class PaperConnectWorkspaceView
     private void BtnRuntime_Click(object sender, RoutedEventArgs e) =>
         ModBase.OpenWebsite(ModPaperConnect.EasyTierReleaseUrl);
 
+    // ---- 好友（在线判定只看当前房间成员，不接任何账号体系）----
+    private void BtnAddFriend_Click(object sender, RoutedEventArgs e)
+    {
+        var name = ModMain.MyMsgBoxInput("添加好友", "填写对方在联机房间里显示的玩家名");
+        if (string.IsNullOrWhiteSpace(name)) return;
+        try
+        {
+            if (!BedrockFriendList.Add(name)) HintService.Hint("这个玩家已经在名单里了", HintType.Info);
+            RefreshFriends();
+        }
+        catch (Exception ex)
+        {
+            HintService.Hint(ex.Message, HintType.Error);
+        }
+    }
+
+    private void RefreshFriends()
+    {
+        var friends = BedrockFriendList.All;
+        var inRoom = ModPaperConnect.IsRunning;
+        var members = ModPaperConnect.Players
+            .Select(player => new RoomMember(player.PlayerName, player.ClientId, player.IsRoomHost))
+            .ToArray();
+
+        PanelFriends.Children.Clear();
+        LabFriendEmpty.Visibility = friends.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        foreach (var friend in friends)
+        {
+            var (online, text) = BedrockFriendList.Describe(friend, members, inRoom);
+            var row = new Grid { Margin = new Thickness(0, 0, 0, 8) };
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+            var label = new TextBlock
+            {
+                FontSize = 12.5,
+                VerticalAlignment = VerticalAlignment.Center,
+                Text = $"{friend.Name} · {text}",
+                Opacity = online ? 1 : 0.6
+            };
+            row.Children.Add(label);
+
+            var remove = new SymbioButton
+            {
+                Height = 28,
+                Padding = new Thickness(12, 0, 12, 0),
+                Text = "移除"
+            };
+            Grid.SetColumn(remove, 1);
+            remove.Click += (_, _) =>
+            {
+                BedrockFriendList.Remove(friend.Name);
+                RefreshFriends();
+            };
+            row.Children.Add(remove);
+
+            PanelFriends.Children.Add(row);
+        }
+    }
+
     // ---- 局域网发现 ----
     private async void BtnScanLan_Click(object sender, RoutedEventArgs e)
     {
@@ -187,6 +248,7 @@ public partial class PaperConnectWorkspaceView
         {
             BedrockServerList.Add(BedrockServerList.Parse(input));
             RefreshServers();
+            RefreshFriends();
             HintService.Hint("已添加", HintType.Success);
         }
         catch (Exception ex)
@@ -233,6 +295,7 @@ public partial class PaperConnectWorkspaceView
             {
                 BedrockServerList.Remove(server.Address);
                 RefreshServers();
+            RefreshFriends();
             };
             row.Children.Add(remove);
 
@@ -298,6 +361,7 @@ public partial class PaperConnectWorkspaceView
             : $"连接地址：{ModPaperConnect.PlayAddress}";
 
         RefreshPlayers();
+        RefreshFriends();
     }
 
     private void RefreshPlayers()

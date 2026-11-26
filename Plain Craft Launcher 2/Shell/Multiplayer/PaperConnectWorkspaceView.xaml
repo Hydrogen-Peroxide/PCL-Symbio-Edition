@@ -95,6 +95,21 @@
                     </StackPanel>
                 </local:WorkspaceCard>
 
+                <local:WorkspaceCard Margin="0,0,0,15" Title="好友">
+                    <StackPanel Margin="21,36,21,18">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <local:SymbioButton x:Name="BtnAddFriend" Height="30" Padding="14,0" Text="添加好友"
+                                                Click="BtnAddFriend_Click" />
+                            <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" FontSize="11.5" Opacity="0.6"
+                                       TextWrapping="Wrap" MaxWidth="360"
+                                       Text="PaperConnect 去中心化，没有服务器记录上线状态：只有同一个房间里的人才会显示在线。" />
+                        </StackPanel>
+                        <StackPanel x:Name="PanelFriends" />
+                        <TextBlock x:Name="LabFriendEmpty" FontSize="12" Opacity="0.6" TextWrapping="Wrap"
+                                   Text="还没有好友。把常在同一个房间里玩的人加进来，进房时就能直接看到谁在。" />
+                    </StackPanel>
+                </local:WorkspaceCard>
+
                 <!-- 缺少 EasyTier 时的引导，默认隐藏 -->
                 <local:WorkspaceCard x:Name="CardRuntime" Margin="0,0,0,15" Title="缺少联机运行文件" Visibility="Collapsed">
                     <StackPanel Margin="21,36,21,18">
