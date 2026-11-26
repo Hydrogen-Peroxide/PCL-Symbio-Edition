@@ -11,6 +11,7 @@ using PCL.Core.App.Essentials;
 using PCL.Core.App.IoC;
 using PCL.Core.App.Localization;
 using PCL.Core.Logging;
+using PCL.Core.Multiplayer;
 using PCL.Core.UI.Controls;
 using PCL.Core.Utils;
 using PCL.Core.Utils.OS;
@@ -72,6 +73,13 @@ public partial class Application
             Current.Exit += (_, _) => ModTerracotta.Shutdown();
             // PaperConnect 自带 EasyTier 子进程，退出时必须一并结束，避免留下虚拟网卡服务。
             Current.Exit += (_, _) => ModPaperConnect.Shutdown();
+
+            // 联机模块：先注册内置实现，再扫描插件目录（同 id 以内置为准，插件失败只记录不阻断启动）
+            MultiplayerModules.Register(new BuiltInBedrockModule());
+            foreach (var plugin in MultiplayerPluginHost.LoadAll()) MultiplayerModules.Register(plugin);
+            if (MultiplayerPluginHost.LastErrors.Count > 0)
+                ModBase.Log("[Multiplayer] 插件加载失败：" + string.Join("；", MultiplayerPluginHost.LastErrors),
+                    ModBase.LogLevel.Hint);
 
             // 设置初始窗口
             if (Config.Preference.ShowStartupLogo)
