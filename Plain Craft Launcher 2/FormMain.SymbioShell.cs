@@ -112,7 +112,9 @@ public partial class FormMain
             RefreshShell();
         };
         view.EditionRequested += SwitchEdition;
-        view.HomeDetailsRequested += (_, _) => PageChange(IsBedrockShell ? PageType.BedrockLibrary : PageType.HomeContent);
+        // 基岩版的“管理”入口应打开实际的实例列表。BedrockLibrary 是旧的占位管理页，
+        // 目前只显示启动日志，用户从这里无法选择已安装的基岩版实例。
+        view.HomeDetailsRequested += (_, _) => PageChange(IsBedrockShell ? PageType.BedrockInstanceSelect : PageType.HomeContent);
         view.MinimizeRequested += (_, args) => BtnTitleMin_Click(this, args);
         view.CloseRequested += (_, args) => BtnTitleClose_Click(this, args);
         view.DragRequested += (_, _) => DragMove();
