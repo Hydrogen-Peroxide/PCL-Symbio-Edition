@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -231,9 +232,10 @@ public static class BedrockWorldProbe
     {
         var payload = new byte[1 + 8 + 16 + 8];
         payload[0] = 0x01;
-        BitConverter.TryWriteBytes(payload.AsSpan(1, 8), (long)DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+        BinaryPrimitives.WriteInt64BigEndian(
+            payload.AsSpan(1, 8), DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
         Magic.CopyTo(payload, 9);
-        BitConverter.TryWriteBytes(payload.AsSpan(25, 8), 0L);
+        BinaryPrimitives.WriteInt64BigEndian(payload.AsSpan(25, 8), 0L);
         return payload;
     }
 
