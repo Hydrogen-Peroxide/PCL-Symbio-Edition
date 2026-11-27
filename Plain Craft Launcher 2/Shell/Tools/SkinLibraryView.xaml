@@ -5,7 +5,14 @@
                    xmlns:controls="clr-namespace:PCL.Core.UI.Controls;assembly=PCL.Core"
                    PanScroll="{Binding ElementName=PanBack}">
     <ScrollViewer local:ScrollInput.Enabled="True" Style="{StaticResource SyScrollViewer}" x:Name="PanBack" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <StackPanel Margin="16,32">
+        <StackPanel Margin="24,28">
+                <StackPanel Margin="0,0,0,22">
+                    <TextBlock Text="皮肤库" FontSize="28" FontWeight="SemiBold"
+                               Foreground="{DynamicResource SyText}" />
+                    <TextBlock Text="管理本地皮肤，预览模型并应用到当前账号。"
+                               Margin="0,6,0,0" FontSize="13"
+                               Foreground="{DynamicResource SyTextSecondary}" />
+                </StackPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -14,7 +21,7 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- 当前皮肤：只保留预览与名字，操作按钮挪到左栏顶部 -->
-                    <controls:BlurBorder Grid.Column="2" Width="292" HorizontalAlignment="Right" VerticalAlignment="Top" Style="{StaticResource SeFluentCard}" Padding="20">
+                    <controls:BlurBorder Grid.Column="2" Width="304" HorizontalAlignment="Right" VerticalAlignment="Top" Style="{StaticResource SeFluentCard}" Padding="20">
                     <StackPanel>
                         <TextBlock Text="{DynamicResource Tools.SkinLibrary.Current}" FontSize="20" FontWeight="SemiBold"
                                    Foreground="{DynamicResource SyText}" />
@@ -37,7 +44,7 @@
                     </controls:BlurBorder>
 
                     <!-- 皮肤库 -->
-                    <StackPanel Grid.Column="0" Margin="0,8,0,0">
+                    <StackPanel Grid.Column="0" Margin="0,0,0,0">
                         <!-- 顶部一条水平栏：模型切换 + 添加到皮肤库居中，刷新/打开文件夹靠右 -->
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -78,7 +85,10 @@
                                                     Click="BtnOpenFolder_Click" />
                             </StackPanel>
                         </Grid>
-                        <WrapPanel x:Name="PanSkinList" Margin="0,20,0,0" HorizontalAlignment="Left" />
+                        <Border Margin="0,16,0,0" Padding="14" CornerRadius="10"
+                                Background="{DynamicResource ColorBrushSemiTransparent}">
+                            <WrapPanel x:Name="PanSkinList" HorizontalAlignment="Left" />
+                        </Border>
                         <TextBlock x:Name="LabEmpty" Text="{DynamicResource Tools.SkinLibrary.Empty}"
                                    Margin="4,12,0,0" TextWrapping="Wrap" FontSize="12"
                                    HorizontalAlignment="Left"
