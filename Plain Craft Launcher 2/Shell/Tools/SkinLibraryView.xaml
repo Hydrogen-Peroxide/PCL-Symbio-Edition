@@ -44,9 +44,18 @@
                     </controls:BlurBorder>
 
                     <!-- 皮肤库 -->
-                    <StackPanel Grid.Column="0" Margin="0,0,0,0">
-                        <!-- 顶部一条水平栏：模型切换 + 添加到皮肤库居中，刷新/打开文件夹靠右 -->
-                        <Grid>
+                    <controls:BlurBorder Grid.Column="0" Margin="0,0,0,0" Padding="20"
+                                         Style="{StaticResource SeFluentCard}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,4">
+                            <TextBlock Text="我的皮肤" FontSize="20" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource SyText}" />
+                            <TextBlock Text="导入 PNG 皮肤后，点击卡片即可预览和应用。"
+                                       Margin="0,30,0,0" FontSize="12"
+                                       Foreground="{DynamicResource SyTextSecondary}" />
+                        </Grid>
+                        <!-- 顶部工具栏 -->
+                        <Grid Margin="0,18,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
@@ -85,7 +94,7 @@
                                                     Click="BtnOpenFolder_Click" />
                             </StackPanel>
                         </Grid>
-                        <Border Margin="0,16,0,0" Padding="14" CornerRadius="10"
+                        <Border Margin="0,18,0,0" Padding="14" CornerRadius="10"
                                 Background="{DynamicResource ColorBrushSemiTransparent}">
                             <WrapPanel x:Name="PanSkinList" HorizontalAlignment="Left" />
                         </Border>
@@ -94,6 +103,7 @@
                                    HorizontalAlignment="Left"
                                    Foreground="{DynamicResource SyTextSecondary}" />
                     </StackPanel>
+                    </controls:BlurBorder>
                 </Grid>
         </StackPanel>
     </ScrollViewer>
