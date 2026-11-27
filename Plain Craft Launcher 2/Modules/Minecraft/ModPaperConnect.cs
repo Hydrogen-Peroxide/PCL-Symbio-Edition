@@ -545,9 +545,9 @@ internal static class ModPaperConnect
 
             var code = GenerateRoomCode();
             var network = RoomCodeGenerator.ParseRoomCode(code);
-            // hostname: pcs-<控制面端口>-<房间码 N 段>，兼顾"前缀匹配"与"带房间标识"两种解析期待
-            var roomTag = code.Substring(RoomCodeGenerator.ROOM_CODE_HEADER.Length, 9); // NNNN-NNNN
-            var args = $"-i {HostVip} --hostname {HostHostnamePrefix}{roomServer.ServerPort}-{roomTag} " +
+            // BedrockBoot GravityCone 识别 pcs-<控制面端口>-g-<游戏端口>。
+            var hostName = $"{HostHostnamePrefix}{roomServer.ServerPort}-g-{gamePort}";
+            var args = $"-i {HostVip} --hostname {hostName} " +
                        $"--network-name {network.NetworkName} --network-secret {network.NetworkKey} " +
                        string.Join(" ", BuildParameters()) + " " +
                        $"--listeners tcp://0.0.0.0:{DirectListenPort} " +
@@ -557,8 +557,7 @@ internal static class ModPaperConnect
             Role = RoomRole.Host;
             RoomCode = code;
             SetStatus("房间已创建，等待其他玩家加入…");
-            // 把 hostname 明确记下来：bedrockboot 报「解析主机名失败」时可直接对照这条
-            ModBase.Log($"[PaperConnect] 房主 hostname = {HostHostnamePrefix}{roomServer.ServerPort}-{roomTag}",
+            ModBase.Log($"[PaperConnect] 房主 hostname = {hostName}",
                 ModBase.LogLevel.Normal);
             ModBase.Log($"[PaperConnect] 开房成功，联机码 {code}，控制面端口 {roomServer.ServerPort}，游戏端口 {gamePort}，" +
                         $"直连地址 {DirectAddress}，共享节点 {(ReadRelays().Length == 0 ? "无" : string.Join(" ", ReadRelays()))}",
