@@ -21,7 +21,8 @@
                     </Grid.ColumnDefinitions>
 
                     <!-- 当前皮肤：只保留预览与名字，操作按钮挪到左栏顶部 -->
-                    <controls:BlurBorder Grid.Column="2" Width="304" HorizontalAlignment="Right" VerticalAlignment="Top" Style="{StaticResource SeFluentCard}" Padding="20">
+                    <controls:BlurBorder Grid.Column="2" Width="304" HorizontalAlignment="Right" VerticalAlignment="Top"
+                                         Style="{StaticResource SeFluentCard}" CornerRadius="12" ClipToBounds="True" Padding="20">
                     <StackPanel>
                         <TextBlock Text="{DynamicResource Tools.SkinLibrary.Current}" FontSize="20" FontWeight="SemiBold"
                                    Foreground="{DynamicResource SyText}" />
@@ -45,7 +46,7 @@
 
                     <!-- 皮肤库 -->
                     <controls:BlurBorder Grid.Column="0" Margin="0,0,0,0" Padding="20"
-                                         Style="{StaticResource SeFluentCard}">
+                                         Style="{StaticResource SeFluentCard}" CornerRadius="12" ClipToBounds="True">
                     <StackPanel>
                         <Grid Margin="0,0,0,4">
                             <TextBlock Text="我的皮肤" FontSize="20" FontWeight="SemiBold"
@@ -72,9 +73,9 @@
                                         <ColumnDefinition Width="6" />
                                         <ColumnDefinition Width="*" />
                                     </Grid.ColumnDefinitions>
-                                    <local:SymbioButton x:Name="BtnClassicModel" Height="34" Style="{StaticResource SePillButton}"
+                                    <local:SymbioButton x:Name="BtnClassicModel" Height="34" CornerRadius="8" Style="{StaticResource SePillButton}"
                                                     Text="{DynamicResource Launch.Skin.Model.Steve}" Click="BtnModel_Click" />
-                                    <local:SymbioButton x:Name="BtnSlimModel" Grid.Column="2" Height="34" Style="{StaticResource SePillButton}"
+                                    <local:SymbioButton x:Name="BtnSlimModel" Grid.Column="2" Height="34" CornerRadius="8" Style="{StaticResource SePillButton}"
                                                     Text="{DynamicResource Launch.Skin.Model.Alex}" Click="BtnModel_Click" />
                             </Grid>
                             <local:SymbioButton x:Name="BtnPrimary" Grid.Row="1" Grid.Column="0" Height="34"
