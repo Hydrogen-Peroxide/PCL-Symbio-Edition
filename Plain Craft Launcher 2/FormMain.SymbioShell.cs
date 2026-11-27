@@ -45,6 +45,11 @@ public partial class FormMain
     internal SymbioShell? Stage => shell;
     internal bool BedrockMode { get; private set; }
 
+    private bool IsBedrockShell => BedrockMode || pageCurrent.page == PageType.Bedrock ||
+                                   pageCurrent.page == PageType.BedrockLibrary ||
+                                   pageCurrent.page == PageType.BedrockInstanceSelect ||
+                                   pageCurrent.page == PageType.BedrockInstance;
+
     private void SwitchEdition(bool bedrock)
     {
         BedrockMode = bedrock;
@@ -107,7 +112,7 @@ public partial class FormMain
             RefreshShell();
         };
         view.EditionRequested += SwitchEdition;
-        view.HomeDetailsRequested += (_, _) => PageChange(BedrockMode ? PageType.BedrockLibrary : PageType.HomeContent);
+        view.HomeDetailsRequested += (_, _) => PageChange(IsBedrockShell ? PageType.BedrockLibrary : PageType.HomeContent);
         view.MinimizeRequested += (_, args) => BtnTitleMin_Click(this, args);
         view.CloseRequested += (_, args) => BtnTitleClose_Click(this, args);
         view.DragRequested += (_, _) => DragMove();
@@ -137,9 +142,9 @@ public partial class FormMain
             if (!BedrockMode) JavaLaunchSession.Cancel();
         };
         view.SelectInstanceRequested += (_, _) =>
-            PageChange(BedrockMode ? PageType.BedrockInstanceSelect : PageType.InstanceSelect);
+            PageChange(IsBedrockShell ? PageType.BedrockInstanceSelect : PageType.InstanceSelect);
         view.InstanceSettingsRequested += (_, _) =>
-            PageChange(BedrockMode ? PageType.BedrockInstance : PageType.InstanceSetup);
+            PageChange(IsBedrockShell ? PageType.BedrockInstance : PageType.InstanceSetup);
         view.AccountRequested += (_, _) => ShowAccountPage();
 
         HookAccountPanel(accountPanel);
