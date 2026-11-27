@@ -16,21 +16,21 @@
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="20" />
-                        <ColumnDefinition Width="250" />
-                        <ColumnDefinition Width="20" />
-                        <ColumnDefinition Width="220" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="1.2*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="1*" />
                     </Grid.ColumnDefinitions>
 
                     <!-- 当前皮肤：只保留预览与名字，操作按钮挪到左栏顶部 -->
-                    <controls:BlurBorder Grid.Column="2" Width="250" HorizontalAlignment="Right" VerticalAlignment="Top"
-                                         Style="{StaticResource SeFluentCard}" CornerRadius="12" ClipToBounds="True" Padding="20">
+                    <controls:BlurBorder Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                                         Style="{StaticResource SeFluentCard}" CornerRadius="12" ClipToBounds="True" Padding="12">
                     <StackPanel>
                         <TextBlock Text="{DynamicResource Tools.SkinLibrary.Current}" FontSize="20" FontWeight="SemiBold"
                                    Foreground="{DynamicResource SyText}" />
                         <Border Margin="0,20,0,0" Padding="10" CornerRadius="8" Background="{DynamicResource ColorBrushSemiTransparent}">
                             <!-- 预览底色不能太深：深色皮肤的手臂、躯干同色，与近黑底色几乎无法区分，会被误看成空隙 -->
-                            <local:SkinPreviewView x:Name="ViewerCurrent" Height="260" />
+                            <local:SkinPreviewView x:Name="ViewerCurrent" Height="210" />
                         </Border>
                         <TextBlock x:Name="LabCurrentName" HorizontalAlignment="Center" Margin="0,10,0,0"
                                    MaxWidth="200" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
@@ -46,16 +46,16 @@
                     </StackPanel>
                     </controls:BlurBorder>
 
-                    <controls:BlurBorder Grid.Column="4" Width="220" HorizontalAlignment="Right" VerticalAlignment="Top"
-                                         Style="{StaticResource SeFluentCard}" CornerRadius="12" ClipToBounds="True" Padding="18">
+                    <controls:BlurBorder Grid.Column="4" HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                                         Style="{StaticResource SeFluentCard}" CornerRadius="12" ClipToBounds="True" Padding="12">
                         <StackPanel>
                             <TextBlock Text="当前披风" FontSize="20" FontWeight="SemiBold"
                                        Foreground="{DynamicResource SyText}" />
                             <TextBlock Text="当前账号使用的披风" Margin="0,6,0,16" FontSize="12"
                                        Foreground="{DynamicResource SyTextSecondary}" />
-                            <Border Height="190" Padding="12" CornerRadius="8"
+                            <Border Height="150" Padding="8" CornerRadius="8"
                                     Background="{DynamicResource ColorBrushSemiTransparent}">
-                                <Image x:Name="ImgCurrentCape" Width="150" Height="166" Stretch="Uniform"
+                                <Image x:Name="ImgCurrentCape" Width="100" Height="130" Stretch="Uniform"
                                        RenderOptions.BitmapScalingMode="NearestNeighbor" />
                             </Border>
                             <TextBlock x:Name="LabCapeName" HorizontalAlignment="Center" Margin="0,10,0,0"
