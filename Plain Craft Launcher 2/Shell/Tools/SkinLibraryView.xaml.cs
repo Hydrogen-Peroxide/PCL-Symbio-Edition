@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using PCL.Core.App;
 using PCL.Core.App.Localization;
 using PCL.Core.UI;
@@ -247,6 +248,31 @@ public partial class SkinLibraryView
             BtnRemove.Visibility = Visibility.Collapsed;
         }
 
+        UpdateCapePreview();
+
+    }
+
+    private void UpdateCapePreview()
+    {
+        ImgCurrentCape.Source = null;
+        LabCapeName.Text = "未设置披风";
+        var cape = ModProfile.selectedProfile?.LocalCape;
+        if (string.IsNullOrWhiteSpace(cape) || !File.Exists(cape)) return;
+        try
+        {
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.UriSource = new Uri(cape, UriKind.Absolute);
+            image.EndInit();
+            image.Freeze();
+            ImgCurrentCape.Source = image;
+            LabCapeName.Text = Path.GetFileNameWithoutExtension(cape);
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, $"[SkinLibrary] 读取披风预览失败（{cape}）", ModBase.LogLevel.Debug);
+        }
     }
 
     /// <summary>切换当前皮肤使用经典（手臂 4 像素）还是纤细（手臂 3 像素）模型，按皮肤单独保存。</summary>

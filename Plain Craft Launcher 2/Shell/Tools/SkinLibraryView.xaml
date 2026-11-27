@@ -33,6 +33,15 @@
                         <TextBlock x:Name="LabCurrentName" HorizontalAlignment="Center" Margin="0,10,0,0"
                                    MaxWidth="200" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
                                    Foreground="{DynamicResource SyTextSecondary}" />
+                        <TextBlock Text="当前披风" Margin="0,18,0,6" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SyText}" />
+                        <Border Height="92" Padding="8" CornerRadius="8"
+                                Background="{DynamicResource ColorBrushSemiTransparent}">
+                            <Image x:Name="ImgCurrentCape" Width="76" Height="76" Stretch="Uniform"
+                                   RenderOptions.BitmapScalingMode="NearestNeighbor" />
+                        </Border>
+                        <TextBlock x:Name="LabCapeName" HorizontalAlignment="Center" Margin="0,6,0,0"
+                                   FontSize="11" Foreground="{DynamicResource SyTextSecondary}" />
                         <local:SymbioButton x:Name="BtnRename" Height="34" Margin="0,14,0,0" Padding="12,0"
                                         HorizontalAlignment="Stretch" Visibility="Collapsed"
                                         Text="{DynamicResource Tools.SkinLibrary.Rename}"
