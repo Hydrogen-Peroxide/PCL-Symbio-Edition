@@ -2538,6 +2538,14 @@ public static class ModLaunch
         if (mcLaunchJavaSelected.Installation.MajorVersion >= 18)
             if (!arguments.Contains("-Dfile.encoding="))
                 arguments = "-Dfile.encoding=COMPAT " + arguments;
+
+        // CVE-2026-114938：部分 x86-64 Java 运行时的 Base64 向量指令实现存在漏洞。
+        // 按受影响版本范围关闭该 HotSpot intrinsic，避免把风险带进 Minecraft JVM。
+        if (_ShouldDisableBase64Intrinsics())
+        {
+            arguments = "-XX:-UseBASE64Intrinsics " + arguments;
+            McLaunchLog("安全保护：已关闭 Java Base64 intrinsics（CVE-2026-114938）");
+        }
         // MJSB
         arguments = arguments.Replace(" -Dos.name=Windows 10", " -Dos.name=\"Windows 10\"");
         // 全屏
@@ -3517,6 +3525,20 @@ public static class ModLaunch
             }
         }
 
+        // Minecraft2Shell 利用服务器资源包中的恶意 TrueType 字体触发 Java 版
+        // 内置 FreeType 越界写。启动器无法替换游戏内的原生字体引擎，先在启动前
+        // 关闭服务器资源包自动加载，阻断服务器推送资源包进入客户端的攻击链。
+        // 该选项对旧版本会被忽略，对新版本会阻止 prompt/enabled 两种加载路径。
+        try
+        {
+            ModBase.WriteIni(setupFileAddress, "serverResourcePacks", "disabled");
+            McLaunchLog("安全保护：已禁用服务器资源包，阻止恶意字体资源包加载");
+        }
+        catch (Exception ex)
+        {
+            ModBase.Log(ex, "写入服务器资源包安全策略失败", ModBase.LogLevel.Hint);
+        }
+
         // 窗口
         switch (Config.Launch.GameWindowMode)
         {
@@ -3586,6 +3608,24 @@ public static class ModLaunch
             or LocalizationFontProfile.TraditionalChinese
             or LocalizationFontProfile.Japanese
             or LocalizationFontProfile.Korean;
+    }
+
+    private static bool _ShouldDisableBase64Intrinsics()
+    {
+        var installation = mcLaunchJavaSelected?.Installation;
+        if (installation is null || !installation.Is64Bit) return false;
+
+        var major = installation.MajorVersion;
+        var version = installation.Version;
+        return major switch
+        {
+            17 => version >= new Version(17, 0, 6) && version < new Version(17, 0, 21, 1),
+            18 or 19 or 20 or 22 or 23 or 24 or 26 => true,
+            21 => version < new Version(21, 0, 13, 1),
+            25 => version < new Version(25, 0, 5, 1),
+            27 => version < new Version(27, 0, 1, 1),
+            _ => false
+        };
     }
 
     private static void McLaunchCustom(ModLoader.LoaderTask<int, int> loader)
