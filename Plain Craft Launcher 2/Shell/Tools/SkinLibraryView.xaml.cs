@@ -255,6 +255,7 @@ public partial class SkinLibraryView
         var slim = ReferenceEquals(sender, BtnSlimModel);
         if (slim == ViewerCurrent.SlimModel)
             return;
+        SymbioMotion.Fade(ViewerCurrent, 0.25, immediate: true);
         ViewerCurrent.SlimModel = slim;
         UpdateModelSelection(slim);
         // 只记录到当前选中的皮肤；未选中皮肤时仅临时预览
@@ -274,6 +275,7 @@ public partial class SkinLibraryView
 
         // 右侧缩略图也按新模型重画
         Reload();
+        SymbioMotion.Fade(ViewerCurrent, 1);
     }
 
     private void UpdateModelSelection(bool slim)

@@ -56,14 +56,17 @@
                         </Grid>
                         <!-- 顶部工具栏 -->
                         <Grid Margin="0,18,0,0">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="34" />
+                                <RowDefinition Height="42" />
+                            </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <WrapPanel Grid.Column="0" VerticalAlignment="Center">
-                                <Grid Width="180" Height="34" VerticalAlignment="Center"
-                                      ToolTip="{DynamicResource Tools.SkinLibrary.SlimModel.ToolTip}">
+                            <Grid Grid.Row="0" Grid.Column="0" Width="180" Height="34" HorizontalAlignment="Left"
+                                  ToolTip="{DynamicResource Tools.SkinLibrary.SlimModel.ToolTip}">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="6" />
@@ -73,21 +76,22 @@
                                                     Text="{DynamicResource Launch.Skin.Model.Steve}" Click="BtnModel_Click" />
                                     <local:SymbioButton x:Name="BtnSlimModel" Grid.Column="2" Height="34" Style="{StaticResource SePillButton}"
                                                     Text="{DynamicResource Launch.Skin.Model.Alex}" Click="BtnModel_Click" />
-                                </Grid>
-                                <local:SymbioButton x:Name="BtnPrimary" Height="34" CornerRadius="8"
-                                                Margin="8,0,0,0" Padding="12,0" VerticalAlignment="Center"
-                                                ColorType="Highlight"
-                                                Text="{DynamicResource Tools.SkinLibrary.AddToLibrary}"
-                                                Click="BtnPrimary_Click" />
-                            </WrapPanel>
+                            </Grid>
+                            <local:SymbioButton x:Name="BtnPrimary" Grid.Row="1" Grid.Column="0" Height="34"
+                                            HorizontalAlignment="Left" CornerRadius="8"
+                                            Margin="0,8,0,0" Padding="12,0" VerticalAlignment="Top"
+                                            ColorType="Highlight"
+                                            Text="{DynamicResource Tools.SkinLibrary.AddToLibrary}"
+                                            Click="BtnPrimary_Click" />
 
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
+                            <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
                                 <local:SymbioIconButton x:Name="BtnRefresh" SvgIcon="lucide/refresh-cw"
                                                     Style="{StaticResource SeIconButton}"
+                                                    CornerRadius="8"
                                                     ToolTip="{DynamicResource Tools.SkinLibrary.Refresh}"
                                                     Click="BtnRefresh_Click" />
                                 <local:SymbioIconButton x:Name="BtnOpenFolder" SvgIcon="lucide/folder-open"
-                                                    Style="{StaticResource SeIconButton}" Margin="6,0,0,0"
+                                                    Style="{StaticResource SeIconButton}" Margin="6,0,0,0" CornerRadius="8"
                                                     ToolTip="{DynamicResource Tools.SkinLibrary.OpenFolder}"
                                                     Click="BtnOpenFolder_Click" />
                             </StackPanel>
