@@ -433,10 +433,24 @@ internal static class ModPaperConnect
             process.WaitForExit(5000);
             if (string.IsNullOrWhiteSpace(output)) return [];
 
+            // EasyTier 2.6 返回数组，较新的 CLI 会包装成 {"peers":[...]}。
+            // 两种格式都兼容，否则网络已经连上时仍会被误报为“没有联机中心”。
             var start = output.IndexOf('[');
             var end = output.LastIndexOf(']');
-            if (start < 0 || end <= start) return [];
-            return JsonSerializer.Deserialize<List<PeerInfo>>(output[start..(end + 1)]) ?? [];
+            if (start >= 0 && end > start)
+            {
+                var peers = JsonSerializer.Deserialize<List<PeerInfo>>(output[start..(end + 1)]);
+                if (peers is not null) return peers;
+            }
+
+            using var document = JsonDocument.Parse(output);
+            if (document.RootElement.ValueKind == JsonValueKind.Object &&
+                document.RootElement.TryGetProperty("peers", out var peerElement))
+            {
+                return JsonSerializer.Deserialize<List<PeerInfo>>(peerElement.GetRawText()) ?? [];
+            }
+
+            return [];
         }
         catch (Exception ex)
         {
@@ -453,7 +467,11 @@ internal static class ModPaperConnect
         while (Environment.TickCount64 < deadline)
         {
             token.ThrowIfCancellationRequested();
-            foreach (var peer in ReadPeers())
+            var peers = ReadPeers();
+            ModBase.Log($"[PaperConnect] EasyTier 节点数 {peers.Count}：" +
+                        string.Join(", ", peers.Select(peer =>
+                            $"{peer.Hostname} ({peer.Ipv4})")), ModBase.LogLevel.Debug);
+            foreach (var peer in peers)
             {
                 sawPeer = true;
                 var hostname = peer.Hostname ?? string.Empty;
