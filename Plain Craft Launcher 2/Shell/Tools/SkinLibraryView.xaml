@@ -57,33 +57,31 @@
                         <!-- 顶部工具栏 -->
                         <Grid Margin="0,18,0,0">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
 
-                            <Grid Grid.Column="0" Width="200" VerticalAlignment="Center"
-                                  ToolTip="{DynamicResource Tools.SkinLibrary.SlimModel.ToolTip}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="8" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <local:SymbioButton x:Name="BtnClassicModel" Height="34" Style="{StaticResource SePillButton}"
-                                                Text="{DynamicResource Launch.Skin.Model.Steve}" Click="BtnModel_Click" />
-                                <local:SymbioButton x:Name="BtnSlimModel" Grid.Column="2" Height="34" Style="{StaticResource SePillButton}"
-                                                Text="{DynamicResource Launch.Skin.Model.Alex}" Click="BtnModel_Click" />
-                            </Grid>
+                            <WrapPanel Grid.Column="0" VerticalAlignment="Center">
+                                <Grid Width="180" Height="34" VerticalAlignment="Center"
+                                      ToolTip="{DynamicResource Tools.SkinLibrary.SlimModel.ToolTip}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="6" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <local:SymbioButton x:Name="BtnClassicModel" Height="34" Style="{StaticResource SePillButton}"
+                                                    Text="{DynamicResource Launch.Skin.Model.Steve}" Click="BtnModel_Click" />
+                                    <local:SymbioButton x:Name="BtnSlimModel" Grid.Column="2" Height="34" Style="{StaticResource SePillButton}"
+                                                    Text="{DynamicResource Launch.Skin.Model.Alex}" Click="BtnModel_Click" />
+                                </Grid>
+                                <local:SymbioButton x:Name="BtnPrimary" Height="34" CornerRadius="8"
+                                                Margin="8,0,0,0" Padding="12,0" VerticalAlignment="Center"
+                                                ColorType="Highlight"
+                                                Text="{DynamicResource Tools.SkinLibrary.AddToLibrary}"
+                                                Click="BtnPrimary_Click" />
+                            </WrapPanel>
 
-                            <local:SymbioButton x:Name="BtnPrimary" Grid.Column="1" Height="34" CornerRadius="8"
-                                            Margin="12,0,0,0" Padding="16,0" VerticalAlignment="Center"
-                                            ColorType="Highlight"
-                                            Text="{DynamicResource Tools.SkinLibrary.AddToLibrary}"
-                                            Click="BtnPrimary_Click" />
-
-                            <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0,0,0">
                                 <local:SymbioIconButton x:Name="BtnRefresh" SvgIcon="lucide/refresh-cw"
                                                     Style="{StaticResource SeIconButton}"
                                                     ToolTip="{DynamicResource Tools.SkinLibrary.Refresh}"
