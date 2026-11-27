@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -177,6 +179,10 @@ internal static class ModPaperConnect
     private static CancellationTokenSource? session;
     private static PaperConnectServer? server;
     private static PaperConnectClient? client;
+    private static readonly object EasyTierLogSync = new();
+    private static readonly Dictionary<string, long> EasyTierLogLastWritten = [];
+    private static long easyTierLogWindowStart;
+    private static int easyTierLogWindowCount;
 
     internal static RoomRole Role { get; private set; } = RoomRole.None;
     internal static string RoomCode { get; private set; } = string.Empty;
@@ -189,13 +195,21 @@ internal static class ModPaperConnect
     /// </summary>
     internal static string? WorldProbeWarning { get; private set; }
     internal static int GamePort { get; private set; } = DefaultGamePort;
+    private static int LocalGamePort { get; set; } = DefaultGamePort;
     internal static bool IsBusy { get; private set; }
     internal static bool IsRunning => Role != RoomRole.None;
 
     /// <summary>房客连接成功后游戏应连接的本机地址。</summary>
     internal static string PlayAddress => Role == RoomRole.Guest && IsRunning
-        ? $"{(UseTun ? HostVip : "127.0.0.1")}:{GamePort}"
+        ? $"{(UseTun ? HostVip : "127.0.0.1")}:{(UseTun ? GamePort : LocalGamePort)}"
         : string.Empty;
+
+    private static int GetFreeTcpPort()
+    {
+        using var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        return ((IPEndPoint)listener.LocalEndpoint).Port;
+    }
 
     internal static IReadOnlyList<AgreementEntry.PlayerEntry> Players
     {
@@ -377,17 +391,49 @@ internal static class ModPaperConnect
             RedirectStandardError = true
         };
         var process = Process.Start(info) ?? throw new InvalidOperationException("无法启动 EasyTier 进程。");
-        process.OutputDataReceived += (_, e) =>
-        {
-            if (!string.IsNullOrWhiteSpace(e.Data)) ModBase.Log($"[EasyTier] {e.Data}", ModBase.LogLevel.Debug);
-        };
-        process.ErrorDataReceived += (_, e) =>
-        {
-            if (!string.IsNullOrWhiteSpace(e.Data)) ModBase.Log($"[EasyTier] {e.Data}", ModBase.LogLevel.Debug);
-        };
+        process.OutputDataReceived += (_, e) => ForwardEasyTierLog(e.Data);
+        process.ErrorDataReceived += (_, e) => ForwardEasyTierLog(e.Data);
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
         return process;
+    }
+
+    /// <summary>
+    ///     EasyTier 在端口转发失败时会以毫秒级频率重复输出同一类错误。
+    ///     只保留分类后的首条并设置总量上限，避免一个联机失败把启动器日志写到数十 GB。
+    /// </summary>
+    private static void ForwardEasyTierLog(string? line)
+    {
+        if (string.IsNullOrWhiteSpace(line)) return;
+
+        var key = line switch
+        {
+            _ when line.Contains("bind addr fail", StringComparison.OrdinalIgnoreCase) => "bind addr fail",
+            _ when line.Contains("BrokenPipe", StringComparison.OrdinalIgnoreCase) => "BrokenPipe",
+            _ when line.Contains("RouteError", StringComparison.OrdinalIgnoreCase) => "RouteError",
+            _ when line.Contains("ConnectionReset", StringComparison.OrdinalIgnoreCase) => "ConnectionReset",
+            _ when line.Contains("handshake timeout", StringComparison.OrdinalIgnoreCase) => "handshake timeout",
+            _ when line.Contains("can not find interface", StringComparison.OrdinalIgnoreCase) => "interface lookup",
+            _ => line.Length > 96 ? line[..96] : line
+        };
+
+        var now = Environment.TickCount64;
+        lock (EasyTierLogSync)
+        {
+            if (now - easyTierLogWindowStart >= 60_000)
+            {
+                easyTierLogWindowStart = now;
+                easyTierLogWindowCount = 0;
+            }
+
+            if (easyTierLogWindowCount >= 120) return;
+            if (EasyTierLogLastWritten.TryGetValue(key, out var last) && now - last < 10_000) return;
+
+            EasyTierLogLastWritten[key] = now;
+            easyTierLogWindowCount++;
+        }
+
+        ModBase.Log($"[EasyTier] {line}", ModBase.LogLevel.Debug);
     }
 
     private static void StopEasyTier()
@@ -657,19 +703,23 @@ internal static class ModPaperConnect
             // 第二段：转发控制面 TCP，问出游戏端口
             StopEasyTier();
             SetStatus("正在建立隧道…");
-            easyTier = StartEasyTier(baseArgs + $" --port-forward tcp://0.0.0.0:{centerPort}/{HostVip}:{centerPort}");
-            var roomClient = new PaperConnectClient("127.0.0.1", centerPort, playerName);
+            var localControlPort = GetFreeTcpPort();
+            easyTier = StartEasyTier(baseArgs + $" --port-forward tcp://127.0.0.1:{localControlPort}/{HostVip}:{centerPort}");
+            var roomClient = new PaperConnectClient("127.0.0.1", localControlPort, playerName);
             var ping2 = await PingWithRetryAsync(roomClient, token);
             if (ping2 is null) throw new TimeoutException("连上了联机中心，但没有拿到游戏端口。");
             GamePort = ping2.GamePort > 1024 ? ping2.GamePort : gamePort;
+            // 本机同时运行房主和房客时，远端控制端口与游戏端口都可能已经被占用。
+            // 转发监听使用独立的回环端口，避免 EasyTier 反复 bind 失败。
+            LocalGamePort = GetFreeTcpPort();
 
             // 第三段：补上游戏流量的 UDP/TCP 转发（nethernet 房间可能走 TCP）
             StopEasyTier();
             easyTier = StartEasyTier(baseArgs +
-                                     $" --port-forward tcp://0.0.0.0:{centerPort}/{HostVip}:{centerPort}" +
-                                     $" --port-forward udp://0.0.0.0:{GamePort}/{HostVip}:{GamePort}" +
-                                     $" --port-forward tcp://0.0.0.0:{GamePort}/{HostVip}:{GamePort}");
-            roomClient = new PaperConnectClient("127.0.0.1", centerPort, playerName);
+                                     $" --port-forward tcp://127.0.0.1:{localControlPort}/{HostVip}:{centerPort}" +
+                                     $" --port-forward udp://127.0.0.1:{LocalGamePort}/{HostVip}:{GamePort}" +
+                                     $" --port-forward tcp://127.0.0.1:{LocalGamePort}/{HostVip}:{GamePort}");
+            roomClient = new PaperConnectClient("127.0.0.1", localControlPort, playerName);
             if (await PingWithRetryAsync(roomClient, token) is null)
                 throw new TimeoutException("隧道建立后联机中心没有响应。");
 
