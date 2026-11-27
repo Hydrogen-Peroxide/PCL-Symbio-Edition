@@ -177,28 +177,17 @@
 
         </StackPanel>
         <StackPanel x:Name="PanPlaceholder" Margin="25,25,25,10">
-            <local:WorkspaceCard Title="{DynamicResource Bedrock.Right.Current.Title}" UseAnimation="False" Visibility="Collapsed">
-                <StackPanel Margin="16,38,16,16">
-                    <TextBlock x:Name="LabCurrentInstance" FontSize="17" FontWeight="Bold"
-                               TextTrimming="CharacterEllipsis" />
-                    <TextBlock x:Name="LabCurrentVersion" FontSize="12" Margin="0,5,0,0"
+            <local:WorkspaceCard x:Name="CardLaunchLog" Title="{DynamicResource Bedrock.Right.Log.Title}">
+                <ScrollViewer Height="560" Margin="16,38,16,16"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              local:ScrollInput.Enabled="True">
+                    <TextBlock x:Name="LabLaunchLog" TextWrapping="Wrap"
+                               FontSize="12" LineHeight="19"
+                               FontFamily="Cascadia Mono, Consolas"
+                               Text="{DynamicResource Bedrock.Right.Log.Empty}"
                                Foreground="{DynamicResource SyTextSecondary}" />
-                    <TextBlock x:Name="LabCurrentLoader" FontSize="12" Margin="0,3,0,0"
-                               Foreground="{DynamicResource SyTextSecondary}" />
-                    <TextBlock x:Name="LabCurrentPath" FontSize="11.5" Margin="0,3,0,0"
-                               TextTrimming="CharacterEllipsis"
-                               Foreground="{DynamicResource SyTextTertiary}" />
-                    <TextBlock Text="{DynamicResource Bedrock.Right.Placeholder}" TextWrapping="Wrap"
-                               FontSize="12" Margin="0,12,0,0" LineHeight="19"
-                               Foreground="{DynamicResource SyTextTertiary}" />
-                </StackPanel>
-            </local:WorkspaceCard>
-            <local:WorkspaceCard x:Name="CardLaunchLog" Margin="0,12,0,0"
-                          Title="{DynamicResource Bedrock.Right.Log.Title}">
-                <TextBlock x:Name="LabLaunchLog" Margin="16,38,16,16" TextWrapping="Wrap"
-                           FontSize="12" LineHeight="19"
-                           Text="{DynamicResource Bedrock.Right.Log.Empty}"
-                           Foreground="{DynamicResource SyTextSecondary}" />
+                </ScrollViewer>
             </local:WorkspaceCard>
         </StackPanel>
         </Grid>

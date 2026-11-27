@@ -237,45 +237,6 @@ public partial class BedrockManagementView
         Session.DetectBedrockInstallation();
         RefreshLocalVersions();
         LoadVersionList();
-        RefreshCurrentInstanceCard();
-        ModMain.frmMain?.RefreshShell();
-    }
-
-    /// <summary>刷新右侧「当前实例」卡片，切换实例后立刻能看到变化。</summary>
-    private void RefreshCurrentInstanceCard()
-    {
-        try
-        {
-            var versions = ModBedrockInstance.GetLocalVersions();
-            var versionId = Config.Launch.BedrockSelectedVersion;
-            if (string.IsNullOrWhiteSpace(versionId) || !versions.Contains(versionId))
-                versionId = versions.Count > 0 ? versions[0] : "";
-            if (string.IsNullOrWhiteSpace(versionId))
-            {
-                LabCurrentInstance.Text = Lang.Text("Bedrock.Right.Current.None");
-                LabCurrentVersion.Text = "";
-                LabCurrentLoader.Text = "";
-                LabCurrentPath.Text = ModBedrockInstance.VersionsDirectory;
-                return;
-            }
-
-            LabCurrentInstance.Text =
-                ModBedrockInstance.GetDisplayName(ModBedrockInstance.VersionsDirectory, versionId);
-            LabCurrentVersion.Text = Lang.Text("Bedrock.Status.Version", versionId) + " · " + ChannelLabel(versionId);
-            LabCurrentLoader.Text = Lang.Text("Bedrock.Right.Current.Loader", ModBedrockLoader.GetLoader(versionId));
-            LabCurrentPath.Text =
-                ModBedrockInstance.GetInstanceFolder(ModBedrockInstance.VersionsDirectory, versionId);
-        }
-        catch (Exception ex)
-        {
-            ModBase.Log(ex, "[Bedrock] 刷新当前实例卡片失败", ModBase.LogLevel.Debug);
-        }
-    }
-
-    /// <summary>只刷新「当前实例」卡片，供实例选择浮层实时联动，不做检测与联网。</summary>
-    public void RefreshInstanceCard()
-    {
-        RefreshCurrentInstanceCard();
         ModMain.frmMain?.RefreshShell();
     }
 
@@ -289,13 +250,11 @@ public partial class BedrockManagementView
     private string? _lastLaunchLogLine;
     private bool _logStarted;
 
-    /// <summary>「启动日志」卡片是否显示，跟随设置里的启动日志开关（调试模式强制显示）。</summary>
+    /// <summary>基岩版管理页就是启动日志页，因此日志始终显示。</summary>
     public void RefreshLaunchLogVisibility()
     {
         if (CardLaunchLog is null) return;
-        CardLaunchLog.Visibility = States.UI.ShowLaunchLog || ModBase.modeDebug
-            ? Visibility.Visible
-            : Visibility.Collapsed;
+        CardLaunchLog.Visibility = Visibility.Visible;
     }
 
     /// <summary>把启动过程的每一步写进右侧「启动日志」卡片。</summary>
