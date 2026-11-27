@@ -69,7 +69,7 @@ public partial class PaperConnectWorkspaceView
                 TextPort.Text = w.Port.ToString();
                 LabDetectedWorld.Text = w.IsRakNetResponsive
                     ? $"✔ 已检测到：{w.Name}（{w.Version}，端口 {w.Port}）"
-                    : $"✔ 已检测到 Minecraft UDP 端口：{w.Port}（当前版本未响应 RakNet，已按游戏进程端口处理）";
+                    : $"✔ 已检测到 Minecraft UDP 端口：{w.Port}（当前世界未提供 RakNet 信息，已按进程端口处理）";
                 // 多于一个时追加提示
                 if (worlds.Count > 1)
                     LabDetectedWorld.Text +=
@@ -288,7 +288,7 @@ public partial class PaperConnectWorkspaceView
         // 房主端端口自检结果：本机没探测到基岩版世界时，把原因直接摆出来
         if (role == ModPaperConnect.RoomRole.Host && !string.IsNullOrEmpty(ModPaperConnect.WorldProbeWarning))
             LabRoomHint.Text = "⚠ " + ModPaperConnect.WorldProbeWarning + "。"
-                               + "否则房客（尤其 BedrockBoot）会报「未检测到本地基岩房间」。";
+                               + "如果对方客户端未能加入，请确认双方都已进入世界并开启「对局域网开放」。";
 
         BtnCopyCode.IsEnabled = !string.IsNullOrEmpty(ModPaperConnect.RoomCode);
         BtnCopyAddress.IsEnabled = !string.IsNullOrEmpty(ModPaperConnect.PlayAddress);

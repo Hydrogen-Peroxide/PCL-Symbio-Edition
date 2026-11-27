@@ -107,7 +107,8 @@ internal static class ModPaperConnect
                 .SelectMany(nic => nic.GetIPProperties().UnicastAddresses)
                 .Select(address => address.Address)
                 .Where(address => address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork &&
-                                  !System.Net.IPAddress.IsLoopback(address))
+                                  !System.Net.IPAddress.IsLoopback(address) &&
+                                  !IsAutomaticPrivateAddress(address))
                 .Select(address => address.ToString())
                 .FirstOrDefault() ?? string.Empty;
         }
@@ -115,6 +116,12 @@ internal static class ModPaperConnect
         {
             return string.Empty;
         }
+    }
+
+    private static bool IsAutomaticPrivateAddress(System.Net.IPAddress address)
+    {
+        var bytes = address.GetAddressBytes();
+        return bytes.Length == 4 && bytes[0] == 169 && bytes[1] == 254;
     }
 
     /// <summary>
@@ -505,7 +512,7 @@ internal static class ModPaperConnect
             }
             else if (probe is null)
             {
-                WorldProbeWarning = $"已确认 Minecraft 正在使用本机 {gamePort} UDP 端口，但当前版本未响应 RakNet，将继续创建房间";
+                WorldProbeWarning = $"已确认 Minecraft 正在使用本机 {gamePort} UDP 端口，当前世界未提供 RakNet 信息，已继续创建房间";
                 ModBase.Log($"[PaperConnect] 已确认 Minecraft 进程拥有 UDP 端口 {gamePort}，跳过 RakNet 应答要求",
                     ModBase.LogLevel.Normal);
             }
