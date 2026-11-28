@@ -112,9 +112,8 @@ public partial class FormMain
             RefreshShell();
         };
         view.EditionRequested += SwitchEdition;
-        // 基岩版的“管理”入口应打开实际的实例列表。BedrockLibrary 是旧的占位管理页，
-        // 目前只显示启动日志，用户从这里无法选择已安装的基岩版实例。
-        view.HomeDetailsRequested += (_, _) => PageChange(IsBedrockShell ? PageType.BedrockInstanceSelect : PageType.HomeContent);
+        // 基岩版的“管理”入口保持为启动日志页；实例选择和实例设置由下方两个独立按钮负责。
+        view.HomeDetailsRequested += (_, _) => PageChange(IsBedrockShell ? PageType.Bedrock : PageType.HomeContent);
         view.MinimizeRequested += (_, args) => BtnTitleMin_Click(this, args);
         view.CloseRequested += (_, args) => BtnTitleClose_Click(this, args);
         view.DragRequested += (_, _) => DragMove();
@@ -145,8 +144,7 @@ public partial class FormMain
         };
         view.SelectInstanceRequested += (_, _) =>
             PageChange(IsBedrockShell ? PageType.BedrockInstanceSelect : PageType.InstanceSelect);
-        view.InstanceSettingsRequested += (_, _) =>
-            PageChange(IsBedrockShell ? PageType.BedrockInstance : PageType.InstanceSetup);
+        view.InstanceSettingsRequested += (_, _) => OpenShellInstanceSettings();
         view.AccountRequested += (_, _) => ShowAccountPage();
 
         HookAccountPanel(accountPanel);
@@ -173,6 +171,28 @@ public partial class FormMain
         view.SetPageContent(PanMain);
         // 窗口刚创建：必须同帧拿到正确状态，不能等 Background 派发
         RefreshShellNow();
+    }
+
+    private void OpenShellInstanceSettings()
+    {
+        if (!IsBedrockShell)
+        {
+            PageChange(PageType.InstanceSetup);
+            return;
+        }
+
+        var version = Config.Launch.BedrockSelectedVersion;
+        if (string.IsNullOrWhiteSpace(version) ||
+            !Directory.Exists(ModBedrockInstance.ResolveVersionsDirectory(version)))
+        {
+            PageChange(PageType.BedrockInstanceSelect);
+            return;
+        }
+
+        BedrockInstanceWorkspace.CurrentVersion = version;
+        ModMain.frmBedrockInstanceLeft ??= new BedrockInstanceNavigation();
+        ModMain.frmBedrockInstanceLeft.pageID = PageSubType.VersionSetup;
+        PageChange(PageType.BedrockInstance, PageSubType.VersionSetup);
     }
 
     private void HookAccountPanel(SymbioAccountPanel accountPanel)
