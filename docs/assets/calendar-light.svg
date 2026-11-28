@@ -16,7 +16,7 @@
 <rect x="2" y="2" width="916" height="552" fill="url(#panFormGrad)"/>
 <rect x="18.0" y="16.0" width="286.0" height="216.0" rx="5" fill="#ffffff" stroke="#e3eaf6" stroke-width="1" filter="url(#myCardShadow)"/>
 <text x="33.0" y="39.0" class="sans" font-size="13" font-weight="700" fill="#343d4a" text-anchor="start">近 5 周提交日历</text>
-<text x="289.0" y="39.0" class="mono" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="end">10/26 - 11/28</text>
+<text x="289.0" y="39.0" class="mono" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="end">10/26 - 11/29</text>
 <text x="49.0" y="56.0" class="sans" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="middle">一</text>
 <text x="86.0" y="56.0" class="sans" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="middle">二</text>
 <text x="123.0" y="56.0" class="sans" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="middle">三</text>
@@ -145,29 +145,30 @@
 <rect x="33.0" y="168.0" width="32" height="22" rx="3.5" fill="#dbeafe" stroke="#e6ecf5" stroke-width="0.8"/>
 <text x="49.0" y="183.0" class="mono" font-size="11.5" font-weight="700" fill="#343d4a" text-anchor="middle">23</text>
 </g>
-<g opacity="1"><title>2026-11-24 · 1 次提交</title>
+<g opacity="1"><title>2026-11-24 · 2 次提交</title>
 <rect x="70.0" y="168.0" width="32" height="22" rx="3.5" fill="#dbeafe" stroke="#e6ecf5" stroke-width="0.8"/>
 <text x="86.0" y="183.0" class="mono" font-size="11.5" font-weight="700" fill="#343d4a" text-anchor="middle">24</text>
 </g>
-<g opacity="1"><title>2026-11-25 · 1 次提交</title>
-<rect x="107.0" y="168.0" width="32" height="22" rx="3.5" fill="#dbeafe" stroke="#e6ecf5" stroke-width="0.8"/>
+<g opacity="1"><title>2026-11-25 · 9 次提交</title>
+<rect x="107.0" y="168.0" width="32" height="22" rx="3.5" fill="#5b9cf6" stroke="#96c0f9" stroke-width="0.8"/>
 <text x="123.0" y="183.0" class="mono" font-size="11.5" font-weight="700" fill="#343d4a" text-anchor="middle">25</text>
 </g>
-<g opacity="1"><title>2026-11-26 · 1 次提交</title>
-<rect x="144.0" y="168.0" width="32" height="22" rx="3.5" fill="#dbeafe" stroke="#e6ecf5" stroke-width="0.8"/>
+<g opacity="1"><title>2026-11-26 · 25 次提交</title>
+<rect x="144.0" y="168.0" width="32" height="22" rx="3.5" fill="#5b9cf6" stroke="#96c0f9" stroke-width="0.8"/>
 <text x="160.0" y="183.0" class="mono" font-size="11.5" font-weight="700" fill="#343d4a" text-anchor="middle">26</text>
 </g>
-<g opacity="1"><title>2026-11-27 · 1 次提交</title>
-<rect x="181.0" y="168.0" width="32" height="22" rx="3.5" fill="#dbeafe" stroke="#e6ecf5" stroke-width="0.8"/>
+<g opacity="1"><title>2026-11-27 · 12 次提交</title>
+<rect x="181.0" y="168.0" width="32" height="22" rx="3.5" fill="#5b9cf6" stroke="#96c0f9" stroke-width="0.8"/>
 <text x="197.0" y="183.0" class="mono" font-size="11.5" font-weight="700" fill="#343d4a" text-anchor="middle">27</text>
 </g>
-<g opacity="1"><title>2026-11-28 · 0 次提交</title>
-<rect x="218.0" y="168.0" width="32" height="22" rx="3.5" fill="#f2f5fa" stroke="#1370f3" stroke-width="1.6"/>
+<g opacity="1"><title>2026-11-28 · 14 次提交</title>
+<rect x="218.0" y="168.0" width="32" height="22" rx="3.5" fill="#5b9cf6" stroke="#96c0f9" stroke-width="0.8"/>
 <text x="234.0" y="183.0" class="mono" font-size="11.5" font-weight="700" fill="#343d4a" text-anchor="middle">28</text>
 </g>
-<g opacity="0.38"><title>2026-11-29 · 0 次提交</title>
-<rect x="255.0" y="168.0" width="32" height="22" rx="3.5" fill="#f2f5fa" stroke="#e6ecf5" stroke-width="0.8"/>
-<text x="271.0" y="183.0" class="mono" font-size="11.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">29</text>
+<g opacity="1"><title>2026-11-29 · 4 次提交</title>
+<rect x="255.0" y="168.0" width="32" height="22" rx="3.5" fill="#b6d4fe" stroke="#1370f3" stroke-width="1.6"/>
+<text x="271.0" y="183.0" class="mono" font-size="11.5" font-weight="700" fill="#343d4a" text-anchor="middle">29</text>
+<circle cx="282.5" cy="172.5" r="2.6" fill="#278b54" stroke="#ffffff" stroke-width="0.9"/>
 </g>
 <line x1="33" y1="199" x2="289" y2="199" stroke="#ebebeb" stroke-width="1"/>
 <circle cx="38" cy="215" r="3" fill="#278b54"/>
@@ -183,166 +184,167 @@
 <text x="268.0" y="219.0" class="sans" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="start">多</text>
 <rect x="316.0" y="16.0" width="586.0" height="216.0" rx="5" fill="#ffffff" stroke="#e3eaf6" stroke-width="1" filter="url(#myCardShadow)"/>
 <text x="331.0" y="39.0" class="sans" font-size="13" font-weight="700" fill="#343d4a" text-anchor="start">每日提交脉冲与版本节点</text>
-<text x="887.0" y="39.0" class="sans" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="end">近 30 日 114 次提交 · 累计 4983 次 · 峰值 46/日</text>
+<text x="887.0" y="39.0" class="sans" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="end">近 30 日 176 次提交 · 累计 5045 次 · 峰值 46/日</text>
 <line x1="358.0" y1="122.1" x2="882.0" y2="122.1" stroke="#ebebeb" stroke-width="1" stroke-dasharray="3 3"/>
 <text x="350.0" y="125.6" class="mono" font-size="10" font-weight="400" fill="#8c8c8c" text-anchor="end">30</text>
 <line x1="358.0" y1="154.2" x2="882.0" y2="154.2" stroke="#ebebeb" stroke-width="1" stroke-dasharray="3 3"/>
 <text x="350.0" y="157.7" class="mono" font-size="10" font-weight="400" fill="#8c8c8c" text-anchor="end">10</text>
 <line x1="358.0" y1="198.0" x2="882.0" y2="198.0" stroke="#cccccc" stroke-width="1"/>
-<path d="M 365.5,198.0 L 365.5,164.1 L 380.5,198.0 L 395.4,167.0 L 410.4,198.0 L 425.4,158.8 L 440.3,198.0 L 455.3,198.0 L 470.3,198.0 L 485.3,184.1 L 500.2,161.3 L 515.2,198.0 L 530.2,198.0 L 545.1,198.0 L 560.1,167.0 L 575.1,174.0 L 590.1,198.0 L 605.0,198.0 L 620.0,170.3 L 635.0,198.0 L 649.9,198.0 L 664.9,198.0 L 679.9,136.0 L 694.9,104.0 L 709.8,184.1 L 724.8,139.2 L 739.8,184.1 L 754.7,184.1 L 769.7,184.1 L 784.7,184.1 L 799.7,184.1 L 814.6,184.1 L 829.6,184.1 L 844.6,184.1 L 859.5,184.1 L 874.5,198.0 L 874.5,198.0 Z" fill="url(#pulseAreaGrad)"/>
-<path d="M 365.5,164.1 L 380.5,198.0 L 395.4,167.0 L 410.4,198.0 L 425.4,158.8 L 440.3,198.0 L 455.3,198.0 L 470.3,198.0 L 485.3,184.1 L 500.2,161.3 L 515.2,198.0 L 530.2,198.0 L 545.1,198.0 L 560.1,167.0 L 575.1,174.0 L 590.1,198.0 L 605.0,198.0 L 620.0,170.3 L 635.0,198.0 L 649.9,198.0 L 664.9,198.0 L 679.9,136.0 L 694.9,104.0 L 709.8,184.1 L 724.8,139.2 L 739.8,184.1 L 754.7,184.1 L 769.7,184.1 L 784.7,184.1 L 799.7,184.1 L 814.6,184.1 L 829.6,184.1 L 844.6,184.1 L 859.5,184.1 L 874.5,198.0" fill="none" stroke="#4890f5" stroke-width="1.3" stroke-opacity="0.65"/>
-<line x1="365.5" y1="66.0" x2="365.5" y2="161.1" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
-<line x1="395.4" y1="86.0" x2="395.4" y2="164.0" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
-<line x1="530.2" y1="66.0" x2="530.2" y2="195.0" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
-<line x1="560.1" y1="86.0" x2="560.1" y2="164.0" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
-<line x1="679.9" y1="66.0" x2="679.9" y2="133.0" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
-<g><title>2026-10-25 · 6 次提交</title>
-<rect x="362.4" y="164.1" width="6.2" height="33.9" rx="2.2" fill="#327de6"/>
-</g>
+<path d="M 365.5,198.0 L 365.5,198.0 L 380.5,167.0 L 395.4,198.0 L 410.4,158.8 L 425.4,198.0 L 440.3,198.0 L 455.3,198.0 L 470.3,184.1 L 485.3,161.3 L 500.2,198.0 L 515.2,198.0 L 530.2,198.0 L 545.1,167.0 L 560.1,174.0 L 575.1,198.0 L 590.1,198.0 L 605.0,170.3 L 620.0,198.0 L 635.0,198.0 L 649.9,198.0 L 664.9,136.0 L 679.9,104.0 L 694.9,184.1 L 709.8,139.2 L 724.8,184.1 L 739.8,184.1 L 754.7,184.1 L 769.7,184.1 L 784.7,184.1 L 799.7,178.4 L 814.6,156.4 L 829.6,128.7 L 844.6,150.0 L 859.5,146.1 L 874.5,170.3 L 874.5,198.0 Z" fill="url(#pulseAreaGrad)"/>
+<path d="M 365.5,198.0 L 380.5,167.0 L 395.4,198.0 L 410.4,158.8 L 425.4,198.0 L 440.3,198.0 L 455.3,198.0 L 470.3,184.1 L 485.3,161.3 L 500.2,198.0 L 515.2,198.0 L 530.2,198.0 L 545.1,167.0 L 560.1,174.0 L 575.1,198.0 L 590.1,198.0 L 605.0,170.3 L 620.0,198.0 L 635.0,198.0 L 649.9,198.0 L 664.9,136.0 L 679.9,104.0 L 694.9,184.1 L 709.8,139.2 L 724.8,184.1 L 739.8,184.1 L 754.7,184.1 L 769.7,184.1 L 784.7,184.1 L 799.7,178.4 L 814.6,156.4 L 829.6,128.7 L 844.6,150.0 L 859.5,146.1 L 874.5,170.3" fill="none" stroke="#4890f5" stroke-width="1.3" stroke-opacity="0.65"/>
+<line x1="380.5" y1="66.0" x2="380.5" y2="164.0" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
+<line x1="515.2" y1="66.0" x2="515.2" y2="195.0" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
+<line x1="545.1" y1="86.0" x2="545.1" y2="164.0" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
+<line x1="664.9" y1="66.0" x2="664.9" y2="133.0" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
+<line x1="874.5" y1="66.0" x2="874.5" y2="167.3" stroke="#1370f3" stroke-width="1" stroke-dasharray="2 2" opacity="0.75"/>
 <g><title>2026-10-26 · 0 次提交</title>
-<rect x="377.4" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<rect x="362.4" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
 <g><title>2026-10-27 · 5 次提交</title>
-<rect x="392.3" y="167.0" width="6.2" height="31.0" rx="2.2" fill="#347fe7"/>
+<rect x="377.4" y="167.0" width="6.2" height="31.0" rx="2.2" fill="#347fe7"/>
 </g>
 <g><title>2026-10-28 · 0 次提交</title>
-<rect x="407.3" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<rect x="392.3" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
 <g><title>2026-10-29 · 8 次提交</title>
-<rect x="422.3" y="158.8" width="6.2" height="39.2" rx="2.2" fill="#2f7ae3"/>
+<rect x="407.3" y="158.8" width="6.2" height="39.2" rx="2.2" fill="#2f7ae3"/>
 </g>
 <g><title>2026-10-30 · 0 次提交</title>
-<rect x="437.2" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<rect x="422.3" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
 <g><title>2026-10-31 · 0 次提交</title>
-<rect x="452.2" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<rect x="437.2" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
 <g><title>2026-11-01 · 0 次提交</title>
-<rect x="467.2" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<rect x="452.2" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
 <g><title>2026-11-02 · 1 次提交</title>
-<rect x="482.2" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
+<rect x="467.2" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
 </g>
 <g><title>2026-11-03 · 7 次提交</title>
-<rect x="497.1" y="161.3" width="6.2" height="36.7" rx="2.2" fill="#307be5"/>
+<rect x="482.2" y="161.3" width="6.2" height="36.7" rx="2.2" fill="#307be5"/>
 </g>
 <g><title>2026-11-04 · 0 次提交</title>
-<rect x="512.1" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<rect x="497.1" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
 <g><title>2026-11-05 · 0 次提交</title>
-<rect x="527.1" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<rect x="512.1" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
 <g><title>2026-11-06 · 0 次提交</title>
-<rect x="542.0" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<rect x="527.1" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
 <g><title>2026-11-07 · 5 次提交</title>
-<rect x="557.0" y="167.0" width="6.2" height="31.0" rx="2.2" fill="#347fe7"/>
+<rect x="542.0" y="167.0" width="6.2" height="31.0" rx="2.2" fill="#347fe7"/>
 </g>
 <g><title>2026-11-08 · 3 次提交</title>
-<rect x="572.0" y="174.0" width="6.2" height="24.0" rx="2.2" fill="#3882ea"/>
+<rect x="557.0" y="174.0" width="6.2" height="24.0" rx="2.2" fill="#3882ea"/>
 </g>
 <g><title>2026-11-09 · 0 次提交</title>
-<rect x="587.0" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<rect x="572.0" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
 <g><title>2026-11-10 · 0 次提交</title>
-<rect x="601.9" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<rect x="587.0" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
 <g><title>2026-11-11 · 4 次提交</title>
-<rect x="616.9" y="170.3" width="6.2" height="27.7" rx="2.2" fill="#3680e9"/>
+<rect x="601.9" y="170.3" width="6.2" height="27.7" rx="2.2" fill="#3680e9"/>
 </g>
 <g><title>2026-11-12 · 0 次提交</title>
-<rect x="631.9" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<rect x="616.9" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
 <g><title>2026-11-13 · 0 次提交</title>
-<rect x="646.8" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<rect x="631.9" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
 <g><title>2026-11-14 · 0 次提交</title>
-<rect x="661.8" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<rect x="646.8" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
 </g>
 <g><title>2026-11-15 · 20 次提交</title>
-<rect x="676.8" y="136.0" width="6.2" height="62.0" rx="2.2" fill="#206dd9"/>
+<rect x="661.8" y="136.0" width="6.2" height="62.0" rx="2.2" fill="#206dd9"/>
 </g>
 <g><title>2026-11-16 · 46 次提交</title>
-<rect x="691.8" y="104.0" width="6.2" height="94.0" rx="2.2" fill="#0b5bcb"/>
+<rect x="676.8" y="104.0" width="6.2" height="94.0" rx="2.2" fill="#0b5bcb"/>
 </g>
 <g><title>2026-11-17 · 1 次提交</title>
-<rect x="706.7" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
+<rect x="691.8" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
 </g>
 <g><title>2026-11-18 · 18 次提交</title>
-<rect x="721.7" y="139.2" width="6.2" height="58.8" rx="2.2" fill="#226fdb"/>
+<rect x="706.7" y="139.2" width="6.2" height="58.8" rx="2.2" fill="#226fdb"/>
 </g>
 <g><title>2026-11-19 · 1 次提交</title>
-<rect x="736.7" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
+<rect x="721.7" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
 </g>
 <g><title>2026-11-20 · 1 次提交</title>
-<rect x="751.6" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
+<rect x="736.7" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
 </g>
 <g><title>2026-11-21 · 1 次提交</title>
-<rect x="766.6" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
+<rect x="751.6" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
 </g>
 <g><title>2026-11-22 · 1 次提交</title>
-<rect x="781.6" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
+<rect x="766.6" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
 </g>
 <g><title>2026-11-23 · 1 次提交</title>
-<rect x="796.6" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
+<rect x="781.6" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
 </g>
-<g><title>2026-11-24 · 1 次提交</title>
-<rect x="811.5" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
+<g><title>2026-11-24 · 2 次提交</title>
+<rect x="796.6" y="178.4" width="6.2" height="19.6" rx="2.2" fill="#3b85ec"/>
 </g>
-<g><title>2026-11-25 · 1 次提交</title>
-<rect x="826.5" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
+<g><title>2026-11-25 · 9 次提交</title>
+<rect x="811.5" y="156.4" width="6.2" height="41.6" rx="2.2" fill="#2d79e2"/>
 </g>
-<g><title>2026-11-26 · 1 次提交</title>
-<rect x="841.5" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
+<g><title>2026-11-26 · 25 次提交</title>
+<rect x="826.5" y="128.7" width="6.2" height="69.3" rx="2.2" fill="#1b69d6"/>
 </g>
-<g><title>2026-11-27 · 1 次提交</title>
-<rect x="856.4" y="184.1" width="6.2" height="13.9" rx="2.2" fill="#3f88ef"/>
+<g><title>2026-11-27 · 12 次提交</title>
+<rect x="841.5" y="150.0" width="6.2" height="48.0" rx="2.2" fill="#2975e0"/>
 </g>
-<g><title>2026-11-28 · 0 次提交</title>
-<rect x="871.4" y="195.8" width="6.2" height="2.2" rx="1.1" fill="#ebebeb"/>
+<g><title>2026-11-28 · 14 次提交</title>
+<rect x="856.4" y="146.1" width="6.2" height="51.9" rx="2.2" fill="#2673de"/>
 </g>
-<circle cx="724.8" cy="133.7" r="3" fill="#fff1d8" stroke="#f57a00" stroke-width="1.5"/>
+<g><title>2026-11-29 · 4 次提交</title>
+<rect x="871.4" y="170.3" width="6.2" height="27.7" rx="2.2" fill="#3680e9"/>
+</g>
+<circle cx="709.8" cy="133.7" r="3" fill="#fff1d8" stroke="#f57a00" stroke-width="1.5"/>
 <rect x="358.0" y="50.0" width="58.4" height="16" rx="3" fill="#eaf2fe" stroke="#96c0f9" stroke-width="1"/>
-<text x="387.2" y="61.5" class="mono" font-size="10" font-weight="700" fill="#1370f3" text-anchor="middle">v2.17.11</text>
-<rect x="366.2" y="70.0" width="58.4" height="16" rx="3" fill="#eaf2fe" stroke="#96c0f9" stroke-width="1"/>
-<text x="395.4" y="81.5" class="mono" font-size="10" font-weight="700" fill="#1370f3" text-anchor="middle">v2.17.12</text>
-<rect x="501.0" y="50.0" width="58.4" height="16" rx="3" fill="#eaf2fe" stroke="#96c0f9" stroke-width="1"/>
-<text x="530.2" y="61.5" class="mono" font-size="10" font-weight="700" fill="#1370f3" text-anchor="middle">v2.17.13</text>
-<rect x="530.9" y="70.0" width="58.4" height="16" rx="3" fill="#eaf2fe" stroke="#96c0f9" stroke-width="1"/>
-<text x="560.1" y="81.5" class="mono" font-size="10" font-weight="700" fill="#1370f3" text-anchor="middle">v2.17.14</text>
-<rect x="650.7" y="50.0" width="58.4" height="16" rx="3" fill="#eaf2fe" stroke="#96c0f9" stroke-width="1"/>
-<text x="679.9" y="61.5" class="mono" font-size="10" font-weight="700" fill="#1370f3" text-anchor="middle">v2.17.15</text>
-<text x="380.5" y="215.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">10/26</text>
-<text x="485.3" y="215.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/02</text>
-<text x="590.1" y="215.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/09</text>
-<text x="694.9" y="215.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/16</text>
-<text x="799.7" y="215.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/23</text>
+<text x="387.2" y="61.5" class="mono" font-size="10" font-weight="700" fill="#1370f3" text-anchor="middle">v2.17.12</text>
+<rect x="486.0" y="50.0" width="58.4" height="16" rx="3" fill="#eaf2fe" stroke="#96c0f9" stroke-width="1"/>
+<text x="515.2" y="61.5" class="mono" font-size="10" font-weight="700" fill="#1370f3" text-anchor="middle">v2.17.13</text>
+<rect x="515.9" y="70.0" width="58.4" height="16" rx="3" fill="#eaf2fe" stroke="#96c0f9" stroke-width="1"/>
+<text x="545.1" y="81.5" class="mono" font-size="10" font-weight="700" fill="#1370f3" text-anchor="middle">v2.17.14</text>
+<rect x="635.7" y="50.0" width="58.4" height="16" rx="3" fill="#eaf2fe" stroke="#96c0f9" stroke-width="1"/>
+<text x="664.9" y="61.5" class="mono" font-size="10" font-weight="700" fill="#1370f3" text-anchor="middle">v2.17.15</text>
+<rect x="823.6" y="50.0" width="58.4" height="16" rx="3" fill="#eaf2fe" stroke="#96c0f9" stroke-width="1"/>
+<text x="852.8" y="61.5" class="mono" font-size="10" font-weight="700" fill="#1370f3" text-anchor="middle">v2.17.16</text>
+<text x="365.5" y="215.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">10/26</text>
+<text x="470.3" y="215.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/02</text>
+<text x="575.1" y="215.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/09</text>
+<text x="679.9" y="215.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/16</text>
+<text x="784.7" y="215.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/23</text>
 <text x="874.5" y="215.0" class="sans" font-size="10.5" font-weight="700" fill="#1370f3" text-anchor="middle">今天</text>
 <rect x="18.0" y="244.0" width="884.0" height="144.0" rx="5" fill="#ffffff" stroke="#e3eaf6" stroke-width="1" filter="url(#myCardShadow)"/>
 <text x="33.0" y="267.0" class="sans" font-size="13" font-weight="700" fill="#343d4a" text-anchor="start">最近发布动态</text>
-<text x="887.0" y="267.0" class="sans" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="end">最新正式版 v2.17.15 · 共发布 19 个版本 · 自动提取 GitHub Releases 摘要</text>
-<g><title>v2.17.16-beta.7 · &lt;summary&gt;</title>
+<text x="887.0" y="267.0" class="sans" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="end">最新正式版 v2.17.16 · 共发布 20 个版本 · 自动提取 GitHub Releases 摘要</text>
+<g><title>v2.17.16 · ---（2.17.16 更新一览(2026-11-28) · 🚀 功能追加）</title>
 <rect x="33.0" y="282.0" width="276.7" height="92.0" rx="4" fill="#f8fcfa" stroke="#278b54" stroke-width="1"/>
 <rect x="33.5" y="292.0" width="3" height="72.0" rx="1.5" fill="#278b54"/>
-<text x="47.0" y="304.0" class="mono" font-size="14" font-weight="700" fill="#343d4a" text-anchor="start">v2.17.16-beta.7</text>
-<rect x="243.7" y="291.0" width="54.0" height="17" rx="3" fill="#fff1d8"/>
-<text x="270.7" y="303.2" class="sans" font-size="10.5" font-weight="600" fill="#975908" text-anchor="middle">预发布版</text>
-<text x="47.0" y="322.0" class="mono" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="start">2026-11-18</text>
-<text x="47.0" y="342.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">&lt;summary&gt;</text>
+<text x="47.0" y="304.0" class="mono" font-size="14" font-weight="700" fill="#343d4a" text-anchor="start">v2.17.16</text>
+<rect x="254.2" y="291.0" width="43.5" height="17" rx="3" fill="#eaf2fe"/>
+<text x="275.9" y="303.2" class="sans" font-size="10.5" font-weight="600" fill="#1370f3" text-anchor="middle">正式版</text>
+<text x="47.0" y="322.0" class="mono" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="start">2026-11-29</text>
+<text x="47.0" y="342.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">---（2.17.16 更新一览(2026-11-28) · 🚀</text>
+<text x="47.0" y="359.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">功能追加）</text>
 </g>
-<g><title>v2.17.16-beta.4 · &gt; 测试版（Pre-release）</title>
+<g><title>v2.17.16-beta.7 · &lt;summary&gt;</title>
 <rect x="321.7" y="282.0" width="276.7" height="92.0" rx="4" fill="#f7f9fc" stroke="#e6ecf5" stroke-width="1"/>
 <rect x="322.2" y="292.0" width="3" height="72.0" rx="1.5" fill="#f57a00"/>
-<text x="335.7" y="304.0" class="mono" font-size="14" font-weight="700" fill="#343d4a" text-anchor="start">v2.17.16-beta.4</text>
+<text x="335.7" y="304.0" class="mono" font-size="14" font-weight="700" fill="#343d4a" text-anchor="start">v2.17.16-beta.7</text>
 <rect x="532.3" y="291.0" width="54.0" height="17" rx="3" fill="#fff1d8"/>
 <text x="559.3" y="303.2" class="sans" font-size="10.5" font-weight="600" fill="#975908" text-anchor="middle">预发布版</text>
-<text x="335.7" y="322.0" class="mono" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="start">2026-11-15</text>
-<text x="335.7" y="342.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">&gt; 测试版（Pre-release）</text>
+<text x="335.7" y="322.0" class="mono" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="start">2026-11-18</text>
+<text x="335.7" y="342.0" class="sans" font-size="12" font-weight="400" fill="#737373" text-anchor="start">&lt;summary&gt;</text>
 </g>
-<g><title>v2.17.16-beta.3 · &gt; 测试版（Pre-release）</title>
+<g><title>v2.17.16-beta.4 · &gt; 测试版（Pre-release）</title>
 <rect x="610.3" y="282.0" width="276.7" height="92.0" rx="4" fill="#f7f9fc" stroke="#e6ecf5" stroke-width="1"/>
 <rect x="610.8" y="292.0" width="3" height="72.0" rx="1.5" fill="#f57a00"/>
-<text x="624.3" y="304.0" class="mono" font-size="14" font-weight="700" fill="#343d4a" text-anchor="start">v2.17.16-beta.3</text>
+<text x="624.3" y="304.0" class="mono" font-size="14" font-weight="700" fill="#343d4a" text-anchor="start">v2.17.16-beta.4</text>
 <rect x="821.0" y="291.0" width="54.0" height="17" rx="3" fill="#fff1d8"/>
 <text x="848.0" y="303.2" class="sans" font-size="10.5" font-weight="600" fill="#975908" text-anchor="middle">预发布版</text>
 <text x="624.3" y="322.0" class="mono" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="start">2026-11-15</text>
@@ -351,142 +353,142 @@
 <rect x="18.0" y="400.0" width="884.0" height="140.0" rx="5" fill="#ffffff" stroke="#e3eaf6" stroke-width="1" filter="url(#myCardShadow)"/>
 <text x="33.0" y="423.0" class="sans" font-size="13" font-weight="700" fill="#343d4a" text-anchor="start">Star 增长趋势</text>
 <rect x="126.0" y="410.0" width="41.4" height="17" rx="3" fill="#eaf2fe" stroke="#96c0f9" stroke-width="1"/>
-<text x="146.7" y="422.0" class="mono" font-size="10.5" font-weight="700" fill="#1370f3" text-anchor="middle">★ 54</text>
-<text x="887.0" y="423.0" class="sans" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="end">近 30 日 +28 ★ · 随 GitHub Actions 自动同步</text>
+<text x="146.7" y="422.0" class="mono" font-size="10.5" font-weight="700" fill="#1370f3" text-anchor="middle">★ 55</text>
+<text x="887.0" y="423.0" class="sans" font-size="11" font-weight="400" fill="#8c8c8c" text-anchor="end">近 30 日 +26 ★ · 随 GitHub Actions 自动同步</text>
 <text x="50.0" y="517.5" class="mono" font-size="10" font-weight="400" fill="#8c8c8c" text-anchor="end">0</text>
-<line x1="60.0" y1="483.0" x2="868.0" y2="483.0" stroke="#ebebeb" stroke-width="1" stroke-dasharray="3 3"/>
-<text x="50.0" y="486.5" class="mono" font-size="10" font-weight="400" fill="#8c8c8c" text-anchor="end">27</text>
+<line x1="60.0" y1="482.4" x2="868.0" y2="482.4" stroke="#ebebeb" stroke-width="1" stroke-dasharray="3 3"/>
+<text x="50.0" y="485.9" class="mono" font-size="10" font-weight="400" fill="#8c8c8c" text-anchor="end">28</text>
 <line x1="60.0" y1="452.0" x2="868.0" y2="452.0" stroke="#ebebeb" stroke-width="1" stroke-dasharray="3 3"/>
-<text x="50.0" y="455.5" class="mono" font-size="10" font-weight="400" fill="#8c8c8c" text-anchor="end">54</text>
+<text x="50.0" y="455.5" class="mono" font-size="10" font-weight="400" fill="#8c8c8c" text-anchor="end">55</text>
 <line x1="60.0" y1="514.0" x2="868.0" y2="514.0" stroke="#cccccc" stroke-width="1"/>
-<path d="M 60.0,514.0 L 60.0,496.8 L 83.8,493.3 L 107.5,489.9 L 131.3,488.7 L 155.1,484.1 L 178.8,480.7 L 202.6,476.1 L 226.4,475.0 L 250.1,473.8 L 273.9,472.7 L 297.6,472.7 L 321.4,472.7 L 345.2,471.5 L 368.9,470.4 L 392.7,469.2 L 416.5,469.2 L 440.2,468.1 L 464.0,468.1 L 487.8,468.1 L 511.5,465.8 L 535.3,464.6 L 559.1,462.3 L 582.8,461.2 L 606.6,460.0 L 630.4,460.0 L 654.1,460.0 L 677.9,458.9 L 701.6,458.9 L 725.4,457.7 L 749.2,455.4 L 772.9,455.4 L 796.7,454.3 L 820.5,454.3 L 844.2,452.0 L 868.0,452.0 L 868.0,514.0 Z" fill="url(#starAreaGrad)"/>
-<path d="M 60.0,496.8 L 83.8,493.3 L 107.5,489.9 L 131.3,488.7 L 155.1,484.1 L 178.8,480.7 L 202.6,476.1 L 226.4,475.0 L 250.1,473.8 L 273.9,472.7 L 297.6,472.7 L 321.4,472.7 L 345.2,471.5 L 368.9,470.4 L 392.7,469.2 L 416.5,469.2 L 440.2,468.1 L 464.0,468.1 L 487.8,468.1 L 511.5,465.8 L 535.3,464.6 L 559.1,462.3 L 582.8,461.2 L 606.6,460.0 L 630.4,460.0 L 654.1,460.0 L 677.9,458.9 L 701.6,458.9 L 725.4,457.7 L 749.2,455.4 L 772.9,455.4 L 796.7,454.3 L 820.5,454.3 L 844.2,452.0 L 868.0,452.0" fill="none" stroke="#1370f3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-<g><title>2026-10-25 · 累计 15 ★（当日 +8）</title>
-<circle cx="60.0" cy="496.8" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="60.0" y="489.3" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">15</text>
-</g>
+<path d="M 60.0,514.0 L 60.0,493.7 L 83.8,490.3 L 107.5,489.2 L 131.3,484.7 L 155.1,481.3 L 178.8,476.8 L 202.6,475.7 L 226.4,474.5 L 250.1,473.4 L 273.9,473.4 L 297.6,473.4 L 321.4,472.3 L 345.2,471.2 L 368.9,470.0 L 392.7,470.0 L 416.5,468.9 L 440.2,468.9 L 464.0,468.9 L 487.8,466.7 L 511.5,465.5 L 535.3,463.3 L 559.1,462.1 L 582.8,461.0 L 606.6,461.0 L 630.4,461.0 L 654.1,459.9 L 677.9,459.9 L 701.6,458.8 L 725.4,456.5 L 749.2,456.5 L 772.9,455.4 L 796.7,455.4 L 820.5,453.1 L 844.2,452.0 L 868.0,452.0 L 868.0,514.0 Z" fill="url(#starAreaGrad)"/>
+<path d="M 60.0,493.7 L 83.8,490.3 L 107.5,489.2 L 131.3,484.7 L 155.1,481.3 L 178.8,476.8 L 202.6,475.7 L 226.4,474.5 L 250.1,473.4 L 273.9,473.4 L 297.6,473.4 L 321.4,472.3 L 345.2,471.2 L 368.9,470.0 L 392.7,470.0 L 416.5,468.9 L 440.2,468.9 L 464.0,468.9 L 487.8,466.7 L 511.5,465.5 L 535.3,463.3 L 559.1,462.1 L 582.8,461.0 L 606.6,461.0 L 630.4,461.0 L 654.1,459.9 L 677.9,459.9 L 701.6,458.8 L 725.4,456.5 L 749.2,456.5 L 772.9,455.4 L 796.7,455.4 L 820.5,453.1 L 844.2,452.0 L 868.0,452.0" fill="none" stroke="#1370f3" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
 <g><title>2026-10-26 · 累计 18 ★（当日 +3）</title>
-<circle cx="83.8" cy="493.3" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="83.8" y="485.8" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">18</text>
+<circle cx="60.0" cy="493.7" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="60.0" y="486.2" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">18</text>
 </g>
 <g><title>2026-10-27 · 累计 21 ★（当日 +3）</title>
-<circle cx="107.5" cy="489.9" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="107.5" y="482.4" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">21</text>
+<circle cx="83.8" cy="490.3" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="83.8" y="482.8" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">21</text>
 </g>
 <g><title>2026-10-28 · 累计 22 ★（当日 +1）</title>
-<circle cx="131.3" cy="488.7" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="131.3" y="481.2" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">22</text>
+<circle cx="107.5" cy="489.2" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="107.5" y="481.7" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">22</text>
 </g>
 <g><title>2026-10-29 · 累计 26 ★（当日 +4）</title>
-<circle cx="155.1" cy="484.1" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="155.1" y="476.6" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">26</text>
+<circle cx="131.3" cy="484.7" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="131.3" y="477.2" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">26</text>
 </g>
 <g><title>2026-10-30 · 累计 29 ★（当日 +3）</title>
-<circle cx="178.8" cy="480.7" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="178.8" y="473.2" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">29</text>
+<circle cx="155.1" cy="481.3" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="155.1" y="473.8" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">29</text>
 </g>
 <g><title>2026-10-31 · 累计 33 ★（当日 +4）</title>
-<circle cx="202.6" cy="476.1" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="202.6" y="468.6" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">33</text>
+<circle cx="178.8" cy="476.8" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="178.8" y="469.3" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">33</text>
 </g>
 <g><title>2026-11-01 · 累计 34 ★（当日 +1）</title>
-<circle cx="226.4" cy="475.0" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="226.4" y="467.5" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">34</text>
+<circle cx="202.6" cy="475.7" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="202.6" y="468.2" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">34</text>
 </g>
 <g><title>2026-11-02 · 累计 35 ★（当日 +1）</title>
-<circle cx="250.1" cy="473.8" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="250.1" y="466.3" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">35</text>
+<circle cx="226.4" cy="474.5" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="226.4" y="467.0" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">35</text>
 </g>
 <g><title>2026-11-03 · 累计 36 ★（当日 +1）</title>
-<circle cx="273.9" cy="472.7" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="273.9" y="465.2" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">36</text>
+<circle cx="250.1" cy="473.4" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="250.1" y="465.9" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">36</text>
 </g>
 <g><title>2026-11-04 · 累计 36 ★（当日 +0）</title>
 </g>
 <g><title>2026-11-05 · 累计 36 ★（当日 +0）</title>
 </g>
 <g><title>2026-11-06 · 累计 37 ★（当日 +1）</title>
-<circle cx="345.2" cy="471.5" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="345.2" y="464.0" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">37</text>
+<circle cx="321.4" cy="472.3" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="321.4" y="464.8" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">37</text>
 </g>
 <g><title>2026-11-07 · 累计 38 ★（当日 +1）</title>
-<circle cx="368.9" cy="470.4" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="368.9" y="462.9" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">38</text>
+<circle cx="345.2" cy="471.2" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="345.2" y="463.7" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">38</text>
 </g>
 <g><title>2026-11-08 · 累计 39 ★（当日 +1）</title>
-<circle cx="392.7" cy="469.2" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="392.7" y="461.7" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">39</text>
+<circle cx="368.9" cy="470.0" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="368.9" y="462.5" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">39</text>
 </g>
 <g><title>2026-11-09 · 累计 39 ★（当日 +0）</title>
 </g>
 <g><title>2026-11-10 · 累计 40 ★（当日 +1）</title>
-<circle cx="440.2" cy="468.1" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="440.2" y="460.6" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">40</text>
+<circle cx="416.5" cy="468.9" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="416.5" y="461.4" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">40</text>
 </g>
 <g><title>2026-11-11 · 累计 40 ★（当日 +0）</title>
 </g>
 <g><title>2026-11-12 · 累计 40 ★（当日 +0）</title>
 </g>
 <g><title>2026-11-13 · 累计 42 ★（当日 +2）</title>
-<circle cx="511.5" cy="465.8" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="511.5" y="458.3" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">42</text>
+<circle cx="487.8" cy="466.7" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="487.8" y="459.2" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">42</text>
 </g>
 <g><title>2026-11-14 · 累计 43 ★（当日 +1）</title>
-<circle cx="535.3" cy="464.6" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="535.3" y="457.1" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">43</text>
+<circle cx="511.5" cy="465.5" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="511.5" y="458.0" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">43</text>
 </g>
 <g><title>2026-11-15 · 累计 45 ★（当日 +2）</title>
-<circle cx="559.1" cy="462.3" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="559.1" y="454.8" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">45</text>
+<circle cx="535.3" cy="463.3" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="535.3" y="455.8" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">45</text>
 </g>
 <g><title>2026-11-16 · 累计 46 ★（当日 +1）</title>
-<circle cx="582.8" cy="461.2" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="582.8" y="453.7" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">46</text>
+<circle cx="559.1" cy="462.1" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="559.1" y="454.6" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">46</text>
 </g>
 <g><title>2026-11-17 · 累计 47 ★（当日 +1）</title>
-<circle cx="606.6" cy="460.0" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="606.6" y="452.5" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">47</text>
+<circle cx="582.8" cy="461.0" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="582.8" y="453.5" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">47</text>
 </g>
 <g><title>2026-11-18 · 累计 47 ★（当日 +0）</title>
 </g>
 <g><title>2026-11-19 · 累计 47 ★（当日 +0）</title>
 </g>
 <g><title>2026-11-20 · 累计 48 ★（当日 +1）</title>
-<circle cx="677.9" cy="458.9" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="677.9" y="451.4" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">48</text>
+<circle cx="654.1" cy="459.9" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="654.1" y="452.4" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">48</text>
 </g>
 <g><title>2026-11-21 · 累计 48 ★（当日 +0）</title>
 </g>
 <g><title>2026-11-22 · 累计 49 ★（当日 +1）</title>
-<circle cx="725.4" cy="457.7" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="725.4" y="450.2" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">49</text>
+<circle cx="701.6" cy="458.8" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="701.6" y="451.3" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">49</text>
 </g>
 <g><title>2026-11-23 · 累计 51 ★（当日 +2）</title>
-<circle cx="749.2" cy="455.4" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="749.2" y="447.9" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">51</text>
+<circle cx="725.4" cy="456.5" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="725.4" y="449.0" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">51</text>
 </g>
 <g><title>2026-11-24 · 累计 51 ★（当日 +0）</title>
 </g>
 <g><title>2026-11-25 · 累计 52 ★（当日 +1）</title>
-<circle cx="796.7" cy="454.3" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="796.7" y="446.8" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">52</text>
+<circle cx="772.9" cy="455.4" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="772.9" y="447.9" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">52</text>
 </g>
 <g><title>2026-11-26 · 累计 52 ★（当日 +0）</title>
 </g>
 <g><title>2026-11-27 · 累计 54 ★（当日 +2）</title>
-<circle cx="844.2" cy="452.0" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
-<text x="844.2" y="444.5" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">54</text>
+<circle cx="820.5" cy="453.1" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="820.5" y="445.6" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">54</text>
 </g>
-<g><title>2026-11-28 · 累计 54 ★（当日 +0）</title>
+<g><title>2026-11-28 · 累计 55 ★（当日 +1）</title>
+<circle cx="844.2" cy="452.0" r="3.2" fill="#ffffff" stroke="#1370f3" stroke-width="1.8"/>
+<text x="844.2" y="444.5" class="mono" font-size="9.5" font-weight="600" fill="#8c8c8c" text-anchor="middle">55</text>
+</g>
+<g><title>2026-11-29 · 累计 55 ★（当日 +0）</title>
 <circle cx="868.0" cy="452.0" r="6.2" fill="#1370f3" fill-opacity="0.20"/>
 <circle cx="868.0" cy="452.0" r="3.4" fill="#1370f3" stroke="#ffffff" stroke-width="1.5"/>
-<text x="868.0" y="443.5" class="mono" font-size="9.5" font-weight="700" fill="#0b5bcb" text-anchor="middle">54</text>
+<text x="868.0" y="443.5" class="mono" font-size="9.5" font-weight="700" fill="#0b5bcb" text-anchor="middle">55</text>
 </g>
-<text x="83.8" y="530.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">10/26</text>
-<text x="250.1" y="530.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/02</text>
-<text x="416.5" y="530.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/09</text>
-<text x="582.8" y="530.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/16</text>
-<text x="749.2" y="530.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/23</text>
+<text x="60.0" y="530.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">10/26</text>
+<text x="226.4" y="530.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/02</text>
+<text x="392.7" y="530.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/09</text>
+<text x="559.1" y="530.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/16</text>
+<text x="725.4" y="530.0" class="mono" font-size="10.5" font-weight="400" fill="#8c8c8c" text-anchor="middle">11/23</text>
 <text x="868.0" y="530.0" class="sans" font-size="10.5" font-weight="700" fill="#1370f3" text-anchor="middle">今天</text>
 </g>
 <rect x="2" y="2" width="916" height="552" rx="6" fill="none" stroke="#e3eaf6" stroke-width="1"/>
