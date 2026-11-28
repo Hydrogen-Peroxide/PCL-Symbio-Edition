@@ -182,8 +182,10 @@ public partial class FormMain
         }
 
         var version = Config.Launch.BedrockSelectedVersion;
+        if (string.IsNullOrWhiteSpace(version)) version = ModBedrockInstance.SelectedVersionId;
+        var versions = ModBedrockInstance.GetLocalVersions();
         if (string.IsNullOrWhiteSpace(version) ||
-            !Directory.Exists(ModBedrockInstance.ResolveVersionsDirectory(version)))
+            !versions.Any(item => string.Equals(item, version, StringComparison.OrdinalIgnoreCase)))
         {
             PageChange(PageType.BedrockInstanceSelect);
             return;
