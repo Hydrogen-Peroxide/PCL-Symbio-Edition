@@ -450,8 +450,13 @@ public partial class FormMain
         if (isBedrock)
         {
             var version = Config.Launch.BedrockSelectedVersion;
+            if (string.IsNullOrWhiteSpace(version)) version = ModBedrockInstance.SelectedVersionId;
             if (string.IsNullOrWhiteSpace(version)) return (false, "选择基岩版实例", "还没有选中实例", BedrockIcon());
-            return (true, ModBedrockInstance.GetDisplayName(ModBedrockInstance.VersionsDirectory, version), "基岩版实例", BedrockIcon());
+            var versions = ModBedrockInstance.GetLocalVersions();
+            if (!versions.Any(item => string.Equals(item, version, StringComparison.OrdinalIgnoreCase)))
+                return (false, "选择基岩版实例", "还没有选中实例", BedrockIcon());
+            var versionsDirectory = ModBedrockInstance.ResolveVersionsDirectory(version);
+            return (true, ModBedrockInstance.GetDisplayName(versionsDirectory, version), "基岩版实例", BedrockIcon());
         }
 
         var instance = ModInstanceList.McMcInstanceSelected;
