@@ -152,9 +152,9 @@ internal static class ModPaperConnect
     /// </summary>
     internal static bool UseTun => Config.Preference.PaperConnectTunMode;
 
-    private static string[] BuildParameters()
+    private static string[] BuildParameters(bool forceTun = false)
     {
-        if (UseTun) return EasyTierParameters;
+        if (forceTun || UseTun) return EasyTierParameters;
         var parameters = new string[EasyTierParameters.Length + 1];
         parameters[0] = "--no-tun";
         EasyTierParameters.CopyTo(parameters, 1);
@@ -613,7 +613,9 @@ internal static class ModPaperConnect
             var hostName = $"{HostHostnamePrefix}{roomServer.ServerPort}-g-{gamePort}";
             var args = $"-i {HostVip} --hostname {hostName} " +
                        $"--network-name {network.NetworkName} --network-secret {network.NetworkKey} " +
-                       string.Join(" ", BuildParameters()) + " " +
+                       // BedrockBoot 通过 10.144.144.1:<gamePort> 访问房主游戏端口，
+                       // 房主必须创建 TUN 才能让基岩版 UDP 进入本机 Minecraft。
+                       string.Join(" ", BuildParameters(forceTun: true)) + " " +
                        $"--listeners tcp://0.0.0.0:{DirectListenPort} " +
                        BuildPeerArgs();
             easyTier = StartEasyTier(args);
